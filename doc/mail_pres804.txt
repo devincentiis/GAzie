@@ -1,0 +1,9 @@
+Titolo:
+Do ut des.
+
+Presentazione:
+A breve distanza di tempo dal precedente rilascio una versione che si caratterizza per la presenza della possibilità di gestire i permessi degli utenti in modo molto più selettivo.
+Prima gli utenti non amministratori con livello di abilitazione minore di 8 potevano essere disabilitati solo per moduli interi. Da oggi i permessi possono essere selezionati con la possibilità di negare l'accesso ad ogni singolo script php e per ogni specifico utente. La selezione è ad appannaggio dei soli amministratori attraverso l'interfaccia per la gestione degli utenti cliccando in direzione della colonna "script esclusi" e flaggando le checkbox dello script di cui si vuole impedire l'esecuzione.
+La modifica che invece salterà all'occhio da subito sarà quella dell'aspetto grafico. Nei limiti consentiti dall'attuale ingegnerizzazione e senza poter riscrivere molto ho provato ad allineare ai colori di tendenza i due menù in dotazione (g7 e lte) oltre che a uniformarli, in particolare ho tolto i vecchi sfondi verdino ed ho virato verso i più attuali bianco-grigio-azzurro.
+
+Antonio de Vincentiis, Montesilvano, 21 luglio 2022

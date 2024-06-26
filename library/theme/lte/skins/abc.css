@@ -1,0 +1,309 @@
+body {
+	background-color: #fff;
+	color: #000;
+}
+
+.contenuto-help {
+   background-color: #fff;
+}
+
+aside.control-sidebar.control-sidebar-dark.control-sidebar-open div.tab-content
+{
+  background-color: #000;
+}
+
+.control-label {
+   /*background-color: #aae2a8;*/
+}
+.dropdown-menu {
+    border-color: #000;
+}
+th {
+    background-color : #aae2a8;
+}
+th a {
+    color: #000;
+}
+th a:hover {
+    color: #eee;
+}
+.FacetFieldCaptionTD, label.control-label {
+	background-color: #c7e8b1;
+	color: #000;
+}
+.FacetColumnTD {
+  background-color: #daeada;
+  color: #000;
+}
+.content-wrapper {
+  background-color:#c6d2b9;
+}
+.FacetFormTABLE, table.Tmiddle, table.Tsmall {
+	background-color: #ebf2f49e;
+}
+.logo-lg {
+    font-size: 14px;
+}
+.FacetFormTABLE {
+    border: 1px solid #000000;
+}
+.FacetFormHeaderFont {
+}
+#preventDuplicate {
+    color: #000;
+}
+.sidebar-menu .treeview-menu > li > a {
+    padding-left: 15px;
+}
+div.th {
+	background: #aae2a8;
+	border: 1px solid #000;
+	border-bottom: 0px;
+}
+.left {
+	border-right: 0px;
+}
+.right {
+	border-left: 0px;
+}
+.lateral {
+  background-color: #000;
+}
+.FacetDataTDred
+{
+  color: #f00;
+  font-weight: bold;
+  background-color: #aae2a8;
+  margin-bottom: 10px;
+}
+.FacetFooterTD {
+	background-color : #d4d783;
+	color : #000000;
+}
+ht
+.breadcrumb > li + li::before {
+    padding: 0 5px;
+    color: #FFC0CB;
+    content: "/\00a0";
+}
+.content-header > .breadcrumb > li > a:hover {
+    color: #000;
+}
+.adminlte-gazie .main-header {
+  background-color:  #aae2a8;
+}
+.adminlte-gazie .main-header .navbar .nav > li > a {
+  color: #123311;
+}
+.dropdown-toggle {
+  color: #123311;
+}
+.adminlte-gazie .main-header .navbar .sidebar-toggle {
+  color: #123311;
+}
+.adminlte-gazie .main-header .navbar .sidebar-toggle:hover {
+  color: #000;
+  background: #f7f7f7;
+}
+@media (max-width: 767px) {
+  .adminlte-gazie .main-header .navbar .dropdown-menu li.divider {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .adminlte-gazie .main-header .navbar .dropdown-menu li a {
+    color: #fff;
+  }
+  .adminlte-gazie .main-header .navbar .dropdown-menu li a:hover {
+    background: #99d197;
+  }
+}
+.adminlte-gazie .main-header {
+  background-color: #d6c188;
+  color: #123311;
+  border-bottom: 0 solid transparent;
+}
+.adminlte-gazie .content-header {
+  background: transparent;
+}
+.adminlte-gazie .wrapper,
+.adminlte-gazie .main-sidebar,
+.adminlte-gazie .left-side {
+  background-color: #222d32;
+}
+.adminlte-gazie .user-panel > .info,
+.adminlte-gazie .user-panel > .info > a {
+  color: #fff;
+}
+.adminlte-gazie .sidebar-menu > li.header {
+  color: #4b646f;
+  background: #1a2226;
+}
+.adminlte-gazie .sidebar-menu > li:hover > a,
+.adminlte-gazie .sidebar-menu > li.active > a {
+  color: #fff;
+  background: #09080873;
+}
+.adminlte-gazie .sidebar-menu > li > .treeview-menu {
+  margin: 0 1px;
+  background: #ffffff08;
+}
+.adminlte-gazie .sidebar a:hover {
+  text-decoration: none;
+}
+.adminlte-gazie .treeview-menu > li.active > a,
+.adminlte-gazie .treeview-menu > li > a:hover {
+  color: #ffffff;
+}
+.sidebar-menu .treeview-menu.menu-open {
+	background-color: #282728;
+}
+.adminlte-gazie .sidebar-form input[type="text"],
+.adminlte-gazie .sidebar-form .btn {
+  background-color: #374850;
+}
+.adminlte-gazie .sidebar-form input[type="text"] {
+  color: #666;
+}
+.adminlte-gazie .sidebar-form input[type="text"]:focus,
+.adminlte-gazie .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+  background-color: #fff;
+  color: #666;
+}
+.adminlte-gazie .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+  border-left-color: #fff;
+}
+.adminlte-gazie .sidebar-form .btn {
+  color: #999;
+}
+.adminlte-gazie.layout-top-nav .main-header > .logo {
+  background-color: #aae2a8;
+  color: #ffffff;
+}
+nav.navbar.navbar-static-top.company-color-bright:hover {
+  background: linear-gradient(to left,#0b0b0b60,#fff0);
+}
+.row.alternate-row-odd{
+  background-color: #eeeeee;
+}
+.row.alternate-row-even{
+  background-color: #cccccc;
+}
+
+.content-header > .breadcrumb {
+    background: transparent;
+    background: #ccf4ca;
+}
+.btn-effetti {
+    background-color: #D4CB6A;
+    color : #000;
+}
+.gaz-attivo {
+  background-color: #E3F5FF;
+  color : #2d15d2;
+}
+.gaz-passivo {
+  background-color: #FFF6EF;
+  color : #a65601;
+}
+.gaz-costi {
+  background-color: #FDD;
+  color : #912626;
+}
+.gaz-ricavi {
+  background-color: #EEFDED;
+  color : #045102;
+}
+.gaz-transitori {
+  background-color: #F4D5FF;
+  color : #72019b;
+}
+.btn-elimina {
+  color: #ff3939;
+  border: 1px solid #ff393938;
+}
+.btn-edit {
+	background-color: #449d44;
+	color: #FFFFFF;
+	box-shadow: 1px 1px 1px 1px gray;
+}
+td.ui-datepicker-other-month>a.ui-state-default.ui-priority-secondary{
+	color: #034802;
+	background: #ccccff;
+}
+.btn-avvisare
+{
+    background-color: #FF88D6;
+    color: #444;
+    border-color: #ddd;
+}
+
+.btn-bloccato
+{
+    background-color: #f44;
+    color: #444;
+    background-color: #ddd;
+}
+
+.btn-aperto
+{
+    background-color: #FFD688;
+    color: #444;
+    border-color: #ddd;
+}
+
+.btn-effettuato
+{
+    background-color: #88D6FF;
+    color: #444;
+    background-color: #ddd;
+}
+.input-area {
+  background-color: #a094a6;
+}
+.nav-pills > li
+{
+    border-top: 1px solid #222d32;
+    border-left: 1px solid #222d32;
+    border-right: 1px solid #222d32;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+.nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover
+{
+    background-color: #99d197;
+    color: #000;
+    border-top: 3px solid #99d197;
+}
+.panel .panel-default .gaz-table-form
+{
+    border: 1px solid #5f7a56;
+    border-radius: 4px;
+}
+.blink {
+    color: #f00;
+    font-weight: bold;
+    animation: blink 0.5s infinite;
+}
+.tab-content > .tab-pane > div.row:nth-of-type(2n+1) {
+	background-color: #f9f9f9;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #e9e9e9;
+}
+.table-striped > tbody > tr:nth-of-type(even) {
+    background-color: #f9f9f9;
+}
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+	font-size: 14px;
+	color: #0d0d0d;
+  border: 1px;
+	border-style: solid;
+}
+.ui-selectmenu-button span.ui-selectmenu-text {
+	background-color: #eee;
+}
+mark.apply-evidenze-e {
+ background: #FFA500;
+}
+mark.apply-evidenze-n {
+ background: #FD3030;
+}

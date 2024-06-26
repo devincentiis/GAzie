@@ -1,0 +1,669 @@
+/*
+ * Skin: Gazie
+ * ----------
+ */
+select {
+  border-radius: 5px;
+}
+.adminlte-gazie .main-header {
+  background-color:  #aae2a8;
+}
+.adminlte-gazie .main-header .navbar .nav > li > a {
+  color: #123311;
+}
+.dropdown-toggle {
+    color: #123311;
+}
+.adminlte-gazie .main-header .navbar .sidebar-toggle {
+  color: #123311;
+}
+.adminlte-gazie .main-header .navbar .sidebar-toggle:hover {
+  color: #f6f6f6;
+  background: rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 767px) {
+  .adminlte-gazie .main-header .navbar .dropdown-menu li.divider {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .adminlte-gazie .main-header .navbar .dropdown-menu li a {
+    color: #fff;
+  }
+  .adminlte-gazie .main-header .navbar .dropdown-menu li a:hover {
+    background: #99d197;
+  }
+}
+.adminlte-gazie .main-header {
+  background-color: #d6c188;
+  color: #123311;
+  border-bottom: 0 solid transparent;
+}
+.adminlte-gazie .main-header:hover {
+  background-color: #88c086;
+}
+.adminlte-gazie .content-header {
+  background: transparent;
+}
+.adminlte-gazie .wrapper,
+.adminlte-gazie .main-sidebar,
+.adminlte-gazie .left-side {
+  background-color: #222d32;
+}
+.adminlte-gazie .user-panel > .info,
+.adminlte-gazie .user-panel > .info > a {
+  color: #fff;
+}
+.adminlte-gazie .sidebar-menu > li.header {
+  color: #4b646f;
+  background: #1a2226;
+}
+.adminlte-gazie .sidebar-menu > li > a {
+  border-left: 2px solid transparent;
+  padding-left: 12px;
+}
+.adminlte-gazie .sidebar-menu > li:hover > a,
+.adminlte-gazie .sidebar-menu > li.active > a {
+  color: #ffffff;
+  background: #1e282c;
+}
+.adminlte-gazie .sidebar-menu > li > .treeview-menu {
+  margin: 0 1px;
+  background: #2c3b41;
+}
+.sidebar-menu .treeview-menu.menu-open {
+	background-color: #282728;
+}
+.adminlte-gazie .sidebar a:hover {
+  text-decoration: none;
+}
+.adminlte-gazie .treeview-menu > li.active > a,
+.adminlte-gazie .treeview-menu > li > a:hover {
+  color: #ffffff;
+}
+.adminlte-gazie .main-sidebar {
+	background: linear-gradient(to left,#0b0b0bc4,#060606e6 20%);
+}
+html body.adminlte-gazie.sidebar-mini.sidebar-collapse form div.wrapper header.main-header nav.navbar.navbar-static-top div.navbar-custom-menu ul.nav.navbar-nav li.dropdown.user.user-menu.open ul.dropdown-menu li.user-footer div.pull-right input.btn.btn-default.btn-flat {
+  height: 34px;
+  width: 65px;
+}
+.sidebar-menu .treeview-menu .treeview-menu {
+	padding-left: 2px;
+}
+.adminlte-gazie .sidebar-form {
+  border-radius: 3px;
+  border: 1px solid #374850;
+  margin: 10px 10px;
+}
+.adminlte-gazie .sidebar-form input[type="text"],
+.adminlte-gazie .sidebar-form .btn {
+  box-shadow: none;
+  background-color: #374850;
+  border: 1px solid transparent;
+  height: 35px;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+.adminlte-gazie .sidebar-form input[type="text"] {
+  color: #666;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 2px;
+}
+.adminlte-gazie .sidebar-form input[type="text"]:focus,
+.adminlte-gazie .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+  background-color: #fff;
+  color: #666;
+}
+.adminlte-gazie .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+  border-left-color: #fff;
+}
+.adminlte-gazie .sidebar-form .btn {
+  color: #999;
+  border-top-left-radius: 0;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-bottom-left-radius: 0;
+}
+.adminlte-gazie.layout-top-nav .main-header > .logo {
+  background-color: #aae2a8;
+  color: #ffffff;
+  border-bottom: 0 solid transparent;
+}
+.adminlte-gazie.layout-top-nav .main-header > .logo:hover {
+  background-color: #3b8ab8;
+}
+
+.form-horizontal .form-group {
+  margin-right: 0px;
+  margin-left: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+.form-group {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+div .panel.panel-default {
+	padding-top: 8px;
+}
+
+ul .nav.nav-tabs {
+	height: 28px;
+}
+
+select.input-sm {
+	height: 28px;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: 28px;
+    padding: 0px 0px;
+        padding-left: 5px;
+
+    border-radius: 2px;
+    box-shadow: none;
+    border-color: #515151;
+
+}
+
+select {
+	min-height: 28px !important;
+}
+div.panel.panel-info div.container-fluid.bg-info ul.nav.nav-tabs li a {
+    position: relative;
+    display: block;
+    padding: 4px 2px;
+}
+div.panel.panel-default div.container-fluid div.form-row div.form-group.col-md-6.col-lg-3.nopadding div.bg-success.text-center {
+	border: 1px;
+	border-color: #666;
+}
+
+div.panel.panel-default div#gaz-responsive-table.container-fluid table.col-xs-12.table-responsive.table-striped.table-condensed.cf tbody tr td.col-lg-4 input.col-lg-12 {
+	width: 99%;
+}
+
+html body.adminlte-gazie.sidebar-mini.sidebar-collapse form div.wrapper div.content-wrapper section.content form.form-horizontal div.panel.panel-default div#gaz-responsive-table.container-fluid table.col-xs-12.table-responsive.table-striped.table-condensed.cf tbody tr td button.btn {
+		padding: 2px 4px;
+		width: 90%;
+}
+div.form-group div.form-group.col-md-6.col-lg-3.nopadding div.bg-success
+{
+	color: #000;
+	border-radius: 3px;
+	border: 1px solid #374850;
+	padding-left:10px;
+	padding-top: 2px;
+	height: 28px;
+}
+
+div.panel.panel-default div.container-fluid div.form-row div.form-group.col-md-6.col-lg-3.nopadding div.bg-success.text-center
+{
+	color: #000;
+	border-radius: 3px;
+	border: 1px solid #374850;
+	padding-left:10px;
+	padding-top: 2px;
+	height: 28px;
+}
+div.panel.panel-default div.container-fluid div.form-row div.form-group.col-md-6.col-lg-3.nopadding div.text-center
+{
+	color: #000;
+	border-radius: 3px;
+	border: 1px solid #374850;
+	padding-left:10px;
+	padding-top: 2px;
+	height: 28px;
+}
+.form-group select {
+    padding-left: 10px;
+}
+
+.alert a {
+    color: #000;
+    text-decoration: none;
+}
+
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            STRUTTURA E FONTS
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+.navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a > h4 {
+  padding: 0;
+  margin: 0 0 0 25px;
+  color: #000;
+  font-size: 15px;
+  position: relative;
+}
+.navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a > p {
+    color: #a80596;
+    font-size: 12px;
+    margin: 0 0 0 25px;
+}
+.navbar-nav > .notifications-menu > .dropdown-menu > li .menu, .navbar-nav > .messages-menu > .dropdown-menu > li .menu, .navbar-nav > .tasks-menu > .dropdown-menu > li .menu {
+    max-height: 500px;
+}
+.navbar-static-top {
+	border-bottom: 1px solid #000 !important;
+}
+.content-wrapper {
+    min-width: 300px;
+}
+.content {
+	padding-left: 1px;
+	padding-right: 1px;
+}
+section.content {
+	padding-top: 1px;
+}
+.admin_footer {
+  margin-top: 30px;
+	opacity: 0.5;
+	filter: alpha(opacity=50);
+}
+.admin_footer:hover {
+  margin-top: 30px;
+	opacity: 1;
+	filter: alpha(opacity=100);
+}
+.img-circle.dit-picture, .text-center > a > .img-circle {
+	border-radius: 10px;
+	max-width: 180px;
+	width: auto;
+	height: auto;
+	max-height: 180px;
+}
+.usr-picture {
+  margin: 10px;
+  height: 150px;
+	max-width: 100%;
+  box-shadow: 0 0 5px 5px;
+  border-radius: 50%;
+}
+.btn {
+	white-space: unset;
+}
+.btn-50 {
+    width: 50px;
+}
+.btn-100 {
+    text-align: right;
+    padding-right: 15px;
+    width: 100px;
+}
+.glyphicon-edit {
+    padding-right: 5px;
+}
+.right {
+    text-align: right;
+    margin-right: 1em;
+}
+.btn-200 {
+    width: 200px;
+}
+.btn-full {
+    width: 100%;
+}
+.FacetFieldCaptionTD {
+    padding: 5px 5px 5px 5px;
+}
+.FacetDataTD input,select,textarea,select[class^='col-'] {
+	padding-left: unset;
+	margin-left: 0px;
+}
+.form-group input {
+	padding-left: 10px;
+}
+.tab-content{
+  padding: 15px;
+}
+.nav-tabs > li > a{
+    border: medium none;
+}
+.nav-tabs > li > a:hover{
+    border-top: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+.table {
+  margin-bottom: 5px;
+}
+.FacetFormTABLE,table.Tmiddle,table.Tsmall {
+	border: 1px solid #87b8d0;
+	border-radius: 4px;
+	border-collapse: unset;
+  margin-left: auto;
+  margin-right: auto;
+}
+table.Tmiddle tr>td, table.Tsmall tr>td {
+	padding : 5px;
+}
+@media only screen and (min-width: 990px) {
+	table.Tmiddle {
+		max-width : 70%;
+	}
+	table.Tsmall {
+		max-width : 50%;
+	}
+}
+#products-list
+{
+    border-top: 0px solid;
+}
+.panel {
+	-webkit-box-shadow: 2px 1px 1px rgba(1,1,1,.5);
+	box-shadow: 2px 1px 1px rgba(1,1,1,.5);
+}
+.panel-company {
+    min-height: 200px;
+	width: 100%;
+}
+.navbar-static-bottom {
+	border-bottom: 1px solid #000;
+}
+.panel-user {
+    min-height: 200px;
+	width: 100%;
+}
+.sidebar-menu .treeview-menu > li > a {
+    padding: 5px 5px 5px 5px;
+}
+
+/* il titolo sopra al header della tabella*/
+.FacetFormHeaderFont {
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+    padding-top: 8px;
+}
+.control-sidebar-menu .menu-info {
+    margin-left: 0px;
+}
+.control-sidebar-menu > li > a {
+    padding: 2px 15px;
+}
+.gaz-home-scadenze {
+    min-height: 260px;
+}
+#fornitori span {
+    display:none;
+}
+#clienti span {
+    display:none;
+}
+@media only screen and (max-width: 991px) {
+    /* Force table to not be like tables anymore */
+    #gaz-responsive-table table,
+    #gaz-responsive-table thead,
+    #gaz-responsive-table tbody,
+    #gaz-responsive-table th,
+    #gaz-responsive-table td,
+    #gaz-responsive-table tr {
+        display: block;
+    }
+    #gaz-responsive-table table{
+        padding: 2px;
+    }
+    /* Hide table headers (but not display: none;, for accessibility) */
+    #gaz-responsive-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    #gaz-responsive-table tr { border: 1px solid #ccc; }
+
+    #gaz-responsive-table td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 30%;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        white-space: normal;
+        text-align:left;
+    }
+
+    #gaz-responsive-table td:before {
+        /* Now like a table header */
+        position: absolute;
+        /* Top/left values mimic padding */
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align:left;
+        font-weight: bold;
+        font-size: small;
+    }
+
+    #gaz-responsive-table td:before { content: attr(data-title); }
+
+    .gaz-table-form .form-group {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}
+
+/*    --------------------------------------------------
+        :: Login Section
+        -------------------------------------------------- */
+
+.panel-title {
+    vertical-align: middle;
+}
+.btn-100 {
+    width: 100px;
+}
+#formlogin {
+    padding-top: 50px
+}
+#formlogin .form-wrap {
+    margin: 0 auto;
+    float: right;
+}
+.form-logo {
+    float: left;
+}
+.form-main {
+    margin: 10px 30%;
+    background-color: #77b075;
+    border: 1px solid #000;
+}
+#formlogin h1 {
+    color: #1fa67b;
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+    padding-bottom: 20px;
+}
+#formlogin .form-group {
+    margin-bottom: 25px;
+}
+#formlogin .checkbox {
+    margin-bottom: 20px;
+    position: relative;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+#formlogin .checkbox.show:before {
+    content: '\e013';
+    color: #1fa67b;
+    font-size: 17px;
+    margin: 1px 0 0 3px;
+    position: absolute;
+    pointer-events: none;
+    font-family: 'Glyphicons Halflings';
+}
+#formlogin .checkbox .character-checkbox {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    vertical-align: middle;
+    display: inline-block;
+}
+#formlogin .checkbox .label {
+    color: #6d6d6d;
+    font-size: 100%;
+    font-weight: normal;
+}
+#formlogin .btn.btn-custom {
+    font-size: 100%;
+    margin-bottom: 20px;
+}
+#formlogin .forget {
+    font-size: 100%;
+    text-align: center;
+    display: block;
+}
+
+#banapp {
+	max-width: 200px;
+}
+
+#expense_vat {
+	max-width: 200px;
+}
+
+#in_codvat {
+	max-width: 200px;
+}
+
+.table-responsive {
+	min-height: .01%;
+}
+
+.box-body {
+    padding: 0px;
+}
+
+.ui-sortable-handle{
+	padding: 2px;
+}
+
+/* l'altezza dei pannelli in dashboard deve essere uguale per tutti*/
+[id^=position-] .panel {
+    min-height: 310px;
+}
+
+/* aggiungo un po di spazio tra i pannelli della dash*/
+[id^=position-] {
+    padding: 10px 10px 10px 10px;
+}
+
+.panel-default  {
+    margin: auto;
+}
+.content-header > h1 {
+	padding-top: 30px;
+}
+.content-header > .breadcrumb {
+  margin-top: 0px;
+  margin-bottom: 0;
+  font-size: 11px;
+  padding: 4px 0px 4px 15px;
+  position: absolute;
+  width: 100%;
+  border-bottom: 1px solid #000 !important;
+  border-radius: 0px;
+}
+.breadcrumb li {
+    margin: 1px 0;
+}
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
+.tooltip-inner {
+    min-width: 150px;
+    max-width: 100%;
+}
+form table.GazFormDeleteTable {
+  margin: auto;
+  width: 400px;
+}
+html body form section.content form.form-horizontal{
+  padding-top: 12px;
+}
+table.xdebug-error, pre.xdebug-var-dump {
+  z-index: 2000;
+  position: relative;
+}
+.animated {
+  -webkit-animation-duration: 2s;
+  animation-duration: 2s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-100px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+  }
+}
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fadeInDown {
+  -webkit-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+}
+.sidebar-menu, .main-sidebar .user-panel, .sidebar-menu > li.header {
+	padding-top: 10px;
+}
+
+.sidebar-menu > li {
+	margin-top: -5px;
+	margin-bottom: -5px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.navbar-nav > li > #docmodal {
+	padding-top: 10px;
+	padding-bottom: 8px;
+}
+section.content-header div h1 {
+  font-size: 2em;
+	margin-top: 8px;
+	margin-bottom: 6px;
+}
+.gaz-table-form {
+	max-width: 990px;
+	float: none;
+	margin-left: auto;
+	margin-right: auto;
+}
+#fattura-elettronica {
+	background-color: #fffff9;
+	padding-top: 20px;
+  color: #000;
+}
+.main-footer {
+	padding-bottom: 25px;
+	padding-top: 5px;
+}
+.ui-button {
+  padding: 1px;
+}
+.line-through {
+  text-decoration: line-through;
+}

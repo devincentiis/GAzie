@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<iv:Fornitura xmlns:iv="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+    <iv:Intestazione>
+        <iv:CodiceFornitura>IVP18</iv:CodiceFornitura>
+    </iv:Intestazione>
+    <iv:Comunicazione identificativo="">
+        <iv:Frontespizio>
+            <iv:CodiceFiscale/>
+            <iv:AnnoImposta/>
+            <iv:PartitaIVA/>
+            <iv:FirmaDichiarazione>1</iv:FirmaDichiarazione>
+            <iv:IdentificativoProdSoftware/>
+        </iv:Frontespizio>
+        <iv:DatiContabili>
+        </iv:DatiContabili>
+    </iv:Comunicazione>
+</iv:Fornitura>

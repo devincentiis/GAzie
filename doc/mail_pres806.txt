@@ -1,0 +1,7 @@
+Titolo:
+Elephas indus culices non timet.
+
+Presentazione:
+Ancora restyling e debug, ma anche qualcosa di più concreto. Ho voluto accelerare questo rilascio soprattutto per rendere immediatamente operativo il miglioramento della selezione automatica dell'aliquota IVA del reverse charge durante l'acquisizione delle fatture di acquisto ( N6.x ). Resta l'obbligo per l'operatore di controllare se effettivamente quanto proposto è giusto ai fini fiscali, e non accettarlo pedissequamente; lo ribadisco perché sovente per pigrizia si preferisce la sequenza di click compulsiva al controllo con quanto riportato sul castelletto IVA della fattura che si sta registrando (messa ben in vista sotto).
+
+Antonio de Vincentiis, Montesilvano, 30 luglio 2022

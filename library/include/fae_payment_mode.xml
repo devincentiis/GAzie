@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="payment_MP01" model="">
+        <field name="code">MP01</field>
+        <field name="name">Contanti</field>
+    </record>
+    <record id="payment_MP02" model="">
+        <field name="code">MP02</field>
+        <field name="name">Assegno</field>
+    </record>
+    <record id="payment_MP03" model="">
+        <field name="code">MP03</field>
+        <field name="name">Assegno circolare</field>
+    </record>
+    <record id="payment_MP04" model="">
+        <field name="code">MP04</field>
+        <field name="name">Contanti presso Tesoreria</field>
+    </record>
+    <record id="payment_MP05" model="">
+        <field name="code">MP05</field>
+        <field name="name">Bonifico</field>
+    </record>
+    <record id="payment_MP06" model="">
+        <field name="code">MP06</field>
+        <field name="name">Vaglia cambiario</field>
+    </record>
+    <record id="payment_MP07" model="">
+        <field name="code">MP07</field>
+        <field name="name">Bollettino bancario</field>
+    </record>
+    <record id="payment_MP08" model="">
+        <field name="code">MP08</field>
+        <field name="name">Carta di pagamento</field>
+    </record>
+    <record id="payment_MP09" model="">
+        <field name="code">MP09</field>
+        <field name="name">RID</field>
+    </record>
+    <record id="payment_MP10" model="">
+        <field name="code">MP10</field>
+        <field name="name">RID utenze</field>
+    </record>
+    <record id="payment_MP11" model="">
+        <field name="code">MP11</field>
+        <field name="name">RID veloce</field>
+    </record>
+    <record id="payment_MP12" model="">
+        <field name="code">MP12</field>
+        <field name="name">RIBA</field>
+    </record>
+    <record id="payment_MP13" model="">
+        <field name="code">MP13</field>
+        <field name="name">MAV</field>
+    </record>
+    <record id="payment_MP14" model="">
+        <field name="code">MP14</field>
+        <field name="name">Quietanza erario</field>
+    </record>
+    <record id="payment_MP15" model="">
+        <field name="code">MP15</field>
+        <field name="name">Giroconto su conti di contabilità speciale</field>
+    </record>
+    <record id="payment_MP16" model="">
+        <field name="code">MP16</field>
+        <field name="name">Domiciliazione bancaria</field>
+    </record>
+    <record id="payment_MP17" model="">
+        <field name="code">MP17</field>
+        <field name="name">Domiciliazione postale</field>
+    </record>
+    <record id="payment_MP18" model="">
+        <field name="code">MP18</field>
+        <field name="name">Bollettino di c/c postale</field>
+    </record>
+    <record id="payment_MP19" model="">
+        <field name="code">MP19</field>
+        <field name="name">SEPA Direct Debit</field>
+    </record>
+    <record id="payment_MP20" model="">
+        <field name="code">MP20</field>
+        <field name="name">SEPA Direct Debit CORE</field>
+    </record>
+    <record id="payment_MP21" model="">
+        <field name="code">MP21</field>
+        <field name="name">SEPA Direct Debit B2B</field>
+    </record>
+    <record id="payment_MP22" model="">
+        <field name="code">MP22</field>
+        <field name="name">Trattenuta su somme già riscosse</field>
+    </record>
+</data>

@@ -1,0 +1,12 @@
+Titolo:
+Tace et calculare.
+
+Presentazione:
+In ottemperanza al titolo mi limito a dire senza troppi fronzoli che è una versione di quasi esclusivo debug, qualche ora prima dell'obbligo (1 luglio) di invio delle fatture elettroniche relative al reverse charge.
+Ricordo che GAzie generava già dalla passata versione i tracciati XML con i nuovi tipi di documento TD16, TD17 ecc. bastava (e basta) registrare (anche solo in prima nota) le fatture di acquisto con una aliquota IVA in cui sia indicata
+la giusta Natura di Esenzione. So per certo che alcuni usavano già la funzione ma adesso che i test saranno stressanti sono lieto di ricevere dei feedback (auspico positivi).
+Troverete due nuovi moduli attivabili all'occorrenza, ognuno manutenuto dagli autori ai quali potrete rivolgervi per chiarimenti e/o assistenza:
+- Camera di compensazione (autore Francesco Pagano)
+- Vacation rental (autore Antonio Germani)
+
+Antonio de Vincentiis, Montesilvano, 01 luglio 2022

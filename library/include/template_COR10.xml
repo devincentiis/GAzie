@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:DatiCorrispettivi xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/corrispettivi/dati/v1.0" versione="COR10">
+    <DatiFatturaHeader>
+        <ProgressivoInvio></ProgressivoInvio>
+    </DatiFatturaHeader>
+</ns2:DatiCorrispettivi>

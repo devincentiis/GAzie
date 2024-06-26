@@ -1,0 +1,28 @@
+{
+  "name": "capslockstate",
+  "title": "jQuery Caps Lock State",
+  "description": "jQuery plugin for monitoring and reporting the state of the Caps Lock key. Tracks at the document level instead of individual fields, and works with all keyboard layouts.",
+  "keywords": [
+    "capslock",
+    "caps",
+    "lock"
+  ],
+  "version": "1.2.1",
+  "author": {
+    "name": "Jason Ellison",
+    "email": "jason+capslockstate@nosilleg.com"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://goo.gl/vuhgh"
+    }
+  ],
+  "bugs": "http://goo.gl/ITMDP",
+  "homepage": "http://goo.gl/k5O5X",
+  "docs": "http://goo.gl/J6HLW",
+  "download": "http://goo.gl/P7S1E",
+  "dependencies": {
+    "jquery": ">=1.3"
+  }
+}

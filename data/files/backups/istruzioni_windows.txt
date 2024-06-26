@@ -1,0 +1,15 @@
+************************************************************************************************************************************************
+ATTENZIONE QUESTA PROCEDURA POTREBBE CANCELLARE COMPLETAMENTE OGNI DATO DAI VOSTRI DISCHI FISSI, SE NON SAPETE COSA STATE FACENDO CHIEDETE AIUTO
+************************************************************************************************************************************************
+
+WINDOWS
+
+1 aprire un prompt dei comandi con permessi di amministrazione
+
+2 posizionarsi nella cartella data\files di gazie rinominare temporaneamente la cartella backups
+
+3 digitare il comando :
+
+    mklink /D backups e:\backups\
+
+dove e:\backups è la cartella dove si vogliono creare i backups a questo punto muovere il contenuto della vecchia cartella backups (rinominata) nella nuova cartella

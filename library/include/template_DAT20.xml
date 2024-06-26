@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:DatiFattura xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.0" versione="DAT20">
+    <DatiFatturaHeader>
+        <ProgressivoInvio></ProgressivoInvio>
+    </DatiFatturaHeader>
+</ns2:DatiFattura>

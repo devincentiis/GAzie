@@ -1,0 +1,80 @@
+*{margin: 0em;padding: 0em;}
+img{border: none;}
+body{font-family: arial, serif;	font-size: 11pt;background: #fff;color: #000000;}
+#header_cont {padding: 1em 1em 1em 1em; background: #2b172e url('gazie_site_header.jpg') top left repeat-x;}
+#header_cont  h1 {font-size: 1.9em; color: #fff;text-decoration: none;}
+#header_cont  h1, #header_cont h2{display: block; width: 960px; margin: 0em auto;}
+#header_cont a {color: #fff;}
+#header_cont  h2{color: #f7b6c5;font-size: 0.8em;}
+
+#container {
+        color: #286e00;
+        font-family: Verdana;
+        font-size: 18px;
+        background-color: #efefef;
+        padding: 25px;
+        width: 960px;
+		margin: 0em auto;
+		list-style: none;
+		padding-left: 2.5em;
+        line-height: 1.6em;
+    }
+.content h2 {color: #f7b6c5; }
+
+.content table {
+	font-size: 0.8em;
+}
+.gazie_menu{
+	position: relative;
+	width: 996px;
+	padding: 0 0 0 34px;
+	margin: 0 auto 0 auto;
+	background: url(gazie_site_menu_bo.png) repeat-x; /*tab background image path*/
+	height: 46px;
+	list-style: none;
+}
+
+.gazie_menu li{
+	float:left;
+}
+
+.gazie_menu li a{
+	float: left;
+	display: block;
+	color:#000;
+	text-decoration: none;
+	font-family: sans-serif;
+	font-size: 13px;
+	font-weight: bold;
+	padding:0 0 0 16px; /*Padding to accomodate left tab image. Do not change*/
+	height: 46px;
+	line-height: 46px;
+	text-align: center;
+	cursor: pointer;	
+}
+
+.gazie_menu li a b{
+	float: left;
+	display: block;
+	padding: 0 24px 0 8px; /*Padding of menu items*/
+}
+
+.gazie_menu li.current a, .gazie_menu li a:hover{
+	color: #fff;
+	background: url(gazie_site_menu_le.png) no-repeat; /*left tab image path*/
+	background-position: left;
+}
+
+.gazie_menu li.current a b, .gazie_menu li a:hover b{
+	color: #fff;
+	background: url(gazie_site_menu_ri.png) no-repeat right top; /*right tab image path*/
+}
+.gazie_other  {
+	font-size: 16px;
+	color: #f0205e; 
+}
+.imgBox { 
+	width: 25px; 
+} 
+
+

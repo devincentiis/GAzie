@@ -1,0 +1,7 @@
+Titolo: Necesse est multos timeat quem multi timent.
+
+Presentazione:
+Versione rilasciata solo per correggere alcuni piccoli bug emersi su alcune funzionalità nuove della 9.06, in particolare il nome del file pdf allegato alla fattura elettronica non giusto (mentre il contenuto lo è).
+Approfitto anche per indicizzare alcune colonne che rallentavano alcune query.
+
+Antonio de Vincentiis, Montesilvano, 02 febbraio 2024

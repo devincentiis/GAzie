@@ -1,0 +1,35 @@
+Titolo:
+Ut sementem feceris, ita metes.
+
+Presentazione:
+Sono trascorsi ben 18 anni da quel 27 gennaio 2004.
+Considerando l'evoluzione dei linguaggi e dei loro paradigmi, della programmazione web in generale, non mi faccio capace, è da non credere che siamo qui ancora a festeggiare un nuovo compleanno.
+Un uomo sarebbe appena maggiorenne, per un software gestionale è una età veneranda, per uno open source è un miracolo, GAzie è insolente verso il tempo che passa.
+Il merito è di tutti noi, di quelli che partecipano quotidianamente a tenerlo in vita contribuendo con la scrittura di codice, con consigli e segnalazioni di errori, a tenerci aggiornati sulle novità fiscali, su quelle tecniche, ad integrarlo con le più svariate librerie libere, a migliorarne l'usabilità, a permettergli di comunicare con infrastrutture di terze parti.
+Tante volte sono stato tentato di riscriverlo usando un framework, sempre mi sono chiesto: quale? In due decadi ne abbiamo visti nascere e morire una moltitudine ed invece GAzie è ancora qui, con le sue "profonde rughe ingegneristiche" ma ancora vivo, suscettibile di tanti possibili miglioramenti ma senza la necessità di essere un'araba fenice.
+Ancora funzionale come un coltellino svizzero.
+Finita la festa mi congedo con un'ultima metafora (quanto mi piacciono!): la lista dei compositori della sinfonia numero 8.02:
+- Implementata la gestione lettere di intento sulle fatture elettroniche con apposito "tipo rigo 26". (A.Biasi e A.Romano)
+- Sistemati alcuni problemi con l'indicazione della varietà nella formattazione del file SIAN per olio. (A.Germani)
+- Corretto bug che su lotti dei DdT di acquisto in uscita (DDL DDR) trattavano i lotti in entrata. (A.Germani)
+- Corretto errore segnalato da C.Pievedepitti che dopo l'impacchettamento delle fatture elettroniche l'utente non veniva ridiretto sul report dei flussi. (A.De Vincentiis)
+- SIAN: creata nuova funzione per vedere il contenuto di un silos espresso in codici articolo. (A.Germani)
+- Aggiunta la possibilità di listare anche i corrispettivi da ristampa documenti di vendita. (A.De Vincentiis)
+- Produzione: nel caso di prelevamento di un componente da un silos contenente una miscela di articoli diversi, con o senza lotti, adesso sottrae in automatico e in percentuale proporzionale tutti gli articoli presenti nel silos facendone distinzione nei movimenti di magazzino. (A.Germani)
+- Ristampa documenti: le fatture d'acconto vengono riportate assieme alle immediate. (A.De Vincentiis)
+- Corretto il problema di invio email con tema lte, e risolti alcuni notice. (A.Biasi)
+- Gruppi di articoli: inserito avviso per quando si tenta di caricare una immagine con dimensioni superiori a quanto impostato nella configurazione php. (A.Germani)
+- Uniformata l'interfaccia per le anagrafiche dei collaboratori a quella dei clienti e dei fornitori, inoltre impostando in configurazione avanzata azienda il campo "consenti_nofisc" a 1 non verranno eseguiti i controlli sui dati fiscali e basterà la sola ragione sociale. (A.De Vincentiis)
+- Se sui clienti stranieri veniva valorizzato il CAP con quello reale e non "00000" allora la fattura elettronica veniva scartata, adesso mette comunque 00000 sugli stranieri ed anche sugli italiani se esso non è lungo 5 caratteri. (A.De Vincentiis)
+- Aggiunta possibilità di fare un update totale di tutte le produzioni. (A.Germani)
+- Corretto errore nel calcolo del pro-rata quando c'erano più di due sezionali. (A.Romano)
+- Dalla configurazione avanzata azienda è consentita la possibilità di disabilitare lo scorrimento delle pagine durante l'inserimento dei documenti. (A.Biasi e A.De Vincentiis)
+- Reso più "universale" l'invio di pacchetti zip delle fatture elettroniche utilizzando la pec o servizi esterni di terze parti attraverso moduli personalizzati per GAzie. (A.De Vincentiis, A.Romano, A.germani)
+- Predisposizione all'esclusione delle fatture verso PA (devono essere prima firmate) e correzione alcuni typo. (A.Romano)
+- Corretti errori di gestione delle fatture elettroniche in elenco fatture di vendita. (A.Romano)
+- Acquisizione fatture elettroniche: la consultazione del canale telematico richiede una libreria specifica per ogni tipo e non è presente in GAzie, non si apre se essa non è uno specificato in "Moduli sincronizzazioni ecommerce e/o devices". (A.Germani)
+- Possibilità di scegliere in configurazione avanzata azienda se utilizzare una numerazione separata dalle fatture per le note credito e debito. (M.Dalmasso)
+- Aggiunti altri stati di notifica delle fatture elettroniche per retro-compatibilità e fino a quando non verrà uniformata completamente la gestione delle stesse. (A.Romano)
+- Aggiunto controllo movimenti di scadenzario orfani in Fine Anno -> Controlli. (A.De Vincentiis e A.Romano)
+
+Antonio de Vincentiis, Montesilvano, 27 gennaio 2022

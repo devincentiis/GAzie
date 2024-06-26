@@ -1,0 +1,115 @@
+;
+AA00000 ;Crediti v/soci per versamenti ancora dovuti
+AB01001 ;Costi di impianto e di ampliamento
+AB01002 ;Costi di ricerca, di sviluppo e di pubblicità
+AB01003 ;Diritti di brevetto e di utilizzazione delle opere dell'ingegno
+AB01004 ;Concessioni, licenze, marchi e diritti simili
+AB01005 ;Avviamento
+AB01006 ;Immobilizzazioni in corso e acconti
+AB01007 ;Altre immobilizzazioni immateriali
+AB02001 ;Terreni e fabbricati
+AB02002 ;Impianti e macchinari
+AB02003 ;Attrezzature industriali e commerciali
+AB02004 ;Altri beni materiali
+AB02005 ;Immobilizzazioni in corso e acconti
+AB03001a;Partecipazioni in imprese controllate
+AB03001b;Partecipazioni in imprese collegate
+AB03001c;Partecipazioni in imprese controllanti
+AB03001d;Partecipazioni in altre imprese
+AB03002a;Crediti verso imprese controllate
+AB03002b;Crediti verso imprese collegate
+AB03002c;Crediti verso imprese controllanti
+AB03002d;Crediti verso altri
+AB03003 ;Altri titoli
+AB03004 ;Azioni proprie, con indicazione del valore nominale complessivo
+AC01001 ;Materie prime, sussidiarie e di consumo
+AC01002 ;Prodotti in corso di lavorazione e semilavorati
+AC01003 ;Lavori in corso su ordinazione
+AC01004 ;Prodotti finiti e merci
+AC01005 ;Acconti
+AC02001 ;Crediti verso clienti
+AC02002 ;Crediti verso imprese controllate
+AC02003 ;Crediti verso imprese collegate
+AC02004 ;Crediti verso imprese controllanti
+AC02004b;Crediti tributari
+AC02004c;Imposte anticipate
+AC02005 ;Crediti verso altri
+AC03001 ;Partecipazioni in imprese controllate
+AC03002 ;Partecipazioni in imprese collegate
+AC03003 ;Partecipazioni in imprese controllanti
+AC03004 ;Altre partecipazioni
+AC03005 ;Azioni proprie, con indicazione del valore nominale complessivo
+AC03006 ;Altri titoli
+AC04001 ;Depositi bancari e postali
+AC04002 ;Assegni
+AC04003 ;Denaro e valori in cassa
+AD00001 ;Ratei attivi
+AD00002 ;Risconti attivi
+AD00003 ;Disaggi su prestiti
+PA01000 ;Capitale sociale
+PA02000 ;Riserva da sovrapprezzo azioni
+PA03000 ;Riserve di rivalutazione
+PA04000 ;Riserva legale
+PA05000 ;Riserva per azioni proprie in portafoglio
+PA06000 ;Riserva statutaria
+PA07000 ;Altre riserve
+PA08000 ;Utili (perdite) portati a nuovo
+PA09000 ;Utile (perdita) dell'esercizio
+PB00001 ;Fondo per trattamento di quiescenza e obblighi simili
+PB00002 ;Fondo per imposte
+PB00003 ;Altri fondi per rischi e oneri futuri
+PC00000 ;Trattamento di fine rapporto di lavoro subordinato
+PD00001 ;Obbligazioni non convertibili
+PD00002 ;Obbligazioni convertibili
+PD00003 ;Debiti verso soci per finanziamenti
+PD00004 ;Debiti verso banche
+PD00005 ;Debiti verso altri finanziatori
+PD00006 ;Acconti
+PD00007 ;Debiti verso fornitori
+PD00008 ;Debiti rappresentati da titoli di credito
+PD00009 ;Debiti verso imprese controllate
+PD00010 ;Debiti verso imprese collegate
+PD00011 ;Debiti verso imprese controllanti
+PD00012 ;Debiti tributari
+PD00013 ;Debiti verso istituti di previdenza e sicurezza sociale
+PD00014 ;Altri debiti
+PE00001 ;Ratei passivi
+PE00002 ;Risconti passivi
+PE00003 ;aggi su prestiti
+EA00001 ;Ricavi delle vendite e delle prestazioni
+EA00002 ;Variazione delle rimanenze di prodotti in corso di lavorazione, semilavorati e finiti
+EA00003 ;Variazione dei lavori in corso su ordinazione
+EA00004 ;Incrementi di immobilizzazioni per lavori interni
+EA00005 ;Altri ricavi e proventi
+EB00006 ;Costi per materie prime, sussidiarie, di consumo e merci
+EB00007 ;Spese per servizi
+EB00008 ;Spese per godimento di beni di terzi
+EB00009a;Salari e stipendi
+EB00009b;Oneri sociali
+EB00009c;Accantonamento al TFRL
+EB00009d;Accantonamento per trattamento di quiescenza e simili
+EB00009e;Altri costi del personale
+EB00010a;Ammortamento delle immobilizzazioni immateriali
+EB00010b;Ammortamento delle immobilizzazioni materiali
+EB00010c;Altre svalutazioni delle immobilizzazioni
+EB00010d;Svalutazione di crediti compresi nell'attivo circolante e delle disponibilità liquide
+EB00011 ;Variazione delle rimanenze di materie prime, sussidiarie, di consumo e merci
+EB00012 ;Accantonamenti per rischi
+EB00013 ;Altri accantonamenti
+EB00014 ;Oneri diversi di gestione
+EC00015 ;Proventi da partecipazioni
+EC00016a;Proventi da crediti iscritti nelle immobilizzazioni
+EC00016b;Proventi da titoli iscritti nelle immobilizzazioni che non costituiscono partecipazioni
+EC00016c;Proventi da titoli iscritti nel'attivo circolante che non costituiscono partecipazioni
+EC00016d;Proventi diversi dai precedenti
+EC00017 ;Interessi ed altri oneri finanziari
+ED00018a;Rivalutazione di partecipazioni
+ED00018b;Rivalutazione di immobilizzazioni finanziarie che non costituiscono partecipazioni
+ED00018c;Rivalutazione da titoli iscritti all'attivo circolante che non costituiscono partecipazioni
+ED00019a;Svalutazione di partecipazioni
+ED00019b;Svalutazione di immobilizzazioni finanziarie che non costituiscono partecipazioni
+ED00019c;Svalutazione di titoli iscritti all'attivo circolante che non costituiscono partecipazioni
+ED00020 ;Proventi straordinari
+ED00021 ;Oneri straordinari
+E 00022 ;Imposte sul reddito d'esercizio
+E 00026 ;Utile o perdita d'esercizio

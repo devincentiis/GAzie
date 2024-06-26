@@ -1,0 +1,75 @@
+************************************************************************************************************************************************
+ATTENZIONE QUESTA PROCEDURA POTREBBE CANCELLARE COMPLETAMENTE OGNI DATO DAI VOSTRI DISCHI FISSI, SE NON SAPETE COSA STATE FACENDO CHIEDETE AIUTO
+************************************************************************************************************************************************
+
+LINUX 
+
+in questa cartella verranno salvati i backup di gazie. per montare un secondo disco in questa cartella seguire i seguenti passi :
+
+1. Per prima cosa devi capire quel'è il nome che il sistema ha assegnato al disco di backup
+
+    fdisk -l
+    
+in questo esempio /dev/sdb non ha una tabella di partizioni valida, sarà questo il nostro nuovo disco
+    
+    Disk /dev/sda: 17.2 GB, 17179869184 bytes
+    255 heads, 63 sectors/track, 2088 cylinders, total 33554432 sectors
+    Units = sectors of 1 * 512 = 512 bytes
+    Sector size (logical/physical): 512 bytes / 512 bytes
+    I/O size (minimum/optimal): 512 bytes / 512 bytes
+    Disk identifier: 0x000299d1
+ 
+    Device Boot Start End Blocks Id System
+    /dev/sda1 * 2048 32088063 16043008 83 Linux
+    /dev/sda2 32090110 33552383 731137 5 Extended
+    /dev/sda5 32090112 33552383 731136 82 Linux swap / Solaris
+ 
+    Disk /dev/sdb: 17.2 GB, 17179869184 bytes
+    255 heads, 63 sectors/track, 2088 cylinders, total 33554432 sectors
+    Units = sectors of 1 * 512 = 512 bytes
+    Sector size (logical/physical): 512 bytes / 512 bytes
+    I/O size (minimum/optimal): 512 bytes / 512 bytes
+    Disk identifier: 0x00000000
+ 
+    Disk /dev/sdb doesn't contain a valid partition table
+
+    
+2. Ora dobbiamo creare una partizione nel nuovo disco (in questo esempio /dev/sdb)
+
+    cfdisk /dev/sdb
+    > New -> Primary -> Specify size in MB
+    > Write -> yes
+    > Quit
+    
+
+3. Poi dobbiamo formattarlo in modo che il sistema possa salvarci dei file (/dev/sdb1 in questo esempio)
+
+    mkfs.ext4 /dev/sdb1
+
+
+4. Se non è stata già creata, bisogna creare la cartella dove verrà montato il disco (sostituite il percorso /var/www/gazie/data/files/backups con quello corrispondente alla vostra installazione di gazie)
+
+    mkdir /var/www/gazie/data/files/backups
+
+
+5. Per fare in modo che il sistema "attivi" il nuovo disco ad ogni avvio, bisogna linkare tramite il suo UUID al percorso
+
+    blkid
+
+verrano mostrate le partizioni con il loro UUID. la nostra partizione è /dev/sdb1
+
+    /dev/sda5: UUID="180cab2a-300a-4e3d-8c8e-0e1df46b9bf7" TYPE="swap"
+    /dev/sda1: UUID="cd0c7b2c-bf50-4557-bc01-0048764a41d2" TYPE="ext4"
+    /dev/sdb1: UUID="359d90df-f17a-42f6-ab13-df13bf356de7" TYPE="ext4"
+
+
+6. Ora aggiungiamo il UUID corrispondente al disco di backup al file fstab
+
+    echo "UUID=359d90df-f17a-42f6-ab13-df13bf356de7 /var/www/gazie/data/files/backups ext4 errors=remount-ro 0 1" >> /etc/fstab
+
+Ricordatevi di sostituire lo UDID con quello visualizzato nel passo 5 e sostituite il percorso (/var/www/gazie/data/files/backups) con quello corrispondente alla vostra installazione di gazie
+
+
+7. Per ultimo montiamo io nostro nuovo disco (potete anche riavviare il sistema per controllare che venga montato automaticamente)
+
+    mount /var/www/gazie/data/files/backups

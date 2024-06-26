@@ -1,0 +1,4 @@
+UPDATE `gaz_config` SET `cvalue` = '55' WHERE `id` =2;
+ALTER TABLE `gaz_aziend` ADD `closing_balance` INT NOT NULL AFTER `c_ritenute` , ADD `economic_result` INT NOT NULL AFTER `closing_balance` , ADD `operating_profit` INT NOT NULL AFTER `economic_result` , ADD `operating_losses` INT NOT NULL AFTER `operating_profit` , ADD `opening_balance` INT NOT NULL AFTER `operating_losses` ;
+UPDATE `gaz_aziend` SET `closing_balance` = '598000002',`economic_result` = '598000003',`operating_profit` = '210000031',`operating_losses` = '210000032',`opening_balance` = '598000001' WHERE `codice` =1 LIMIT 1 ;
+UPDATE `gaz_menu_script` SET `link` = 'select_partit.php' WHERE `id` =30 LIMIT 1 ;

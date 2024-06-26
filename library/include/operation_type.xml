@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="opertype_AMERCI" model="">
+        <field name="code">AMERCI</field>
+        <field name="name">ACQUISTO MERCI</field>
+    </record>
+    <record id="opertype_SERVIZ" model="">
+        <field name="code">SERVIZ</field>
+        <field name="name">ACQUISTO SERVIZI</field>
+    </record>
+    <record id="opertype_SERVIZ" model="">
+        <field name="code">LOCAZI</field>
+        <field name="name">CANONI DI LOCAZIONE</field>
+    </record>
+    <record id="opertype_ROTTAM" model="">
+        <field name="code">ROTTAM</field>
+        <field name="name">ROTTAMI E MATERIALI RECUPERO</field>
+    </record>
+    <record id="opertype_BENAMM" model="">
+        <field name="code">BENAMM</field>
+        <field name="name">BENI STRUMENTALI AMMORTIZZABILI</field>
+    </record>
+    <record id="opertype_BENOAM" model="">
+        <field name="code">BENOAM</field>
+        <field name="name">BENI STRUMENTALI NON AMMORTIZZABILI</field>
+    </record>
+    <record id="opertype_BENLEA" model="">
+        <field name="code">BENLEA</field>
+        <field name="name">BENI STRUMENTALI ACQ. LEASING</field>
+    </record>
+    <record id="opertype_FABIMP" model="">
+        <field name="code">FABIMP</field>
+        <field name="name">FABBRICATI STRUMENTALI IMPONIBILI</field>
+    </record>
+    <record id="opertype_PASINT" model="">
+        <field name="code">PASINT</field>
+        <field name="name">PASSAGGIO INTERNO</field>
+    </record>
+    <record id="opertype_FITTIZ" model="">
+        <field name="code">FITTIZ</field>
+        <field name="name">FATTURA FITTIZIA</field>
+    </record>
+    <record id="opertype_TELCEL" model="">
+        <field name="code">TELCEL</field>
+        <field name="name">ACQUISTO TELEFONI CELLULARI</field>
+    </record>
+    <record id="opertype_SUBEDI" model="">
+        <field name="code">SUBEDI</field>
+        <field name="name">ACQUISTO DA SUBAPPALTORI EDILIZIA</field>
+    </record>
+    <record id="opertype_FANOES" model="">
+        <field name="code">FAESDI</field>
+        <field name="name">FAT C/IVA ESIGIB.DIFFERITA NO SALDO IVA</field>
+    </record>
+    <record id="opertype_FANOES" model="">
+        <field name="code">FANOES</field>
+        <field name="name">FAT C/IVA NON ESIGIBILE NO SALDO IVA</field>
+    </record>
+    <record id="opertype_CEEVEI" model="">
+        <field name="code">CEEVEI</field>
+        <field name="name">CESSIONE VEICOLO ACQ.INTRACOMUNIT.</field>
+    </record>
+    <record id="opertype_ABNRES" model="">
+        <field name="code">ABNRES</field>
+        <field name="name">ACQUISTO BENI DA NON RESIDENTI</field>
+    </record>
+    <record id="opertype_ASNRES" model="">
+        <field name="code">ASNRES</field>
+        <field name="name">ACQUISTO SERVIZI DA NON RESIDENTI</field>
+    </record>
+    <record id="opertype_ANOVEN" model="">
+        <field name="code">ANOVEN</field>
+        <field name="name">ACQUISTI NON DESTINATI RIVENDITA</field>
+    </record>
+    <record id="opertype_AMICRO" model="">
+        <field name="code">AMICRO</field>
+        <field name="name">ACQUISTO MICROPROCESSORI</field>
+    </record>
+    <record id="opertype_OROARG" model="">
+        <field name="code">OROARG</field>
+        <field name="name">ACQUISTO ORO ARGENTO S/IVA DOGANA</field>
+    </record>
+    <record id="opertype_ACQ741" model="">
+        <field name="code">ACQ741</field>
+        <field name="name">ACQUISTI ART.74 C.1 I.E</field>
+    </record>
+    <record id="opertype_CREIMP" model="">
+        <field name="code">CREIMP</field>
+        <field name="name">CREDITO D'IMPOSTA</field>
+    </record>
+    <record id="opertype_CESOIN" model="">
+        <field name="code">CESOIN</field>
+        <field name="name">CESSIONI SOGGETTI A INTERESSI</field>
+    </record>
+    <record id="opertype_BECOOP" model="">
+        <field name="code">BECOOP</field>
+        <field name="name">PASSAGGIO BENE COOPERATIVA</field>
+    </record>
+    <record id="opertype_FABABI" model="">
+        <field name="code">FABABI</field>
+        <field name="name">ACQUISTO FABBRICATO ABITATIVO</field>
+    </record>
+    <record id="opertype_PRO748" model="">
+        <field name="code">PRO748</field>
+        <field name="name">PROVVIGIONI ART.74 TER C.8</field>
+    </record>
+</data>

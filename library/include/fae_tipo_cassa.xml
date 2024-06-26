@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="TipoCassa_TC01" model="">
+        <field name="code">TC01</field>
+        <field name="name">Cassa nazionale previdenza e assistenza avvocati e procuratori legali </field>
+    </record>
+    <record id="TipoCassa_TC02" model="">
+        <field name="code">TC02</field>
+        <field name="name">Cassa previdenza dottori commercialisti</field>
+    </record>
+    <record id="TipoCassa_TC03" model="">
+        <field name="code">TC03</field>
+        <field name="name">Cassa previdenza e assistenza geometri</field>
+    </record>
+    <record id="TipoCassa_TC04" model="">
+        <field name="code">TC04</field>
+        <field name="name">Cassa nazionale previdenza e assistenza ingegneri e architetti liberi professionisti</field>
+    </record>
+    <record id="TipoCassa_TC05" model="">
+        <field name="code">TC05</field>
+        <field name="name">Cassa nazionale del notariato</field>
+    </record>
+    <record id="TipoCassa_TC06" model="">
+        <field name="code">TC06</field>
+        <field name="name">Cassa nazionale previdenza e assistenza ragionieri e periti commerciali</field>
+    </record>
+    <record id="TipoCassa_TC07" model="">
+        <field name="code">TC07</field>
+        <field name="name">Ente nazionale assistenza agenti e rappresentanti di commercio (ENASARCO)</field>
+    </record>
+    <record id="TipoCassa_TC08" model="">
+        <field name="code">TC08</field>
+        <field name="name">Ente nazionale previdenza e assistenza consulenti del lavoro (ENPACL)</field>
+    </record>
+    <record id="TipoCassa_TC09" model="">
+        <field name="code">TC09</field>
+        <field name="name">Ente nazionale previdenza e assistenza medici (ENPAM)</field>
+    </record>
+    <record id="TipoCassa_TC10" model="">
+        <field name="code">TC10</field>
+        <field name="name">Ente nazionale previdenza e assistenza farmacisti (ENPAF)</field>
+    </record>
+    <record id="TipoCassa_TC11" model="">
+        <field name="code">TC11</field>
+        <field name="name">Ente nazionale previdenza e assistenza veterinari (ENPAV)</field>
+    </record>
+    <record id="TipoCassa_TC12" model="">
+        <field name="code">TC12</field>
+        <field name="name">Ente nazionale previdenza e assistenza impiegati dell'agricoltura (ENPAIA)</field>
+    </record>
+    <record id="TipoCassa_TC13" model="">
+        <field name="code">TC13</field>
+        <field name="name">Fondo previdenza impiegati imprese di spedizione e agenzie marittime</field>
+    </record>
+    <record id="TipoCassa_TC14" model="">
+        <field name="code">TC14</field>
+        <field name="name">Istituto nazionale previdenza giornalisti italiani (INPGI)</field>
+    </record>
+    <record id="TipoCassa_TC15" model="">
+        <field name="code">TC15</field>
+        <field name="name">Opera nazionale assistenza orfani sanitari italiani (ONAOSI)</field>
+    </record>
+    <record id="TipoCassa_TC16" model="">
+        <field name="code">TC16</field>
+        <field name="name">Cassa autonoma assistenza integrativa giornalisti italiani (CASAGIT)</field>
+    </record>
+    <record id="TipoCassa_TC17" model="">
+        <field name="code">TC17</field>
+        <field name="name">Ente previdenza periti industriali e periti industriali laureati (EPPI)</field>
+    </record>
+    <record id="TipoCassa_TC18" model="">
+        <field name="code">TC18</field>
+        <field name="name">Ente previdenza e assistenza pluricategoriale (EPAP)</field>
+    </record>
+    <record id="TipoCassa_TC19" model="">
+        <field name="code">TC19</field>
+        <field name="name">Ente nazionale previdenza e assistenza biologi (ENPAB)</field>
+    </record>
+    <record id="TipoCassa_TC20" model="">
+        <field name="code">TC20</field>
+        <field name="name">Ente nazionale previdenza e assistenza professione infermieristica (ENPAPI)</field>
+    </record>
+    <record id="TipoCassa_TC21" model="">
+        <field name="code">TC21</field>
+        <field name="name">Ente nazionale previdenza e assistenza psicologi (ENPAP)</field>
+    </record>
+    <record id="TipoCassa_TC22" model="">
+        <field name="code">TC22</field>
+        <field name="name">INPS</field>
+    </record>
+</data>

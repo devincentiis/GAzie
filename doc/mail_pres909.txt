@@ -1,0 +1,6 @@
+Titolo: Do ut des.
+
+Presentazione:
+Come la precedente: versione di debug alla quale hanno contribuito A.Germani, M.Rimoldi e A.Romano ognuno per quello che potrete osservare navigando i commit sul repository.
+
+Antonio de Vincentiis, Montesilvano, 10 aprile 2024

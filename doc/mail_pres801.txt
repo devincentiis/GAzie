@@ -1,0 +1,7 @@
+Titolo:
+De omnibus dubitandum.
+
+Presentazione:
+Rilascio esclusivamente dovuto al fix di alcuni bug chiusi con i pochi commits che abbiamo fatto in questi pochi giorni trascorsi dal rilascio della 8.00.
+
+Antonio de Vincentiis, Montesilvano, 01 dicembre 2021

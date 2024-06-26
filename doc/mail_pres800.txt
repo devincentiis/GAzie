@@ -1,0 +1,25 @@
+Titolo:
+Veritas filia temporis.
+
+Presentazione:
+GAzie versione 8.00 è un buon proposito, come quelli contenuti nelle lettere di Natale che i Maestri ci preparavano da ripetere a memoria a casa, in piedi sulla sedia davanti a tutti per abituarci al palcoscenico della vita.
+Non solo propositi: la necessita di trovarsi pronti alle novità normative che il 2022 porterà con se; mi riferisco nello specifico al giusto abbandono dell'esterometro in favore dell'invio delle (auto)fatture per gli acquisti intraCEE(TD18), servizi extraCEE(TD17) e per le interne(TD16).
+Ho colto l'occasione per darvi la possibilità di raggruppare tutti gli XML delle fatture: sia del ciclo attivo che passivo in reverse charge. Se si opta per questa opportunità un unico invio al Sistema di Interscambio (o ad un intermediario) facilita senza dubbio l'operatività degli utenti.
+Sulla homepage troverete un nuovo widget cper aiutarvi a mantenere il controllo dello stato della fatturazione.
+
+Ringraziando i contributori vado a dettagliare gli apporti:
+- Implementata la gestione delle varietà e invio dato anche su file SIAN. (A.Germani)
+- Alcune correzione sull'inventario di magazzino a seguito di segnalazioni di A.Murabito. (A.De Vincentiis)
+- Corretto bug che sostituiva la data documento con quella dell'ordine nella registrazione del movimento di magazzino. (A.Germani)
+- Corretta errata stampa descrizione documenti "Fatture di acconto" (TD02) su PDF, segnalato su forum da A.Murabito. (A.De Vincentiis) 
+- Migliorata la descrizione delle disposizioni per la tenuta del registro SIAN. (A.Germani)
+- Inserita la possibilità di importare un inventario iniziale della situazione magazzino dell'e-commerce a GAzie. (A.Germani)
+- Corretto errato calcolo delle note credito su lista documenti. (A.Romano)
+- La stampa, o meglio la generazione del pdf di molti documenti, adesso viene inviata ad una finestra modale. (A.Germani)
+- La documentazione dei moduli viene data in finestra modale. (A.Germani)
+- Aggiunta la possibilità di inviare al SdI le autofatture (TD16,TD17,TD18), contabilizzando le fatture di acquisto il gestionale genererà dei documenti fittizi (tipdoc XFA o XNC) che a loro volta potranno generare l'XML specifico. (A.De Vincentiis)
+- Riscritta l'interfaccia utente per permettere l'impacchettamento delle fatture da inviare al SdI comprendendo anche quelle di acquisto estere e le autofatture generate come sopra descritto. (A.De Vincentiis)
+- Nel DDT viene stampato l'imballo e condizione di resa se manca il vettore. (A.Romano)
+- Sia sul ciclo attivo che passivo è possibile l'utilizzo di più magazzini, al momento manca la relativa reportistica specifica. (A.De Vincentiis)
+
+Antonio de Vincentiis, Montesilvano, 25 novembre 2021

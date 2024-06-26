@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="tipoTD01" model="">
+        <field name="code">TD01</field>
+        <field name="name">Fattura</field>
+    </record>
+    <record id="tipoTD02" model="">
+        <field name="code">TD02</field>
+        <field name="name">Acconto/anticipo su fattura</field>
+    </record>
+    <record id="tipoTD03" model="">
+        <field name="code">TD03</field>
+        <field name="name">Acconto/anticipo su parcella</field>
+    </record>
+    <record id="tipoTD04" model="">
+        <field name="code">TD04</field>
+        <field name="name">Nota di credito</field>
+    </record>
+    <record id="tipoTD05" model="">
+        <field name="code">TD05</field>
+        <field name="name">Nota di debito</field>
+    </record>
+    <record id="tipoTD06" model="">
+        <field name="code">TD06</field>
+        <field name="name">Parcella</field>
+    </record>
+    <record id="tipoTD07" model="">
+        <field name="code">TD07</field>
+        <field name="name">Fattura semplifica</field>
+    </record>
+    <record id="tipoTD08" model="">
+        <field name="code">TD08</field>
+        <field name="name">Nota di credito semplificata</field>
+    </record>
+    <record id="tipoTD09" model="">
+        <field name="code">TD09</field>
+        <field name="name">Nota di debito semplificata</field>
+    </record>
+    <record id="tipoTD10" model="">
+        <field name="code">TD10</field>
+        <field name="name">Fattura di acquisto intracomunitario beni</field>
+    </record>
+    <record id="tipoTD11" model="">
+        <field name="code">TD11</field>
+        <field name="name">Fattura di acquisto intracomunitario servizi</field>
+    </record>
+    <record id="tipoTD12" model="">
+        <field name="code">TD12</field>
+        <field name="name">Documento riepil. (art.6,DPR 695/1996)</field>
+    </record>
+    <record id="tipoTD16" model="">
+        <field name="code">TD16</field>
+        <field name="name">Integrazione fattura reverse charge interno</field>
+    </record>
+    <record id="tipoTD17" model="">
+        <field name="code">TD17</field>
+        <field name="name">Integrazione/Autofattura acquisto servizi da estero</field>
+    </record>
+    <record id="tipoTD18" model="">
+        <field name="code">TD18</field>
+        <field name="name">Integrazione acquisto di beni intracomunitario</field>
+    </record>
+    <record id="tipoTD19" model="">
+        <field name="code">TD19</field>
+        <field name="name">Integrazione/Autofattura acquisto beni ex art.17c.2</field>
+    </record>
+    <record id="tipoTD20" model="">
+        <field name="code">TD20</field>
+        <field name="name">Autofattura regolarizzaz/integraz fatt (a6c8 471/97 a.46c.5 331/93)</field>
+    </record>
+    <record id="tipoTD21" model="">
+        <field name="code">TD21</field>
+        <field name="name">Autofattura per splafonamento</field>
+    </record>
+    <record id="tipoTD22" model="">
+        <field name="code">TD22</field>
+        <field name="name">Estrazione beni da Deposito IVA</field>
+    </record>
+    <record id="tipoTD23" model="">
+        <field name="code">TD23</field>
+        <field name="name">Estrazione beni da Deposito IVA con versamento IVA</field>
+    </record>
+    <record id="tipoTD24" model="">
+        <field name="code">TD24</field>
+        <field name="name">Fattura differita di cui a a.21 c.4 l.a</field>
+    </record>
+    <record id="tipoTD25" model="">
+        <field name="code">TD25</field>
+        <field name="name">Fattura differita art.21 c.4  terzoperiodo l.b</field>
+    </record>
+    <record id="tipoTD26" model="">
+        <field name="code">TD26</field>
+        <field name="name">Cessione beni ammortizzabili e passaggi interni (ex art.36)</field>
+    </record>
+    <record id="tipoTD27" model="">
+        <field name="code">TD27</field>
+        <field name="name">Fattura autoconsumo o per cessioni gratuite senza rivalsa</field>
+    </record>
+</data>

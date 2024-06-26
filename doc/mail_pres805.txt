@@ -1,0 +1,7 @@
+Titolo:
+Sapere aude.
+
+Presentazione:
+Se in GAzie avessi potuto avvalermi dei più moderni pattern architetturali avrei certamente impiegato meno tempo e sarei stato facilitato, nonostante tutto ho rivisitato molte interfacce utente con lo scopo di uniformarle stilisticamente. Venivamo da vent'anni di sviluppo tutto rivolto all'aggiunta delle funzioni senza preoccuparsi troppo della grafica, in questa settimana ho voluto modernizzare ed uniformare tra loro le viste delle finestre, dei report, dei form. Inoltre ho aggiunto l'aspetto dello stile "black" forse più apprezzato dei coder. Spero di suscitare piacere visivo e rendere il lavoro leggermente meno faticoso. Colgo l'occasione per ricordare che il gestionale consente ad ogni utente di scegliersi il tema che più ritiene gradevole attraverso 3 parametri selezionabili dal proprio profilo: il "Tipo di menù" tra g7 e lte, la "Struttura dello stile" tra default e abc, e "Aspetto dello stile" tra default, black e abc. La combinazione per l'utente amministratore al momento dell'installazione è lte-default-default. Ho anche provveduto a togliere dal menù alcuni script vecchi e non più usati, altri con link sbagliati.
+
+Antonio de Vincentiis, Montesilvano, 26 luglio 2022

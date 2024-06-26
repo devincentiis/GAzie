@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<gazie>
+	<artico>
+		<codice>GAZIE</codice>
+		<descri>Software per la gestione aziendale</descri>
+		<unimis>pz</unimis>
+		<catmer>1</catmer>
+		<prezzoweb>15.880</prezzoweb>
+		<taxrate>20.0</taxrate>
+		<url></url>
+		<annota>http://gazie.sourceforge.net</annota>
+	</artico>
+	<catmer>
+		<codice>1</codice>
+		<descri>CATEGORIA PRINCIPALE</descri>
+		<annota>TEST</annota>
+	</catmer>
+</gazie>

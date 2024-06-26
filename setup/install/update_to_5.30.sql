@@ -1,0 +1,8 @@
+UPDATE `gaz_config` SET `cvalue` = '86' WHERE `id` =2;
+ALTER TABLE `gaz_aziend` ADD `virtual_stamp_auth_prot` VARCHAR( 14 ) NOT NULL AFTER `round_bol` ,
+ADD `virtual_stamp_auth_date` DATE NOT NULL AFTER `virtual_stamp_auth_prot`, ADD `causale_pagam_770` VARCHAR( 1 ) NOT NULL AFTER `virtual_stamp_auth_date`;
+INSERT INTO `gaz_menu_script` (`id_menu` ,`link` ,`icon` ,`class` ,`translate_key` ,`accesskey` ,`weight`) VALUES (2, 'report_fae_sdi.php', '', '', 30, '', 8 );
+-- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
+CREATE TABLE IF NOT EXISTS `gaz_XXXfae_flux` (  `id` INT NOT NULL AUTO_INCREMENT,  `filename_ori` VARCHAR(30) NOT NULL,  `id_tes_ref` INT NOT NULL,  `exec_date` datetime NOT NULL,  `received_date` datetime NOT NULL,  `delivery_date` datetime NOT NULL,  `filename_son` VARCHAR(30) NOT NULL,  `id_SDI` INT NOT NULL,  `filename_ret` VARCHAR(30) NOT NULL,  `mail_id` VARCHAR(50) NOT NULL,  `data` blob NOT NULL,  `flux_status` VARCHAR(10) NOT NULL,  `flux_completed` INT NOT NULL, `progr_ret` VARCHAR( 4 ) NOT NULL, `flux_descri` VARCHAR(255) NOT NULL DEFAULT '',  PRIMARY KEY (`id`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+INSERT INTO `gaz_XXXcompany_config` (`id`, `description`, `var`, `val`) VALUES (15, 'Casella di posta', 'cemail', ''), (16, 'Password', 'cpassword', ''),(17, 'Filtro casella di posta', 'cfiltro', ''), (18, 'Configurazione pop imap', 'cpopimap', ''), (19, 'Ultima mail fatture elettroniche', 'last_fae_email', '');
+-- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query seguenti su tutte le aziende dell'installazione)

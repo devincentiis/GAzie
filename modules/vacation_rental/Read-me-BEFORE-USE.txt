@@ -1,0 +1,21 @@
+﻿  -----------------------------------------------------------------------
+ VacationRental per  GAzie
+  -----------------------------------------------------------------------
+
+
+          contattare l'autore
+  -----------------------------------------------------------------------
+  @Author    Antonio Germani
+  @Website   https://www.programmisitiweb.lacasettabio.it
+  @Contact   340-5011912
+  @Copyright Copyright (C) 2022 - 2023 Antonio Germani All Rights Reserved.
+
+  ------------------------------------------------------------------------
+
+NOTE per l'uso
+
+- Impostare manualemente le variabili nel file ...vacation_rental/manual_settings.php
+
+- Il file config/gconfig.myconf.php DEVE esistere
+
+

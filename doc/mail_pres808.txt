@@ -1,0 +1,7 @@
+Titolo:
+Pro bono.
+
+Presentazione:
+La novità principale è la modifica apportata per generare correttamente le fatture di reverse charge per gli acquisti di beni dall'esterno con tipo documento TD19, chi ha seguito lo sviluppo del codice avrà avuto modo di osservare il lavoro in itere, questa release si propone di rendere operativa la nuova logica anche per coloro che installano il gestionale nuovo intonso. Chi ha già il database in produzione consiglio di aggiungere le aliquote IVA che riportano in descrizione "TD18" e "TD19" al fine di allineare i propri archivi ed poter generare correttamente i documenti XML delle operazioni commerciali che richiedono il reverse charge nella fattispecie.
+
+Antonio de Vincentiis, Montesilvano, 12 agosto 2022

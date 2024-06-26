@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="fatturaordinaria_v1.2.1.xsl"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+ <FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese/>
+				<IdCodice/>
+			</IdTrasmittente>
+			<ProgressivoInvio/>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario/>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese/>
+					<IdCodice/>
+				</IdFiscaleIVA>
+				<CodiceFiscale/>
+				<Anagrafica>
+					<Denominazione/>
+				</Anagrafica>
+				<RegimeFiscale/>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo/>
+				<CAP/>
+				<Comune/>
+				<Provincia/>
+				<Nazione/>
+			</Sede>
+		</CedentePrestatore>
+		<CessionarioCommittente>
+			<DatiAnagrafici>
+				<Anagrafica>
+					
+				</Anagrafica>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo/>
+				<CAP/>
+				<Comune/>
+				<Nazione/>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento/>
+				<Divisa/>
+				<Data/>
+				<Numero/>
+			</DatiGeneraliDocumento>
+		</DatiGenerali>
+		<DatiBeniServizi>
+		</DatiBeniServizi>
+	</FatturaElettronicaBody>
+</p:FatturaElettronica>

@@ -1,0 +1,11 @@
+UPDATE `gaz_config` SET `cvalue` = '05' WHERE `id` =2;
+ALTER TABLE `gaz_caucon` CHANGE `insiva` `regiva` INT NOT NULL;
+ALTER TABLE `gaz_caucon` ADD `operat` INT NOT NULL AFTER `regiva`;
+ALTER TABLE `gaz_tesmov` ADD `operat` INT NOT NULL AFTER `regiva` ;
+ALTER TABLE `gaz_rigmoi` DROP `regist` ;
+UPDATE `gaz_rigmoi` SET `tipiva` = 'I' WHERE `tipiva` = '';
+UPDATE `gaz_tesmov` SET `regiva` = '2' , `operat` = '1' WHERE `caucon` = 'FAI' OR `caucon` = 'FAD' OR `caucon` = 'FND';
+UPDATE `gaz_tesmov` SET `regiva` = '2' , `operat` = '2' WHERE `caucon` = 'FNC';
+UPDATE `gaz_tesmov` SET `regiva` = '4' , `operat` = '1' WHERE `caucon` = 'VCO';
+UPDATE `gaz_tesmov` SET `regiva` = '6' , `operat` = '1' WHERE `caucon` = 'AFA' OR `caucon` = 'AFD';
+UPDATE `gaz_tesmov` SET `regiva` = '6' , `operat` = '2' WHERE `caucon` = 'AFC';

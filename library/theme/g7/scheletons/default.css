@@ -1,0 +1,813 @@
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            STRUTTURA E FONTS
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+body {
+  font-family : Arial, Tahoma, Verdana, Helvetica;
+  background-attachment : fixed;
+  font-size: 14px;
+	padding-bottom: 70px;
+}
+mark {
+  padding: 0em;
+}
+input, select {
+    border-radius: 4px;
+}
+input[type=number] {
+    text-align:center;
+}
+.img-circle.dit-picture,.text-center>a>.img-circle{
+	border-radius: 10px;
+}
+.usr-picture {
+  margin: 10px;
+  height: 150px;
+	max-width: 100%;
+  box-shadow: 0 0 5px 5px;
+  border-radius: 50%;
+}
+#loader-icon {
+    position:fixed;
+    left: 50%;
+    bottom: 1%;
+    display: none;
+}
+.gaz-nav {
+  min-width: 3000px;
+}
+table {
+  border-spacing: 1px;
+}
+table.Tlarge {
+    border : solid 1px;
+}
+.table {
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+.FacetFormTABLE,table.Tmiddle,table.Tsmall {
+	border: 1px solid #87b8d0;
+	border-radius: 4px;
+	border-collapse: unset;
+  margin-left: auto;
+  margin-right: auto;
+}
+table.Tmiddle tr>td, table.Tsmall tr>td {
+	padding : 5px;
+}
+@media only screen and (min-width: 990px) {
+	table.Tmiddle {
+		max-width : 70%;
+	}
+	table.Tsmall {
+		max-width : 50%;
+	}
+}
+table.selectTable tr.even {
+}
+
+table.selectTable tr.odd {
+}
+
+table.selectTable td {
+    height: 10px;
+    border-bottom: 1px solid;
+    font-size: 90%;
+}
+
+.selectContainer {
+    width: 300px;
+    position: absolute;
+    border: 1px solid;
+}
+.selectHeader {
+    background-repeat: repeat-x;
+    background-position: top center;
+    font-weight: bold;
+    font-size: 90%;
+    margin: 0;
+    padding: 1px 1px 1px 1px;
+}
+.topmenu {
+    position : relative;
+    top : -4px;
+    font-weight: bold;
+}
+
+.bottomMenu {
+    position : relative;
+    top : -4px;
+}
+.FacetFormHeaderFont {
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 30px;
+}
+.FacetFormHeaderRed {
+    font-weight : bold;
+}
+.FacetFieldCaptionTD {
+    padding: 0px 3px 0px 5px;
+}
+.FacetDataTRstart td {
+    border-top: 2px solid;
+}
+.FacetDataTRend td {
+    border-bottom: 5px solid;
+}
+.FacetDataTD {
+    margin: 2px 2px;
+    padding: 2px 5px 2px 5px;
+}
+.FacetDataTDsmall {
+	font-size : 90%;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+.FacetDataTDsmall a {
+  	font-size : 90%;
+}
+.FacetAltDataTD {
+  font-size : 110px;
+}
+.FacetSeparatorTD {
+    font-size : 85%;
+}
+.FacetMainMenu {
+    color : yellow;
+    background-color: blue;
+}
+.FacetButton {
+    border-left : 1px solid #000000;
+    border-right : 1px solid #000000;
+    border-top : 1px solid #000000;
+    border-bottom : 1px solid #000000;
+}
+.FacetInput {
+    border-bottom : 1px solid #000000;
+    border-left : 1px solid #000000;
+    border-right : 1px solid #000000;
+    border-top : 1px solid #000000;
+}
+.FacetTextarea {
+    border-bottom : 1px solid #000000;
+    border-left : 1px solid #000000;
+    border-right : 1px solid #000000;
+    border-top : 1px solid #000000;
+}
+.error {
+    color : red;
+    font-weight: bold;
+    font-size : larger;
+}
+.error_box {
+    margin: 40px;
+    padding: 20px;
+    border: 1px solid #000000;
+    text-align: center;
+}
+#admin_main {
+    margin-top: 20px;
+}
+#admin_welcome {
+    padding: 30px 40px;
+    position: relative;
+    font-size: 90%;
+}
+#admin_p_logout {
+    margin-top: 20px;
+}
+
+.navbar {
+    border-top: 0px;
+    border-bottom: 1px solid #000000;
+    border-left: 1px solid #000000;
+    border-right: 1px solid #000000;
+    border-radius: 0px;
+    font-size : 100%;
+    min-height: 40px;
+    margin-bottom: 20px;
+}
+div.help {
+    margin: 15px 20px;
+    text-align: justify;
+}
+.nav-first {
+    margin-bottom: 0px;
+    padding-top: auto;
+    padding-bottom: auto;
+}
+.nav-mb {
+    margin-bottom: 5px;
+}
+.nav-tabs {
+    border-bottom: 0px;
+}
+div.FacetFormHeaderFont {
+    font-size: 90%;
+    margin-top: 10px;
+    margin-bottom: 1px;
+}
+.vcenter {
+    padding-top:7px;
+    padding-right:8px;
+}
+input.input-xs {
+    height: 24px;
+    padding: 2px 2px;
+    font-size: 100%;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.opzione {
+    margin-top: 10px;
+    margin-left: -8px;
+}
+.progress {
+    margin: 5px 5px 7px 5px;
+}
+
+.contenuto-help {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+}
+.nav-tabs {
+    margin-bottom: 0px;
+}
+.help-text {
+    font-size: 100%;
+}
+.help-text a {
+    text-transform: uppercase;
+}
+/*    --------------------------------------------------
+        :: Login Section
+        -------------------------------------------------- */
+
+.panel-title {
+    vertical-align: middle;
+}
+.btn-100 {
+    width: 100px;
+}
+#formlogin {
+    padding-top: 50px
+}
+#formlogin .form-wrap {
+    margin: 0 auto;
+    float: right;
+}
+.form-logo {
+    float: left;
+}
+.form-main {
+    margin: 10px 30%;
+    background-color: #77b075;
+    border: 1px solid #000;
+}
+#formlogin h1 {
+    color: #1fa67b;
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+    padding-bottom: 20px;
+}
+#formlogin .form-group {
+    margin-bottom: 25px;
+}
+#formlogin .checkbox {
+    margin-bottom: 20px;
+    position: relative;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+#formlogin .checkbox.show:before {
+    content: '\e013';
+    color: #1fa67b;
+    font-size: 17px;
+    margin: 1px 0 0 3px;
+    position: absolute;
+    pointer-events: none;
+    font-family: 'Glyphicons Halflings';
+}
+#formlogin .checkbox .character-checkbox {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    vertical-align: middle;
+    display: inline-block;
+}
+#formlogin .checkbox .label {
+    color: #6d6d6d;
+    font-size: 100%;
+    font-weight: normal;
+}
+#formlogin .btn.btn-custom {
+    font-size: 100%;
+    margin-bottom: 20px;
+}
+#formlogin .forget {
+    font-size: 100%;
+    text-align: center;
+    display: block;
+}
+/*    --------------------------------------------------
+        :: Inputs & Buttons
+        -------------------------------------------------- */
+.btn-articolo {
+    padding: 3px 2px 5px 2px;
+}
+
+/* loading - the AJAX indicator */
+.ui-autocomplete-loading {
+    background: white url('../images/ui-anim_basic_16x16.gif') right center no-repeat;
+}
+/* scroll results */
+.ui-autocomplete {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+/* IE 6 doesn't support max-height
+* we use height instead, but this forces the menu to always be this tall
+*/
+* html .ui-autocomplete {
+    height: 250px;
+}
+/* Fine */
+/** ENRICO FEDELE */
+
+/** ENRICO FEDELE */
+.container {
+    width: 100%;
+}
+/* stile per il pulsante di tipo file */
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+/* fine stile per il pulsante di tipo file */
+.navbar-brand > img {
+    display: inline;
+}
+
+.navbar-brand {
+    font-size: 100%;
+    height: 40px;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: #66afe9;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(26, 77, 25, 0.6);
+    outline: 0 none;
+}
+/* highlight results */
+.ui-autocomplete span.hl_results {
+    background-color: #ffff66;
+}
+
+/** ENRICO FEDELE */
+
+.navbar-toggle {
+    position: relative;
+    padding-right: 9px;
+}
+.navbar-right{margin-right: 0;}
+
+
+.dash-tabs > li.active > a,
+.dash-tabs > li.active > a:hover,
+.dash-tabs > li.active > a:focus {
+    cursor: default;
+    border: 0;
+}
+
+span.rounded{
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    display: inline-block;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    text-align: center;
+    font-size: 25px;
+    border: 2px solid;
+}
+
+div.danger span.rounded{
+}
+
+div.danger li.active span.rounded{
+    border: none;
+}
+
+.dash-tabs > li.active > a span.rounded{
+
+}
+.dash-tabs > li {
+    width: 50%;
+    border: 1px solid;
+}
+.dash-tabs > li a{
+    width: 50px;
+    height: 50px;
+    margin: 20px auto;
+    border-radius: 50%;
+    padding: 0;
+}
+
+.noborder {
+    border: 0px solid #fff;
+}
+.tr_piacon  {
+    border-spacing: 0px;
+    border: none;
+}
+.div_config {
+    border-collapse: separate;
+    border-spacing: 2px;
+    border: 1px solid #000;
+}
+.div-table{
+    display:table;
+    background-color:#eee;
+    border:1px solid  #666666;
+    border-spacing:5px;
+}
+.div-table-row{
+    display:table-row;
+    width:auto;
+    clear:both;
+}
+.div-table-col{
+    float:left;
+    display:table-column;
+    padding: 10px 10px 10px 10px;
+}
+.row {
+    padding: 2px 3px 2px 3px;
+    margin-right: 0px;
+    margin-left: 0px;}
+.licheck {
+    list-style-type: none;
+}
+ul.licheck li {
+    padding-bottom: 4px;
+}
+.divlarge {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.divborder {
+    border: solid 1px;
+}
+.divgroup {
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+.form-group {
+    padding-right: 1%;
+    padding-left: 0%;
+}
+label {
+    font-weight: 200;
+}
+
+/**************************************
+**** BOOTSTRAP & SMARTMENU ************
+***************************************/
+
+.navbar {
+    margin-bottom: 1px;
+    min-height:20px;
+}
+.navbar-header {
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    font-size: 95%;
+}
+.navbar-collapse {
+    margin-right: 0px;
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+.btn-toolbar {
+    padding-left: 65%;
+}
+.navbar-nav {
+    margin: 0px 0px;
+    padding-left: 10px;
+}
+.dropdown-menu > li > a {
+    font-size: 90%;
+}
+
+.navbar-nav > li > a {
+    padding: 5px 0px 2px 5px;
+    line-height: 2;
+    height: 36px;
+}
+
+.navbar-default .navbar-nav > li > a:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.nav-mb {
+    min-height: 0px;
+}
+
+.form-horizontal .form-group .form-control,
+.form-horizontal .form-group div select,
+.form-horizontal .form-group select {
+    margin: 2px 0px 0px 0px;
+    padding: 2px 2px 2px 2px;
+}
+
+.form-horizontal .form-group .text-left,
+.form-horizontal .form-group label {
+  margin: 3px 0px 0px 0px;
+  padding: 2px 2px 2px 2px;
+  font-size: 80%;
+}
+
+.form-control {
+    height: 24px;
+}
+
+.form-group {
+	margin-top: 8px;
+  margin-bottom: 8px;
+}
+.container-fluid > .navbar-header {
+    margin-right: -10px;
+    margin-left: 0px;
+    height: 36px;
+}
+
+.form-horizontal .form-group {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+.container-fluid {
+    padding-right: 1px;
+    padding-left: 1px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.form-horizontal .form-group > div {
+    padding-right: 1px;
+    padding-left: 1px;
+}
+
+.btn {
+    padding: 3px 2px 3px 2px;
+    white-space: normal;
+}
+
+.navbar-toggle {
+    float: left;
+    margin-top: 0px;
+    margin-right: 3px;
+    margin-bottom: 0px;
+    background-color: #eee;
+}
+
+.navbar-toggle > img {
+    margin-top: 0px;
+
+}
+
+.navbar-nav.sm-collapsible .caret, .navbar-nav.sm-collapsible ul .caret {
+    position: relative;
+    float: right;
+    margin: 2px 2px 0 0;
+}
+
+.navbar-nav.sm-collapsible{
+    background-color: #fff;
+    max-width: 300px
+}
+
+.navbar-fixed-top .navbar-collapse {
+    max-height: 100%;
+}
+
+.nav > li > a {
+    padding: 2px 6px;
+}
+
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th {
+  padding-top: 5px;
+}
+
+.table,
+.zero-padding {
+    padding: 0px;
+    margin: 0px;
+}
+
+.table-condensed > tbody > tr > td,
+.table-condensed > thead > tr > th {
+    padding: 2px;
+}
+
+.gaz-home-scadenze {
+    min-height: 260px;
+}
+#fornitori span {
+    display:none;
+}
+#clienti span {
+    display:none;
+}
+
+@media only screen and (max-width: 991px) {
+    /* Force table to not be like tables anymore */
+    #gaz-responsive-table table,
+    #gaz-responsive-table thead,
+    #gaz-responsive-table tbody,
+    #gaz-responsive-table th,
+    #gaz-responsive-table td,
+    #gaz-responsive-table tr {
+        display: block;
+    }
+    #gaz-responsive-table table{
+        padding: 2px;
+    }
+    /* Hide table headers (but not display: none;, for accessibility) */
+    #gaz-responsive-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    #gaz-responsive-table tr { border: 1px solid #ccc; }
+
+    #gaz-responsive-table td {
+        /* Behave like a "row" */
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        white-space: normal;
+        text-align:left;
+    }
+
+    #gaz-responsive-table td:before {
+        /* Now like a table header */
+        position: absolute;
+        /* Top/left values mimic padding */
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align:left;
+        font-weight: bold;
+        font-size: small;
+    }
+
+    #gaz-responsive-table td:before { content: attr(data-title); }
+
+    .gaz-table-form .form-group {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}
+#gaz-responsive-table table{
+    padding: 2px;
+}
+
+.gaz-table-form {
+    max-width: 990px;
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ui-sortable-handle{
+	padding: 2px;
+}
+
+/**************************************
+************** JQUERY UI **************
+***************************************/
+
+.ui-widget {
+    font-size: 12px;
+}
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+  border: 0px;
+  border-radius: 4px;
+  font-weight: normal;
+}
+.ui-selectmenu-button span.ui-selectmenu-text {
+    padding: 3px 3px 3px 3px;
+    line-height: 1;
+}
+
+[id^=position-] .panel {
+    min-height: 250px;
+}
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
+.tooltip-inner {
+    min-width: 150px;
+    max-width: 100%;
+}
+.tab-content > .tab-pane > div.row:nth-of-type(2n+1) {
+	background-color: #f9f9f9;
+}
+form table.GazFormDeleteTable {
+  margin: auto;
+  width: 400px;
+}
+.animated {
+  -webkit-animation-duration: 2s;
+  animation-duration: 2s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-100px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+  }
+}
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fadeInDown {
+  -webkit-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+}
+#loginbox div.panel.panel-info {
+  box-shadow: 0 30px 60px 0 rgba(0,0,0,.3);
+}
+.dropdown-menu > li > a {
+	padding: 3px 6px;
+}
+.dataTables_wrapper div.row div.col-sm-12, .dataTables_wrapper div.row {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+div#fattura-container {
+	background-color: #fffff9;
+	padding-top: 20px;
+  color: #000;
+}
+.ui-button {
+  padding: 1px;
+}
+.line-through {
+  text-decoration: line-through;
+}

@@ -1,0 +1,7 @@
+Titolo:
+Nove sed non nova.
+
+Presentazione:
+Rilascio esclusivamente dovuto al fix di diversi piccoli errori ed alcuni miglioramenti non essenziali.
+
+Antonio de Vincentiis, Montesilvano, 03 dicembre 2022

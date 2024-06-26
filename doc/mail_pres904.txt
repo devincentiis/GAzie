@@ -1,0 +1,17 @@
+Titolo: Primus inter pares.
+
+Presentazione:
+Già sulle presentazioni precedenti ho citato $_SESSION['aes_key'] parlando della sua disponibilità e potenzialità, repetita iuvant, stavolta cominciamo ad usarla sulle password degli account per la spedizione delle email (SMTP).
+Alla luce di ciò se aggiornate a questa versione è indispensabile reinserire le password del vostro server smtp andando in configurazione avanzata azienda altrimenti non riuscirete più ad inviare i documenti direttamente da GAzie .
+Gli sviluppatori possono prendere visione di come vengono criptate/decriptate sui relativi campi del database. Per facilitarne l'apprendimento, e chiarire meglio il meccanismo quando si attiva il debug da gconfig.myconf.php sul footer (in calce a qualsiasi pagina) viene visualizzato il valore di $_SESSION['aes_key'] ed un bottone il cui link riporta alla utility per la generazione degli hashes delle password degli utenti, anch'esso verboso ed eloquente.
+Avere le password SMTP e qualsiasi altro dato criptato con questo sistema rendono i contenuti protetti da occhi indiscreti. Ne consegue che, banalmente, un backup di database non solo non li riporterà in chiaro ma la decriptazione sarà possibile solo agli utenti che conoscono la loro password.
+Un consiglio spassionato che mi sento di dare a chi crea dei moduli personalizzati contenenti dati sensibili: per non incorrere in un data loss non si deve MAI verificare che l'unico utente o addirittura tutti perdano/dimentichino le password; questo scenario comporta la PERDITA IRREVERSIBILE dei dati sensibili protetti da $_SESSION['aes_key'] che viene generata on-the-fly solo dopo il login e pertanto volatile. Il danno sarà irrimediabile a meno di averla preventivamente generata e/o visualizzata attivando il debug e conservata a parte in luogo sicuro.
+Allo scopo di migliorare ulteriormente la sicurezza senza essere troppo esigenti verso gli utenti è stata introdotta una logica a 2 livelli per il cambio della password di accesso a GAzie; rimane tollerante per 30 giorni oltre il 90° (preconfigurato), ovvero l'accesso viene consentito anche dopo i 90 gg dall'ultimo cambio ma serete tormentati ed ogni volta spediti sulla pagina di richiesta di modifica. Superati ulteriori 30 gg di segnalazioni diventa obbligatorio agire.
+Collaborazioni:
+Andrea Biasi ha migliorato lo skin del suo tema "abc" per LTE ed ha aggiunto una descrizione libera sui preventivi a clienti riportata anche sul listato.
+Antonio  Germani un widget per la home page per il suo modulo "vacation_rental", e molte altre modifiche per eliminare i warning generati da PHP 8.1.
+Angelo Romano ha corretto l'errore nel calcolo della partita aperta in presenza di reverse charge nella fattura di acquisto.
+
+Il solito changelog visibile su questo portale in Code -> Browse commits da [r6139] a [r6271].
+
+Antonio de Vincentiis, Montesilvano, 28 febbraio 2023

@@ -1,0 +1,12 @@
+Titolo: Si cecidit de genu pugnat.
+
+Presentazione:
+Un rilascio a breve distanza dal precedente con lo scopo di facilitare l'amministratore con livello di abilitazione = 9 nel cambio delle password degli altri utenti e nella rigenerazione/allineamento del valore della (oramai famosa) chiave di encrypt/decrypt contenuta nella $_SESSION['aes_key'].
+Quindi da questo momento un utente con i massimi diritti  amministrativi (Abilit=9) è consentito reimpostare le password a tutti gli altri utenti e nel farlo viene ricreato contemporaneamente anche il contenuto della campo aes_key nella tabella gaz_admin assicurando anche ad essi la possibilità di invare email senza incorrere in errori. Vi ricordo che attivando il debug dal file config/config/gconfig.myconf.php potrete visualizzare se aes_key è presente (stringa di lunghezza 16 caratteri) ed eventualmente crearla seguendo le istruzioni della procedura raggiungibile tramite il bottone azzurro "HASHES UTILITY".
+Antonio Germani ha implementato la visualizzazione dei widget sulla homepage personalizzabile a livello sia utente che azienda attiva, inoltre ha creato un nuovo widget per il modulo Vacation rental.
+Sul modulo magazzino è stato migliorato il report delle merci e servizi.
+
+
+Changelog in Code -> Browse commits da [r6275] a [r6305]
+
+Antonio de Vincentiis, Montesilvano, 04 marzo 2023

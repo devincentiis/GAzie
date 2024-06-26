@@ -1,0 +1,1 @@
+UPDATE `gaz_config` SET `cvalue` = '75' WHERE `id` =2;

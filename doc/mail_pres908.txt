@@ -1,0 +1,7 @@
+Titolo: Plus quam viginti annos. Idus Martii.
+
+Presentazione:
+Nonostante vedrete l'update del database non ci sono grandi novità in questa versione, ha il solo scopo di migliorare la precedente con diversi e piccoli miglioramenti grafici, ottimizzazioni e fix di errori che si verificavano in poche e marginali circostanze.
+Oltre a me hanno contribuito: A.Germani, A.Romano e M.Rimoldi, ognuno per quello che potrete osservare navigando i commit sul repository.
+
+Antonio de Vincentiis, Montesilvano, 14 marzo 2024
