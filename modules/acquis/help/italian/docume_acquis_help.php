@@ -26,10 +26,10 @@ si tratta di documenti recepiti da fornitori.</p>
 
 		<p class="help-text">Esempi: <br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=4w8LwPE-JgI">richiesta di preventivo a
+		href="https://www.youtube.com/watch?v=4w8LwPE-JgI">richiesta di preventivo a
 		fornitore</a><br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=IaR4cp_ILbg">ordine a fornitore</a><br></p>
+		href="https://www.youtube.com/watch?v=IaR4cp_ILbg">ordine a fornitore</a><br></p>
 	</div>
 
 	<div id="Ddt" class="tab-pane fade in">
@@ -51,7 +51,7 @@ si tratta di documenti recepiti da fornitori.</p>
 
 		<p class="help-text">Esempio: <br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=8NrlW_EaTrs">emissione di un
+		href="https://www.youtube.com/watch?v=8NrlW_EaTrs">emissione di un
 		DDT di reso a fornitore</a></p>
 	</div>
 

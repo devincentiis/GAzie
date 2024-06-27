@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -55,8 +55,8 @@ function createArrayCrediti($result, $pagame, $utsval) {
    global $gTables;
 
    $epsilon = 0.000001;    // Massima differenza tra 2 float
-   // http://www.php.net/manual/en/language.types.float.php
-   // http://stackoverflow.com/questions/3148937/compare-floats-in-php
+   // https://www.php.net/manual/en/language.types.float.php
+   // https://stackoverflow.com/questions/3148937/compare-floats-in-php
 
    $parzi = 0.00;
    $progr = 0.00;

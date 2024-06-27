@@ -618,7 +618,7 @@ function tln_fixurl($attname, &$attvalue, $trans_image_path, $block_external_ima
         if (preg_match('/[\0-\37\200-\377]+/',$attvalue)) {
             switch ($attname) {
                 case 'href':
-                    $attvalue = $sQuote . 'http://invalid-stuff-detected.example.com' . $sQuote;
+                    $attvalue = $sQuote . 'https://invalid-stuff-detected.example.com' . $sQuote;
                     break;
                 default:
                     $attvalue = $sQuote . $trans_image_path . $sQuote;

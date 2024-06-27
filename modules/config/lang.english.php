@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -83,7 +83,7 @@ $strScript = array("admin_aziend.php" =>
         'REA_stato_value' => array('LN' => 'non in liquidazione', 'LS' => 'in liquidazione'),
         'pec' => 'Posta Elettronica Certificata',
         'e_mail' => 'e mail',
-        'web_url' => 'Web url<br />(ex: http://companyname.com)',
+        'web_url' => 'Web url<br />(ex: https://companyname.com)',
         'gazSynchro' => 'Moduli sincronizzazioni ecommerce e/o devices',
         'cod_ateco' => 'Activity code (ATECOFIN)',
         'regime' => 'Accounting regime',

@@ -1,8 +1,8 @@
 <?php
 /*
  --------------------------------------------------------------------------
-    Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-         (http://www.devincentiis.it)
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+         (https://www.devincentiis.it)
  --------------------------------------------------------------------------
 */
 require("../../library/include/datlib.inc.php");

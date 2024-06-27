@@ -34,14 +34,14 @@ sopra.</p>
 
 		<p class="help-text">Esempi: <br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=_ursC5We6nY">registrazione con
+		href="https://www.youtube.com/watch?v=_ursC5We6nY">registrazione con
 		causale libera</a><br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=XYdFTPwQZFE">registrazione di
+		href="https://www.youtube.com/watch?v=XYdFTPwQZFE">registrazione di
 		un acquisto con una causale gi&agrave; predisposta</a><br>
 		- <a
 		title="guarda il video"
-		href="http://www.youtube.com/watch?v=FKNz1l0gWLw">registrazione di
+		href="https://www.youtube.com/watch?v=FKNz1l0gWLw">registrazione di
 		un acquisto con una causale predisposta, ma da modificare</a>
 		</p>
 	</div>
@@ -53,7 +53,7 @@ sopra.</p>
 
 		<p class="help-text">Esempio: <br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=IXyrXjLTO_Q">stampa del
+		href="https://www.youtube.com/watch?v=IXyrXjLTO_Q">stampa del
 		partitario di un cliente</a>.</p>
 	</div>
 
@@ -73,9 +73,9 @@ sopra.</p>
 		«registri delle fatture».</p>
 	
 		<p class="help-text">Esempi: <br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=lNHfnjJx-tk">stampa del
+		href="https://www.youtube.com/watch?v=lNHfnjJx-tk">stampa del
 		registro IVA degli acquisti in prova</a><br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=Cxn2zZ3jlG8">stampa del
+		href="https://www.youtube.com/watch?v=Cxn2zZ3jlG8">stampa del
 		registro IVA delle vendite in prova</a></p>
 	</div>
 
@@ -88,7 +88,7 @@ sopra.</p>
 		contabilit&agrave; generale.</p>
 
 		<p class="help-text">Esempio: <br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=4q3PdZiBAbg">stampa del
+		href="https://www.youtube.com/watch?v=4q3PdZiBAbg">stampa del
 		giornale di contabilit&agrave; generale in prova</a></p>
 	</div>
 </div>

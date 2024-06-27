@@ -62,8 +62,8 @@
  * @package   Net_SSH2
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**#@+
@@ -322,7 +322,7 @@ class Net_SSH2
      *  of the cipher block size or 8, whichever is larger.  This constraint
      *  MUST be enforced, even when using stream ciphers."
      *
-     *  -- http://tools.ietf.org/html/rfc4253#section-6
+     *  -- https://tools.ietf.org/html/rfc4253#section-6
      *
      * @see self::Net_SSH2()
      * @see self::_send_binary_packet()
@@ -406,7 +406,7 @@ class Net_SSH2
      *  used as the session identifier, which is a unique identifier for
      *  this connection."
      *
-     *  -- http://tools.ietf.org/html/rfc4253#section-7.2
+     *  -- https://tools.ietf.org/html/rfc4253#section-7.2
      *
      * @see self::_key_exchange()
      * @var string
@@ -455,7 +455,7 @@ class Net_SSH2
     /**
      * Terminal Modes
      *
-     * @link http://tools.ietf.org/html/rfc4254#section-8
+     * @link https://tools.ietf.org/html/rfc4254#section-8
      * @see self::Net_SSH2()
      * @var array
      * @access private
@@ -465,7 +465,7 @@ class Net_SSH2
     /**
      * SSH_MSG_CHANNEL_EXTENDED_DATA's data_type_codes
      *
-     * @link http://tools.ietf.org/html/rfc4254#section-5.2
+     * @link https://tools.ietf.org/html/rfc4254#section-5.2
      * @see self::Net_SSH2()
      * @var array
      * @access private
@@ -1025,7 +1025,7 @@ class Net_SSH2
         $this->last_packet = strtok(microtime(), ' ') + strtok(''); // == microtime(true) in PHP5
 
         if (!is_resource($this->fsock)) {
-            $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+            $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
             $this->fsock = @fsockopen($this->host, $this->port, $errno, $errstr, $this->curTimeout);
             if (!$this->fsock) {
                 $host = $this->host . ':' . $this->port;
@@ -1179,13 +1179,13 @@ class Net_SSH2
         static $encryption_algorithms = false;
         if ($encryption_algorithms === false) {
             $encryption_algorithms = array(
-                // from <http://tools.ietf.org/html/rfc4345#section-4>:
+                // from <https://tools.ietf.org/html/rfc4345#section-4>:
                 'arcfour256',
                 'arcfour128',
 
                 //'arcfour',      // OPTIONAL          the ARCFOUR stream cipher with a 128-bit key
 
-                // CTR modes from <http://tools.ietf.org/html/rfc4344#section-4>:
+                // CTR modes from <https://tools.ietf.org/html/rfc4344#section-4>:
                 'aes128-ctr',     // RECOMMENDED       AES (Rijndael) in SDCTR mode, with 128-bit key
                 'aes192-ctr',     // RECOMMENDED       AES with 192-bit key
                 'aes256-ctr',     // RECOMMENDED       AES with 256-bit key
@@ -1257,7 +1257,7 @@ class Net_SSH2
         }
 
         $mac_algorithms = array(
-            // from <http://www.ietf.org/rfc/rfc6668.txt>:
+            // from <https://www.ietf.org/rfc/rfc6668.txt>:
             'hmac-sha2-256',// RECOMMENDED     HMAC-SHA256 (digest length = key length = 32)
 
             'hmac-sha1-96', // RECOMMENDED     first 96 bits of HMAC-SHA1 (digest length = 12, key length = 20)
@@ -1439,15 +1439,15 @@ class Net_SSH2
             $serverKexReplyMessage = NET_SSH2_MSG_KEXDH_GEX_REPLY;
         } else {
             switch ($kex_algorithm) {
-                // see http://tools.ietf.org/html/rfc2409#section-6.2 and
-                // http://tools.ietf.org/html/rfc2412, appendex E
+                // see https://tools.ietf.org/html/rfc2409#section-6.2 and
+                // https://tools.ietf.org/html/rfc2412, appendex E
                 case 'diffie-hellman-group1-sha1':
                     $prime = 'FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74' .
                             '020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F1437' .
                             '4FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED' .
                             'EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF';
                     break;
-                // see http://tools.ietf.org/html/rfc3526#section-3
+                // see https://tools.ietf.org/html/rfc3526#section-3
                 case 'diffie-hellman-group14-sha1':
                     $prime = 'FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74' .
                             '020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F1437' .
@@ -1482,7 +1482,7 @@ class Net_SSH2
            secret.  For more details, see the paper by van Oorschot and Wiener
            [VAN-OORSCHOT].
 
-           -- http://tools.ietf.org/html/rfc4419#section-6.2 */
+           -- https://tools.ietf.org/html/rfc4419#section-6.2 */
         $one = new Math_BigInteger(1);
         $keyLength = min($keyLength, $kexHash->getLength());
         $max = $one->bitwise_leftShift(16 * $keyLength); // 2 * 8 * $keyLength
@@ -1793,7 +1793,7 @@ class Net_SSH2
            first encrypted packet MUST be encrypted using the 1537th byte of
            keystream.
 
-           -- http://tools.ietf.org/html/rfc4345#section-4 */
+           -- https://tools.ietf.org/html/rfc4345#section-4 */
         if ($encrypt == 'arcfour128' || $encrypt == 'arcfour256') {
             $this->encrypt->encrypt(str_repeat("\0", 1536));
         }
@@ -1989,7 +1989,7 @@ class Net_SSH2
      * @param string $password
      * @return bool
      * @access private
-     * @internal It might be worthwhile, at some point, to protect against {@link http://tools.ietf.org/html/rfc4251#section-9.3.9 traffic analysis}
+     * @internal It might be worthwhile, at some point, to protect against {@link https://tools.ietf.org/html/rfc4251#section-9.3.9 traffic analysis}
      *           by sending dummy SSH_MSG_IGNORE messages.
      */
     function _login_helper($username, $password = null)
@@ -2161,7 +2161,7 @@ class Net_SSH2
     /**
      * Login via keyboard-interactive authentication
      *
-     * See {@link http://tools.ietf.org/html/rfc4256 RFC4256} for details.  This is not a full-featured keyboard-interactive authenticator.
+     * See {@link https://tools.ietf.org/html/rfc4256 RFC4256} for details.  This is not a full-featured keyboard-interactive authenticator.
      *
      * @param string $username
      * @param string $password
@@ -2250,7 +2250,7 @@ class Net_SSH2
                     }
                 }
 
-                // see http://tools.ietf.org/html/rfc4256#section-3.2
+                // see https://tools.ietf.org/html/rfc4256#section-3.2
                 if (strlen($this->last_interactive_response)) {
                     $this->last_interactive_response = '';
                 } elseif (defined('NET_SSH2_LOGGING')) {
@@ -2270,7 +2270,7 @@ class Net_SSH2
                    After obtaining the requested information from the user, the client
                    MUST respond with an SSH_MSG_USERAUTH_INFO_RESPONSE message.
                 */
-                // see http://tools.ietf.org/html/rfc4256#section-3.4
+                // see https://tools.ietf.org/html/rfc4256#section-3.4
                 $packet = $logged = pack('CN', NET_SSH2_MSG_USERAUTH_INFO_RESPONSE, count($responses));
                 for ($i = 0; $i < count($responses); $i++) {
                     $packet.= pack('Na*', strlen($responses[$i]), $responses[$i]);
@@ -2334,12 +2334,12 @@ class Net_SSH2
      * @param Crypt_RSA $password
      * @return bool
      * @access private
-     * @internal It might be worthwhile, at some point, to protect against {@link http://tools.ietf.org/html/rfc4251#section-9.3.9 traffic analysis}
+     * @internal It might be worthwhile, at some point, to protect against {@link https://tools.ietf.org/html/rfc4251#section-9.3.9 traffic analysis}
      *           by sending dummy SSH_MSG_IGNORE messages.
      */
     function _privatekey_login($username, $privatekey)
     {
-        // see http://tools.ietf.org/html/rfc4253#page-15
+        // see https://tools.ietf.org/html/rfc4253#page-15
         $publickey = $privatekey->getPublicKey(CRYPT_RSA_PUBLIC_FORMAT_RAW);
         if ($publickey === false) {
             return false;
@@ -2479,9 +2479,9 @@ class Net_SSH2
         // RFC4254 defines the (client) window size as "bytes the other party can send before it must wait for the window to
         // be adjusted".  0x7FFFFFFF is, at 2GB, the max size.  technically, it should probably be decremented, but,
         // honestly, if you're transfering more than 2GB, you probably shouldn't be using phpseclib, anyway.
-        // see http://tools.ietf.org/html/rfc4254#section-5.2 for more info
+        // see https://tools.ietf.org/html/rfc4254#section-5.2 for more info
         $this->window_size_server_to_client[NET_SSH2_CHANNEL_EXEC] = $this->window_size;
-        // 0x8000 is the maximum max packet size, per http://tools.ietf.org/html/rfc4253#section-6.1, although since PuTTy
+        // 0x8000 is the maximum max packet size, per https://tools.ietf.org/html/rfc4253#section-6.1, although since PuTTy
         // uses 0x4000, that's what will be used here, as well.
         $packet_size = 0x4000;
 
@@ -2992,7 +2992,7 @@ class Net_SSH2
             return false;
         }
 
-        $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+        $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
         $raw = fread($this->fsock, $this->decrypt_block_size);
 
         if (!strlen($raw)) {
@@ -3011,7 +3011,7 @@ class Net_SSH2
 
         $remaining_length = $packet_length + 4 - $this->decrypt_block_size;
 
-        // quoting <http://tools.ietf.org/html/rfc4253#section-6.1>,
+        // quoting <https://tools.ietf.org/html/rfc4253#section-6.1>,
         // "implementations SHOULD check that the packet length is reasonable"
         // PuTTY uses 0x9000 as the actual max packet size and so to shall we
         if ($remaining_length < -$this->decrypt_block_size || $remaining_length > 0x9000 || $remaining_length % $this->decrypt_block_size != 0) {
@@ -3107,7 +3107,7 @@ class Net_SSH2
                 }
         }
 
-        // see http://tools.ietf.org/html/rfc4252#section-5.4; only called when the encryption has been activated and when we haven't already logged in
+        // see https://tools.ietf.org/html/rfc4252#section-5.4; only called when the encryption has been activated and when we haven't already logged in
         if (($this->bitmap & NET_SSH2_MASK_CONNECTED) && !($this->bitmap & NET_SSH2_MASK_LOGIN) && ord($payload[0]) == NET_SSH2_MSG_USERAUTH_BANNER) {
             $this->_string_shift($payload, 1);
             extract(unpack('Nlength', $this->_string_shift($payload, 4)));
@@ -3118,7 +3118,7 @@ class Net_SSH2
         // only called when we've already logged in
         if (($this->bitmap & NET_SSH2_MASK_CONNECTED) && ($this->bitmap & NET_SSH2_MASK_LOGIN)) {
             switch (ord($payload[0])) {
-                case NET_SSH2_MSG_GLOBAL_REQUEST: // see http://tools.ietf.org/html/rfc4254#section-4
+                case NET_SSH2_MSG_GLOBAL_REQUEST: // see https://tools.ietf.org/html/rfc4254#section-4
                     extract(unpack('Nlength', $this->_string_shift($payload, 4)));
                     $this->errors[] = 'SSH_MSG_GLOBAL_REQUEST: ' . $this->_string_shift($payload, $length);
 
@@ -3128,7 +3128,7 @@ class Net_SSH2
 
                     $payload = $this->_get_binary_packet();
                     break;
-                case NET_SSH2_MSG_CHANNEL_OPEN: // see http://tools.ietf.org/html/rfc4254#section-5.1
+                case NET_SSH2_MSG_CHANNEL_OPEN: // see https://tools.ietf.org/html/rfc4254#section-5.1
                     $this->_string_shift($payload, 1);
                     extract(unpack('Nlength', $this->_string_shift($payload, 4)));
                     $data = $this->_string_shift($payload, $length);
@@ -3292,7 +3292,7 @@ class Net_SSH2
                 $read = array($this->fsock);
                 $write = $except = null;
 
-                $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+                $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
                 $sec = floor($this->curTimeout);
                 $usec = 1000000 * ($this->curTimeout - $sec);
                 // on windows this returns a "Warning: Invalid CRT parameters detected" error
@@ -3453,12 +3453,12 @@ class Net_SSH2
                             $this->exit_status = $exit_status;
 
                             // "The client MAY ignore these messages."
-                            // -- http://tools.ietf.org/html/rfc4254#section-6.10
+                            // -- https://tools.ietf.org/html/rfc4254#section-6.10
 
                             break;
                         default:
                             // "Some systems may not implement signals, in which case they SHOULD ignore this message."
-                            //  -- http://tools.ietf.org/html/rfc4254#section-6.9
+                            //  -- https://tools.ietf.org/html/rfc4254#section-6.9
                             break;
                     }
                     break;
@@ -3504,7 +3504,7 @@ class Net_SSH2
 
         //if ($this->compress) {
         //    // the -4 removes the checksum:
-        //    // http://php.net/function.gzcompress#57710
+        //    // https://php.net/function.gzcompress#57710
         //    $data = substr(gzcompress($data), 0, -4);
         //}
 
@@ -3528,7 +3528,7 @@ class Net_SSH2
 
         $packet.= $hmac;
 
-        $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+        $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
         $result = strlen($packet) == fputs($this->fsock, $packet);
         $stop = strtok(microtime(), ' ') + strtok('');
 
@@ -3643,7 +3643,7 @@ class Net_SSH2
             /* The maximum amount of data allowed is determined by the maximum
                packet size for the channel, and the current window size, whichever
                is smaller.
-                 -- http://tools.ietf.org/html/rfc4254#section-5.2 */
+                 -- https://tools.ietf.org/html/rfc4254#section-5.2 */
             $max_size = min(
                 $this->packet_size_client_to_server[$client_channel],
                 $this->window_size_client_to_server[$client_channel]
@@ -3680,7 +3680,7 @@ class Net_SSH2
      */
     function _close_channel($client_channel, $want_reply = false)
     {
-        // see http://tools.ietf.org/html/rfc4254#section-5.3
+        // see https://tools.ietf.org/html/rfc4254#section-5.3
 
         $this->_send_binary_packet(pack('CN', NET_SSH2_MSG_CHANNEL_EOF, $this->server_channels[$client_channel]));
 
@@ -3811,7 +3811,7 @@ class Net_SSH2
                 $fragment = $this->_string_shift($current_log, $this->log_short_width);
                 $hex = substr(preg_replace_callback('#.#s', array($this, '_format_log_helper'), $fragment), strlen($this->log_boundary));
                 // replace non ASCII printable characters with dots
-                // http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters
+                // https://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters
                 // also replace < with a . since < messes up the output on web browsers
                 $raw = preg_replace('#[^\x20-\x7E]|<#', '.', $fragment);
                 $output.= str_pad($hex, $this->log_long_width - $this->log_short_width, ' ') . $raw . "\r\n";

@@ -35,16 +35,16 @@
 
 		<p class="help-text">Esempi: <br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=QL3NBjXj2Ro">emissione di una
+		href="https://www.youtube.com/watch?v=QL3NBjXj2Ro">emissione di una
 		fatture immediata normale</a><br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=MY_P9kusXnU">contabilizzazione
+		href="https://www.youtube.com/watch?v=MY_P9kusXnU">contabilizzazione
 		della fattura emessa</a><br/>
 		- <a target="_blank" title="guarda il
-		video" href="http://www.youtube.com/watch?v=w8N4VDrbG9U">emissione di una
+		video" href="https://www.youtube.com/watch?v=w8N4VDrbG9U">emissione di una
 		nota di accredito</a><br/>
 		- <a target="_blank" title="guarda il
-		video" href="http://www.youtube.com/watch?v=QC-VADDI7hs">contabilizzazione
+		video" href="https://www.youtube.com/watch?v=QC-VADDI7hs">contabilizzazione
 		della nota di accredito</a><br/>
 		</p>
 	</div>
@@ -75,7 +75,7 @@
 
 		<p class="help-text">Esempio: <br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=odXYSakibw0">emissione di un
+		href="https://www.youtube.com/watch?v=odXYSakibw0">emissione di un
 		documento di trasporto di vendita</a><br></p>
 	</div>
 
@@ -95,9 +95,9 @@
 
 		<p class="help-text">Esempi: <br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=YpAIVbrS1EE">conferma d'ordine</a><br>
+		href="https://www.youtube.com/watch?v=YpAIVbrS1EE">conferma d'ordine</a><br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=xR39uw1_-Yk">evasione di un ordine</a></p>
+		href="https://www.youtube.com/watch?v=xR39uw1_-Yk">evasione di un ordine</a></p>
 	</div>
 	
 	<div id="Effetti" class="tab-pane fade in">
@@ -126,13 +126,13 @@
 	
 		<p class="help-text">Esempi:<br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=S0Iqgfh9mZs">generazione degli
+		href="https://www.youtube.com/watch?v=S0Iqgfh9mZs">generazione degli
 		effetti da fatture</a><br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=h73zDfQ5JLU">stampa della distinta
+		href="https://www.youtube.com/watch?v=h73zDfQ5JLU">stampa della distinta
 		effetti</a><br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=tdyRsQlv9s4">contabilizzazione
+		href="https://www.youtube.com/watch?v=tdyRsQlv9s4">contabilizzazione
 		effetti</a></p>
 	</div>
 	

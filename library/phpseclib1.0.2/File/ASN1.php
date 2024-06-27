@@ -35,15 +35,15 @@
  * @package   File_ASN1
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2012 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**#@+
  * Tag Classes
  *
  * @access private
- * @link http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#page=12
+ * @link https://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#page=12
  */
 define('FILE_ASN1_CLASS_UNIVERSAL',        0);
 define('FILE_ASN1_CLASS_APPLICATION',      1);
@@ -55,7 +55,7 @@ define('FILE_ASN1_CLASS_PRIVATE',          3);
  * Tag Classes
  *
  * @access private
- * @link http://www.obj-sys.com/asn1tutorial/node124.html
+ * @link https://www.obj-sys.com/asn1tutorial/node124.html
  */
 define('FILE_ASN1_TYPE_BOOLEAN',           1);
 define('FILE_ASN1_TYPE_INTEGER',           2);
@@ -77,7 +77,7 @@ define('FILE_ASN1_TYPE_SET',              17); // SET OF
  * More Tag Classes
  *
  * @access private
- * @link http://www.obj-sys.com/asn1tutorial/node10.html
+ * @link https://www.obj-sys.com/asn1tutorial/node10.html
  */
 define('FILE_ASN1_TYPE_NUMERIC_STRING',   18);
 define('FILE_ASN1_TYPE_PRINTABLE_STRING', 19);
@@ -151,7 +151,7 @@ class File_ASN1
      *
      * @var array
      * @access private
-     * @link http://en.wikipedia.org/wiki/Object_identifier
+     * @link https://en.wikipedia.org/wiki/Object_identifier
      */
     var $oids = array();
 
@@ -160,7 +160,7 @@ class File_ASN1
      *
      * @var string
      * @access private
-     * @link http://php.net/class.datetime
+     * @link https://php.net/class.datetime
      */
     var $format = 'D, d M Y H:i:s O';
 
@@ -171,7 +171,7 @@ class File_ASN1
      * @access private
      * @see self::setTimeFormat()
      * @see self::asn1map()
-     * @link http://php.net/class.datetime
+     * @link https://php.net/class.datetime
      */
     var $encoded;
 
@@ -345,7 +345,7 @@ class File_ASN1
            alternatives of a CHOICE, or universally tagged set members. Only the class number appears in braces for this
            data type; the term CONTEXT-SPECIFIC does not appear.
 
-             -- http://www.obj-sys.com/asn1tutorial/node12.html */
+             -- https://www.obj-sys.com/asn1tutorial/node12.html */
         $class = ($type >> 6) & 3;
         switch ($class) {
             case FILE_ASN1_CLASS_APPLICATION:
@@ -508,7 +508,7 @@ class File_ASN1
                 // hyphen, full stop, solidus, colon, equal sign, question mark
             case FILE_ASN1_TYPE_TELETEX_STRING:
                 // The Teletex character set in CCITT's T61, space, and delete
-                // see http://en.wikipedia.org/wiki/Teletex#Character_sets
+                // see https://en.wikipedia.org/wiki/Teletex#Character_sets
             case FILE_ASN1_TYPE_VIDEOTEX_STRING:
                 // The Videotex character set in CCITT's T.100 and T.101, space, and delete
             case FILE_ASN1_TYPE_VISIBLE_STRING:
@@ -1040,7 +1040,7 @@ class File_ASN1
                 /* The initial octet shall encode, as an unsigned binary integer with bit 1 as the least significant bit,
                    the number of unused bits in the final subsequent octet. The number shall be in the range zero to seven.
 
-                   -- http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#page=16 */
+                   -- https://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#page=16 */
                 $value = base64_decode($source);
                 break;
             case FILE_ASN1_TYPE_OBJECT_IDENTIFIER:
@@ -1147,7 +1147,7 @@ class File_ASN1
      * DER-encode the length
      *
      * DER supports lengths up to (2**8)**127, however, we'll only support lengths up to (2**8)**4.  See
-     * {@link http://itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#p=13 X.690 paragraph 8.1.3} for more information.
+     * {@link https://itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#p=13 X.690 paragraph 8.1.3} for more information.
      *
      * @access private
      * @param int $length
@@ -1176,12 +1176,12 @@ class File_ASN1
     function _decodeTime($content, $tag)
     {
         /* UTCTime:
-           http://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
-           http://www.obj-sys.com/asn1tutorial/node15.html
+           https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
+           https://www.obj-sys.com/asn1tutorial/node15.html
 
            GeneralizedTime:
-           http://tools.ietf.org/html/rfc5280#section-4.1.2.5.2
-           http://www.obj-sys.com/asn1tutorial/node14.html */
+           https://tools.ietf.org/html/rfc5280#section-4.1.2.5.2
+           https://www.obj-sys.com/asn1tutorial/node14.html */
 
         $pattern = $tag == FILE_ASN1_TYPE_UTC_TIME ?
             '#(..)(..)(..)(..)(..)(..)(.*)#' :

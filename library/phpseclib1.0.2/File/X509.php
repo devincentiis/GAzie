@@ -7,8 +7,8 @@
  *
  * Encode and decode X.509 certificates.
  *
- * The extensions are from {@link http://tools.ietf.org/html/rfc5280 RFC5280} and
- * {@link http://web.archive.org/web/19961027104704/http://www3.netscape.com/eng/security/cert-exts.html Netscape Certificate Extensions}.
+ * The extensions are from {@link https://tools.ietf.org/html/rfc5280 RFC5280} and
+ * {@link https://web.archive.org/web/19961027104704/https://www3.netscape.com/eng/security/cert-exts.html Netscape Certificate Extensions}.
  *
  * Note that loading an X.509 certificate and resaving it may invalidate the signature.  The reason being that the signature is based on a
  * portion of the certificate that contains optional parameters with default values.  ie. if the parameter isn't there the default value is
@@ -38,8 +38,8 @@
  * @package   File_X509
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2012 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**
@@ -229,7 +229,7 @@ class File_X509
      *
      * @var array
      * @access private
-     * @link http://en.wikipedia.org/wiki/Object_identifier
+     * @link https://en.wikipedia.org/wiki/Object_identifier
      */
     var $oids;
 
@@ -287,8 +287,8 @@ class File_X509
     /**
      * Key Identifier
      *
-     * See {@link http://tools.ietf.org/html/rfc5280#section-4.2.1.1 RFC5280#section-4.2.1.1} and
-     * {@link http://tools.ietf.org/html/rfc5280#section-4.2.1.2 RFC5280#section-4.2.1.2}.
+     * See {@link https://tools.ietf.org/html/rfc5280#section-4.2.1.1 RFC5280#section-4.2.1.1} and
+     * {@link https://tools.ietf.org/html/rfc5280#section-4.2.1.2 RFC5280#section-4.2.1.2}.
      *
      * @var string
      * @access private
@@ -324,7 +324,7 @@ class File_X509
         }
 
         // Explicitly Tagged Module, 1988 Syntax
-        // http://tools.ietf.org/html/rfc5280#appendix-A.1
+        // https://tools.ietf.org/html/rfc5280#appendix-A.1
 
         $this->DirectoryString = array(
             'type'     => FILE_ASN1_TYPE_CHOICE,
@@ -371,7 +371,7 @@ class File_X509
             'children' => $AttributeTypeAndValue
         );
 
-        // http://tools.ietf.org/html/rfc5280#section-4.1.2.4
+        // https://tools.ietf.org/html/rfc5280#section-4.1.2.4
         $RDNSequence = array(
             'type'     => FILE_ASN1_TYPE_SEQUENCE,
             // RDNSequence does not define a min or a max, which means it doesn't have one
@@ -387,7 +387,7 @@ class File_X509
             )
         );
 
-        // http://tools.ietf.org/html/rfc5280#section-4.1.1.2
+        // https://tools.ietf.org/html/rfc5280#section-4.1.1.2
         $AlgorithmIdentifier = array(
             'type'     => FILE_ASN1_TYPE_SEQUENCE,
             'children' => array(
@@ -404,7 +404,7 @@ class File_X509
            a critical extension it does not recognize; however, a non-critical
            extension may be ignored if it is not recognized.
 
-           http://tools.ietf.org/html/rfc5280#section-4.2
+           https://tools.ietf.org/html/rfc5280#section-4.2
         */
         $Extension = array(
             'type'     => FILE_ASN1_TYPE_SEQUENCE,
@@ -446,7 +446,7 @@ class File_X509
             )
         );
 
-        // http://tools.ietf.org/html/rfc5280#section-4.1.2.5
+        // https://tools.ietf.org/html/rfc5280#section-4.1.2.5
         $Validity = array(
             'type'     => FILE_ASN1_TYPE_SEQUENCE,
             'children' => array(
@@ -491,7 +491,7 @@ class File_X509
                                                'optional' => true,
                                                'implicit' => true
                                            ) + $UniqueIdentifier,
-                // <http://tools.ietf.org/html/rfc2459#page-74> doesn't use the EXPLICIT keyword but if
+                // <https://tools.ietf.org/html/rfc2459#page-74> doesn't use the EXPLICIT keyword but if
                 // it's not IMPLICIT, it's EXPLICIT
                 'extensions'            => array(
                                                'constant' => 3,
@@ -1057,7 +1057,7 @@ class File_X509
             )
         );
 
-        // mapping is from <http://www.mozilla.org/projects/security/pki/nss/tech-notes/tn3.html>
+        // mapping is from <https://www.mozilla.org/projects/security/pki/nss/tech-notes/tn3.html>
         $this->netscape_cert_type = array(
             'type'    => FILE_ASN1_TYPE_BIT_STRING,
             'mapping' => array(
@@ -1090,7 +1090,7 @@ class File_X509
             )
         );
 
-        // adapted from <http://tools.ietf.org/html/rfc2986>
+        // adapted from <https://tools.ietf.org/html/rfc2986>
 
         $Attributes = array(
             'type'     => FILE_ASN1_TYPE_SET,
@@ -1416,7 +1416,7 @@ class File_X509
             '1.2.840.113533.7.65.0' => 'entrustVersInfo',
             '2.16.840.1.113733.1.6.9' => 'verisignPrivate',
             // for Certificate Signing Requests
-            // see http://tools.ietf.org/html/rfc2985
+            // see https://tools.ietf.org/html/rfc2985
             '1.2.840.113549.1.9.2' => 'pkcs-9-at-unstructuredName', // PKCS #9 unstructured name
             '1.2.840.113549.1.9.7' => 'pkcs-9-at-challengePassword', // Challenge password for certificate revocations
             '1.2.840.113549.1.9.14' => 'pkcs-9-at-extensionRequest' // Certificate extension request
@@ -1825,13 +1825,13 @@ class File_X509
                 return $this->UserNotice;
 
             // the following OIDs are unsupported but we don't want them to give notices when calling saveX509().
-            case 'id-pe-logotype': // http://www.ietf.org/rfc/rfc3709.txt
+            case 'id-pe-logotype': // https://www.ietf.org/rfc/rfc3709.txt
             case 'entrustVersInfo':
-            // http://support.microsoft.com/kb/287547
+            // https://support.microsoft.com/kb/287547
             case '1.3.6.1.4.1.311.20.2': // szOID_ENROLL_CERTTYPE_EXTENSION
             case '1.3.6.1.4.1.311.21.1': // szOID_CERTSRV_CA_VERSION
             // "SET Secure Electronic Transaction Specification"
-            // http://www.maithean.com/docs/set_bk3.pdf
+            // https://www.maithean.com/docs/set_bk3.pdf
             case '2.23.42.7.0': // id-set-hashedRootKey
                 return true;
 
@@ -2030,7 +2030,7 @@ class File_X509
      * By default returns false for self-signed certs. Call validateSignature(false) to make this support
      * self-signed.
      *
-     * The behavior of this function is inspired by {@link http://php.net/openssl-verify openssl_verify}.
+     * The behavior of this function is inspired by {@link https://php.net/openssl-verify openssl_verify}.
      *
      * @param bool $caonly optional
      * @access public
@@ -2044,7 +2044,7 @@ class File_X509
 
         /* TODO:
            "emailAddress attribute values are not case-sensitive (e.g., "subscriber@example.com" is the same as "SUBSCRIBER@EXAMPLE.COM")."
-            -- http://tools.ietf.org/html/rfc5280#section-4.1.2.6
+            -- https://tools.ietf.org/html/rfc5280#section-4.1.2.6
 
            implement pathLenConstraint in the id-ce-basicConstraints extension */
 
@@ -2874,7 +2874,7 @@ class File_X509
             return $csr;
         }
 
-        // see http://tools.ietf.org/html/rfc2986
+        // see https://tools.ietf.org/html/rfc2986
 
         $asn1 = new File_ASN1();
 
@@ -3003,7 +3003,7 @@ class File_X509
             return $spkac;
         }
 
-        // see http://www.w3.org/html/wg/drafts/html/master/forms.html#signedpublickeyandchallenge
+        // see https://www.w3.org/html/wg/drafts/html/master/forms.html#signedpublickeyandchallenge
 
         $asn1 = new File_ASN1();
 
@@ -3742,7 +3742,7 @@ class File_X509
           the notAfter SHOULD be assigned the GeneralizedTime value of
           99991231235959Z.
 
-          -- http://tools.ietf.org/html/rfc5280#section-4.1.2.5
+          -- https://tools.ietf.org/html/rfc5280#section-4.1.2.5
         */
         if (strtolower($date) == 'lifetime') {
             $temp = '99991231235959Z';

@@ -2,9 +2,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -1283,7 +1283,7 @@ foreach ($form['rows'] as $k => $v) {
             echo "<td></td>\n";
             echo "<td class=\"text-right\" title=\"".$script_transl[18].": ".$v['codric']."\"><input type=\"text\" name=\"rows[{$k}][prelis]\" value=\"{$v['prelis']}\" align=\"right\" maxlength=\"11\"  onchange=\"document.docacq.last_focus.value={$k}; this.form.submit()\" /></td>\n";
             echo "<td>{$v['pervat']}%</td>\n";
-            echo "<td><input type=\"text\" class=\"datepick\" id=\"date_".$k."\" name=\"rows[{$k}][delivery_date]\" >" . $v['delivery_date'] . "/></td>\n";
+            echo "<td><input type=\"text\" class=\"datepick\" id=\"date_".$k."\" name=\"rows[{$k}][delivery_date]\" value=\"" . $v['delivery_date'] . "\" /></td>\n";
             $last_row[] = array_unshift($last_row, $script_transl['typerow'][$v['tiprig']]);
             break;
         case "2":

@@ -29,8 +29,8 @@
  * @package   Net_SFTP_Stream
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2013 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**
@@ -461,7 +461,7 @@ class Net_SFTP_Stream
         }
 
         // stream_metadata was introduced in PHP 5.4.0 but as of 5.4.11 the constants haven't been defined
-        // see http://www.php.net/streamwrapper.stream-metadata and https://bugs.php.net/64246
+        // see https://www.php.net/streamwrapper.stream-metadata and https://bugs.php.net/64246
         //     and https://github.com/php/php-src/blob/master/main/php_streams.h#L592
         switch ($option) {
             case 1: // PHP_STREAM_META_TOUCH
@@ -531,7 +531,7 @@ class Net_SFTP_Stream
 
         $path_to = $path_to['path']; // the $component part of parse_url() was added in PHP 5.1.2
         // "It is an error if there already exists a file with the name specified by newpath."
-        //  -- http://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-6.5
+        //  -- https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-6.5
         if (!$this->sftp->rename($path_from, $path_to)) {
             if ($this->sftp->stat($path_to)) {
                 return $this->sftp->delete($path_to, true) && $this->sftp->rename($path_from, $path_to);
@@ -638,8 +638,8 @@ class Net_SFTP_Stream
     /**
      * Removes a directory
      *
-     * Only valid $options is STREAM_MKDIR_RECURSIVE per <http://php.net/streamwrapper.rmdir>, however,
-     * <http://php.net/rmdir>  does not have a $recursive parameter as mkdir() does so I don't know how
+     * Only valid $options is STREAM_MKDIR_RECURSIVE per <https://php.net/streamwrapper.rmdir>, however,
+     * <https://php.net/rmdir>  does not have a $recursive parameter as mkdir() does so I don't know how
      * STREAM_MKDIR_RECURSIVE is supposed to be set. Also, when I try it out with rmdir() I get 8 as
      * $options. What does 8 correspond to?
      *
@@ -662,7 +662,7 @@ class Net_SFTP_Stream
     /**
      * Flushes the output
      *
-     * See <http://php.net/fflush>. Always returns true because Net_SFTP doesn't cache stuff before writing
+     * See <https://php.net/fflush>. Always returns true because Net_SFTP doesn't cache stuff before writing
      *
      * @return bool
      * @access public

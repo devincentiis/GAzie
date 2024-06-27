@@ -36,7 +36,7 @@
  * </code>
  *
  * More information on the SSHv1 specification can be found by reading
- * {@link http://www.snailbook.com/docs/protocol-1.5.txt protocol-1.5.txt}.
+ * {@link https://www.snailbook.com/docs/protocol-1.5.txt protocol-1.5.txt}.
  *
  * LICENSE: Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,8 +60,8 @@
  * @package   Net_SSH1
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**#@+
@@ -153,7 +153,7 @@ define('NET_SSH1_AUTH_RHOSTS_RSA', 4);
 /**#@+
  * Terminal Modes
  *
- * @link http://3sp.com/content/developer/maverick-net/docs/Maverick.SSH.PseudoTerminalModesMembers.html
+ * @link https://3sp.com/content/developer/maverick-net/docs/Maverick.SSH.PseudoTerminalModesMembers.html
  * @access private
  */
 define('NET_SSH1_TTY_OP_END',  0);
@@ -814,8 +814,8 @@ class Net_SSH1
      * servers don't, however, this isn't an SSH2 client.  The way this works, on the server, is by initiating a
      * shell with the -s option, as discussed in the following links:
      *
-     * {@link http://www.faqs.org/docs/bashman/bashref_65.html http://www.faqs.org/docs/bashman/bashref_65.html}
-     * {@link http://www.faqs.org/docs/bashman/bashref_62.html http://www.faqs.org/docs/bashman/bashref_62.html}
+     * {@link https://www.faqs.org/docs/bashman/bashref_65.html https://www.faqs.org/docs/bashman/bashref_65.html}
+     * {@link https://www.faqs.org/docs/bashman/bashref_62.html https://www.faqs.org/docs/bashman/bashref_62.html}
      *
      * To execute further commands, a new Net_SSH1 object will need to be created.
      *
@@ -1003,7 +1003,7 @@ class Net_SSH1
      *
      * Requires PHP 4.3.0 or later due to the use of the stream_select() function.  If you see stuff like
      * "^[[00m", you're seeing ANSI escape codes.  According to
-     * {@link http://support.microsoft.com/kb/101875 How to Enable ANSI.SYS in a Command Window}, "Windows NT
+     * {@link https://support.microsoft.com/kb/101875 How to Enable ANSI.SYS in a Command Window}, "Windows NT
      * does not support ANSI escape sequences in Win32 Console applications", so if you're a Windows user,
      * there's not going to be much recourse.
      *
@@ -1094,7 +1094,7 @@ class Net_SSH1
      * See 'The Binary Packet Protocol' of protocol-1.5.txt for more info.
      *
      * Also, this function could be improved upon by adding detection for the following exploit:
-     * http://www.securiteam.com/securitynews/5LP042K3FY.html
+     * https://www.securiteam.com/securitynews/5LP042K3FY.html
      *
      * @see self::_send_binary_packet()
      * @return array
@@ -1111,7 +1111,7 @@ class Net_SSH1
             $read = array($this->fsock);
             $write = $except = null;
 
-            $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+            $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
             $sec = floor($this->curTimeout);
             $usec = 1000000 * ($this->curTimeout - $sec);
             // on windows this returns a "Warning: Invalid CRT parameters detected" error
@@ -1123,7 +1123,7 @@ class Net_SSH1
             $this->curTimeout-= $elapsed;
         }
 
-        $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+        $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
         $temp = unpack('Nlength', fread($this->fsock, 4));
 
         $padding_length = 8 - ($temp['length'] & 7);
@@ -1198,7 +1198,7 @@ class Net_SSH1
 
         $packet = pack('Na*', $length, $data);
 
-        $start = strtok(microtime(), ' ') + strtok(''); // http://php.net/microtime#61838
+        $start = strtok(microtime(), ' ') + strtok(''); // https://php.net/microtime#61838
         $result = strlen($packet) == fputs($this->fsock, $packet);
         $stop = strtok(microtime(), ' ') + strtok('');
 
@@ -1303,7 +1303,7 @@ class Net_SSH1
             // We AND $crc >> 8 with 0x00FFFFFF because we want the eight newly added bits to all
             // be zero.  PHP, unfortunately, doesn't always do this.  0x80000000 >> 8, as an example,
             // yields 0xFF800000 - not 0x00800000.  The following link elaborates:
-            // http://www.php.net/manual/en/language.operators.bitwise.php#57281
+            // https://www.php.net/manual/en/language.operators.bitwise.php#57281
             $crc = (($crc >> 8) & 0x00FFFFFF) ^ $crc_lookup_table[($crc & 0xFF) ^ ord($data[$i])];
         }
 
@@ -1456,7 +1456,7 @@ class Net_SSH1
                 $fragment = $this->_string_shift($current_log, $this->log_short_width);
                 $hex = substr(preg_replace_callback('#.#s', array($this, '_format_log_helper'), $fragment), strlen($this->log_boundary));
                 // replace non ASCII printable characters with dots
-                // http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters
+                // https://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters
                 // also replace < with a . since < messes up the output on web browsers
                 $raw = preg_replace('#[^\x20-\x7E]|<#', '.', $fragment);
                 $output.= str_pad($hex, $this->log_long_width - $this->log_short_width, ' ') . $raw . "\r\n";

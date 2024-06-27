@@ -30,7 +30,7 @@ contabilit&agrave; generale.</p>
 	<div id="Bilancio" class="tab-pane fade in">	
 		<p class="help-text">Da qui &egrave; si ottiene la stampa di un bilancio di verifica.</p>
 		<p class="help-text">Esempio: <br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=YpGhNKCNCJA">stampa del
+		href="https://www.youtube.com/watch?v=YpGhNKCNCJA">stampa del
 		bilancio di verifica</a></p>
 	</div>
 
@@ -46,7 +46,7 @@ contabilit&agrave; generale.</p>
 		girati a conti più adatti alla rappresentazione in bilancio.</p>
 
 		<p class="help-text">Esempio: <br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=qCWuisB3_88">stampa del
+		href="https://www.youtube.com/watch?v=qCWuisB3_88">stampa del
 		bilancio secondo codice</a></p>
 	</div>
 </div>

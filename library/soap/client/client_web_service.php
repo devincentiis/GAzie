@@ -1,6 +1,6 @@
 <?php
 try {
-	$client = new SoapClient('http://localhost/gazie/library/soap/server/welcome.wsdl');
+	$client = new SoapClient('https://localhost/gazie/library/soap/server/welcome.wsdl');
 	echo("SOAP Client creato con successo!<br />");
 	$result=$client->getWelcome();
 	echo("Servizio Disponibile<br />");

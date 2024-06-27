@@ -48,8 +48,8 @@
  * @author    Jim Wigginton <terrafrost@php.net>
  * @author    Hans-Juergen Petrich <petrich@tronic-media.com>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**#@+
@@ -62,31 +62,31 @@
  *
  * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
  */
 define('CRYPT_MODE_CTR', -1);
 /**
  * Encrypt / decrypt using the Electronic Code Book mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
  */
 define('CRYPT_MODE_ECB', 1);
 /**
  * Encrypt / decrypt using the Code Book Chaining mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
  */
 define('CRYPT_MODE_CBC', 2);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
  */
 define('CRYPT_MODE_CFB', 3);
 /**
  * Encrypt / decrypt using the Output Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
  */
 define('CRYPT_MODE_OFB', 4);
 /**
@@ -262,7 +262,7 @@ class Crypt_Base
      * In order to do the CFB-mode work (fast) phpseclib
      * use a separate ECB-mode mcrypt resource.
      *
-     * @link http://phpseclib.sourceforge.net/cfb-demo.phps
+     * @link https://phpseclib.sourceforge.net/cfb-demo.phps
      * @see self::encrypt()
      * @see self::decrypt()
      * @see self::_setupMcrypt()
@@ -354,8 +354,8 @@ class Crypt_Base
      *
      * Only used if $engine == CRYPT_ENGINE_MCRYPT
      *
-     * @link http://www.php.net/mcrypt_module_open
-     * @link http://www.php.net/mcrypt_list_algorithms
+     * @link https://www.php.net/mcrypt_module_open
+     * @link https://www.php.net/mcrypt_list_algorithms
      * @see self::_setupMcrypt()
      * @var string
      * @access private
@@ -367,7 +367,7 @@ class Crypt_Base
      *
      * Only used if $engine == CRYPT_ENGINE_OPENSSL
      *
-     * @link http://www.php.net/openssl-get-cipher-methods
+     * @link https://www.php.net/openssl-get-cipher-methods
      * @var string
      * @access private
      */
@@ -379,7 +379,7 @@ class Crypt_Base
      * If OpenSSL does not support the mode we're trying to use (CTR)
      * it can still be emulated with ECB mode.
      *
-     * @link http://www.php.net/openssl-get-cipher-methods
+     * @link https://www.php.net/openssl-get-cipher-methods
      * @var string
      * @access private
      */
@@ -618,7 +618,7 @@ class Crypt_Base
      * Sets the password.
      *
      * Depending on what $method is set to, setPassword()'s (optional) parameters are as follows:
-     *     {@link http://en.wikipedia.org/wiki/PBKDF2 pbkdf2} or pbkdf1:
+     *     {@link https://en.wikipedia.org/wiki/PBKDF2 pbkdf2} or pbkdf1:
      *         $hash, $salt, $count, $dkLen
      *
      *         Where $hash (default = sha1) currently supports the following hashes: see: Crypt/Hash.php
@@ -715,7 +715,7 @@ class Crypt_Base
      * necessary are discussed in the following
      * URL:
      *
-     * {@link http://www.di-mgt.com.au/cryptopad.html http://www.di-mgt.com.au/cryptopad.html}
+     * {@link https://www.di-mgt.com.au/cryptopad.html https://www.di-mgt.com.au/cryptopad.html}
      *
      * An alternative to padding is to, separately, send the length of the file.  This is what SSH, in fact, does.
      * strlen($plaintext) will still need to be a multiple of the block size, however, arbitrary values can be added to make it that
@@ -757,7 +757,7 @@ class Crypt_Base
                     return $this->_openssl_ctr_process($plaintext, $this->encryptIV, $this->enbuffer);
                 case CRYPT_MODE_CFB:
                     // cfb loosely routines inspired by openssl's:
-                    // {@link http://cvs.openssl.org/fileview?f=openssl/crypto/modes/cfb128.c&v=1.3.2.2.2.1}
+                    // {@link https://cvs.openssl.org/fileview?f=openssl/crypto/modes/cfb128.c&v=1.3.2.2.2.1}
                     $ciphertext = '';
                     if ($this->continuousBuffer) {
                         $iv = &$this->encryptIV;
@@ -818,7 +818,7 @@ class Crypt_Base
                 $this->enchanged = false;
             }
 
-            // re: {@link http://phpseclib.sourceforge.net/cfb-demo.phps}
+            // re: {@link https://phpseclib.sourceforge.net/cfb-demo.phps}
             // using mcrypt's default handing of CFB the above would output two different things.  using phpseclib's
             // rewritten CFB implementation the above outputs the same thing twice.
             if ($this->mode == CRYPT_MODE_CFB && $this->continuousBuffer) {
@@ -942,7 +942,7 @@ class Crypt_Base
                 break;
             case CRYPT_MODE_CFB:
                 // cfb loosely routines inspired by openssl's:
-                // {@link http://cvs.openssl.org/fileview?f=openssl/crypto/modes/cfb128.c&v=1.3.2.2.2.1}
+                // {@link https://cvs.openssl.org/fileview?f=openssl/crypto/modes/cfb128.c&v=1.3.2.2.2.1}
                 if ($this->continuousBuffer) {
                     $iv = &$this->encryptIV;
                     $pos = &$buffer['pos'];
@@ -1031,7 +1031,7 @@ class Crypt_Base
     function decrypt($ciphertext)
     {
         if ($this->paddable) {
-            // we pad with chr(0) since that's what mcrypt_generic does.  to quote from {@link http://www.php.net/function.mcrypt-generic}:
+            // we pad with chr(0) since that's what mcrypt_generic does.  to quote from {@link https://www.php.net/function.mcrypt-generic}:
             // "The data is padded with "\0" to make sure the length of the data is n * blocksize."
             $ciphertext = str_pad($ciphertext, strlen($ciphertext) + ($this->block_size - strlen($ciphertext) % $this->block_size) % $this->block_size, chr(0));
         }
@@ -1069,7 +1069,7 @@ class Crypt_Base
                     break;
                 case CRYPT_MODE_CFB:
                     // cfb loosely routines inspired by openssl's:
-                    // {@link http://cvs.openssl.org/fileview?f=openssl/crypto/modes/cfb128.c&v=1.3.2.2.2.1}
+                    // {@link https://cvs.openssl.org/fileview?f=openssl/crypto/modes/cfb128.c&v=1.3.2.2.2.1}
                     $plaintext = '';
                     if ($this->continuousBuffer) {
                         $iv = &$this->decryptIV;
@@ -1843,7 +1843,7 @@ class Crypt_Base
 
             // we need the $ecb mcrypt resource (only) in MODE_CFB with enableContinuousBuffer()
             // to workaround mcrypt's broken ncfb implementation in buffered mode
-            // see: {@link http://phpseclib.sourceforge.net/cfb-demo.phps}
+            // see: {@link https://phpseclib.sourceforge.net/cfb-demo.phps}
             if ($this->mode == CRYPT_MODE_CFB) {
                 $this->ecb = mcrypt_module_open($this->cipher_name_mcrypt, '', MCRYPT_MODE_ECB, '');
             }

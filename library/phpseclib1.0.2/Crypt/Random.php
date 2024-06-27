@@ -39,8 +39,8 @@
  * @package   Crypt_Random
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 // laravel is a PHP framework that utilizes phpseclib. laravel workbenches may, independently,
@@ -73,7 +73,7 @@ if (!function_exists('crypt_random_string')) {
                 return mcrypt_create_iv($length);
             }
             // method 2. openssl_random_pseudo_bytes was introduced in PHP 5.3.0 but prior to PHP 5.3.4 there was,
-            // to quote <http://php.net/ChangeLog-5.php#5.3.4>, "possible blocking behavior". as of 5.3.4
+            // to quote <https://php.net/ChangeLog-5.php#5.3.4>, "possible blocking behavior". as of 5.3.4
             // openssl_random_pseudo_bytes and mcrypt_create_iv do the exact same thing on Windows. ie. they both
             // call php_win32_get_random_bytes():
             //
@@ -183,7 +183,7 @@ if (!function_exists('crypt_random_string')) {
             // if the hash doesn't produce enough a key or an IV that's long enough concat successive hashes of the
             // original hash and the current hash. we'll be emulating that. for more info see the following URL:
             //
-            // http://tools.ietf.org/html/rfc4253#section-7.2
+            // https://tools.ietf.org/html/rfc4253#section-7.2
             //
             // see the is_string($crypto) part for an example of how to expand the keys
             $key = pack('H*', sha1($seed . 'A'));
@@ -191,7 +191,7 @@ if (!function_exists('crypt_random_string')) {
 
             // ciphers are used as per the nist.gov link below. also, see this link:
             //
-            // http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator#Designs_based_on_cryptographic_primitives
+            // https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator#Designs_based_on_cryptographic_primitives
             switch (true) {
                 case phpseclib_resolve_include_path('Crypt/AES.php'):
                     if (!class_exists('Crypt_AES')) {
@@ -243,11 +243,11 @@ if (!function_exists('crypt_random_string')) {
 
         // the following is based off of ANSI X9.31:
         //
-        // http://csrc.nist.gov/groups/STM/cavp/documents/rng/931rngext.pdf
+        // https://csrc.nist.gov/groups/STM/cavp/documents/rng/931rngext.pdf
         //
         // OpenSSL uses that same standard for it's random numbers:
         //
-        // http://www.opensource.apple.com/source/OpenSSL/OpenSSL-38/openssl/fips-1.0/rand/fips_rand.c
+        // https://www.opensource.apple.com/source/OpenSSL/OpenSSL-38/openssl/fips-1.0/rand/fips_rand.c
         // (do a search for "ANS X9.31 A.2.4")
         $result = '';
         while (strlen($result) < $length) {

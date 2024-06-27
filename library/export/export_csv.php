@@ -1,5 +1,5 @@
 <?php
-// php-export-data by Eli Dickinson, http://github.com/elidickinson/php-export-data
+// php-export-data by Eli Dickinson, https://github.com/elidickinson/php-export-data
 
 /**
  * ExportData is the base class for exporters to specific file formats. See other
@@ -147,12 +147,12 @@ class ExportDataCSV extends ExportData {
  * generally isn't associated with Excel. Using .XLS is tempting, but Excel 2007 will
  * throw a scary warning that the extension doesn't match the file type.
  *
- * Based on Excel XML code from Excel_XML (http://github.com/oliverschwarz/php-excel)
+ * Based on Excel XML code from Excel_XML (https://github.com/oliverschwarz/php-excel)
  *  by Oliver Schwarz
  */
 class ExportDataExcel extends ExportData {
 
-	const XmlHeader = "<?xml version=\"1.0\" encoding=\"%s\"?\>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"http://www.w3.org/TR/REC-html40\">";
+	const XmlHeader = "<?xml version=\"1.0\" encoding=\"%s\"?\>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"https://www.w3.org/TR/REC-html40\">";
 	const XmlFooter = "</Workbook>";
 
 	public $encoding = 'UTF-8'; // encoding type to specify in file.

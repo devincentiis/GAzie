@@ -19,13 +19,13 @@
  * which only supports integers.  Although this fact will slow this library down, the fact that such a high
  * base is being used should more than compensate.
  *
- * Numbers are stored in {@link http://en.wikipedia.org/wiki/Endianness little endian} format.  ie.
+ * Numbers are stored in {@link https://en.wikipedia.org/wiki/Endianness little endian} format.  ie.
  * (new Math_BigInteger(pow(2, 26)))->value = array(0, 1)
  *
  * Useful resources are as follows:
  *
- *  - {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf Handbook of Applied Cryptography (HAC)}
- *  - {@link http://math.libtomcrypt.com/files/tommath.pdf Multi-Precision Math (MPM)}
+ *  - {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf Handbook of Applied Cryptography (HAC)}
+ *  - {@link https://math.libtomcrypt.com/files/tommath.pdf Multi-Precision Math (MPM)}
  *  - Java's BigInteger classes.  See /j2se/src/share/classes/java/math in jdk-1_5_0-src-jrl.zip
  *
  * Here's an example of how to use this library:
@@ -64,8 +64,8 @@
  * @package   Math_BigInteger
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2006 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://pear.php.net/package/Math_BigInteger
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://pear.php.net/package/Math_BigInteger
  */
 
 /**#@+
@@ -345,7 +345,7 @@ class Math_BigInteger
         }
 
         // '0' counts as empty() but when the base is 256 '0' is equal to ord('0') or 48
-        // '0' is the only value like this per http://php.net/empty
+        // '0' is the only value like this per https://php.net/empty
         if (empty($x) && (abs($base) != 256 || $x !== '0')) {
             return;
         }
@@ -727,7 +727,7 @@ class Math_BigInteger
      * PHP5 passes objects by reference while PHP4 passes by value.  As such, we need a function to guarantee
      * that all objects are passed by value, when appropriate.  More information can be found here:
      *
-     * {@link http://php.net/language.oop5.basic#51624}
+     * {@link https://php.net/language.oop5.basic#51624}
      *
      * @access public
      * @see self::__clone()
@@ -1259,8 +1259,8 @@ class Math_BigInteger
     /**
      * Performs Karatsuba multiplication on two BigIntegers
      *
-     * See {@link http://en.wikipedia.org/wiki/Karatsuba_algorithm Karatsuba algorithm} and
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=120 MPM 5.2.3}.
+     * See {@link https://en.wikipedia.org/wiki/Karatsuba_algorithm Karatsuba algorithm} and
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=120 MPM 5.2.3}.
      *
      * @param array $x_value
      * @param array $y_value
@@ -1316,8 +1316,8 @@ class Math_BigInteger
      * Performs traditional squaring on two BigIntegers
      *
      * Squaring can be done faster than multiplying a number by itself can be.  See
-     * {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=7 HAC 14.2.4} /
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=141 MPM 5.3} for more information.
+     * {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=7 HAC 14.2.4} /
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=141 MPM 5.3} for more information.
      *
      * @param array $value
      * @return array
@@ -1355,8 +1355,8 @@ class Math_BigInteger
     /**
      * Performs Karatsuba "squaring" on two BigIntegers
      *
-     * See {@link http://en.wikipedia.org/wiki/Karatsuba_algorithm Karatsuba algorithm} and
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=151 MPM 5.3.4}.
+     * See {@link https://en.wikipedia.org/wiki/Karatsuba_algorithm Karatsuba algorithm} and
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=151 MPM 5.3.4}.
      *
      * @param array $value
      * @return array
@@ -1417,7 +1417,7 @@ class Math_BigInteger
      * @param Math_BigInteger $y
      * @return array
      * @access public
-     * @internal This function is based off of {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=9 HAC 14.20}.
+     * @internal This function is based off of {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=9 HAC 14.20}.
      */
     function divide($y)
     {
@@ -1654,7 +1654,7 @@ class Math_BigInteger
      *    modulo is even and Montgomery reductions when the modulo is odd.  BigInteger.java's modPow method, however,
      *    uses a trick involving the Chinese Remainder Theorem to factor the even modulo into two numbers - one odd and
      *    the other, a power of two - and recombine them, later.  This is the method that this modPow function uses.
-     *    {@link http://islab.oregonstate.edu/papers/j34monex.pdf Montgomery Reduction with Even Modulus} elaborates.
+     *    {@link https://islab.oregonstate.edu/papers/j34monex.pdf Montgomery Reduction with Even Modulus} elaborates.
      */
     function modPow($e, $n)
     {
@@ -1815,8 +1815,8 @@ class Math_BigInteger
     /**
      * Sliding Window k-ary Modular Exponentiation
      *
-     * Based on {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=27 HAC 14.85} /
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=210 MPM 7.7}.  In a departure from those algorithims,
+     * Based on {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=27 HAC 14.85} /
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=210 MPM 7.7}.  In a departure from those algorithims,
      * however, this function performs a modular reduction after every multiplication and squaring operation.
      * As such, this function has the same preconditions that the reductions being used do.
      *
@@ -2007,17 +2007,17 @@ class Math_BigInteger
     /**
      * Barrett Modular Reduction
      *
-     * See {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=14 HAC 14.3.3} /
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=165 MPM 6.2.5} for more information.  Modified slightly,
+     * See {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=14 HAC 14.3.3} /
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=165 MPM 6.2.5} for more information.  Modified slightly,
      * so as not to require negative numbers (initially, this script didn't support negative numbers).
      *
      * Employs "folding", as described at
-     * {@link http://www.cosic.esat.kuleuven.be/publications/thesis-149.pdf#page=66 thesis-149.pdf#page=66}.  To quote from
+     * {@link https://www.cosic.esat.kuleuven.be/publications/thesis-149.pdf#page=66 thesis-149.pdf#page=66}.  To quote from
      * it, "the idea [behind folding] is to find a value x' such that x (mod m) = x' (mod m), with x' being smaller than x."
      *
      * Unfortunately, the "Barrett Reduction with Folding" algorithm described in thesis-149.pdf is not, as written, all that
      * usable on account of (1) its not using reasonable radix points as discussed in
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=162 MPM 6.2.2} and (2) the fact that, even with reasonable
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=162 MPM 6.2.2} and (2) the fact that, even with reasonable
      * radix points, it only works when there are an even number of digits in the denominator.  The reason for (2) is that
      * (x >> 1) + (x >> 1) != x / 2 + x / 2.  If x is even, they're the same, but if x is odd, they're not.  See the in-line
      * comments for details.
@@ -2267,7 +2267,7 @@ class Math_BigInteger
      * Montgomery Modular Reduction
      *
      * ($x->_prepMontgomery($n))->_montgomery($n) yields $x % $n.
-     * {@link http://math.libtomcrypt.com/files/tommath.pdf#page=170 MPM 6.3} provides insights on how this can be
+     * {@link https://math.libtomcrypt.com/files/tommath.pdf#page=170 MPM 6.3} provides insights on how this can be
      * improved upon (basically, by using the comba method).  gcd($n, 2) must be equal to one for this function
      * to work correctly.
      *
@@ -2316,7 +2316,7 @@ class Math_BigInteger
      * Montgomery Multiply
      *
      * Interleaves the montgomery reduction and long multiplication algorithms together as described in
-     * {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=13 HAC 14.36}
+     * {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=13 HAC 14.36}
      *
      * @see self::_prepMontgomery()
      * @see self::_montgomery()
@@ -2393,11 +2393,11 @@ class Math_BigInteger
      *
      * Based off of the bnpInvDigit function implemented and justified in the following URL:
      *
-     * {@link http://www-cs-students.stanford.edu/~tjw/jsbn/jsbn.js}
+     * {@link https://www-cs-students.stanford.edu/~tjw/jsbn/jsbn.js}
      *
      * The following URL provides more info:
      *
-     * {@link http://groups.google.com/group/sci.crypt/msg/7a137205c1be7d85}
+     * {@link https://groups.google.com/group/sci.crypt/msg/7a137205c1be7d85}
      *
      * As for why we do all the bitmasking...  strange things can happen when converting from floats to ints. For
      * instance, on some computers, var_dump((int) -4294967297) yields int(-1) and on others, it yields
@@ -2452,7 +2452,7 @@ class Math_BigInteger
      * @param Math_BigInteger $n
      * @return Math_BigInteger|false
      * @access public
-     * @internal See {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=21 HAC 14.64} for more information.
+     * @internal See {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=21 HAC 14.64} for more information.
      */
     function modInverse($n)
     {
@@ -2496,7 +2496,7 @@ class Math_BigInteger
      * Say you have 693 and 609.  The GCD is 21.  Bezout's identity states that there exist integers x and y such that
      * 693*x + 609*y == 21.  In point of fact, there are actually an infinite number of x and y combinations and which
      * combination is returned is dependant upon which mode is in use.  See
-     * {@link http://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity Bezout's identity - Wikipedia} for more information.
+     * {@link https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity Bezout's identity - Wikipedia} for more information.
      *
      * Here's an example:
      * <code>
@@ -2517,7 +2517,7 @@ class Math_BigInteger
      * @return Math_BigInteger
      * @access public
      * @internal Calculates the GCD using the binary xGCD algorithim described in
-     *    {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=19 HAC 14.61}.  As the text above 14.61 notes,
+     *    {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=19 HAC 14.61}.  As the text above 14.61 notes,
      *    the more traditional algorithim requires "relatively costly multiple-precision divisions".
      */
     function extendedGCD($n)
@@ -3188,7 +3188,7 @@ class Math_BigInteger
 
             phpseclib works around this using the technique described here:
 
-            http://crypto.stackexchange.com/questions/5708/creating-a-small-number-from-a-cryptographically-secure-random-string
+            https://crypto.stackexchange.com/questions/5708/creating-a-small-number-from-a-cryptographically-secure-random-string
         */
         $random_max = new Math_BigInteger(chr(1) . str_repeat("\0", $size), 256);
         $random = $this->_random_number_helper($size);
@@ -3221,7 +3221,7 @@ class Math_BigInteger
      * @param int $timeout
      * @return Math_BigInteger|false
      * @access public
-     * @internal See {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap4.pdf#page=15 HAC 4.44}.
+     * @internal See {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap4.pdf#page=15 HAC 4.44}.
      */
     function randomPrime($arg1, $arg2 = false, $timeout = false)
     {
@@ -3258,7 +3258,7 @@ class Math_BigInteger
 
         $x = $this->random($min, $max);
 
-        // gmp_nextprime() requires PHP 5 >= 5.2.0 per <http://php.net/gmp-nextprime>.
+        // gmp_nextprime() requires PHP 5 >= 5.2.0 per <https://php.net/gmp-nextprime>.
         if (MATH_BIGINTEGER_MODE == MATH_BIGINTEGER_MODE_GMP && extension_loaded('gmp') && version_compare(PHP_VERSION, '5.2.0', '>=')) {
             $p = new Math_BigInteger();
             $p->value = gmp_nextprime($x->value);
@@ -3350,8 +3350,8 @@ class Math_BigInteger
      * @return bool
      * @access public
      * @internal Uses the
-     *     {@link http://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test Miller-Rabin primality test}.  See
-     *     {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap4.pdf#page=8 HAC 4.24}.
+     *     {@link https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test Miller-Rabin primality test}.  See
+     *     {@link https://www.cacr.math.uwaterloo.ca/hac/about/chap4.pdf#page=8 HAC 4.24}.
      */
     function isPrime($t = false)
     {

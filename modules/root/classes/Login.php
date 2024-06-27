@@ -3,9 +3,9 @@
 /*
 --------------------------------------------------------------------------
 GAzie - Gestione Azienda
-Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-(http://www.devincentiis.it)
-<http://gazie.sourceforge.net>
+Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+(https://www.devincentiis.it)
+<https://gazie.sourceforge.net>
 --------------------------------------------------------------------------
 Questo programma e` free software;   e` lecito redistribuirlo  e/o
 modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -27,9 +27,9 @@ Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
 /**
 * handles the user login/logout/session
 * @author Panique
-* @link http://www.php-login.net
+* @link https://www.php-login.net
 * @link https://github.com/panique/php-login-advanced/
-* @license http://opensource.org/licenses/MIT MIT License
+* @license https://opensource.org/licenses/MIT MIT License
 */
 class Login
 {
@@ -184,9 +184,9 @@ class Login
 		} else {
 			try {
 				// Generate a database connection, using the PDO connector
-				// @see http://net.tutsplus.com/tutorials/php/why-you-should-be-using-phps-pdo-for-database-access/
+				// @see https://net.tutsplus.com/tutorials/php/why-you-should-be-using-phps-pdo-for-database-access/
 				// Also important: We include the charset, as leaving it out seems to be a security issue:
-				// @see http://wiki.hashphp.org/PDO_Tutorial_for_MySQL_Developers#Connecting_to_MySQL says:
+				// @see https://wiki.hashphp.org/PDO_Tutorial_for_MySQL_Developers#Connecting_to_MySQL says:
 				// "Adding the charset to the DSN is very important for security reasons,
 				// most examples you'll see around leave it out. MAKE SURE TO INCLUDE THE CHARSET!"
 				$this->db_connection = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8', DB_USER, DB_PASS);
@@ -539,7 +539,7 @@ class Login
 
 		// set the rememberme-cookie to ten years ago (3600sec * 365 days * 10).
 		// that's obivously the best practice to kill a cookie via php
-		// @see http://stackoverflow.com/a/686166/1114320
+		// @see https://stackoverflow.com/a/686166/1114320
 		setcookie('rememberme', false, time() - (3600 * 3650), '/', COOKIE_DOMAIN);
 	}
 

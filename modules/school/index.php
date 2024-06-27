@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -26,12 +26,12 @@
 
 /**
  * A simple PHP Login Script / ADVANCED VERSION
- * For more versions (one-file, minimal, framework-like) visit http://www.php-login.net
+ * For more versions (one-file, minimal, framework-like) visit https://www.php-login.net
  *
  * @author Panique
- * @link http://www.php-login.net
+ * @link https://www.php-login.net
  * @link https://github.com/panique/php-login-advanced/
- * @license http://opensource.org/licenses/MIT MIT License
+ * @license https://opensource.org/licenses/MIT MIT License
  */
 require("../../library/include/datlib.inc.php");
 // include the config

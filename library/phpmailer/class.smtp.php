@@ -11,7 +11,7 @@
  * @copyright 2014 Marcus Bointon
  * @copyright 2010 - 2012 Jim Jagielski
  * @copyright 2004 - 2009 Andy Prevost
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @license https://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  * @note This program is distributed in the hope that it will be useful - WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.
@@ -128,8 +128,8 @@ class SMTP
 
     /**
      * Whether to use VERP.
-     * @link http://en.wikipedia.org/wiki/Variable_envelope_return_path
-     * @link http://www.postfix.org/VERP_README.html Info on VERP
+     * @link https://en.wikipedia.org/wiki/Variable_envelope_return_path
+     * @link https://www.postfix.org/VERP_README.html Info on VERP
      * @var boolean
      */
     public $do_verp = false;
@@ -138,7 +138,7 @@ class SMTP
      * The timeout value for connection, in seconds.
      * Default of 5 minutes (300sec) is from RFC2821 section 4.5.3.2
      * This needs to be quite high to function correctly with hosts using greetdelay as an anti-spam measure.
-     * @link http://tools.ietf.org/html/rfc2821#section-4.5.3.2
+     * @link https://tools.ietf.org/html/rfc2821#section-4.5.3.2
      * @var integer
      */
     public $Timeout = 300;
@@ -485,8 +485,8 @@ class SMTP
                  * Bundled with Permission
                  *
                  * How to telnet in windows:
-                 * http://technet.microsoft.com/en-us/library/aa995718%28EXCHG.65%29.aspx
-                 * PROTOCOL Docs http://curl.haxx.se/rfc/ntlm.html#ntlmSmtpAuthentication
+                 * https://technet.microsoft.com/en-us/library/aa995718%28EXCHG.65%29.aspx
+                 * PROTOCOL Docs https://curl.haxx.se/rfc/ntlm.html#ntlmSmtpAuthentication
                  */
                 require_once 'extras/ntlm_sasl_client.php';
                 $temp = new stdClass;
@@ -565,7 +565,7 @@ class SMTP
         }
 
         // The following borrowed from
-        // http://php.net/manual/en/function.mhash.php#27225
+        // https://php.net/manual/en/function.mhash.php#27225
 
         // RFC 2104 HMAC implementation for php.
         // Creates an md5 HMAC.

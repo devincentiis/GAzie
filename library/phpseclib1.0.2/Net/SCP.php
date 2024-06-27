@@ -5,7 +5,7 @@
  *
  * PHP versions 4 and 5
  *
- * The API for this library is modeled after the API from PHP's {@link http://php.net/book.ftp FTP extension}.
+ * The API for this library is modeled after the API from PHP's {@link https://php.net/book.ftp FTP extension}.
  *
  * Here's a short example of how to use this library:
  * <code>
@@ -45,8 +45,8 @@
  * @package   Net_SCP
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2010 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**#@+

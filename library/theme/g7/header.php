@@ -14,7 +14,7 @@ if ( isset($maintenance) && $maintenance!=FALSE && $maintenance!=$_SESSION['user
     <meta http-equiv="content-language" content="en, it, es">
 		<meta name="mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="Antonio de Vincentiis http://www.devincentiis.it">
+    <meta name="author" content="Antonio de Vincentiis https://www.devincentiis.it">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-title" content="<?php echo $admin_aziend['ragso1'];?>">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

@@ -5,10 +5,10 @@
  *
  * PHP versions 4 and 5
  *
- * If you call read() in Net_SSH2 you may get {@link http://en.wikipedia.org/wiki/ANSI_escape_code ANSI escape codes} back.
+ * If you call read() in Net_SSH2 you may get {@link https://en.wikipedia.org/wiki/ANSI_escape_code ANSI escape codes} back.
  * They'd look like chr(0x1B) . '[00m' or whatever (0x1B = ESC).  They tell a
- * {@link http://en.wikipedia.org/wiki/Terminal_emulator terminal emulator} how to format the characters, what
- * color to display them in, etc. File_ANSI is a {@link http://en.wikipedia.org/wiki/VT100 VT100} terminal emulator.
+ * {@link https://en.wikipedia.org/wiki/Terminal_emulator terminal emulator} how to format the characters, what
+ * color to display them in, etc. File_ANSI is a {@link https://en.wikipedia.org/wiki/VT100 VT100} terminal emulator.
  *
  * LICENSE: Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@
  * @package   File_ANSI
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2012 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**
@@ -253,7 +253,7 @@ class File_ANSI
             if (strlen($this->ansi)) {
                 $this->ansi.= $source[$i];
                 $chr = ord($source[$i]);
-                // http://en.wikipedia.org/wiki/ANSI_escape_code#Sequence_elements
+                // https://en.wikipedia.org/wiki/ANSI_escape_code#Sequence_elements
                 // single character CSI's not currently supported
                 switch (true) {
                     case $this->ansi == "\x1B=":
@@ -267,7 +267,7 @@ class File_ANSI
                 }
                 $this->tokenization[] = $this->ansi;
                 $this->tokenization[] = '';
-                // http://ascii-table.com/ansi-escape-sequences-vt-100.php
+                // https://ascii-table.com/ansi-escape-sequences-vt-100.php
                 switch ($this->ansi) {
                     case "\x1B[H": // Move cursor to upper left corner
                         $this->old_x = $this->x;

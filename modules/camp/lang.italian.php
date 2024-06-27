@@ -2,9 +2,9 @@
 /*
 	  --------------------------------------------------------------------------
 	  GAzie - Gestione Azienda
-	  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-	  (http://www.devincentiis.it)
-	  <http://gazie.sourceforge.net>
+	  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+	  (https://www.devincentiis.it)
+	  <https://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP
 	  Copyright (C) 2018-2023 - Antonio Germani, Massignano (AP)
@@ -239,7 +239,7 @@ $strScript = array("camp_browse_document.php" =>
         "la descrizione &egrave; vuota!",
         "Il file immagine dev'essere nel formato PNG",
         "L'immagine non dev'essere pi&ugrave; grande di 10 kb",
-        'web_url' => 'Web url<br />(es: http://site.com/group.html)'
+        'web_url' => 'Web url<br />(es: https://site.com/group.html)'
     ),
 	"admin_campi.php" =>
     array("Campo di coltivazione ",
@@ -272,7 +272,7 @@ $strScript = array("camp_browse_document.php" =>
         "la descrizione &egrave; vuota!",
         "Il file immagine dev'essere nel formato PNG",
         "L'immagine non dev'essere pi&ugrave; grande di 10 kb",
-        'web_url' => 'Web url<br />(es: http://site.com/group.html)'
+        'web_url' => 'Web url<br />(es: https://site.com/group.html)'
     ),
     "camp_admin_caumag.php" =>
     array("causale di magazzino ",
@@ -620,7 +620,7 @@ $strScript = array("camp_browse_document.php" =>
         'web_public_value' => array(0 => 'No', 1 => 'Si'),
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
         'modal_ok_insert' => 'Articolo inserito con successo clicca sulla X in alto a destra per uscire oppure...',
         'iterate_invitation' => 'INSERISCI UN ALTRO ARTICOLO DI MAGAZZINO',
         'browse_for_file' => 'Sfoglia',

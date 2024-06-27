@@ -15,15 +15,15 @@
  *
  * Not all Rijndael implementations may support 160-bits or 224-bits as the block length / key length.  mcrypt, for example,
  * does not.  AES, itself, only supports block lengths of 128 and key lengths of 128, 192, and 256.
- * {@link http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=10 Rijndael-ammended.pdf#page=10} defines the
+ * {@link https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=10 Rijndael-ammended.pdf#page=10} defines the
  * algorithm for block lengths of 192 and 256 but not for block lengths / key lengths of 160 and 224.  Indeed, 160 and 224
  * are first defined as valid key / block lengths in
- * {@link http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=44 Rijndael-ammended.pdf#page=44}:
+ * {@link https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=44 Rijndael-ammended.pdf#page=44}:
  * Extensions: Other block and Cipher Key lengths.
  * Note: Use of 160/224-bit Keys must be explicitly set by setKeyLength(160) respectively setKeyLength(224).
  *
  * {@internal The variable names are the same as those in
- * {@link http://www.csrc.nist.gov/publications/fips/fips197/fips-197.pdf#page=10 fips-197.pdf#page=10}.}}
+ * {@link https://www.csrc.nist.gov/publications/fips/fips197/fips-197.pdf#page=10 fips-197.pdf#page=10}.}}
  *
  * Here's a short example of how to use this library:
  * <code>
@@ -66,8 +66,8 @@
  * @package   Crypt_Rijndael
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2008 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**
@@ -89,31 +89,31 @@ if (!class_exists('Crypt_Base')) {
  *
  * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
  */
 define('CRYPT_RIJNDAEL_MODE_CTR', CRYPT_MODE_CTR);
 /**
  * Encrypt / decrypt using the Electronic Code Book mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
  */
 define('CRYPT_RIJNDAEL_MODE_ECB', CRYPT_MODE_ECB);
 /**
  * Encrypt / decrypt using the Code Book Chaining mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
  */
 define('CRYPT_RIJNDAEL_MODE_CBC', CRYPT_MODE_CBC);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
  */
 define('CRYPT_RIJNDAEL_MODE_CFB', CRYPT_MODE_CFB);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
  */
 define('CRYPT_RIJNDAEL_MODE_OFB', CRYPT_MODE_OFB);
 /**#@-*/
@@ -446,7 +446,7 @@ class Crypt_Rijndael extends Crypt_Base
         // Unfortunately, the description given there is not quite correct.  Per aes.spec.v316.pdf#page=19 [1],
         // equation (7.4.7) is supposed to use addition instead of subtraction, so we'll do that here, as well.
 
-        // [1] http://fp.gladman.plus.com/cryptography_technology/rijndael/aes.spec.v316.pdf
+        // [1] https://fp.gladman.plus.com/cryptography_technology/rijndael/aes.spec.v316.pdf
         $temp = array();
         for ($round = 1; $round < $Nr; ++$round) {
             $i = 0; // $c[0] == 0
@@ -606,7 +606,7 @@ class Crypt_Rijndael extends Crypt_Base
     function _setupKey()
     {
         // Each number in $rcon is equal to the previous number multiplied by two in Rijndael's finite field.
-        // See http://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
+        // See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
         static $rcon = array(0,
             0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
             0x20000000, 0x40000000, 0x80000000, 0x1B000000, 0x36000000,
@@ -649,7 +649,7 @@ class Crypt_Rijndael extends Crypt_Base
         for ($i = $this->Nk; $i < $length; $i++) {
             $temp = $w[$i - 1];
             if ($i % $this->Nk == 0) {
-                // according to <http://php.net/language.types.integer>, "the size of an integer is platform-dependent".
+                // according to <https://php.net/language.types.integer>, "the size of an integer is platform-dependent".
                 // on a 32-bit machine, it's 32-bits, and on a 64-bit machine, it's 64-bits. on a 32-bit machine,
                 // 0xFFFFFFFF << 8 == 0xFFFFFF00, but on a 64-bit machine, it equals 0xFFFFFFFF00. as such, doing 'and'
                 // with 0xFFFFFFFF (or 0xFFFFFF00) on a 32-bit machine is unnecessary, but on a 64-bit machine, it is.
@@ -663,7 +663,7 @@ class Crypt_Rijndael extends Crypt_Base
 
         // convert the key schedule from a vector of $Nb * ($Nr + 1) length to a matrix with $Nr + 1 rows and $Nb columns
         // and generate the inverse key schedule.  more specifically,
-        // according to <http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=23> (section 5.3.3),
+        // according to <https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=23> (section 5.3.3),
         // "The key expansion for the Inverse Cipher is defined as follows:
         //        1. Apply the Key Expansion.
         //        2. Apply InvMixColumn to all Round Keys except the first and the last one."
@@ -742,7 +742,7 @@ class Crypt_Rijndael extends Crypt_Base
     {
         static $tables;
         if (empty($tables)) {
-            // according to <http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=19> (section 5.2.1),
+            // according to <https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=19> (section 5.2.1),
             // precomputed tables can be used in the mixColumns phase. in that example, they're assigned t0...t3, so
             // those are the names we'll use.
             $t3 = array_map('intval', array(

@@ -13,7 +13,7 @@
  * PHP versions 4 and 5
  *
  * {@internal The variable names are the same as those in
- * {@link http://tools.ietf.org/html/rfc2104#section-2 RFC2104}.}}
+ * {@link https://tools.ietf.org/html/rfc2104#section-2 RFC2104}.}}
  *
  * Here's a short example of how to use this library:
  * <code>
@@ -50,8 +50,8 @@
  * @package   Crypt_Hash
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**#@+
@@ -325,7 +325,7 @@ class Crypt_Hash
                     /* "Applications that use keys longer than B bytes will first hash the key using H and then use the
                         resultant L byte string as the actual key to HMAC."
 
-                        -- http://tools.ietf.org/html/rfc2104#section-2 */
+                        -- https://tools.ietf.org/html/rfc2104#section-2 */
                     $key = strlen($this->key) > $this->b ? call_user_func($this->hash, $this->key) : $this->key;
 
                     $key    = str_pad($key, $this->b, chr(0));      // step 1
@@ -388,7 +388,7 @@ class Crypt_Hash
     /**
      * Pure-PHP implementation of MD2
      *
-     * See {@link http://tools.ietf.org/html/rfc1319 RFC1319}.
+     * See {@link https://tools.ietf.org/html/rfc1319 RFC1319}.
      *
      * @access private
      * @param string $m
@@ -429,7 +429,7 @@ class Crypt_Hash
             for ($j = 0; $j < 16; $j++) {
                 // RFC1319 incorrectly states that C[j] should be set to S[c xor L]
                 //$c[$j] = chr($s[ord($m[$i + $j] ^ $l)]);
-                // per <http://www.rfc-editor.org/errata_search.php?rfc=1319>, however, C[j] should be set to S[c xor L] xor C[j]
+                // per <https://www.rfc-editor.org/errata_search.php?rfc=1319>, however, C[j] should be set to S[c xor L] xor C[j]
                 $c[$j] = chr($s[ord($m[$i + $j] ^ $l)] ^ ord($c[$j]));
                 $l = $c[$j];
             }
@@ -464,7 +464,7 @@ class Crypt_Hash
     /**
      * Pure-PHP implementation of SHA256
      *
-     * See {@link http://en.wikipedia.org/wiki/SHA_hash_functions#SHA-256_.28a_SHA-2_variant.29_pseudocode SHA-256 (a SHA-2 variant) pseudocode - Wikipedia}.
+     * See {@link https://en.wikipedia.org/wiki/SHA_hash_functions#SHA-256_.28a_SHA-2_variant.29_pseudocode SHA-256 (a SHA-2 variant) pseudocode - Wikipedia}.
      *
      * @access private
      * @param string $m

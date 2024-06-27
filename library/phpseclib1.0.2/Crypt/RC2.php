@@ -9,7 +9,7 @@
  *
  * Useful resources are as follows:
  *
- *  - {@link http://tools.ietf.org/html/rfc2268}
+ *  - {@link https://tools.ietf.org/html/rfc2268}
  *
  * Here's a short example of how to use this library:
  * <code>
@@ -47,8 +47,8 @@
  * @category Crypt
  * @package  Crypt_RC2
  * @author   Patrick Monnerat <pm@datasphere.ch>
- * @license  http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link     http://phpseclib.sourceforge.net
+ * @license  https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link     https://phpseclib.sourceforge.net
  */
 
 /**
@@ -70,31 +70,31 @@ if (!class_exists('Crypt_Base')) {
  *
  * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
  */
 define('CRYPT_RC2_MODE_CTR', CRYPT_MODE_CTR);
 /**
  * Encrypt / decrypt using the Electronic Code Book mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
  */
 define('CRYPT_RC2_MODE_ECB', CRYPT_MODE_ECB);
 /**
  * Encrypt / decrypt using the Code Book Chaining mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
  */
 define('CRYPT_RC2_MODE_CBC', CRYPT_MODE_CBC);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
  */
 define('CRYPT_RC2_MODE_CFB', CRYPT_MODE_CFB);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
  */
 define('CRYPT_RC2_MODE_OFB', CRYPT_MODE_OFB);
 /**#@-*/

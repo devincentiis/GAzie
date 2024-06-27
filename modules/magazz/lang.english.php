@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.devincentiis.it>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.devincentiis.it>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -127,7 +127,7 @@ $strScript = array("browse_document.php" =>
         "la descrizione &egrave; vuota!",
         "Il file immagine dev'essere nel formato PNG",
         "L'immagine non dev'essere pi&ugrave; grande di 64Kb",
-        'web_url' => 'Web url<br />(ex: http://site.com/group.html)'
+        'web_url' => 'Web url<br />(ex: https://site.com/group.html)'
     ),
     "admin_ragstat.php" =>
     array("statistic groups ",
@@ -140,7 +140,7 @@ $strScript = array("browse_document.php" =>
         "la descrizione &egrave; vuota!",
         "Il file immagine dev'essere nel formato PNG",
         "L'immagine non dev'essere pi&ugrave; grande di 64Kb",
-        'web_url' => 'Web url<br />(es: http://site.com/group.html)'
+        'web_url' => 'Web url<br />(es: https://site.com/group.html)'
     ),
     "admin_caumag.php" =>
     array("warehouse causal ",
@@ -436,7 +436,7 @@ $strScript = array("browse_document.php" =>
         'depli_public' => 'Public on depliant',
         'depli_public_value' => array(0 => 'No', 1 => 'Yes'),
         'web_public_value' => array(0 => 'No', 1 => 'Yes'),
-        'web_url' => 'Web url<br />(ex: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(ex: https://site.com/item.html)',
         'modal_ok_insert' => 'Product inserted successfully, click on the X on the upper right corner to exit or...',
         'iterate_invitation' => 'INSERT ANOTHER ITEM IN STOCK!',
         'browse_for_file' => 'Browse',
@@ -476,7 +476,7 @@ $strScript = array("browse_document.php" =>
 		'body_text' => 'Descrizione estesa',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
         'modal_ok_insert' => 'Articolo inserito con successo clicca sulla X in alto a destra per uscire oppure...',
         'mesg' => array(
         )

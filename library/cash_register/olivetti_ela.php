@@ -2,9 +2,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -47,9 +47,9 @@
   sudo /etc/init.d/udev restart
 
   per maggiori info:
-  http://ubuntuforums.org/showthread.php?t=782115
+  https://ubuntuforums.org/showthread.php?t=782115
   e su:
-  http://guide.debianizzati.org/index.php/Udev_e_Debian
+  https://guide.debianizzati.org/index.php/Udev_e_Debian
 
  */
 

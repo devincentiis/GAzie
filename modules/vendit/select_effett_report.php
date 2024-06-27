@@ -2,9 +2,9 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-         (http://www.devincentiis.it)
-           <http://gazie.sourceforge.net>
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+         (https://www.devincentiis.it)
+           <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
     Questo programma e` free software;   e` lecito redistribuirlo  e/o
     modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -326,7 +326,7 @@ if (isset($_POST['preview']) and $msg=='') {
         echo "<td class=\"FacetDataTD\">".gaz_format_date($v["scaden"])."</td>";
         echo "<td class=\"FacetDataTD\" align=\"right\">".$admin_aziend['html_symbol'].' '.gaz_format_number($v["impeff"])." </td>";
         echo "<td class=\"FacetDataTD\">".$v["customer"]." </td>";
-        echo "<td class=\"FacetDataTD\"><A HREF=\"http://localhost/gazie/modules/vendit/admin_docven.php?id_tes=".$v['id_tes']."&Update\">n.".$v["numfat"]."/".$v["seziva"]." - ".gaz_format_date($v["datfat"])."</a></td>";
+        echo "<td class=\"FacetDataTD\"><A HREF=\"https://localhost/gazie/modules/vendit/admin_docven.php?id_tes=".$v['id_tes']."&Update\">n.".$v["numfat"]."/".$v["seziva"]." - ".gaz_format_date($v["datfat"])."</a></td>";
         echo "<td class=\"FacetDataTD\">".$v["desban"]." </td>";
         echo "</tr>\n";
         echo "<tr>";

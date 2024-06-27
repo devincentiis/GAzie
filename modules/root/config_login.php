@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -28,8 +28,8 @@
  * Configuration for: Database Connection
  * This is the place where your database login constants are saved
  *
- * For more info about constants please @see http://php.net/manual/en/function.define.php
- * If you want to know why we use "define" instead of "const" @see http://stackoverflow.com/q/2447791/1114320
+ * For more info about constants please @see https://php.net/manual/en/function.define.php
+ * If you want to know why we use "define" instead of "const" @see https://stackoverflow.com/q/2447791/1114320
  *
  * DB_HOST: database host, usually it's "127.0.0.1" or "localhost", some servers also need port info
  * DB_NAME: name of the database. please note: database and database table are not the same thing
@@ -78,8 +78,8 @@ define("DB_PASS", $Password);
  * For local development .127.0.0.1 or .localhost is fine, but when deploying you should
  * change this to your real domain, like '.mydomain.com' ! The leading dot makes the cookie available for
  * sub-domains too.
- * @see http://stackoverflow.com/q/9618217/1114320
- * @see http://www.php.net/manual/en/function.setcookie.php
+ * @see https://stackoverflow.com/q/9618217/1114320
+ * @see https://www.php.net/manual/en/function.setcookie.php
  *
  * COOKIE_RUNTIME: How long should a cookie be valid ? 1800 seconds = 30 min
  * COOKIE_DOMAIN: The domain where the cookie is valid for, like '.mydomain.com'
@@ -119,9 +119,9 @@ function getBaseUrl() { // ricavo l'URL del modulo
     $pathInfo = pathinfo($currentPath);
     // output: localhost
     $hostName = $_SERVER['HTTP_HOST'];
-    // output: http://
-    $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"], 0, 5)) == 'https://' ? 'https://' : 'http://';
-    // return: http://localhost/myproject/
+    // output: https://
+    $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"], 0, 5)) == 'https://' ? 'https://' : 'https://';
+    // return: https://localhost/myproject/
     return $protocol . $hostName . $pathInfo['dirname'] . "/";
 }
 
@@ -156,7 +156,7 @@ define("EMAIL_VERIFICATION_URL", getBaseUrl()."login_register.php");
  * Don't change this if you don't know what you do.
  *
  * To get more information about the best cost factor please have a look here
- * @see http://stackoverflow.com/q/4443476/1114320
+ * @see https://stackoverflow.com/q/4443476/1114320
  *
  * This constant will be used in the login and the registration class.
  */

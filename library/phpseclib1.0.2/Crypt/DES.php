@@ -9,9 +9,9 @@
  *
  * Useful resources are as follows:
  *
- *  - {@link http://en.wikipedia.org/wiki/DES_supplementary_material Wikipedia: DES supplementary material}
- *  - {@link http://www.itl.nist.gov/fipspubs/fip46-2.htm FIPS 46-2 - (DES), Data Encryption Standard}
- *  - {@link http://www.cs.eku.edu/faculty/styer/460/Encrypt/JS-DES.html JavaScript DES Example}
+ *  - {@link https://en.wikipedia.org/wiki/DES_supplementary_material Wikipedia: DES supplementary material}
+ *  - {@link https://www.itl.nist.gov/fipspubs/fip46-2.htm FIPS 46-2 - (DES), Data Encryption Standard}
+ *  - {@link https://www.cs.eku.edu/faculty/styer/460/Encrypt/JS-DES.html JavaScript DES Example}
  *
  * Here's a short example of how to use this library:
  * <code>
@@ -54,8 +54,8 @@
  * @package   Crypt_DES
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**
@@ -92,31 +92,31 @@ define('CRYPT_DES_DECRYPT', 1);
  *
  * Set to -1 since that's what Crypt/Random.php uses to index the CTR mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Counter_.28CTR.29
  */
 define('CRYPT_DES_MODE_CTR', CRYPT_MODE_CTR);
 /**
  * Encrypt / decrypt using the Electronic Code Book mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29
  */
 define('CRYPT_DES_MODE_ECB', CRYPT_MODE_ECB);
 /**
  * Encrypt / decrypt using the Code Book Chaining mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29
  */
 define('CRYPT_DES_MODE_CBC', CRYPT_MODE_CBC);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher_feedback_.28CFB.29
  */
 define('CRYPT_DES_MODE_CFB', CRYPT_MODE_CFB);
 /**
  * Encrypt / decrypt using the Cipher Feedback mode.
  *
- * @link http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
+ * @link https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Output_feedback_.28OFB.29
  */
 define('CRYPT_DES_MODE_OFB', CRYPT_MODE_OFB);
 /**#@-*/
@@ -734,7 +734,7 @@ class Crypt_DES extends Crypt_Base
      * Encrypts or decrypts a 64-bit block
      *
      * $mode should be either CRYPT_DES_ENCRYPT or CRYPT_DES_DECRYPT.  See
-     * {@link http://en.wikipedia.org/wiki/Image:Feistel.png Feistel.png} to get a general
+     * {@link https://en.wikipedia.org/wiki/Image:Feistel.png Feistel.png} to get a general
      * idea of what this function does.
      *
      * @see self::_encryptBlock()
@@ -786,7 +786,7 @@ class Crypt_DES extends Crypt_Base
             // Perform the 16 steps.
             for ($i = 0; $i < 16; $i++) {
                 // start of "the Feistel (F) function" - see the following URL:
-                // http://en.wikipedia.org/wiki/Image:Data_Encryption_Standard_InfoBox_Diagram.png
+                // https://en.wikipedia.org/wiki/Image:Data_Encryption_Standard_InfoBox_Diagram.png
                 // Merge key schedule.
                 $b1 = (($r >>  3) & 0x1FFFFFFF) ^ ($r << 29) ^ $keys[++$ki];
                 $b2 = (($r >> 31) & 0x00000001) ^ ($r <<  1) ^ $keys[++$ki];
@@ -1466,7 +1466,7 @@ class Crypt_DES extends Crypt_Base
                     // Perform the 16 steps.
                     for ($i = 0; $i < 16; ++$i) {
                         // start of "the Feistel (F) function" - see the following URL:
-                        // http://en.wikipedia.org/wiki/Image:Data_Encryption_Standard_InfoBox_Diagram.png
+                        // https://en.wikipedia.org/wiki/Image:Data_Encryption_Standard_InfoBox_Diagram.png
                         // Merge key schedule.
                         $crypt_block[$c].= '
                             $b1 = ((' . $r . ' >>  3) & 0x1FFFFFFF)  ^ (' . $r . ' << 29) ^ ' . $k[$c][++$ki] . ';

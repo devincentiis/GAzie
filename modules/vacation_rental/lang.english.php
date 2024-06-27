@@ -3,14 +3,14 @@
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP) - telefono +39 340 50 11 912
-  (http://www.programmisitiweb.lacasettabio.it)
+  (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.devincentiis.it>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.devincentiis.it>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -215,7 +215,7 @@ $strScript = array(
         "L'immagine non dev'essere pi&ugrave; grande di 64Kb",
         "Descrizione estesa",
         "ID riferimento e-commerce",
-        'web_url' => 'Web url<br />(es: http://site.com/group.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/group.html)',
         'top' => 'Bottone su home ecommerce'
       ),
     "admin_ragstat.php" =>
@@ -229,7 +229,7 @@ $strScript = array(
         "la descrizione &egrave; vuota!",
         "Il file immagine dev'essere nel formato PNG",
         "L'immagine non dev'essere pi&ugrave; grande di 64Kb",
-        'web_url' => 'Web url<br />(es: http://site.com/group.html)'
+        'web_url' => 'Web url<br />(es: https://site.com/group.html)'
       ),
     "admin_caumag.php" =>
     array("causale di magazzino ",
@@ -596,7 +596,7 @@ $strScript = array(
         'utilizzato' => 'Utilizzato',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
         'modal_ok_insert' => 'Casa inserita con successo clicca sulla X in alto a destra per uscire oppure...',
         'iterate_invitation' => 'INSERISCI UN\'ALTRA CASA',
         'browse_for_file' => 'Sfoglia',
@@ -643,7 +643,7 @@ $strScript = array(
 		'body_text' => 'Descrizione estesa',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
         'modal_ok_insert' => 'Alloggio inserito con successo clicca sulla X in alto a destra per uscire oppure...',
         'mesg' => array(
         )

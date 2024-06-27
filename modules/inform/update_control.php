@@ -2,9 +2,9 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-         (http://www.devincentiis.it)
-           <http://gazie.sourceforge.net>
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+         (https://www.devincentiis.it)
+           <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
     Questo programma e` free software;   e` lecito redistribuirlo  e/o
     modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -26,7 +26,7 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend=checkAdmin(9);
 
 // Qui viene tenuto dagli sviluppatori la lista dei siti che hanno messo a disposizione il file di check della propria versione
-$tutor[1] = array('zone'=>'Abruzzo','city'=>'Montesilvano (PE)','sms'=>'+393383121161','web'=>'https://www.devincentiis.it','check'=>'http://www.devincentiis.it/file_ver');
+$tutor[1] = array('zone'=>'Abruzzo','city'=>'Montesilvano (PE)','sms'=>'+393383121161','web'=>'https://www.devincentiis.it','check'=>'https://www.devincentiis.it/file_ver');
 // fine lista
 $configurazione = gaz_dbi_get_row($gTables['config'],'variable','update_url');
 // se si ha un sito "personalizzato" per il download diverso da quello ufficiale su Sourceforge: modifico quello di default

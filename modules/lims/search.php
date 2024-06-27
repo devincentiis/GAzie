@@ -1,7 +1,7 @@
 <?php
 /*
   --------------------------------------------------------------------------
-  Copyright (C) - Antonio De Vincentiis Montesilvano (PE)  (http://www.devincentiis.it)
+  Copyright (C) - Antonio De Vincentiis Montesilvano (PE)  (https://www.devincentiis.it)
   --------------------------------------------------------------------------
 // prevent direct access
 /*/
@@ -96,12 +96,12 @@ function like_prepare($dbfield, $txtsearch) {
 
 /** ENRICO FEDELE */
 /* Codice preso da
-  http://www.pontikis.net/blog/jquery-ui-autocomplete-step-by-step
+  https://www.pontikis.net/blog/jquery-ui-autocomplete-step-by-step
  */
 
 /**
  * mb_stripos all occurences
- * based on http://www.php.net/manual/en/function.strpos.php#87061
+ * based on https://www.php.net/manual/en/function.strpos.php#87061
  *
  * Find all occurrences of a needle in a haystack
  *

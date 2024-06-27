@@ -9,8 +9,8 @@
  *
  * Useful resources are as follows:
  *
- *  - {@link http://www.mozilla.org/projects/security/pki/nss/draft-kaukonen-cipher-arcfour-03.txt ARCFOUR Algorithm}
- *  - {@link http://en.wikipedia.org/wiki/RC4 - Wikipedia: RC4}
+ *  - {@link https://www.mozilla.org/projects/security/pki/nss/draft-kaukonen-cipher-arcfour-03.txt ARCFOUR Algorithm}
+ *  - {@link https://en.wikipedia.org/wiki/RC4 - Wikipedia: RC4}
  *
  * RC4 is also known as ARCFOUR or ARC4.  The reason is elaborated upon at Wikipedia.  This class is named RC4 and not
  * ARCFOUR or ARC4 because RC4 is how it is referred to in the SSH1 specification.
@@ -56,8 +56,8 @@
  * @package   Crypt_RC4
  * @author    Jim Wigginton <terrafrost@php.net>
  * @copyright 2007 Jim Wigginton
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- * @link      http://phpseclib.sourceforge.net
+ * @license   https://www.opensource.org/licenses/mit-license.html  MIT License
+ * @link      https://phpseclib.sourceforge.net
  */
 
 /**
@@ -207,11 +207,11 @@ class Crypt_RC4 extends Crypt_Base
      *
      * [1] WEP's initialization vectors (IV's) are used in a somewhat insecure way.  Since, in that protocol,
      * the IV's are relatively easy to predict, an attack described by
-     * {@link http://www.drizzle.com/~aboba/IEEE/rc4_ksaproc.pdf Scott Fluhrer, Itsik Mantin, and Adi Shamir}
+     * {@link https://www.drizzle.com/~aboba/IEEE/rc4_ksaproc.pdf Scott Fluhrer, Itsik Mantin, and Adi Shamir}
      * can be used to quickly guess at the rest of the key.  The following links elaborate:
      *
-     * {@link http://www.rsa.com/rsalabs/node.asp?id=2009 http://www.rsa.com/rsalabs/node.asp?id=2009}
-     * {@link http://en.wikipedia.org/wiki/Related_key_attack http://en.wikipedia.org/wiki/Related_key_attack}
+     * {@link https://www.rsa.com/rsalabs/node.asp?id=2009 https://www.rsa.com/rsalabs/node.asp?id=2009}
+     * {@link https://en.wikipedia.org/wiki/Related_key_attack https://en.wikipedia.org/wiki/Related_key_attack}
      *
      * @param string $iv
      * @see self::setKey()

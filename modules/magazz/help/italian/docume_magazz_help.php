@@ -85,18 +85,18 @@ che appaiono mentre il puntatore del mouse vi si sposta sopra.</p>
 		registrazioni.</p> -->
 
 		<p class="help-text">Esempi: <br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=qnypB8B8nH4">carico per
+		href="https://www.youtube.com/watch?v=qnypB8B8nH4">carico per
 		acquisto</a><br>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=Wm9Ix2IboiI">scarico per
+		href="https://www.youtube.com/watch?v=Wm9Ix2IboiI">scarico per
 		vendita</a><br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=GIpPRKImO34">carico per
+		href="https://www.youtube.com/watch?v=GIpPRKImO34">carico per
 		acquisto</a><br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=fyvXMJuCl-g">scarico per
+		href="https://www.youtube.com/watch?v=fyvXMJuCl-g">scarico per
 		vendita</a><br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=kyV8HJ6cDAE">scarico per
+		href="https://www.youtube.com/watch?v=kyV8HJ6cDAE">scarico per
 		vendita</a><br>- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=vc5kDenlgHo">stampa del giornale di magazzino</a></p>
+		href="https://www.youtube.com/watch?v=vc5kDenlgHo">stampa del giornale di magazzino</a></p>
 	</div>
 
 	<div id="Causali" class="tab-pane fade in">

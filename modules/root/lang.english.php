@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.sourceforge.net>
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -50,28 +50,28 @@ $strScript = array("admin.php" =>
         'user_regol' => 'LEGGI IL "REGOLAMENTO UTILIZZO RISORSE INFORMATICHE"',
         'auth' => "Contact",
         'strBottom' => array(
-            array('href' => "http://www.kernel.org/",
+            array('href' => "https://www.kernel.org/",
                 'img' => "linux.gif",
                 'title' => "Linux (kernel)"),
-            array('href' => "http://www.apache.org",
+            array('href' => "https://www.apache.org",
                 'img' => "apache.gif",
                 'title' => "Apache the Web Server more used in the world!"),
             array('href' => "https://mariadb.org",
                 'img' => "mariadb.png",
                 'title' => "MariaDB, il database dentro il quale GAzie archivia i suoi dati"),
-            array('href' => "http://www.php.net",
+            array('href' => "https://www.php.net",
                 'img' => "phppower.gif",
                 'title' => "Go to PHP official web site, the language for Dynamic Web!"),
-            array('href' => "http://sourceforge.net/projects/tcpdf/",
+            array('href' => "https://sourceforge.net/projects/tcpdf/",
                 'img' => "tcpdf.jpg",
                 'title' => "You find TCPDF here, the PHP class FPDF based used to produce the GAzie's documents!"),
             array('href' => "https://jquery.com/",
                 'img' => "jquery.png",
                 'title' => "La libreria javascript per il web"),
-            array('href' => "http://getbootstrap.com/",
+            array('href' => "https://getbootstrap.com/",
                 'img' => "bootstrap.png",
                 'title' => "Bootstrap, front end web library"),
-            array('href' => "http://www.mozilla.org/products/firefox/all.html",
+            array('href' => "https://www.mozilla.org/products/firefox/all.html",
                 'img' => "firefox.gif",
                 'title' => "Download FIREFOX, the browser GAzie has been tested with!")
         ),

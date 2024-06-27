@@ -2,9 +2,9 @@
 /*
 	  --------------------------------------------------------------------------
 	  GAzie - Gestione Azienda
-	  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-	  (http://www.devincentiis.it)
-	  <http://gazie.sourceforge.net>
+	  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+	  (https://www.devincentiis.it)
+	  <https://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP 
 	  Copyright (C) 2018-2021 - Antonio Germani, Massignano (AP)

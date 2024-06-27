@@ -2,9 +2,9 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-         (http://www.devincentiis.it)
-           <http://gazie.sourceforge.net>
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+         (https://www.devincentiis.it)
+           <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
     Questo programma e` free software;   e` lecito redistribuirlo  e/o
     modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -38,7 +38,7 @@ Siccome esistono diversi modelli di stampanti fiscali con altrettanti numerosi d
 Qualora ci fosse qualche produttore e/o rivenditore di stampanti fiscali interessato
 alla scrittura per la sua macchina (bastano poche righe di codice), sperando in un
 ritorno commerciale sulle vendite del proprio hardware, pu&oacute; inviare il lavoro
-direttamente su Sourceforge a <A HREF=\"http://sourceforge.net/tracker2/?group_id=130281&atid=717641\">
+direttamente su Sourceforge a <A HREF=\"https://sourceforge.net/tracker2/?group_id=130281&atid=717641\">
 QUESTO INDIRIZZO</A>.
 Non esiteremo a recepire ed evidenziare rapidamente il contributo sul sito del progetto.
 </td></tr></table>\n";

@@ -71,7 +71,6 @@ GAzie è la soluzione ideale per piccole aziende che operano nel commercio, nell
 * Contabilizzazione delle fatture in Prima Nota
 * Gestione dei Cespiti
 * Registro IVA e Libro Giornale
-* Riconciliazione E/C in contabilità
 
 ### Magazzino e Produzione
 * Gestione del Magazzino a lotti con Magazzini multipli

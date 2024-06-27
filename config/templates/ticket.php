@@ -2,9 +2,9 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-         (http://www.devincentiis.it)
-           <http://gazie.sourceforge.net>
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+         (https://www.devincentiis.it)
+           <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
     Questo programma e` free software;   e` lecito redistribuirlo  e/o
     modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -50,7 +50,7 @@ class Ticket extends Template
     function newPage() {
         $this->AddPage();
         $this->SetFillColor(hexdec(substr($this->colore,0,2)),hexdec(substr($this->colore,2,2)),hexdec(substr($this->colore,4,2)));
-		$url= "http://" . $_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/ts.php?id='.$this->tesdoc['id_orderman'].'&co='.$_SESSION['company_id'];
+		$url= "https://" . $_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/ts.php?id='.$this->tesdoc['id_orderman'].'&co='.$_SESSION['company_id'];
 		require('../../library/qrcode/phpqrcode.php');
 		$qrc = new QRcode();
 		$qrc->png($url, DATA_DIR . 'files/tmp/qr.png');

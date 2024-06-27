@@ -24,10 +24,10 @@ Come ogni software libero lascia la possibilità di modificare i sorgenti e la p
 eventualmente questo breve <a title="guarda il video" href="help/italian/home_menu.ogv">filmato</a>.-->
             </p>
 
-            <p>Per una guida generale introduttiva a GAzie si possono consultare alcuni capitoli tratti da &laquo;<big>a</big>2&raquo; <a href="http://www.archive.org/details/AppuntiDiInformaticaLibera" target="new">Appunti Di Informatica Libera</a>: <a
-title="leggi la guida" href="http://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/installazione_e_manutenzione_generale.pdf" target="_new"><em>Installazione e manutenzione generale</em></a>, <a title="leggi la guida" href="http://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/manuale_sintetico_delle_funzionalita_principali_di_gazie.pdf" target="_new"><em>Manuale sintetico delle funzionalit&agrave; di Gazie</em></a>, <a title="leggi la guida" href="http://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/tabelle_principali_della_base_di_dati_di_gazie.pdf" target="_new">
-<em>Tabelle principali della base di dati di Gazie</em></a>, <a title="leggi la guida" href="http://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/esercitazioni_con_gazie.pdf" target="_new">
-<em>Esercitazioni con Gazie</em></a>. Si veda eventualmente anche questa <a title="leggi l'appendice" href="http://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/gazie_non_e_un_giocattolo.htm" target="_new">appendice</a>
+            <p>Per una guida generale introduttiva a GAzie si possono consultare alcuni capitoli tratti da &laquo;<big>a</big>2&raquo; <a href="https://www.archive.org/details/AppuntiDiInformaticaLibera" target="new">Appunti Di Informatica Libera</a>: <a
+title="leggi la guida" href="https://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/installazione_e_manutenzione_generale.pdf" target="_new"><em>Installazione e manutenzione generale</em></a>, <a title="leggi la guida" href="https://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/manuale_sintetico_delle_funzionalita_principali_di_gazie.pdf" target="_new"><em>Manuale sintetico delle funzionalit&agrave; di Gazie</em></a>, <a title="leggi la guida" href="https://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/tabelle_principali_della_base_di_dati_di_gazie.pdf" target="_new">
+<em>Tabelle principali della base di dati di Gazie</em></a>, <a title="leggi la guida" href="https://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/esercitazioni_con_gazie.pdf" target="_new">
+<em>Esercitazioni con Gazie</em></a>. Si veda eventualmente anche questa <a title="leggi l'appendice" href="https://appuntilinux.mirror.garr.it/mirrors/appuntilinux/a2/gazie_non_e_un_giocattolo.htm" target="_new">appendice</a>
 se si cerca assistenza.
             </p>
 </div>
@@ -58,16 +58,16 @@ se si cerca assistenza.
 
 		<p class="help-text">Esempi: <br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=QL3NBjXj2Ro">emissione di una
+		href="https://www.youtube.com/watch?v=QL3NBjXj2Ro">emissione di una
 		fatture immediata normale</a><br/>
 		- <a target="_blank" title="guarda il video"
-		href="http://www.youtube.com/watch?v=MY_P9kusXnU">contabilizzazione
+		href="https://www.youtube.com/watch?v=MY_P9kusXnU">contabilizzazione
 		della fattura emessa</a><br/>
 		- <a target="_blank" title="guarda il
-		video" href="http://www.youtube.com/watch?v=w8N4VDrbG9U">emissione di una
+		video" href="https://www.youtube.com/watch?v=w8N4VDrbG9U">emissione di una
 		nota di accredito</a><br/>
 		- <a target="_blank" title="guarda il
-		video" href="http://www.youtube.com/watch?v=QC-VADDI7hs">contabilizzazione
+		video" href="https://www.youtube.com/watch?v=QC-VADDI7hs">contabilizzazione
 		della nota di accredito</a><br/>
 		</p>
 	</div>

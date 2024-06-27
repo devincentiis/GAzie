@@ -2,9 +2,9 @@
 /* $Id: install.php,v 1.17 2011/01/01 11:08:15 devincen Exp $
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
-         (http://www.devincentiis.it)
-           <http://gazie.sourceforge.net>
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+         (https://www.devincentiis.it)
+           <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
     Questo programma e` free software;   e` lecito redistribuirlo  e/o
     modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -480,7 +480,7 @@ function executeModulesUpdate(){// Antonio Germani 12/07/2022 - funzione per ese
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="author" content="Antonio De Vincentiis http://www.devincentiis.it">
+    <meta name="author" content="Antonio De Vincentiis https://www.devincentiis.it">
     <link rel="stylesheet" type="text/css" href="../../library/theme/g7/scheletons/default.css">
     <link rel="shortcut icon" href="../library/images/favicon.ico">
     <title><?php echo $msg['title'];?></title>

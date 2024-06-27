@@ -3,14 +3,14 @@
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP) - telefono +39 340 50 11 912
-  (http://www.programmisitiweb.lacasettabio.it)
+  (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
   Copyright (C) 2004-2022 - Antonio De Vincentiis Montesilvano (PE)
-  (http://www.devincentiis.it)
-  <http://gazie.devincentiis.it>
+  (https://www.devincentiis.it)
+  <https://gazie.devincentiis.it>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -358,7 +358,7 @@ $strScript = array(
         'utilizzato' => 'Utilizzato',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
         'modal_ok_insert' => 'Casa inserita con successo clicca sulla X in alto a destra per uscire oppure...',
         'iterate_invitation' => 'INSERISCI UN\'ALTRA CASA',
         'browse_for_file' => 'Sfoglia',
@@ -410,7 +410,7 @@ $strScript = array(
 		'body_text' => 'Descrizione estesa',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
         'modal_ok_insert' => 'Alloggio inserito con successo clicca sulla X in alto a destra per uscire oppure...',
         'mesg' => array(
         )
