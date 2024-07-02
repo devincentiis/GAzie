@@ -2,7 +2,7 @@
 /*
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
   (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
@@ -755,7 +755,7 @@ while ($r = gaz_dbi_fetch_array($result)) {
      </table>
 	</div>
 </form>
-<a href="https://programmisitiweb.lacasettabio.it/gazie/vacation-rental-il-gestionale-per-case-vacanza-residence-bb-e-agriturismi/" target="_blank" class="navbar-fixed-bottom" style="max-width:350px; left:20%; z-index:2000;"> Vacation rental è un modulo di Antonio Germani</a>
+<a href="https://programmisitiweb.lacasettabio.it/gazie/vacation-rental-il-gestionale-per-case-vacanza-residence-bb-e-agriturismi/" target="_blank" class="navbar-fixed-bottom" style="max-width:350px; left:10%; z-index:2000;"> Vacation rental è un modulo di Antonio Germani</a>
 <script src="../../js/custom/fix_select.js" type="text/javascript"></script>
 <script src="../../js/custom/clean_empty_form_fields.js" type="text/javascript"></script>
 <?php

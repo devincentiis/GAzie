@@ -2,7 +2,7 @@
 /*
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
   (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
@@ -260,7 +260,7 @@ function tour_tax_daytopay($night,$start,$end,$tour_tax_from,$tour_tax_to,$tour_
   return $daytopay;
 }
 
-// calcolo totale locazione
+// calcolo totale della locazione
 function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent_vat="",$add_extra=FALSE,$security_deposit=FALSE){// security_deposit viene calcolato, se TRUE, solo se il totale deve essere iva compresa +++ preeminent vat serve solo per calcolare l'iva sulle eventuali spese se è nulla le spese vanno senza iva
   if ($tesbro!==''){
     $tesbro=intval($tesbro);
@@ -355,7 +355,7 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
   }
 }
 
-function get_total_promemo($startprom,$endprom){
+function get_total_promemo($startprom,$endprom){// STAT
   global $link, $azTables, $gTables;// posso chiamare la funzione con entrambi i metodi
   if ($azTables){
     $tableart = $azTables."artico";
@@ -444,7 +444,7 @@ function get_next_check($startprom,$endprom){
   return $next;
 }
 
-function get_total_paid($idtesbro){
+function get_total_paid($idtesbro){// totale pagato nella locazione
   global $link, $azTables, $gTables;// posso chiamare la funzione con entrambi i metodi
   if ($azTables){
     $tablerent_pay = $azTables."rental_payments";
@@ -622,5 +622,100 @@ function set_imap($id_anagra){// restituisce le impostazioni imap tranne la pass
     }
   }
   return false;
+}
+
+// Calcolo prezzo con sconti e controllo la prenotabilità in base min stay giornaliero del prezzo
+function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web_url,$descri,$lang,$in_fixquote,$id_artico_group){
+  global $genTables,$azTables,$link,$IDaz,$script_transl,$admin_aziend;
+  $minstay_memo=0;
+  $accommodations=array();
+  $datediff = strtotime($end)-strtotime($start);
+	$nights=round($datediff / (60 * 60 * 24));
+  $accommodations['msg']=[];
+
+  $accommodations['price']=0;
+  $accommodations['codice']=$housecode;
+  $accommodations['descri']=$descri;
+  $accommodations['web_url']=get_string_lang($web_url, $lang);// se ci sono i tag lingua restituisco l'url nella lingua appropriata
+  $accommodations['aliquo']=$aliquo;
+  $startw=$start;
+  while (strtotime($startw) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
+
+    //Calcolo del prezzo locazione
+    $what = "price, minstay";
+    $where = "start <= '". $startw ."' AND end >= '". $startw."' AND house_code ='".mysqli_real_escape_string($link,$housecode)."'";
+    $sql = "SELECT ".$what." FROM ".$azTables."rental_prices"." WHERE ".$where;
+    if ($result = mysqli_query($link, $sql)) {
+      $prezzo = mysqli_fetch_array($result);
+    }
+
+    if (isset($prezzo['minstay']) && intval($prezzo['minstay'])>0 && intval($nights) < intval($prezzo['minstay'])){// se richiesto controllo se non si è raggiunto il soggiorno minimo giornaliero del prezzo
+      if (intval($prezzo['minstay'])>$minstay_memo){
+        $minstay_memo=intval($prezzo['minstay']);
+        $accommodations['msg'][]=$script_transl['msg_minstay']." ".$prezzo['minstay']." ".$script_transl['nights']; //." ".$script_transl['msg_minstay2']." ".$nights;
+        //echo "<br>",$housecode," Questo alloggio sarebbe disponibile ma il soggiorno minimo è di ",$prezzo['minstay']," notti mentre sono state richieste solo ",$nights, "notti";
+        //break;
+      }
+    }
+    // NB: il prezzo mostrato al pubblico deve essere sempre IVA compresa
+    if (isset($prezzo)){// se c'è un prezzo nel calendario lo uso
+      if ($ivac=="si"){
+        $accommodations['price'] += floatval($prezzo['price']);// aggiungo il prezzo giornaliero torvato
+      }else{
+        $accommodations['price'] += floatval($prezzo['price'])+((floatval($prezzo['price'])*floatval($aliquo))/100);// aggiungo il prezzo e aggiungo l'iva
+      }
+    } elseif(floatval($web_price)>0){// altrimenti uso il prezzo base al quale devo sempre aggiungere l'iva
+      $accommodations['price'] += floatval($web_price)+((floatval($web_price)*floatval($aliquo))/100);
+
+    }else{// se non c'è alcun prezzo non posso prenotare e metto non prenotabile
+      unset ($accommodations);
+      return;
+    }
+    $startw = date ("Y-m-d", strtotime("+1 days", strtotime($startw)));// aumento di un giorno il ciclo
+  }
+
+  // Se ho trovato prezzo disponibile procedo con il calcolo sconti
+  $accommodations['fixquote'] = floatval($in_fixquote)+((floatval($in_fixquote)*floatval($aliquo))/100);// inizializzo eventuale quota fissa e aggiungo IVA
+  $accommodations['price'] += $accommodations['fixquote'];
+
+  // calcolo gli sconti
+  $discounts=searchdiscount($housecode,$id_artico_group,$start,$end,$nights,$anagra=0);
+  $accommodations['discount']=0;
+  $accommodations['descri_discount']="";
+
+  $today=date('Y-m-d');
+
+  if (isset($discounts) && $discounts->num_rows >0){// se c'è almeno uno sconto
+    foreach ($discounts as $discount){// li ciclo e applico lo sconto
+      if (intval($discount['last_min'])>0){// se è un lastmin controllo la validità
+        $date=date_create($today);
+        date_add($date,date_interval_create_from_date_string($discount['last_min']." days"));
+        $time=strtotime(date_format($date,"Y-m-d"));
+        if ($time < strtotime($start)){
+          continue; // non è valido, continuo con l'eventuale prossimo sconto
+
+        }
+      }
+      if (intval($discount['level_points'])==0){// escludo gli eventuali sconto livello punti perché non ho ancora il cliente
+        if ($accommodations['discount']>0){
+          $accommodations['descri_discount'].="+";
+        }
+        if ($discount['is_percent']==1){
+          $accommodations['discount']+= ((floatval($accommodations['price'])-$accommodations['discount'])*floatval($discount['value']))/100;// aggiungo al totale sconti, lo sconto calcolato in percentuale
+          $accommodations['descri_discount'].=$discount['title']." ".$discount['value']."%";// incremento la descrizione con lo sconto applicato
+        }else{
+          $accommodations['discount']+= floatval($discount['value']);// aggiungo al totale sconti, lo sconto a valore
+          $accommodations['descri_discount'].= $discount['title']." ".$admin_aziend['symbol']." ".$discount['value'];/// incremento la descrizione con lo sconto applicato
+
+        }
+        if ($discount['stop_further_processing']==1){// se questo deve bloccare i successivi eventuali, interrompo il conteggio
+          break;
+        }
+      }
+    }
+  }
+
+
+  return $accommodations;
 }
 ?>

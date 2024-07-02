@@ -2,7 +2,7 @@
 /*
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP) - telefono +39 340 50 11 912
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP) - telefono +39 340 50 11 912
   (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
@@ -677,7 +677,8 @@ $strScript = array(
 		'no_search_house' => 'The requested accommodation is not available, check availability in your calendar. Or there are these alternatives:',
 		'msg_minstay' => 'This accommodation would be available but the minimum stay is',
 		'msg_minstay2' => 'nights while you requested only',
-		'available' => 'AVAILABLE! Look at it or book it now'
+		'available' => 'AVAILABLE! Look at it or book it now',
+    'alternative' => 'Alternative availability:'
     ),
 	"booking_form.php" =>
     array('title' => 'Booking form',
