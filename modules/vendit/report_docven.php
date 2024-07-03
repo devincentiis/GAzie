@@ -155,7 +155,7 @@ function confirFae(link){
     case "##":
     case "PA":
       $("#dialog_fae_content_PA").addClass("bg-default");
-      $("#dialog_fae_content_PA span").html("<div class=\'text-center col-xs-9\'><input type=\'file\'  accept=\'.xml\' id=\'file\' name=\'file\' title=\' Carica il  file firmato digitalmente\' ></div><div class=\'btn btn-xs btn-warning col-xs-3\' value=\'Upload\' ref=\'"+tes_id+"\' onclick=\'but_upload_signed("+tes_id+");return false;\'>Carica file firmato</div>");
+      $("#dialog_fae_content_PA span").html("<div class=\'text-center col-xs-9\'><input type=\'file\'  accept=\'.xml,.p7m\' id=\'file\' name=\'file\' title=\' Carica il  file firmato digitalmente\' ></div><div class=\'btn btn-xs btn-warning col-xs-3\' value=\'Upload\' ref=\'"+tes_id+"\' onclick=\'but_upload_signed("+tes_id+");return false;\'>Carica file firmato</div>");
       $("#dialog_fae_content_PA").show();
     break;
     case "PI":

@@ -40,7 +40,7 @@ if (isset($_POST['term']) && isset($_POST['opt'])) {
         $id_tes = intval($_POST['term']); // valore id_tes che dovrà valorizzare id_tes_ref di gaz_001fae_flux
         $v=[];
         $v['id_tes_ref']=$id_tes;
-        $v['flux_status']='PI'; // scrivo "PI" sulla colonna flux_status per indicare che adesso è possibile inviare la fattura alla PA
+        $v['flux_status']='#'; // scrivo "#" sulla colonna flux_status per indicare che adesso è possibile inviare la fattura alla PA
         $v['filename_ret'] = $_FILES['file']['name']; // uso la colonna filename_ret della tabella gaz_001fae_flux per ricordare il nome del file firmato conservato sul filesystem
         $v['exec_date']=date("Y-m-d");
         $v['received_date']=date("Y-m-d");
