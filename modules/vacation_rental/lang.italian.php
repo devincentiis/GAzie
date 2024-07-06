@@ -2,15 +2,15 @@
 /*
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-present - Antonio Germani, Massignano (AP) - telefono +39 340 50 11 912
-  (https://www.programmisitiweb.lacasettabio.it)
+  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP) - telefono +39 340 50 11 912
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.devincentiis.it>
+  Copyright (C) 2004-2022 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.devincentiis.it>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -358,7 +358,7 @@ $strScript = array(
         'utilizzato' => 'Utilizzato',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
         'modal_ok_insert' => 'Casa inserita con successo clicca sulla X in alto a destra per uscire oppure...',
         'iterate_invitation' => 'INSERISCI UN\'ALTRA CASA',
         'browse_for_file' => 'Sfoglia',
@@ -410,7 +410,7 @@ $strScript = array(
 		'body_text' => 'Descrizione estesa',
         'depli_public' => 'Pubblica sul catalogo',
         'depli_public_value' => array(0 => 'No', 1 => 'Si'),
-        'web_url' => 'Web url<br />(es: https://site.com/item.html)',
+        'web_url' => 'Web url<br />(es: http://site.com/item.html)',
         'modal_ok_insert' => 'Alloggio inserito con successo clicca sulla X in alto a destra per uscire oppure...',
         'mesg' => array(
         )
@@ -446,7 +446,7 @@ $strScript = array(
 		'msg_minstay' => 'Questo alloggio sarebbe disponibile ma il soggiorno minimo è di',
 		'msg_minstay2' => 'notti mentre ne sono state richieste solo',
 		'available' => 'DISPONIBILE! Guarda o prenota subito',
-    'alternative' => 'Disponibilità alternative:'
+    'alternative' => 'Disponibilità alternative prenotabili:'
     ),
 	"booking_form.php" =>
     array('title' => 'Modulo di prenotazione',
@@ -605,7 +605,8 @@ $strScript = array(
     'email_extra_sbj' =>'Aggiunti extra su prenotazione n.',
     'email_extra_body' =>'<p>Si informa che gli extra richiesti sono stati aggiunti alla prenotazione in oggetto.</p><p>Nella sua pagina utente potrà visionare l\'aggiornamento. (Le credenziali per accedere alla sua pagina utente sono sempre quelle riportate nella mail iniziale di conferma della prenotazione) </p>',
     'selfcheck_button' => 'Leggi regole self check-in',
-	'ins_yourData' => 'Inserisci i tuoi dati'
+	'ins_yourData' => 'Inserisci i tuoi dati',
+	'minor_notice' =>''
     ),
 
   "admin_extra.php" =>

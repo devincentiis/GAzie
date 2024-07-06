@@ -749,7 +749,7 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
                 <div class="col-md-12">
                   <div class="form-group">
                     <label for="lat" class="col-sm-4 control-label">Ubicazione, latitudine (numero decimale)</label>
-                    <input class="col-sm-8" type="text" value="<?php echo $form['lat']; ?>" name="lat" maxlength="9" min="0" max="15" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');" />
+                    <input class="col-sm-8" type="text" value="<?php echo $form['lat']; ?>" name="lat" maxlength="19" min="0" max="19" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');" />
                   </div>
                 </div>
 							</div><!-- chiude row  -->
@@ -757,7 +757,7 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
                 <div class="col-md-12">
                   <div class="form-group">
                     <label for="long" class="col-sm-4 control-label">Ubicazione, longitudine (numero decimale)</label>
-                    <input class="col-sm-8" type="text" value="<?php echo $form['long']; ?>" name="long" maxlength="9" min="0" max="15" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');" />
+                    <input class="col-sm-8" type="text" value="<?php echo $form['long']; ?>" name="long" maxlength="19" min="0" max="19" oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');" />
                   </div>
                 </div>
 							</div><!-- chiude row  -->

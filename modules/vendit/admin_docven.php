@@ -2608,7 +2608,6 @@ if ($form['tipdoc'] == "DDT") {
 
     echo "</tr></table></div>\n";
     echo '<input type="hidden" value="' . $form['id_doc_ritorno'] . '" name="id_doc_ritorno" />';
-    echo "<input type=\"hidden\" value=\"" . $form['id_contract'] . "\" name=\"id_contract\">\n";
 } elseif ($form['tipdoc'] == "RDV") {
     echo "</td></tr>";
     echo "<tr><td align=\"left\"  colspan=\"4\" class=\"FacetFieldCaptionTD\" >" . $script_transl['id_doc_ritorno_title'] . "</td>\n";
