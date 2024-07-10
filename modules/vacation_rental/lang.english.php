@@ -712,6 +712,7 @@ $strScript = array(
 		'tur_tax' => 'Turist tax',
 		'submitpay'=>'Sign the lease and pay',
     'check_submit' => 'Yes, I confirm that I have read the lease, that I have had the opportunity to print it and accept, without reservation, all the clauses. The contract will become effective only after confirmation by the owner.',
+    'check_submit2' => 'Yes, I declare that I have read and fully accept the following clauses: 1,2,3,4,5,6,7.',
     'contractor' => 'The contractor',
     'how_sign' => 'To sign, tick the confirmation box',
 		'price_for' => 'Price for ',

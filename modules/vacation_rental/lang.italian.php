@@ -480,6 +480,7 @@ $strScript = array(
 		'tur_tax' => 'Tassa turistica',
 		'submitpay'=>'Firma e procedi con il pagamento',
     'check_submit' => 'Sì, confermo di aver letto il contratto, di aver avuto la possibilità di stamparlo e di accettarne, senza riserva, tutte le clausole. Il contratto diventerà effettivo solo dopo la conferma del proprietario.',
+    'check_submit2' => 'Sì, dichiaro di aver preso consapevole visione e di accetare integralmente le seguenti clausole: 1,2,3,4,5,6,7.',
     'contractor' => 'Il contraente',
     'how_sign' => 'Per firmare, spuntare la casella di conferma',
 		'price_for' => 'Prezzo per ',

@@ -2,9 +2,9 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-         (https://www.devincentiis.it)
-           <https://gazie.sourceforge.net>
+    Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+         (http://www.devincentiis.it)
+           <http://gazie.sourceforge.net>
  --------------------------------------------------------------------------
     Questo programma e` free software;   e` lecito redistribuirlo  e/o
     modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -298,14 +298,13 @@ if (isset($_GET['anteprima']) and $msg == "") {
                     $count[$facil]['MIN_room_tarif_periodo_pers'][$room_type] =  $count[$facil]['room_tarif_periodo_pers'][$room_type];
                   }
                 }
-
                 if ($open_nights!==''){ // se c'è un periodo di apertura della struttura
                   $currentDate = strtotime($open_from);
                   while ($currentDate <= strtotime($open_to)){ // ciclo un giorno alla volta l'intervallo del periodo di apertura
 
                     if (($currentDate >= strtotime($row['start'])) && ($currentDate <= strtotime($row['end']))){ // se il giorno che sto analizzando è dentro la locazione
-
-                        if (($currentDate > strtotime($open_from.'-'.date("Y",$currentDate)) && ($currentDate <= strtotime($open_to.'-'.date("Y",$currentDate))))){// il giorno fa parte della locazione quindi vedo se è dentro il periodo di apertura
+	
+                        if (($currentDate >= strtotime($open_from) && ($currentDate <= strtotime($open_to)))){// il giorno fa parte della locazione quindi vedo se è dentro il periodo di apertura
                           // conteggio l'occupazione giornaliera della struttura (una sola volta al giorno)
                             if (isset($countDay[$facil]) && (!in_array($currentDate,$countDay[$facil]))){
                               $count[$facil]['count_pres'] = $count[$facil]['count_pres']-1;
