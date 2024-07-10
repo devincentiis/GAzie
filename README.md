@@ -43,7 +43,11 @@ puoi clonare il repository direttamente da SVN:
 
 `svn checkout svn://svn.code.sf.net/p/gazie/code/ gazie-code`
 
+Recentemente c'è anche un repository su github che viene manutenuto e sincronizzato con una buona frequenza, quasi ad ogni commit, se sei abituato a questo strumento più moderno eccoti l'url:
 
+[GAzie su github](https://github.com/devincentiis/gazie)
+
+ 
 ### Requisiti di Sistema
 
 * Webserver Apache 2.4 o superiore, IIS su windows
