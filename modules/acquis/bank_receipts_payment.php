@@ -107,7 +107,7 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
                     'expiry' => substr($_POST['expires'][$k], 0, 10));
                 paymovInsert($paymov_value);
             }
-            if ($form['transfer_fees'] >= 0.01 && $form['transfer_fees_acc'] > 100000000) { // ho le spese bancarie 
+            if ($form['transfer_fees'] >= 0.01 && $form['transfer_fees_acc'] > 100000000) { // ho le spese bancarie
                 rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => $form['transfer_fees_acc'], 'import' => $form['transfer_fees']));
 				if (TRUE) {//TO-DO: IN ANAGRAFICA CONTO CORRENTE CREARE OPZIONE PER CONTABILIZZAZIONE UNIFICATA O SU RIGA SEPARATA DELLE COMMISSIONI BANCARIE
 					rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $form['target_account'], 'import' => round($form['transfer_fees'], 2)));
@@ -286,12 +286,12 @@ echo '		  </table></div>';
                 default:
                     $orderby = 'expiry ASC';
             }
-            $rs = gaz_dbi_dyn_query("*", $gTables['paymov'], "expiry BETWEEN '" . gaz_format_date($form['expiry_ini'], true) . "' AND '" . gaz_format_date($form['expiry_fin'], true) . "' AND id_rigmoc_doc >= 1 GROUP BY id_tesdoc_ref, expiry", $orderby);
+            $rs = gaz_dbi_dyn_query("*", $gTables['paymov'], "expiry BETWEEN '" . gaz_format_date($form['expiry_ini'], true) . "' AND '" . gaz_format_date($form['expiry_fin'], true) . "' AND id_rigmoc_doc >= 1 AND id_tesdoc_ref LIKE '20%' GROUP BY id_tesdoc_ref, expiry", $orderby);
             while ($r = gaz_dbi_fetch_array($rs)) {
                 $doc_data = $paymov->getDocFromID($r['id_rigmoc_doc']);
                 //print_r($doc_data);print '<br>';
                 $status = $paymov->getAmount($r['id_tesdoc_ref'], $r['expiry']);
-                if ($doc_data && (substr($doc_data['clfoco'], 0, 3)==$admin_aziend['masfor'] || substr($doc_data['codcon'], 0, 3)==$admin_aziend['masfor']) && $status >= 0.01) { // considero solo i fornitori non saldati 
+                if ($doc_data && (substr($doc_data['clfoco'], 0, 3)==$admin_aziend['masfor'] || substr($doc_data['codcon'], 0, 3)==$admin_aziend['masfor']) && $status >= 0.01) { // considero solo i fornitori non saldati
                 	if (substr($doc_data['clfoco'], 0, 3)!=$admin_aziend['masfor'] && substr($doc_data['codcon'], 0, 3)==$admin_aziend['masfor']) {
                     	$doc_data['clfoco'] = $doc_data['codcon'];
                     }
