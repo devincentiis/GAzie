@@ -74,7 +74,7 @@ if (!empty($msg)) {
             $message .= $script_transl['error']."! -> ";
             $rsval = explode('-',chop($value));
             foreach ($rsval as $valmsg){
-                    $message .= $script_transl[$valmsg]." ";
+                    $message .= (isset($script_transl[$valmsg]))?$script_transl[$valmsg]." ":'';
             }
             $message .= "<br />";
     }
