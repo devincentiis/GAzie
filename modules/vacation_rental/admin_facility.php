@@ -76,6 +76,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	$form['id_artico_group'] = trim($form['id_artico_group']);
 	$form['ritorno'] = $_POST['ritorno'];
   $form['paypal_email'] = $_POST['paypal_email'];
+  $form['hype_transf'] = $_POST['hype_transf'];
   $form['stripe_pub_key'] = $_POST['stripe_pub_key'];
   $form['stripe_sec_key'] = $_POST['stripe_sec_key'];
   $form['check_in'] = $_POST['check_in'];
@@ -250,7 +251,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 			}
 			// aggiorno il db
 			if ($toDo == 'insert') {
-				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long']));// creo l'array per il custom field
+				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long']));// creo l'array per il custom field
 				$form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
 				gaz_dbi_table_insert('artico_group', $form);
 			} elseif ($toDo == 'update') {
@@ -260,6 +261,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
           if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
             $data['vacation_rental']['facility_type']='';
             $data['vacation_rental']['paypal_email']=$_POST['paypal_email'];
+            $data['vacation_rental']['hype_transf']=$_POST['hype_transf'];
             $data['vacation_rental']['stripe_pub_key']=$_POST['stripe_pub_key'];
             $data['vacation_rental']['stripe_sec_key']=$_POST['stripe_sec_key'];
             $data['vacation_rental']['check_in']=$_POST['check_in'];
@@ -275,7 +277,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
             $data['vacation_rental']['longitude']=$_POST['long'];
             $form['custom_field'] = json_encode($data);
           } else { //se non c'è il modulo "vacation_rental" lo aggiungo
-            $data['vacation_rental']= array('facility_type' => '', 'paypal_email' => $_POST['paypal_email'], 'stripe_pub_key' => $_POST['stripe_pub_key'], 'stripe_sec_key' => $_POST['stripe_sec_key'], 'check_in' => $_POST['check_in'], 'check_out' => $_POST['check_out'], 'minor' => $_POST['minor'], 'tour_tax_from' => $_POST['tour_tax_from'], 'tour_tax_to' => $_POST['tour_tax_to'], 'open_from' => $_POST['open_from'], 'open_to' => $_POST['open_to'], 'tour_tax_day' => $_POST['tour_tax_day'], 'max_booking_days' => $_POST['max_booking_days'], 'latitude' => $_POST['lat'], 'longitude' => $_POST['long']);
+            $data['vacation_rental']= array('facility_type' => '', 'paypal_email' => $_POST['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $_POST['stripe_pub_key'], 'stripe_sec_key' => $_POST['stripe_sec_key'], 'check_in' => $_POST['check_in'], 'check_out' => $_POST['check_out'], 'minor' => $_POST['minor'], 'tour_tax_from' => $_POST['tour_tax_from'], 'tour_tax_to' => $_POST['tour_tax_to'], 'open_from' => $_POST['open_from'], 'open_to' => $_POST['open_to'], 'tour_tax_day' => $_POST['tour_tax_day'], 'max_booking_days' => $_POST['max_booking_days'], 'latitude' => $_POST['lat'], 'longitude' => $_POST['long']);
             $form['custom_field'] = json_encode($data);
           }
         }
@@ -317,6 +319,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     if (is_array($data['vacation_rental'])){
 				$form['facility_type'] = $data['vacation_rental']['facility_type'];
 				$form['paypal_email'] = (isset($data['vacation_rental']['paypal_email']))?$data['vacation_rental']['paypal_email']:'';
+        $form['hype_transf'] = (isset($data['vacation_rental']['hype_transf']))?$data['vacation_rental']['hype_transf']:'';
         $form['stripe_pub_key'] = (isset($data['vacation_rental']['stripe_pub_key']))?$data['vacation_rental']['stripe_pub_key']:'';
         $form['stripe_sec_key'] = (isset($data['vacation_rental']['stripe_sec_key']))?$data['vacation_rental']['stripe_sec_key']:'';
         $form['check_in'] = (isset($data['vacation_rental']['check_in']))?$data['vacation_rental']['check_in']:'';
@@ -333,6 +336,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     } else {
 				$form['facility_type'] = '';
 				$form['paypal_email'] ='';
+        $form['hype_transf'] ='';
         $form['stripe_pub_key'] = '';
         $form['stripe_sec_key'] = '';
         $form['check_in'] = "";
@@ -350,6 +354,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	} else {
     $form['facility_type'] = '';
 		$form['paypal_email'] = '';
+    $form['hype_transf'] ='';
     $form['stripe_pub_key'] = '';
     $form['stripe_sec_key'] = '';
     $form['check_in'] = "";
@@ -396,6 +401,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     // eventuale descrizione ampliata
     $form['large_descri'] = '';
     $form['paypal_email'] = '';
+    $form['hype_transf'] ='';
     $form['stripe_pub_key'] = '';
     $form['stripe_sec_key'] = '';
     $form['check_in'] = "";
@@ -626,6 +632,14 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
 								<div class="form-group">
 									<label for="paypal_email" class="col-sm-4 control-label">Eventuale e-mail account PayPal</label>
 									<input class="col-sm-8" type="text" value="<?php echo $form['paypal_email']; ?>" name="paypal_email" maxlength="60" />
+								</div>
+							</div>
+							</div><!-- chiude row  -->
+              <div id="webUrl" class="row IERincludeExcludeRow">
+							<div class="col-md-12">
+								<div class="form-group">
+									<label for="hype_transf" class="col-sm-4 control-label">Eventuale telefono trasferimento Hyper</label>
+									<input class="col-sm-8" type="text" value="<?php echo $form['hype_transf']; ?>" name="hype_transf" maxlength="60" />
 								</div>
 							</div>
 							</div><!-- chiude row  -->
