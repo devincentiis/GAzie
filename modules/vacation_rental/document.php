@@ -473,6 +473,13 @@ class DocContabVars {
         $this->totiva = 0.00;
         $results = array();
         while ($rigo = gaz_dbi_fetch_array($rs_rig)) {
+          $cin='';
+          if (isset ($rigo['group_custom_field']) && $data = json_decode($rigo['group_custom_field'], TRUE)) { // se esiste un json nel group custom field posso prendere i dati della struttura
+            if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['cin'])){ // se c'è il cin
+              $cin = (strlen($data['vacation_rental']['cin'])>15)?"-CIN:".$data['vacation_rental']['cin']:''; //lo prendo
+            }
+          }
+          $rigo['codart'] .= $cin;
           $rigo['descri'] = get_string_lang($rigo['descri'], substr($lang,0,2));// se multilingua seleziono la descrizione nella lingua richiesta
           $rigo['barcode']="";
           if ($rigo['tiprig'] <= 1 || $rigo['tiprig'] == 4 || $rigo['tiprig'] == 50 || $rigo['tiprig'] == 90) {
