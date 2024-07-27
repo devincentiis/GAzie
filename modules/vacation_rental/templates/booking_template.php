@@ -67,6 +67,7 @@ class Template extends Fpdi {
         $this->agente = $docVars->name_agente;
         $this->status = $docVars->status;
         $this->alloggio = $docVars->alloggio;
+        $this->checkinout = $docVars->checkinout;
         $this->extras = $docVars->extras;
         /*
         if ( $docVars->destinazione == "" && isset($docVars->client['destin'])) {
@@ -173,6 +174,7 @@ class Template extends Fpdi {
             $add_int=0;$extras="";
 
             $this->SetX(110);$this->Cell(88, 5, $this->alloggio, 1, 1, 'C', 0, '', 1);
+            $this->SetX(110);$this->Cell(88, 5, $this->checkinout, 1, 1, 'C', 0, '', 1);
             $extraDes='';
             foreach ($this->extras as $extra){
               $extraDes .=$extra;
@@ -182,15 +184,16 @@ class Template extends Fpdi {
               $this->SetX(110);
               $this->Cell(88, 4, "Extra:".$extraDes, 1, 1, 'L', 0, '', 1);
             }
+            $this->SetX(100);
             if (!empty($this->agente)) {
               $this->SetXY(10, $interlinea +$add_int +5 );
               $this->Cell(75, 6, "TOUR OPERATOR: ".$this->agente, 1, 1, 'C', 0, '', 1);
             }
             if ($this->codice_partner > 0){
-              $this->SetXY(35, $interlinea +$add_int - 5);
+              $this->SetXY(10, $interlinea +$add_int);
               $this->Cell(13, 4, $this->descri_partner, 'LT', 0, 'R', 1, '', 1);
               $this->Cell(62, 4, ': ' . $this->cliente5, 'TR', 1, 0, '', 1,1);//cod.fisc. cliente
-              $this->Cell(25);
+
               $this->Cell(20, 4, ' cod.: ' . $this->codice_partner, 'LB', 0, 'L');// id codice cliente
               $to='';
               if (trim($this->cod_univoco)!=''){

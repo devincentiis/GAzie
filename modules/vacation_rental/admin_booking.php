@@ -167,6 +167,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['oratra'] = $_POST['oratra'];
     $form['mintra'] = $_POST['mintra'];
     $form['protoc'] = $_POST['protoc'];
+    $form['email'] = $_POST['email'];
     $form['numdoc'] = $_POST['numdoc'];
     $form['numfat'] = $_POST['numfat'];
     $form['datfat'] = $_POST['datfat'];
@@ -930,7 +931,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 		$check_availability=check_availability($form['start'],$form['end'],$form['in_codart'], $open_from="", $open_to="");// controllo disponibilità
 		if (intval($check_availability)==0){
 			$overbooking=1;
-		}		
+		}
         while (strtotime($start) < strtotime($form['end'])) {// ciclo il periodo della locazione giorno per giorno
           //Calcolo del prezzo locazione e conteggio notti
           $what = "price";
@@ -1783,6 +1784,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['mintra'] = substr($tesbro['initra'], 14, 2);
     $form['protoc'] = $tesbro['protoc'];
     $form['numdoc'] = $tesbro['numdoc'];
+    $form['email'] = $tesbro['email'];
     $form['numfat'] = $tesbro['numfat'];
     $form['datfat'] = $tesbro['datfat'];
     $form['clfoco'] = $tesbro['clfoco'];
@@ -2046,6 +2048,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     }
     $form['protoc'] = "";
     $form['numdoc'] = "";
+    $form['email'] = "";
     $form['numfat'] = "";
     $form['datfat'] = "";
     $form['clfoco'] = "";
@@ -2238,6 +2241,7 @@ echo '	<input type="hidden" name="' . ucfirst($toDo) . '" value="" />
 		<input type="hidden" value="' . $form['ritorno'] . '" name="ritorno" />
 		<input type="hidden" value="' . $form['change_pag'] . '" name="change_pag" />
 		<input type="hidden" value="' . $form['protoc'] . '" name="protoc" />
+    <input type="hidden" value="' . $form['email'] . '" name="email" />
 		<input type="hidden" value="' . $form['numdoc'] . '" name="numdoc" />
 		<input type="hidden" value="' . $form['numfat'] . '" name="numfat" />
 		<input type="hidden" value="' . $form['datfat'] . '" name="datfat" />

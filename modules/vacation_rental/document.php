@@ -400,34 +400,50 @@ class DocContabVars {
 		}else{
 		  echo "Error: " . $sql . "<br>" . mysqli_error($link);
 		}
-        $rrff=($conf_rf)?trim($conf_rf['val']):0;
-        $rf=explode(';',$rrff);
-        if (isset($rf[0])&&!empty($rf[0])){// ho almeno un altro regime
-          foreach($rf as $v){
-            $exrf=explode('=',$v);
-            if (preg_match("/^([1-8]{1})$/", $exrf[0], $rgsez)&&preg_match("/^(RF[0-9]{2})$/", $exrf[1], $rgrf)){
-              if ($rgsez[1]==$this->tesdoc["seziva"]) $res=$rgrf[1];
-            }
-          }
-        }
-        $fr=$res;
-        if ($fr){
-          $this->regime_fiscale=$fr;
-        }
-		$sql = "SELECT * FROM ".$azTables."rental_events"." WHERE id_tesbro = '".$tesdoc['id_tes']."' AND (type ='ALLOGGIO' OR type='EXTRA') ORDER BY id";
-		if ($result = mysqli_query($link, $sql)) {
-      $extras=array();
-      while ($row_event = gaz_dbi_fetch_array($result)){
-        if ($row_event['type']=='ALLOGGIO'){
-          $this->alloggio = " ".$row_event['house_code']." check-in:".date_format(date_create($row_event['start']),"d-m-Y")." check-out:".date_format(date_create($row_event['end']),"d-m-Y");
-        }else{// se non è alloggio allora è extra
-          $extras[] = " ".$row_event['house_code']." -";// aggiungo l'extra all'array
+    $rrff=($conf_rf)?trim($conf_rf['val']):0;
+    $rf=explode(';',$rrff);
+    if (isset($rf[0])&&!empty($rf[0])){// ho almeno un altro regime
+      foreach($rf as $v){
+        $exrf=explode('=',$v);
+        if (preg_match("/^([1-8]{1})$/", $exrf[0], $rgsez)&&preg_match("/^(RF[0-9]{2})$/", $exrf[1], $rgrf)){
+          if ($rgsez[1]==$this->tesdoc["seziva"]) $res=$rgrf[1];
         }
       }
-      $this->extras = $extras;
-		}else{
-		  echo "Error: " . $sql . "<br>" . mysqli_error($link);
-		}
+    }
+    $fr=$res;
+    if ($fr){
+      $this->regime_fiscale=$fr;
+    }
+
+     $sql = "SELECT ".$azTables."rigbro".".*, ".$azTables.'aliiva'.".tipiva, ".$azTables.'artico'.".custom_field, ".$azTables.'artico'.".id_artico_group, ".$azTables.'artico'.".codice, ".$azTables.'artico_group'.".custom_field AS group_custom_field, ".$azTables."rental_events".".* FROM ".$azTables."rigbro"."
+      LEFT JOIN " . $azTables.'aliiva' . " ON codvat=codice
+      LEFT JOIN " . $azTables.'artico' . " ON " . $azTables.'artico'.".codice=" . $azTables.'rigbro' . ".codart
+      LEFT JOIN " . $azTables.'rental_events' . " ON " . $azTables.'rental_events'.".id_rigbro=" . $azTables.'rigbro' . ".id_rig
+      LEFT JOIN " . $azTables.'artico_group' . " ON ". $azTables.'artico_group'.".id_artico_group = ".$azTables.'artico'.".id_artico_group
+      WHERE id_tes = " . $tesdoc['id_tes'] ." ORDER BY id_tes DESC, id_rig";
+      if ($result = mysqli_query($link, $sql)){
+      }else{
+        echo "Error: " . $sql . "<br>" . mysqli_error($link);
+      }
+      $this->alloggio="-";
+      while ($rigev = gaz_dbi_fetch_array($result)){
+        if (isset ($rigev['custom_field']) && $data = json_decode($rigev['custom_field'], TRUE)) {// se c'è un custom field in artico
+          if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['accommodation_type'])){ // se è un alloggio
+            $cin='';
+            if (isset ($rigev['group_custom_field']) && $datagr = json_decode($rigev['group_custom_field'], TRUE)){// se fa parte di una struttura
+              if (is_array($datagr['vacation_rental']) && isset($datagr['vacation_rental']['cin'])){ // se c'è il cin
+                $cin = (strlen($datagr['vacation_rental']['cin'])>15)?" CIN:".$datagr['vacation_rental']['cin']:''; //lo prendo
+              }
+            }
+            $this->alloggio .= " ".$rigev['codice']. $cin ." -";
+            $this->checkinout = " check-in:".date_format(date_create($rigev['start']),"d-m-Y")." check-out:".date_format(date_create($rigev['end']),"d-m-Y");
+          }elseif(is_array($data['vacation_rental'])){// se è un extra
+            $extras[] = " ".$rigev['codice']." -";// aggiungo l'extra all'array
+          }
+        }
+      }
+
+      $this->extras = (isset($extras))?$extras:array();
   }
 
     function initializeTotals() {
@@ -473,13 +489,6 @@ class DocContabVars {
         $this->totiva = 0.00;
         $results = array();
         while ($rigo = gaz_dbi_fetch_array($rs_rig)) {
-          $cin='';
-          if (isset ($rigo['group_custom_field']) && $data = json_decode($rigo['group_custom_field'], TRUE)) { // se esiste un json nel group custom field posso prendere i dati della struttura
-            if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['cin'])){ // se c'è il cin
-              $cin = (strlen($data['vacation_rental']['cin'])>15)?"-CIN:".$data['vacation_rental']['cin']:''; //lo prendo
-            }
-          }
-          $rigo['codart'] .= $cin;
           $rigo['descri'] = get_string_lang($rigo['descri'], substr($lang,0,2));// se multilingua seleziono la descrizione nella lingua richiesta
           $rigo['barcode']="";
           if ($rigo['tiprig'] <= 1 || $rigo['tiprig'] == 4 || $rigo['tiprig'] == 50 || $rigo['tiprig'] == 90) {
