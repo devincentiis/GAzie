@@ -3,9 +3,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2022 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -23,12 +23,11 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-
-use setasign\Fpdi\Tcpdf\Fpdi;
-
+//*** ENGLISH LANGUAGE ***
+require('../../library/tcpdf/tcpdf.php');
+require('../../library/tcpdf/tcpdi.php');
 #[AllowDynamicProperties]
-
-class Template extends Fpdi {
+class Template extends TCPDI {
 
     function setVars(&$docVars, $Template = '') {
         $this->docVars = & $docVars;
@@ -67,7 +66,7 @@ class Template extends Fpdi {
         $this->agente = $docVars->name_agente;
         $this->status = $docVars->status;
         $this->alloggio = $docVars->alloggio;
-        $this->checkinout = $docVars->checkinout;
+		$this->checkinout = $docVars->checkinout;
         $this->extras = $docVars->extras;
         /*
         if ( $docVars->destinazione == "" && isset($docVars->client['destin'])) {
@@ -77,7 +76,7 @@ class Template extends Fpdi {
         }
         */
         $this->clientSedeLegale = '';
-		$this->pers_title = $docVars->pers_title;
+        $this->pers_title = $docVars->pers_title;
         if (!empty($docVars->clientSedeLegale)) {
             foreach ($docVars->clientSedeLegale as $value) {
                 $this->clientSedeLegale .= $value . ' ';
@@ -153,18 +152,18 @@ class Template extends Fpdi {
             $this->Line(0, 93, 3, 93); //questa marca la linea d'aiuto per la piegatura del documento
             $this->Line(0, 143, 3, 143); //questa marca la linea d'aiuto per la foratura del documento
             $this->Ln($interlinea);
-            if (!empty($this->efattura)){
-              $this->SetFont('helvetica','B',9);
-              $this->SetTextColor(255,0,0);
-              $this->Cell(110,0,'Copia cartacea del documento elettronico inviato al Sistema di Interscambio ('.$this->efattura.')',0,1,'L',0,'',1);
-              $this->SetTextColor(0,0,0);
-            }
-            $this->SetFont('helvetica', '', 11);
-            $this->Cell(100, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);// tipo documento es.: prenotazione n. etc
+			if (!empty($this->efattura)){
+				$this->SetFont('helvetica','B',9);
+				$this->SetTextColor(255,0,0);
+				$this->Cell(110,0,'Copia di cortesia del documento elettronico inviato al sistema di interscambio ('.$this->efattura.')',0,1,'L',0,'',1);
+				$this->SetTextColor(0,0,0);
+			}
+            $this->SetFont('helvetica', '', 10);
+			$this->Cell(95, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);// tipo documento es.: prenotazione n. etc
             if ($this->tesdoc['tipdoc'] == 'NOP' || $this->withoutPageGroup) {
-                $this->Cell(30, 5);
+                $this->Cell(25, 3);
             } else {
-                $this->Cell(30, 5, 'Pag. ' . $this->getGroupPageNo() . ' di ' . $this->getPageGroupAlias(), 0, 0, 'L');
+                $this->Cell(25, 3, 'Pag. ' . $this->getGroupPageNo() . ' di ' . $this->getPageGroupAlias(), 0, 0, 'L');
             }
             $this->Ln(6);
             $interlinea = $this->GetY();
@@ -173,27 +172,27 @@ class Template extends Fpdi {
             $this->SetY($interlinea - 11);
             $add_int=0;$extras="";
 
-            $this->SetX(110);$this->Cell(88, 5, $this->alloggio, 1, 1, 'C', 0, '', 1);
-            $this->SetX(110);$this->Cell(88, 5, $this->checkinout, 1, 1, 'C', 0, '', 1);
+            $this->SetX(105);$this->Cell(93, 5, $this->alloggio, 1, 1, 'C', 0, '', 1);
+			$this->SetX(105);$this->Cell(93, 5, $this->checkinout, 1, 1, 'C', 0, '', 1);
             $extraDes='';
             foreach ($this->extras as $extra){
               $extraDes .=$extra;
             }
+
             $add_int = ($add_int>2)?$add_int:0;
             if (strlen($extraDes)>2){
-              $this->SetX(110);
-              $this->Cell(88, 4, "Extra:".$extraDes, 1, 1, 'L', 0, '', 1);
-            }
-            $this->SetX(100);
+                $this->SetX(105);
+                $this->Cell(93, 4, "Extra:".$extraDes, 1, 1, 'L', 0, '', 1);
+              }
             if (!empty($this->agente)) {
               $this->SetXY(10, $interlinea +$add_int +5 );
-              $this->Cell(75, 6, "TOUR OPERATOR: ".$this->agente, 1, 1, 'C', 0, '', 1);
+              $this->Cell(90, 6, "TOUR OPERATOR: ".$this->agente, 1, 1, 'C', 0, '', 1);
             }
             if ($this->codice_partner > 0){
-              $this->SetXY(10, $interlinea +$add_int);
+              $this->SetXY(30, $interlinea +$add_int - 6);
               $this->Cell(13, 4, $this->descri_partner, 'LT', 0, 'R', 1, '', 1);
               $this->Cell(62, 4, ': ' . $this->cliente5, 'TR', 1, 0, '', 1,1);//cod.fisc. cliente
-
+              $this->Cell(20);
               $this->Cell(20, 4, ' cod.: ' . $this->codice_partner, 'LB', 0, 'L');// id codice cliente
               $to='';
               if (trim($this->cod_univoco)!=''){
@@ -204,37 +203,35 @@ class Template extends Fpdi {
               }
               $this->Cell(55, 4,$to.' ' , 'BR', 0, 'L', 0, '', 1);
             }
-
-            $this->SetXY(110, $interlinea +$add_int+ 6);
+            $this->SetXY(102, $interlinea +$add_int+ 6);
             $this->SetFont('helvetica', '', 10);
             if (!empty($this->cliente1 || !empty($this->cliente2))){ // Antonio Germani - se non c'è cliente evito di scrivere (serve per template scontrino)
                   $this->Cell(15, 5, $this->pers_title.' ', 0, 0, 'R');
                   $this->Cell(75, 5, $this->cliente1." ".$this->cliente2, 0, 1, 'L', 0, '', 1);
                   if (strlen($this->logo_level)>5){
                     $x=0;$y=15;
-                    $this->Image('@' .$this->logo_level, 190, 45, $x, $y, 'png');
+                    $this->Image('@' .$this->logo_level, 183, 45, $x, $y, 'png');
                   }
             } else {
               $this->Cell(15, 5,'', 0, 0, 'R');
               $this->Cell(75, 5,'', 0, 1, 'L', 0, '', 1);
             }
-
             $this->SetFont('helvetica', '', 10);
-            $this->Cell(115);
+            $this->Cell(105);
             $this->Cell(75, 5, $this->cliente3, 0, 1, 'L', 0, '', 1);
-            $this->Cell(115);
+            $this->Cell(105);
             $this->Cell(75, 5, $this->cliente4, 0, 1, 'L', 0, '', 1);
-            if (!empty($this->clientetel)) {
-                      $this->Cell(115);
-                      $this->Cell(75, 5, "tel: ".$this->clientetel, 0, 1, 'L', 0, '', 1);
-            }
+			if (!empty($this->clientetel)) {
+                $this->Cell(105);
+                $this->Cell(75, 5, "tel: ".$this->clientetel, 0, 1, 'L', 0, '', 1);
+			}
+
             $this->SetFont('helvetica', '', 7);
             if (!empty($this->c_Attenzione)) {
                 $this->SetFont('helvetica', '', 10);
-                $this->Cell(115, 8, 'alla C.A.', 0, 0, 'R');
+                $this->Cell(105, 8, 'alla C.A.', 0, 0, 'R');
                 $this->Cell(75, 8, $this->c_Attenzione, 0, 1, 'L', 0, '', 1);
             }
-
             if (!empty($this->status)) {
               switch ($this->status) {
                 case "GENERATO":
@@ -259,15 +256,14 @@ class Template extends Fpdi {
                   $this->status = 'PREVENTIVO - Verificare sempre la disponibilità prima di prenotare';
                 break;
               }
-              $this->Cell(75, 6, "STATO DELLA PRENOTAZIONE: ".$this->status, 1, 1, 'C', 1, '', 1);
+              $this->Cell(90, 6, "STATO DELLA PRENOTAZIONE: ".$this->status, 1, 1, 'C', 1, '', 1);
             }
-
             $this->SetFont('helvetica', '', 7);
             if ($this->fiscal_rapresentative) {
-                $this->Cell(115, 8, 'Legale Rappresentante ', 0, 0, 'R');
+                $this->Cell(115, 8, 'Rappresentante legale ', 0, 0, 'R');
                 $this->Cell(75, 8, $this->fiscal_rapresentative['ragso1']." ".$this->fiscal_rapresentative['ragso2']." ".$this->fiscal_rapresentative['country'].$this->fiscal_rapresentative['pariva'], 0, 1, 'L', 0, '', 1);
             } elseif (!empty($this->clientSedeLegale)) {
-                $this->Cell(115, 8, 'Sede legale: ', 0, 0, 'R');
+                $this->Cell(115, 8, 'Sede Legale: ', 0, 0, 'R');
                 $this->Cell(75, 8, $this->clientSedeLegale, 0, 1, 'L', 0, '', 1);
             } else {
                 $this->Ln(4);
