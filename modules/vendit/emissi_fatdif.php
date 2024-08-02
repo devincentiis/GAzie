@@ -56,7 +56,10 @@ function getDateLimits($sez=1, $tipodocumento='DDT') {
                 $ddtfirst = gaz_dbi_fetch_array($rs_first);
                 if ($ddtfirst) {
                     $nd = new DateTime($ddtfirst['datemi']);
-                    $acc['date_ini'] = $ddtfirst['datemi'];
+                    $di = new DateTime($acc['date_ini']);
+                    if ($di>$nd){
+                      $acc['date_ini'] = $ddtfirst['datemi'];
+                    }
                     $nd->modify('last day of this month');
                     $acc['date_fin'] = $nd->format('Y-m-d');
                     $acc['date_exe'] = $acc['date_fin'];
