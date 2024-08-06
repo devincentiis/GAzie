@@ -28,7 +28,9 @@
   --------------------------------------------------------------------------
 */
 require("../../library/include/datlib.inc.php");
+//require("lib.function.php");
 $admin_aziend = checkAdmin(8);
+$lang=gaz_dbi_get_row($gTables['languages'], 'lang_id', intval($admin_aziend['id_language']))['sef'];
 $gForm = new GazieForm();
 $genclass="active";
 $feedclass="";
@@ -41,9 +43,10 @@ if (isset($_POST['addElement'])){// se è stato richiesto di inserire un nuovo e
   if (strlen($_POST['newElement'])>2){// se non è vuoto posso inserire
     $table = 'rental_feedback_elements';
     $set['element']=  mysqli_real_escape_string($link,substr($_POST['newElement'],0,64));
+    $set['description']=  mysqli_real_escape_string($link,substr($_POST['description'],0,100));
     $set['facility']=  intval($_POST['newFacility']);
     $set['status']=  "CREATED";
-    $columns = array('element', 'facility', 'status');
+    $columns = array('element', 'description', 'facility', 'status');
     tableInsert($table, $columns, $set);
   }
 }
@@ -66,13 +69,14 @@ if (isset($_POST['SaveupdElement']) && intval($_POST['SaveupdElement'])>0){// se
   $feedclass="active";
    $table = 'rental_feedback_elements';
     $set['element']=  mysqli_real_escape_string($link,substr($_POST['newElement'],0,64));
+    $set['description']=  mysqli_real_escape_string($link,substr($_POST['description'],0,100));
     $set['facility']=  intval($_POST['newFacility']);
     $set['status']=  "MODIFIED";
-    $columns = array('element', 'facility', 'status');
+    $columns = array('element', 'description', 'facility', 'status');
     $codice=array();
     $codice[0]="id";
     $codice[1]=intval($_POST['SaveupdElement']);
-    $newValue = array('element'=>$set['element'], 'facility'=>$set['facility'],'status'=>$set['status']);
+    $newValue = array('element'=>$set['element'], 'description'=>$set['description'], 'facility'=>$set['facility'],'status'=>$set['status']);
     tableUpdate($table, $columns, $codice, $newValue);
 }
 
@@ -257,22 +261,24 @@ $point = gaz_dbi_dyn_query("*", $gTables['company_config'], " var LIKE 'point%'"
                 ?>
                 <div class="row border border-primary">
                   <div class="form-group" >
-                    <label for="existElement" class="col-sm-4 control-label"><?php echo $feedback["element"]; ?></label>
+                    <label for="existElement" class="col-sm-2 control-label"><?php echo "<b>".get_string_lang($feedback["element"], $lang)."</b> "; ?></label>
+                    <label for="existElement" class="col-sm-4 control-label"><pre><?php echo get_string_lang($feedback["description"], $lang); ?></pre></label>
+
                     <?php if (intval($feedback["facility"])>0){
                       ?>
-                      <span class="col-sm-4"> - riservato alla struttura: <?php echo $feedback["facility"]," ",$feedback["descri"]; ?></span>
+                      <span class="col-sm-4"> - Struttura: <?php echo $feedback["facility"]," ",$feedback["descri"]; ?></span>
                       <?php
                     }else{
                       ?>
-                      <span class="col-sm-4"> - tutte le strutture</span>
+                      <span class="col-sm-4"> - Tutte le strutture</span>
                       <?php
                     }
                     ?>
-                    <button type="submit" class="btn btn-success col-sm-2" name="delElement" value="<?php echo $feedback["id"]; ?>">
-                      <i class="glyphicon glyphicon-minus"> Elimina elemento</i>
+                    <button type="submit" class="btn btn-success col-sm-1" name="delElement" value="<?php echo $feedback["id"]; ?>">
+                      <i class="glyphicon glyphicon-minus"> Elimina</i>
                     </button>
-                    <button type="submit" class="btn btn-success col-sm-2" name="updElement" value="<?php echo $feedback["id"]; ?>">
-                      <i class="glyphicon glyphicon-edit"> modifica</i>
+                    <button type="submit" class="btn btn-success col-sm-1" name="updElement" value="<?php echo $feedback["id"]; ?>">
+                      <i class="glyphicon glyphicon-edit"> Modifica</i>
                     </button>
                   </div>
                 </div>
@@ -294,9 +300,15 @@ $point = gaz_dbi_dyn_query("*", $gTables['company_config'], " var LIKE 'point%'"
                         </div>
                     </div>
                     <div class="row">
-                      <label for="inputElement" class="col-sm-5 control-label">Modifica elemento feedback&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
+                      <label for="inputElement" class="col-sm-5 control-label">Modifica titolo feedback&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
                       <div class="col-sm-7">
                         <input class="col-sm-9" type="text" name="newElement" value="<?php echo $upd['element'];?>">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label for="inputElement" class="col-sm-5 control-label">Modifica descrizione feedback&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
+                      <div class="col-sm-7">
+                        <input class="col-sm-9" type="text" name="description" value="<?php echo $upd['description'];?>">
                         <button type="submit" class="btn btn-success col-sm-3" name="SaveupdElement" value="<?php echo $upd['id']; ?>">
                           <i class="glyphicon glyphicon-record"> Modifica elemento</i>
                         </button>
@@ -319,9 +331,15 @@ $point = gaz_dbi_dyn_query("*", $gTables['company_config'], " var LIKE 'point%'"
                       </div>
                   </div>
                   <div class="row">
-                    <label for="inputElement" class="col-sm-5 control-label">Inserisci nuovo elemento feedback&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
+                    <label for="inputElement" class="col-sm-5 control-label">Inserisci titolo nuovo elemento feedback&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
                     <div class="col-sm-7">
                       <input class="col-sm-9" type="text" name="newElement">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <label for="inputElement" class="col-sm-5 control-label">Inserisci descrizione nuovo elemento feedback&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
+                    <div class="col-sm-7">
+                      <input class="col-sm-9" type="text" name="description">
                       <button type="submit" class="btn btn-success col-sm-3" name="addElement">
                         <i class="glyphicon glyphicon-plus"> Aggiungi elemento</i>
                       </button>

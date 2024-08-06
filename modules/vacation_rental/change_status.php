@@ -239,8 +239,8 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
               }else{
                 $level_name="nessun livello raggiunto";
               }
-              $mail->Body    = "<p>".$script_transl['give_point']." ".$points." per un totale di ".$data['vacation_rental']['points']." ".$script_transl['give_point1']." ".$level_name."</p><p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
-              $mail->Body    .="<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Fidelity Mon Amour</a></p>";
+              $mail->Body    = "<p>".$script_transl['give_point']." ".$points." punti per un totale di ".$data['vacation_rental']['points']." ".$script_transl['give_point1']." ".$level_name."</p><p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
+			  $mail->Body    .="<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma <b>Fidelity Mon Amour</b></a></p>";
 
               if($mail->send()) {
                 if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata

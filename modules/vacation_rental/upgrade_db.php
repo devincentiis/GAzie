@@ -69,4 +69,5 @@ $upgrade_db[155][]="ALTER TABLE `".$table_prefix."_XXXrental_prices` ADD `minsta
 $upgrade_db[155][]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `var`, `val`) VALUES ('Scadenza punti gg (0=senza scadenza)', 'points_expiry', '0')";
 $upgrade_db[155][]="ALTER TABLE `".$table_prefix."_XXXartico` CHANGE `web_url` `web_url` VARCHAR(700) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL;";
 $upgrade_db[155][]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `var`, `val`) VALUES ('URL front-end del regolamento web sel check-in', 'vacation_url_selfcheck', '')";
+$upgrade_db[160][]="ALTER TABLE `".$table_prefix."_XXXrental_feedback_elements` ADD `description` VARCHAR(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT '' COMMENT 'Breve descrizione' AFTER `element`";
 ?>
