@@ -40,15 +40,19 @@ $tesbro = gaz_dbi_get_row($gTables['tesbro'],"id_tes", intval($_GET['id_tes']));
 $lang_template = false;
 $id_anagra = gaz_dbi_get_row($gTables['clfoco'], 'codice', $tesbro['clfoco']);
 $stato = gaz_dbi_get_row($gTables['anagra'], 'id', $id_anagra['id_anagra']);
-if ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0){// se è italiano o non è impostato
-    $lang_template = '';$lang="it";
-} elseif ($stato AND $stato['id_language'] == 2 ) {// se è inglese
-  $lang_template = 'english';$lang="en";
-}elseif ($stato AND $stato['id_language'] == 3 ) {// se è spagnolo
-  $lang_template = 'spanish';$lang="es";
+$lang_template = '';$lang="it";
+if (!isset($_GET['dest']) OR ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0)){// se devo stampare dal gestionale, è italiano o non è impostato
+    // lascio il default
+	//echo "LASCIO DEFAULT";
+} else{// altrimenti se esite il file lingua, modifico
+  $language_row = gaz_dbi_get_row($gTables['languages'], 'lang_id', $stato['id_language']);
+  if (isset($language_row['title_native'])){
+    $expl_l_row=explode(' ',$language_row['title_native']);
+    $lang_template = strtolower($expl_l_row[0]);
+    $lang = $language_row['sef'];
+  }
 }
 $user_level=get_user_points_level($id_anagra['id_anagra']);
-
 if ($tesbro['tipdoc']=='VOR' || $tesbro['tipdoc']=='VOG') {
 	$type=false;
 	$template='BookingSummary';
