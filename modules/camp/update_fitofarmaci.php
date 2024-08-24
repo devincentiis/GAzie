@@ -2,9 +2,9 @@
 /*
 	  --------------------------------------------------------------------------
 	  GAzie - Gestione Azienda
-	  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-	  (https://www.devincentiis.it)
-	  <https://gazie.sourceforge.net>
+	  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
+	  (http://www.devincentiis.it)
+	  <http://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP
 	  Copyright (C) 2018-2023 - Antonio Germani, Massignano (AP)
@@ -73,17 +73,21 @@ $admin_aziend=checkAdmin(); $title="Update tabella fitofarmaci dal database del 
 </style>
 <div id="loader" class="center"></div>
 <?php
-
-
 require("../../library/include/header.php");
- $script_transl=HeadMain();
+$script_transl=HeadMain();
 
+$url='https://www.dati.salute.gov.it/it/dataset/fitosanitari/';
+$webpage=file_get_contents($url);
+if (preg_match('~sites(.*?).csv~', $webpage, $output)){
+  $file_name="https://www.dati.salute.gov.it/".$output[0];// questo è l'url completo per scaricare il dataset in csv
+} else {
+  var_dump("Pagina: <a href='".$url."'>".$url."</a> non trovata!");
+  $file_name='';
+}
 
 echo "<form method=\"POST\" name=\"myform\">";
 echo "<div align=\"center\" class=\"FacetFormHeaderFont\">$title</div>\n";
-
 echo "<table class=\"Tmiddle table-striped\" align=\"center\">\n";
-
 echo '<tr><td colspan="5" class="FacetDataTDred" align="center">' . "Procedura di aggiornamento della tabella fitofarmaci" . "</td></tr>\n";
 echo "<tr><td class=\"FacetDataTD\">\n";
 echo "<td class=\"FacetFieldCaptionTD\">" ."Questa procedura popola la tabella fitofarmaci, se è la prima volta che viene attivata; se non è la prima volta la aggiorna.<br> Può durare alcuni minuti e necessita di connessione ad internet. <br> Non cambiare pagina al browser finché non si riceve un messaggio di avvenuto aggiornamento o di errore." . "</td><td class=\"FacetDataTD\">\n";
@@ -91,7 +95,6 @@ if ($msg==""){
 	echo '<button type="submit" class="btn btn-default btn-sm" name="update" title="' . $script_transl['submit'] . '"><i class="glyphicon glyphicon-refresh"></i></button>';
 }
 echo '</td></tr><tr><td></td><td class="FacetDataTD">'.$msg.'</td><td></td></tr>';
-
 ?>
 </div>
 </table>
@@ -113,7 +116,7 @@ document.onreadystatechange = function() {
 if (isset($_POST['update'])) {
 	// creo l'array dal file csv
 	$array = array();$delimiter = ";";
-	$lines = @file('https://www.dati.salute.gov.it/imgs/C_17_dataset_6_download_itemDownload0_upFile.CSV', FILE_IGNORE_NEW_LINES) or die ("Apertura del file fallita. Aspettare 1 minuto e riprovare oppure controllare la connessione ad internet.");
+	$lines = @file($file_name, FILE_IGNORE_NEW_LINES) or die ("Apertura del file fallita. Aspettare 1 minuto e riprovare oppure controllare la connessione ad internet.");
 	//$lines = file('fitofarmaci.CSV', FILE_IGNORE_NEW_LINES); // commentare la riga sopra e togliere il commento a questa se si desidera prelevare i dati da un file scaricato precedentemente nel PC
 	foreach ($lines as $key => $value){
 		$array[$key] = str_getcsv($value,$delimiter);
