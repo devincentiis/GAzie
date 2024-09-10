@@ -2,9 +2,9 @@
 /*
 	  --------------------------------------------------------------------------
 	  GAzie - Gestione Azienda
-	  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-	  (https://www.devincentiis.it)
-	  <https://gazie.sourceforge.net>
+	  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+	  (http://www.devincentiis.it)
+	  <http://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  SHOP SYNCHRONIZE è un modulo creato per GAzie da Antonio Germani, Massignano AP
 	  Copyright (C) 2019-2021 - Antonio Germani, Massignano (AP)
@@ -42,11 +42,11 @@ $OSftp_pass = gaz_dbi_get_row($gTables['company_config'], "var", "pass")['val'];
 $OSaccpass = gaz_dbi_get_row($gTables['company_config'], "var", "accpass")['val'];// vecchio sistema di password non criptata
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'pass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
-$ftp_pass=$rdec?htmlspecialchars_decode($rdec[0]):'';
+$ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 $ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
-$accpass=$rdec?htmlspecialchars_decode($rdec[0]):'';
+$accpass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 $accpass=(strlen($accpass)>0)?$accpass:$OSaccpass; // se la password decriptata non ha dato risultati provo a mettere la password non criptata
 
 $test = gaz_dbi_query("SHOW COLUMNS FROM `" . $gTables['admin'] . "` LIKE 'enterprise_id'");

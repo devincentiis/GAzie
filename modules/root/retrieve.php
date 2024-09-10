@@ -31,6 +31,10 @@ if (isset($_GET['filename'])) {
 } elseif (isset($_GET['id_ref'])) {
   $doc = gaz_dbi_get_row($gTables['files'],'id_doc',intval($_GET['id_doc']));
 	$filepath=$admin_aziend['company_id']."/images/".$doc['id_doc'].'.'.$doc['extension'];
+} elseif (isset($_GET['filepath'])) {
+  $doc = pathinfo($_GET['filepath']);
+  $doc['title']=$_GET['descriname'];
+	$filepath=$admin_aziend['company_id']."/".$_GET['filepath'];
 } else {
   $doc = gaz_dbi_get_row($gTables['files'],'id_doc',intval($_GET['id_doc']));
 	$filepath=$admin_aziend['company_id']."/doc/".$doc['id_doc'].'.'.$doc['extension'];
