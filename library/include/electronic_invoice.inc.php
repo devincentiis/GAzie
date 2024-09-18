@@ -654,7 +654,7 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
       $results->appendChild($attrVal);
       //il IdCodice iva e' la partita iva?
       $results = $xpath->query("//FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdCodice")->item(0);
-			if ($XMLvars->reverse&&($XMLvars->TipoDocumento=='TD17'||$XMLvars->TipoDocumento=='TD18')) { // gli stranieri metto il codice fiscale in mancanza la partita IVA se non ho nessuno dei due uso XXXXXXX
+			if ($XMLvars->reverse&&($XMLvars->TipoDocumento=='TD17'||$XMLvars->TipoDocumento=='TD18'|| ($XMLvars->TipoDocumento=='TD19' && $XMLvars->client['country']<>'IT'))) { // gli stranieri metto il codice fiscale in mancanza la partita IVA se non ho nessuno dei due uso XXXXXXX
 				if (strlen($XMLvars->client['codfis'])>3){
 					$vidc=trim($XMLvars->client['codfis']);
 				} elseif (strlen($XMLvars->client['pariva'])>3){
@@ -673,9 +673,8 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
 			} else {
 				$attrVal = $domDoc->createTextNode(trim($XMLvars->azienda['pariva']));
 			}
-            $results->appendChild($attrVal);
-
-            //nodo 1.2.1.2 Codice Fiscale richiesto da alcune amministrazioni come obbligatorio ma da non indicare sulle autofatture a stanieri
+      $results->appendChild($attrVal);
+      //nodo 1.2.1.2 Codice Fiscale richiesto da alcune amministrazioni come obbligatorio ma da non indicare sulle autofatture a stanieri
 			if ($XMLvars->reverse&&$XMLvars->TipoDocumento<>'TD16') {
 				$results = $xpath->query("//FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/CodiceFiscale")->item(0);
 				$results->parentNode->removeChild($results);
@@ -794,6 +793,9 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
 				$rsFatturaElettronicaHeader = $xpath->query("//FatturaElettronicaHeader")->item(0);
 				$el = $domDoc->createElement("SoggettoEmittente","CC");
 				$rsFatturaElettronicaHeader->appendChild($el);
+ 				if (strlen($XMLvars->client['capspe']) <> 5 || $XMLvars->client['country']!='IT'){
+					$XMLvars->client['capspe']='00000';
+				}
         // FINE REVERSE
 			} else {
 				// nodo 1.4.1.2 codice fiscale del committente
@@ -894,7 +896,7 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
 				}
 			}
       // se cliente e fornitore coincidono allora forzo il tipo documento come autofattura TD27
-      if (trim($XMLvars->azienda['pariva'])==trim($XMLvars->client['pariva']) && ( $XMLvars->TipoDocumento=='TD01' || $XMLvars->TipoDocumento=='TD24' )) {
+      if (trim($XMLvars->azienda['pariva'])==trim($XMLvars->client['pariva']) && ( $XMLvars->TipoDocumento=='TD01' || $XMLvars->TipoDocumento=='TD24' || $XMLvars->TipoDocumento=='TD16')) {
         $XMLvars->TipoDocumento='TD27';
       }
       $results = $xpath->query("//FatturaElettronicaBody/DatiGenerali/DatiGeneraliDocumento/TipoDocumento")->item(0);

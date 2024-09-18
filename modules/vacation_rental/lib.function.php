@@ -630,13 +630,18 @@ function get_user_points_level($id_anagra){// determina il livello punti raggiun
 
 function check_availability($start,$end,$house_code, $open_from="", $open_to=""){// controllo disponibilità
   global $link, $azTables, $gTables, $genTables;// posso chiamare la funzione con entrambi i metodi
+  $check_in=$start;
   $unavailable=1;
   if ($azTables){
     $table = $azTables."rental_events";
     $table_ts = $azTables."tesbro";
+    $table_gr= $azTables."artico_group";
+    $table_ar= $azTables."artico";
   }else{
     $table = $gTables['rental_events'];
     $table_ts = $gTables['tesbro'];
+    $table_gr= $gTables['artico_group'];
+    $table_ar= $gTables['artico'];
   }
   while (strtotime($start) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
     if ((intval($open_from)>0 && strtotime($open_from."-".substr($start,0,4))<=strtotime($start) && strtotime($open_to."-".substr($start,0,4))>=strtotime($start)) || intval($open_from)==0){
@@ -661,6 +666,40 @@ function check_availability($start,$end,$house_code, $open_from="", $open_to="")
     }
     $start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
   }
+
+  if ($unavailable==1){  // quì, se disponibile, controllo se ci sono limitazioni nel giorno di entrata e di uscita
+    $sql = "SELECT ".$table_gr.".custom_field FROM ".$table_gr." LEFT JOIN ".$table_ar." ON ".$table_gr.".id_artico_group = ".$table_ar.".id_artico_group  WHERE ".$table_ar.".codice = '".mysqli_real_escape_string($link,$house_code)."'";
+    if ($res_cust = mysqli_query($link, $sql)) {
+      $row = mysqli_fetch_array($res_cust);
+      if (isset($row['custom_field']) && ($data = json_decode($row['custom_field'],true))){// se c'è un json in artico_group
+        if ((isset($data['vacation_rental']['week_check_in'])&& strlen($data['vacation_rental']['week_check_in'])>0 )|| (isset($data['vacation_rental']['week_check_out'])&& strlen($data['vacation_rental']['week_check_out'])>0 )){
+          // controllo il check-in
+          $in=explode(",", $data['vacation_rental']['week_check_in']);
+          $unavailable=2;
+          foreach ($in as $inday){
+            if (date('w', strtotime($check_in))== intval($inday)){
+              $unavailable=1; // disponibile per giorno check-in
+              break;
+            }
+          }
+          if ($unavailable==1){ // controllo il check-out
+            $out=explode(",", $data['vacation_rental']['week_check_out']);
+            $unavailable=3;
+            foreach ($out as $outday){
+              if (date('w', strtotime($end))== intval($outday)){
+                $unavailable=1; // disponibile per giorno check-out
+
+                break;
+              }
+            }
+          }
+        }
+      }
+    }else {
+     echo "Error: " . $sql . "<br>" . mysqli_error($link);
+    }
+  }
+
   return $unavailable;
 }
 
