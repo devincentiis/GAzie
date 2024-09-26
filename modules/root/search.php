@@ -90,14 +90,14 @@ if (isset($_GET['term'])) { //	Evitiamo errori se lo script viene chiamato diret
               "datemi DESC, numdoc DESC",0,500);
       break;
     case 'production':
-      $fields = array("id", "description", "add_info"); //	Sono i campi sui quali effettuare la ricerca
+      $fields = array("id", "description"); //	Sono i campi sui quali effettuare la ricerca
       foreach ($fields as $id1 => $field) {   //	preparo i diversi campi per il like, questo funziona meglio del concat
           foreach ($parts as $id => $part) {   //	(inteso come stringa sulla quale fare il like) perchè è più flessibile con i caratteri jolly
               $like[] = like_prepare($field, $part); //	Altrimenti se si cerca za%, il like viene fatto su tutto il concat, e se il codice prodotto
           }           //	non inizia per za il risultato è nullo, così invece se cerco za%, viene fuori anche un prodotto il
       }            //  cui nome (o descrizione) inizia per za ma il cui codice può anche essere TPQ
       $like = implode(" OR ", $like);    //	creo la porzione di query per il like, con OR perchè cerco in campi differenti
-      $result = gaz_dbi_dyn_query("id, CONCAT(id,' - ',description,' - ',add_info) AS label, id AS value, 'S' AS movimentabile, description ",
+      $result = gaz_dbi_dyn_query("id, CONCAT(id,' - ',description) AS label, id AS value, 'S' AS movimentabile, description ",
               $gTables['orderman'], "(".$like.") AND stato_lavorazione < 9", // così prendo solo gli ordini da clienti
               "id DESC",0,500);
       break;

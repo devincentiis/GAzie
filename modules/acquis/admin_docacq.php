@@ -284,7 +284,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
     $form['in_extdoc'] = $_POST['in_extdoc'];
     $form['in_status'] = $_POST['in_status'];
 // fine rigo input
-    $form['rows'] = array();
+    $form['rows'] = [];
     $i = 0;
     if (isset($_POST['rows'])) {
       foreach ($_POST['rows'] as $i => $value) {
@@ -308,6 +308,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         $form['rows'][$i]['id_warehouse'] = intval($value['id_warehouse']);
         $form['rows'][$i]['id_order'] = intval($value['id_order']);
         $form['rows'][$i]['id_orderman'] = intval($value['id_orderman']);
+        if(isset($_POST['all_same_orderman'])){$form['rows'][$i]['id_orderman']=$form['in_id_orderman'];}
         $form['rows'][$i]['annota'] = substr($value['annota'], 0, 50);
         $form['rows'][$i]['pesosp'] = floatval($value['pesosp']);
         $form['rows'][$i]['gooser'] = intval($value['gooser']);
@@ -409,9 +410,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
                 $form['in_id_mag'] = $form['rows'][$key_row]['id_mag'];
                 $form['in_id_warehouse'] = $form['rows'][$key_row]['id_warehouse'];
                 $form['in_id_order'] = $form['rows'][$key_row]['id_order'];
-                $orderman = gaz_dbi_get_row($gTables['orderman'], "id", $form['rows'][$key_row]['id_orderman']);
-                $form['coseprod'] =($orderman)?$orderman['description']:'';
-                $form['in_id_orderman'] = $form['rows'][$key_row]['id_orderman'];
+                //$orderman = gaz_dbi_get_row($gTables['orderman'], "id", $form['rows'][$key_row]['id_orderman']);
+                //$form['coseprod'] =($orderman)?$orderman['description']:'';
+                //$form['in_id_orderman'] = $form['rows'][$key_row]['id_orderman'];
                 $form['in_annota'] = $form['rows'][$key_row]['annota'];
                 $form['in_pesosp'] = $form['rows'][$key_row]['pesosp'];
                 $form['in_gooser'] = $form['rows'][$key_row]['gooser'];
@@ -428,7 +429,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
                 $artico = gaz_dbi_get_row($gTables['artico'], "codice", $form['rows'][$key_row]['codart']);
                 $form['net_weight'] -= $form['rows'][$key_row]['quanti'] * ($artico['peso_specifico'] ?? 1);
                 $form['gross_weight'] -= $form['rows'][$key_row]['quanti'] * ($artico['peso_specifico'] ?? 1);
-                if ($artico['pack_units'] > 0) {
+                if ($artico && $artico['pack_units'] > 0) {
                     $form['units'] -= intval(round($form['rows'][$key_row]['quanti'] / $artico['pack_units']));
                 }
                 $form['volume'] -= $form['rows'][$key_row]['quanti'] * ($artico['volume_specifico'] ?? 1);
@@ -2274,27 +2275,36 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
                 </div>
             </div> <!-- chiude group  -->
             <div class="col-sm-12">
-                <div class="col-sm-6">
-                    <div class="form-group col-sm-12 col-md-6">
-                        <label for="id_orderman" class="col-form-label"><?php echo $script_transl['orderman']; ?></label>
+              <div class="col-sm-6">
+                <div class="form-group col-sm-12">
+                  <label for="id_orderman" class="col-form-label col-xs-6"><?php echo $script_transl['orderman']; ?></label>
 							<?php
 							$select_prod = new selectproduction("in_id_orderman");
 							$select_prod->addSelected($form['in_id_orderman']);
 							$select_prod->output($form['coseprod'],true,'col-lg-12');
 							?>
+                </div>
+              </div>
+              <div class="col-sm-3">
+							<?php
+              echo ' <div class="form-groupcol-sm-12">';
+              echo ' <label for="all_same_orderman" class="col-form-label col-xs-12">Attribusici <b>TUTTO</b> alla produzione:</label>';
+              if ($form['in_id_orderman']>0){
+                echo '<input type="submit" class="btn btn-info btn-xs" name="all_same_orderman" title="Tutti i righi alla produzione '.$form['coseprod'].'" value=" '.$form['coseprod'].'" />';
+              }
+              echo '</div>';
+              ?>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group col-sm-12">
+                </div>
+                <div class="form-group col-sm-12 col-md-6">
+                    <label for="sconto" class="col-form-label"><?php echo $script_transl['sconto']; ?></label>
+                    <div>
+                        <input type="number" step="0.01" max="100" id="sconto" name="sconto" placeholder="<?php echo $script_transl['sconto']; ?>" value="<?php echo $form['sconto']; ?>" onchange="this.form.submit();">
                     </div>
                 </div>
-
-				<div class="col-sm-5">
-                    <div class="form-group col-sm-12 col-md-6">
-                    </div>
-                    <div class="form-group col-sm-12 col-md-6">
-                        <label for="sconto" class="col-form-label"><?php echo $script_transl['sconto']; ?></label>
-                        <div>
-                            <input type="number" step="0.01" max="100" id="sconto" name="sconto" placeholder="<?php echo $script_transl['sconto']; ?>" value="<?php echo $form['sconto']; ?>" onchange="this.form.submit();">
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div> <!-- chiude group  -->
 
 
@@ -2576,7 +2586,7 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 					} else {
 						$orderman = gaz_dbi_get_row($gTables['orderman'], "id", $v['id_orderman']);
             if (!$orderman ) $orderman = array('id'=>0,'description'=>'');
-						$descri_orderman='<div class="btn btn-xs btn-info">Materiale per Produzione n. ' .$orderman['id'].' - '.$orderman['description'].' '.$v['id_orderman'].' <i class="glyphicon glyphicon-arrow-down"> </i></div>';
+						$descri_orderman='<div class="btn btn-xs btn-info">per Produzione n.' .$orderman['id'].' - '.$orderman['description'].' '.$v['id_orderman'].' <i class="glyphicon glyphicon-arrow-down"> </i></div>';
 					}
 					$rowshead[$k]='<td colspan=13>'.$descri_orderman.'</td>';
 				}

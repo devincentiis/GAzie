@@ -529,7 +529,7 @@ if ($res){
 
 // RIEPILOGO
 if( $pdf->GetY() > 150 ){ $pdf->AddPage(); }
-if($what_print==1){ $tot_acq=0; } // se ho scelto di stampare sul report sia l'ordinato che l'acquistato tramite dtt-fatture non stampo quest'ultimo sul totale generale
+//if($what_print==1){ $tot_acq=0; } // se ho scelto di stampare sul report sia l'ordinato che l'acquistato tramite dtt-fatture non stampo quest'ultimo sul totale generale
 $totgen=$tot_aor+$tot_acq+$tot_mom_v+$tot_prw_v+$tot_pr4;
 if ($totgen>=0.01){
   $pdf->SetFont('helvetica','',9);

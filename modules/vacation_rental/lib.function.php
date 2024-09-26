@@ -279,12 +279,18 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
 	  $tableart = $gTables['artico'];
     }
     $where = " WHERE id_tes = '".$tesbro."'";
-    if ($tourist_tax<>TRUE){// se richiesto escludo la tassa turistica
+    if ($tourist_tax == TRUE && $add_extra==FALSE){// se richiesta la tassa turistica ma esclusi gli extra
+      $where .= " AND (codart LIKE 'TASSA-TURISTICA%' OR (".$tableart.".custom_field REGEXP 'accommodation_type'))";
+    }
+    if ($add_extra==FALSE && $tourist_tax == FALSE){// escludo gli extra ma anche la tassa turistica
+      $where .= " AND (".$tableart.".custom_field REGEXP 'accommodation_type')";
+    }
+    if ($tourist_tax == TRUE && $add_extra==TRUE){// se richiesta la tassa turistica e gli extra
+      $where .= "";
+    }
+     if ($tourist_tax == FALSE && $add_extra==TRUE){// se richiesti solo gli extra
       $where .= " AND codart NOT LIKE 'TASSA-TURISTICA%'";
     }
-	if ($add_extra==FALSE){// escludo gli extra ma anche la tassa turistica
-		$where .= "AND (".$tableart.".custom_field REGEXP 'accommodation_type')";
-	}
     if ($vat==FALSE){// devo restituire l'imponibile
       $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON ".$tablerig.".codart = ".$tableart.".codice ".$where;
       if ($result = mysqli_query($link, $sql)) {
@@ -604,22 +610,28 @@ function get_user_points_level($id_anagra){// determina il livello punti raggiun
     }else{
       $table = $gTables['company_config'];
     }
+    $sql = "SELECT * FROM ". $table ." WHERE var = 'pointenable' ORDER BY id ASC LIMIT 1";
+    if ($result = mysqli_query($link, $sql)) {// prendo il customfield in anagra
+      $row = mysqli_fetch_assoc($result);
+      $pointenable=$row['val'];
+    }
+
     $sql = "SELECT * FROM ". $table ." WHERE var LIKE 'pointlevel%' ORDER BY id ASC";
     if ($result = mysqli_query($link, $sql)) {// prendo i livelli dalle impostazioni generali
       $levname="";$user_lev="";
-      while ($rigpoint = mysqli_fetch_array($result)){
-        if (substr($rigpoint['description'],0,12)=="Nome livello"){
-          $lev_number=substr($rigpoint['description'],13);
-        }
-        if (substr($rigpoint['description'],0,13)=="Punti livello"){
-          if ($user_point>=$rigpoint['val']){
-            $user_lev=$lev_number;
+      if (intval($pointenable)>0 ){
+        while ($rigpoint = mysqli_fetch_array($result)){
+          if (substr($rigpoint['description'],0,12)=="Nome livello"){
+            $lev_number=substr($rigpoint['description'],13);
+          }
+          if (substr($rigpoint['description'],0,13)=="Punti livello"){
+            if ($user_point>=$rigpoint['val']){
+              $user_lev=$lev_number;
+            }
           }
         }
       }
-
       return $user_lev;// restituisco il numero del livello
-
     }else {
        echo "Error: " . $sql . "<br>" . mysqli_error($link);
     }

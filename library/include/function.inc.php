@@ -1214,7 +1214,7 @@ class selectproduction extends SelectBox {
             if ($without_closed){
                 $opera .= " AND stato_lavorazione < 9";
             }
-            $result = gaz_dbi_dyn_query("id,description,add_info", $gTables['orderman'], $field_sql . " LIKE '" . addslashes($cerca) . $opera, "id DESC");
+            $result = gaz_dbi_dyn_query("id,description", $gTables['orderman'], $field_sql . " LIKE '" . addslashes($cerca) . $opera, "id DESC");
             $numclfoco = gaz_dbi_num_rows($result);
             if ($numclfoco > 0) {
 				echo ' <select name="' . $this->name . '" class="' . $class . '">';
