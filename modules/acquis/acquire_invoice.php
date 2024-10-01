@@ -571,8 +571,12 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
       $curr_doc_cont = $xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]");
       $df = $xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]/DatiGenerali/DatiGeneraliDocumento/Data")->item(0)->nodeValue;
       // trovo l'ultima data di registrazione
-      $lr = getLastProtocol('AF_',substr($df,0,4),1)['last_datreg'];/**/
-      if ($lr > $df) {
+      $lr = getLastProtocol('AF_',substr($df,0,4),1)['last_datreg'];
+      if ($lr > $df && !isset($_POST['datreg'])) { // solo al primo accesso propongo l'ultima data di registrazione
+        $form['datreg'] = gaz_format_date($lr, false, true);
+      }
+      $date_post = gaz_format_date($form['datreg'], true);
+      if ($lr > $date_post) { // solo se scelgo una data inferiore all'ultima registrazione la forzo
         $form['datreg'] = gaz_format_date($lr, false, true);
       }
       // controllo se ho uno split payment

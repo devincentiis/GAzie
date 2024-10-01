@@ -26,6 +26,7 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $mastroclienti = $admin_aziend['mascli'] . "000000";
 $mastrofornitori = $admin_aziend['masfor'] . "000000";
+$scorrimento = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
 $anagrafica = new Anagrafica();
 $msg = "";
 $form = array();
@@ -1196,6 +1197,15 @@ if ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo
 
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup', 'custom/modal_form'));
+
+if ( empty($msg) && $scorrimento == '1' ) { // scrollo solo se voluto e non ci sono errori
+?>
+<script>
+    $("html, body").stop().animate({scrollTop:$(document).height()}, 500, 'swing', function() {
+   });</script>
+<?php
+}
+
 echo '<script type="text/javascript">
       $(function() {
            $( "#search_insert_conto" ).autocomplete({
