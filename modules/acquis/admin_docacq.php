@@ -2641,6 +2641,13 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 									}
 								}
 								$selected_lot = $lm->getLot($v['id_lotmag']);
+								if(!isset($selected_lot['identifier'])){
+									$selected_lot['identifier']="";
+									$selected_lot['id']="";
+									$selected_lot['expiry']="";
+									$selected_lot['desdoc']="";
+									$selected_lot['datdoc']="";
+								}
 								if (!isset($count[$selected_lot['identifier']])){
 									$count[$selected_lot['identifier']]="";
 								}
@@ -2669,7 +2676,7 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 								$lm_acc .='</div>';
 								$lm_acc .='<div id="lm_dialog' . $k . '" class="collapse" >
 										<div class="form-group">';
-								if (count($lm->available) > 1) {
+								if (count($lm->available) > 0) {
 									foreach ($lm->available as $v_lm) {
 										if ($v_lm['id'] <> $v['id_lotmag']) {
 										if ($count[$v_lm['identifier']]>=$v['quanti']){

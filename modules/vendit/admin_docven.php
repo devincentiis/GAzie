@@ -1474,6 +1474,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       $form['rows'][$next_row]['extdoc'] = 0;
 			$form['rows'][$next_row]['recip_stocc_destin'] = "";
       $form['rows'][$next_row]['tiprig'] = $form['in_tiprig'];
+      $form['rows'][$next_row]['pesosp'] = 0;
 			if ($form['in_tiprig']<=1 || $form['in_tiprig']==90){
 				$form['RiferimentoNumeroLinea'][$next_row+1] = substr($form['in_descri'],0,20);
 			}

@@ -60,15 +60,19 @@ function iCalDecoder($file) {
 function validatecard($cardnumber) {// L' algoritmo di Luhn , noto anche come algoritmo 10, è una semplice checksum utilizzata per convalidare numeri di identificazione, come il numero delle carte di credito
     $cardnumber=preg_replace("/\D|\s/", "", $cardnumber);  # strip any non-digits
     $cardlength=strlen($cardnumber);
-    $parity=$cardlength % 2;
-    $sum=0;
-    for ($i=0; $i<$cardlength; $i++) {
-      $digit=$cardnumber[$i];
-      if ($i%2==$parity) $digit=$digit*2;
-      if ($digit>9) $digit=$digit-9;
-      $sum=$sum+$digit;
-    }
+    if($cardlength>0){// previene esito positivo se non è stato passato nulla
+      $parity=$cardlength % 2;
+      $sum=0;
+      for ($i=0; $i<$cardlength; $i++) {
+        $digit=$cardnumber[$i];
+        if ($i%2==$parity) $digit=$digit*2;
+        if ($digit>9) $digit=$digit-9;
+        $sum=$sum+$digit;
+      }
     $valid=($sum%10==0);
+    }else{
+      $valid=null;
+    }
     return $valid;
 }
 

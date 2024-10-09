@@ -27,6 +27,7 @@ $admin_aziend = checkAdmin();
 $msg = '';
 if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo accesso
   $form = array_merge(gaz_dbi_parse_post('clfoco'), gaz_dbi_parse_post('anagra'));
+  $form['old_id_SIAN']=$_POST['old_id_SIAN'];
   $form['ritorno'] = $_POST['ritorno'];
   $form['hidden_req'] = $_POST['hidden_req'];
   $form['pec_email'] = trim($form['pec_email']);
@@ -176,14 +177,14 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       if (intval($form['id_SIAN'])>0){
         $rs_same_code = gaz_dbi_dyn_query('*', $gTables['anagra'], " id_SIAN = " . $form['id_SIAN']);
         $rows=gaz_dbi_num_rows($rs_same_code);
-        if ($rows>0 && ($toDo == 'insert')) { // c'� gi� uno stesso codice
-          $form['id_SIAN'] ++; // lo aumento di 1
+        if ($rows>0 && ($toDo == 'insert')) { // c'è già uno stesso codice
+          $form['id_SIAN'] ++; // lo aumento di 1 e segnalo
           $msg .= "22+";
         }
-        if ($toDo == 'update') {
+        if ($toDo == 'update' && intval($form['old_id_SIAN'])<>intval($form['id_SIAN'])) {// se sono in update faccio il controllo solo se ho cambiato il codice SIAN
           foreach ($rs_same_code as $row){
             if ($row['ragso1']!==$form['ragso1'] AND $row['id_SIAN']==$form['id_SIAN']){
-              $form['id_SIAN'] ++; // c'� gi� uno stesso codice lo aumento di 1
+              $form['id_SIAN'] ++; // c'è già uno stesso codice lo aumento di 1 e segnalo
               $msg .= "22+";
             }
           }
@@ -222,6 +223,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['datnas_M'] = ($form['datnas'])?substr($form['datnas'], 5, 2):'';
   $form['datnas_D'] = ($form['datnas'])?substr($form['datnas'], 8, 2):'';
 	$form['external_resp']=$form['external_resp'];
+  $form['old_id_SIAN']=$form['id_SIAN'];
 } elseif (!isset($_POST['Insert'])) { //se e' il primo accesso per INSERT
   $anagrafica = new Anagrafica();
   $last = $anagrafica->queryPartners('*', "codice BETWEEN " . $admin_aziend['masfor'] . "000000 AND " . $admin_aziend['masfor'] . "999999", "codice DESC", 0, 1);
@@ -245,6 +247,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	$form['external_resp']="";
 	$form["external_service_descri"]="";
 	$form['id_SIAN']="";
+  $form['old_id_SIAN']="";
 }
 
 require("../../library/include/header.php");
@@ -558,6 +561,7 @@ $gForm->selectFromDB('country', 'counas', 'iso', $form['counas'], 'iso', 1, ' - 
                 <div class="form-group">
                     <label for="id_SIAN" class="col-sm-4 control-label">Codice identificativo SIAN</label>
                     <input class="col-sm-4" type="text" onkeyup="this.value=this.value.replace(/[^\d]/,'');" value="<?php echo $form['id_SIAN']; ?>" name="id_SIAN" id="id_SIAN" maxlength="10" />
+                    <input type="hidden" value="<?php echo $form['old_id_SIAN']; ?>" name="old_id_SIAN" id="old_id_SIAN"  />
                 </div>
             </div>
         </div><!-- chiude row  -->
