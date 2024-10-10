@@ -252,7 +252,7 @@ $strScript = array("select_liqiva.php" =>
             'P' => 'La sequenza dei numeri di protocollo non &egrave; corretta',
             'N' => 'La sequenza dei numeri dei documenti non &egrave; corretta',
             'T' => 'C\'&egrave; un movimento IVA non tipizzata',
-            'err' => 'Ci sono degli errori che non giustificano la stampa del registro'
+            'err' => 'Puoi procedere con la STAMPA ma sono stati riscontratI degli errori'
         ),
         'vat_reg' => 'Registro IVA da stampare:',
         'vat_reg_value' => array(2 => 'Fatture di Vendita', 4 => 'Corrispettivi', 6 => 'Fatture d\'Acquisto', 9 => 'Lista dei versamenti'),

@@ -2184,6 +2184,7 @@ if (intval($form['nome_colt']) == 0) {
 
 									<input type="hidden" name="filename<?php echo $form['mov']; ?>" value="<?php echo $form['filename'][$form['mov']]; ?>">
 									<?php
+									$idlotcontroll['id_movmag']=(isset($idlotcontroll['id_movmag']))?$idlotcontroll['id_movmag']:'';
 									if (intval($form['id_mov']) > 0 or intval($form['id_mov']) == intval($idlotcontroll['id_movmag'])) { // attiva inserimento certificato in alcuni casi
 										if (strlen($form['filename'][$form['mov']]) == 0) {
 											echo '<div><button class="btn btn-xs btn-danger" type="image" data-toggle="collapse" href="#lm_dialog' . $form['mov'] . '">' . 'Inserire nuovo certificato' . ' ' . '<i class="glyphicon glyphicon-tag"></i>' . '</button></div>';
@@ -2244,6 +2245,7 @@ if (intval($form['nome_colt']) == 0) {
 											echo '<div><button class="btn btn-xs btn-success" type="image" data-toggle="collapse" href="#lm_dialog_lot' . $form['mov'] . '">' . $form['identifier'][$form['mov']] . " " . '<i class="glyphicon glyphicon-tag"></i></button></div>';
 										}
 									}
+									$idlotcontroll['id_movmag']=(isset($idlotcontroll['id_movmag']))?$idlotcontroll['id_movmag']:'';
 									if (intval($form['id_mov']) == intval($idlotcontroll['id_movmag'])) {
 										?>
 										<div id="lm_dialog<?php echo $form['mov']; ?>" class="collapse" >

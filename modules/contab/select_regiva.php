@@ -369,145 +369,142 @@ echo "\t </td>\n";
 echo "\t </tr>\n";
 echo "</table>\n";
 if (isset($_POST['preview']) and $msg == '') {
-    $date_ini = sprintf("%04d%02d%02d", $form['date_ini_Y'], $form['date_ini_M'], $form['date_ini_D']);
-    $date_fin = sprintf("%04d%02d%02d", $form['date_fin_Y'], $form['date_fin_M'], $form['date_fin_D']);
-    $m = getMovements($form['vat_section'], $form['vat_reg'], $date_ini, $date_fin);
-    echo "<table class=\"Tlarge table table-striped table-bordered table-condensed table-responsive\">";
-    if (sizeof($m) > 0) {
-        $err = 0;
-        echo "<tr>";
-        $linkHeaders = new linkHeaders($script_transl['header']);
-        $linkHeaders->output();
-        echo "</tr>";
-        $totimponi = 0.00;
-        $totimpost = 0.00;
-        $totindetr = 0.00;
-        $totimponi_liq = 0.00;
-        $totimpost_liq = 0.00;
-        $totindetr_liq = 0.00;
-        $ctrlmopre = 0;
-		$castle_imponi=array();
-		$castle_descri[0]='';
-		$castle_percen[0]='';
-		foreach ($m AS $key => $mv) {
-			$class_m='';
-            if ($mv['operat'] == 1||$form['vat_reg']==9) {
-                $imponi = $mv['imponi'];
-                $impost = $mv['impost'];
-            } elseif ($mv['operat'] == 2) {
-                $imponi = -$mv['imponi'];
-                $impost = -$mv['impost'];
-            } else {
-                $imponi = 0;
-                $impost = 0;
-            }
-            if ($mv['regiva'] == 4) {
-                $mv['ragsoc'] = $mv['descri'];
-                $mv['descri'] = '';
-            }
-			if($mv['dr']<$date_ini){ // fattura pregressa, precedente al periodo selezionato ma che concorre alla liquidazione
-				$class_m='danger';
-			}elseif($mv['dr']>$date_fin){// fattura successiva al periodo selezionato ma che concorre alla liquidazione es. acquisto egistrato nei 15gg successivi
-				$class_m='danger';
-			}else{
-				$totimponi += $imponi;
-				if ($mv['tipiva'] != 'D' && $mv['tipiva'] != 'T') { // se indetraibili o split payment
-					$totimpost += $impost;
-				}
-				if (!isset($castle_imponi[$mv['codiva']])) {
-					$castle_imponi[$mv['codiva']] = 0;
-					$castle_impost[$mv['codiva']] = 0;
-					$castle_descri[$mv['codiva']] = $mv['desvat'];
-					$castle_percen[$mv['codiva']] = $mv['periva'];
-				}
-				$castle_imponi[$mv['codiva']] += $imponi;
-				$castle_impost[$mv['codiva']] += $impost;
-			}
-			if (!isset($castle_impost_liq[$mv['codiva']])){
+  $date_ini = sprintf("%04d%02d%02d", $form['date_ini_Y'], $form['date_ini_M'], $form['date_ini_D']);
+  $date_fin = sprintf("%04d%02d%02d", $form['date_fin_Y'], $form['date_fin_M'], $form['date_fin_D']);
+  $m = getMovements($form['vat_section'], $form['vat_reg'], $date_ini, $date_fin);
+  echo "<table class=\"Tlarge table table-striped table-bordered table-condensed table-responsive\">";
+  if (sizeof($m) > 0) {
+    $err = 0;
+    echo "<tr>";
+    $linkHeaders = new linkHeaders($script_transl['header']);
+    $linkHeaders->output();
+    echo "</tr>";
+    $totimponi = 0.00;
+    $totimpost = 0.00;
+    $totindetr = 0.00;
+    $totimponi_liq = 0.00;
+    $totimpost_liq = 0.00;
+    $totindetr_liq = 0.00;
+    $ctrlmopre = 0;
+    $castle_imponi=array();
+    $castle_descri[0]='';
+    $castle_percen[0]='';
+    foreach ($m AS $key => $mv) {
+      $class_m='';
+      if ($mv['operat'] == 1||$form['vat_reg']==9) {
+          $imponi = $mv['imponi'];
+          $impost = $mv['impost'];
+      } elseif ($mv['operat'] == 2) {
+          $imponi = -$mv['imponi'];
+          $impost = -$mv['impost'];
+      } else {
+          $imponi = 0;
+          $impost = 0;
+      }
+      if ($mv['regiva'] == 4) {
+          $mv['ragsoc'] = $mv['descri'];
+          $mv['descri'] = '';
+      }
+      if($mv['dr']<$date_ini){ // fattura pregressa, precedente al periodo selezionato ma che concorre alla liquidazione
+        $class_m='danger';
+      }elseif($mv['dr']>$date_fin){// fattura successiva al periodo selezionato ma che concorre alla liquidazione es. acquisto egistrato nei 15gg successivi
+        $class_m='danger';
+      }else{
+        $totimponi += $imponi;
+        if ($mv['tipiva'] != 'D' && $mv['tipiva'] != 'T') { // se indetraibili o split payment
+          $totimpost += $impost;
+        }
+        if (!isset($castle_imponi[$mv['codiva']])) {
+          $castle_imponi[$mv['codiva']] = 0;
+          $castle_impost[$mv['codiva']] = 0;
+          $castle_descri[$mv['codiva']] = $mv['desvat'];
+          $castle_percen[$mv['codiva']] = $mv['periva'];
+        }
+        $castle_imponi[$mv['codiva']] += $imponi;
+        $castle_impost[$mv['codiva']] += $impost;
+      }
+      if (!isset($castle_impost_liq[$mv['codiva']])){
                 $castle_imponi_liq[$mv['codiva']] = 0;
-				$castle_impost_liq[$mv['codiva']] = 0;
-			}
-			$liq_val='';
-			if ($mv['dl']<$date_ini){
-				$liq_val='<br>IMPOSTA GIÀ LIQUIDATA';
-				$class_m='danger';
-			} elseif ($mv['dl']>$date_fin){
-				$liq_val='<br>IMPOSTA DA LIQUIDARE';
-				$class_m='warning';
-			} else {
-				$liq_val='<br>'.gaz_format_number($impost);
-				$totimponi_liq += $imponi;
-				$totimpost_liq += $impost;
+        $castle_impost_liq[$mv['codiva']] = 0;
+      }
+      $liq_val='';
+      if ($mv['dl']<$date_ini){
+        $liq_val='<br>IMPOSTA GIÀ LIQUIDATA';
+        $class_m='danger';
+      } elseif ($mv['dl']>$date_fin){
+        $liq_val='<br>IMPOSTA DA LIQUIDARE';
+        $class_m='warning';
+      } else {
+        $liq_val='<br>'.gaz_format_number($impost);
+        $totimponi_liq += $imponi;
+        $totimpost_liq += $impost;
                 $castle_imponi_liq[$mv['codiva']] += $imponi;
                 $castle_impost_liq[$mv['codiva']] += $impost;
-			}
-            $red_p = '';
-            if (isset($mv['err_p'])) {
-                $red_p = 'red';
-                $err++;
-                echo "<tr>";
-                echo "<td colspan=\"8\" class=\"FacetDataTDred\">" . $script_transl['errors']['P'] . ":&nbsp;</td>";
-                echo "</tr>";
-            }
-            $red_d = '';
-            if (isset($mv['err_n'])) {
-                $red_d = 'red';
-                $err++;
-                echo "<tr>";
-                echo "<td colspan=\"8\" class=\"FacetDataTDred\">" . $script_transl['errors']['N'] . ":&nbsp;</td>";
-                echo "</tr>";
-            }
-            $red_t = '';
-            if (isset($mv['err_t'])) {
-                $red_t = 'red';
-                $err++;
-                echo "<tr>";
-                echo "<td colspan=\"8\" class=\"FacetDataTDred\">" . $script_transl['errors']['T'] . ":&nbsp;</td>";
-                echo "</tr>";
-            }
-            echo '<tr class="'.$class_m.'">';
-            echo "<td align=\"right\" class=\"FacetDataTD$red_p\">" . $mv['protoc'] . " &nbsp;</td>";
-            echo "<td align=\"center\"><a href=\"admin_movcon.php?id_tes=" . $mv['id_tes'] . "&Update\" title=\"Modifica il movimento contabile\">id " . $mv['id_tes'] . "</a><br />" . gaz_format_date($mv['datreg']). "</td>";
-            echo "<td>" . $mv['descri'] . " n." . $mv['numdoc'] . $script_transl['of'] . gaz_format_date($mv['datdoc']) . " &nbsp;</td>";
-            echo "<td>" . substr($mv['ragsoc'], 0, 30) . " &nbsp;</td>";
-            echo "<td align=\"right\">" . gaz_format_number($imponi) . " &nbsp;</td>";
-            echo "<td align=\"center\">" . $mv['periva'] . " &nbsp;</td>";
-            echo "<td align=\"right\">" . gaz_format_number($impost) . " &nbsp;</td>";
-            echo "<td align=\"center\">" . substr(gaz_format_date($mv['datliq']),3) . $liq_val." &nbsp;</td>";
-            echo "</tr>";
-        }
-        echo '<tr><td colspan="8"><hr/></td></tr>';
-        $totale = number_format(($totimponi + $totimpost), 2, '.', '');
-        foreach ($castle_imponi as $key => $value) {
-            echo "<tr><td colspan=3></td><td class=\"FacetDataTD\">" . $script_transl['tot'] .
-			$castle_descri[$key] . ' '.$script_transl['reg'] .
-			"</td><td align=\"right\">" . gaz_format_number($value) . " &nbsp;</td><td align=\"right\">" . $castle_percen[$key] .
-			"% &nbsp;</td><td align=\"right\">" . gaz_format_number($castle_impost[$key]) . " &nbsp;</td><td></td></tr>";
-        }
-
-        foreach ($castle_imponi_liq as $key => $value) {
-            echo "<tr><td colspan=3></td><td class=\"info\">" . $script_transl['tot'] .
-			$castle_descri[$key]. ' '.$script_transl['liq']  .
-			"</td><td align=\"right\">" . gaz_format_number($value) . " &nbsp;</td><td align=\"right\">" . $castle_percen[$key] .
-			"% &nbsp;</td><td align=\"right\"></td><td align=\"center\" class=\"info\">" . gaz_format_number($castle_impost_liq[$key]) . " &nbsp; &nbsp;</td></tr>";
-        }
-        echo "<tr><td colspan=3></td><td colspan=4><HR></td></tr>";
-        echo "<tr><td colspan=2></td><td>" . $script_transl['t_gen'] . "</td><td align=\"right\">" . gaz_format_number($totale) . " &nbsp;</td><td align=\"right\">" . gaz_format_number($totimponi, 2, '.', '') . " &nbsp;</td><td></td><td align=\"right\">" . gaz_format_number($totimpost, 2, '.', '') . " &nbsp;</td></tr>";
-        echo "<tr><td colspan=2></td><td class=\"info\">" .$script_transl['t_liq'] . "</td><td align=\"right\">" . gaz_format_number($totimponi_liq+$totimpost_liq) . " &nbsp;</td><td align=\"right\">" . gaz_format_number($totimponi_liq, 2, '.', '') . " &nbsp;</td><td colspan=\"2\"></td><td align=\"center\" class=\"info\">" . gaz_format_number($totimpost_liq, 2, '.', '') . " &nbsp;</td></tr>";
-        if ($err == 0) {
-            echo "\t<tr>\n";
-            echo '<td class="FacetFooterTD" colspan="8" align="center"><input type="submit" class="btn btn-warning" name="print" value="';
-            echo $script_transl['print'];
-            echo '">';
-            echo "\t </td>\n";
-            echo "\t </tr>\n";
-        } else {
-            echo "<tr>";
-            echo "<td colspan=\"8\" align=\"right\" class=\"FacetDataTDred\">" . $script_transl['errors']['err'] . "</td>";
-            echo "</tr>\n";
-        }
+      }
+      $red_p = '';
+      if (isset($mv['err_p'])) {
+          $red_p = 'red';
+          $err++;
+          echo "<tr>";
+          echo "<td colspan=\"8\" class=\"FacetDataTDred\">" . $script_transl['errors']['P'] . ":&nbsp;</td>";
+          echo "</tr>";
+      }
+      $red_d = '';
+      if (isset($mv['err_n'])) {
+          $red_d = 'red';
+          $err++;
+          echo "<tr>";
+          echo "<td colspan=\"8\" class=\"FacetDataTDred\">" . $script_transl['errors']['N'] . ":&nbsp;</td>";
+          echo "</tr>";
+      }
+      $red_t = '';
+      if (isset($mv['err_t'])) {
+          $red_t = 'red';
+          $err++;
+          echo "<tr>";
+          echo "<td colspan=\"8\" class=\"FacetDataTDred\">" . $script_transl['errors']['T'] . ":&nbsp;</td>";
+          echo "</tr>";
+      }
+      echo '<tr class="'.$class_m.'">';
+      echo "<td align=\"right\" class=\"FacetDataTD$red_p\">" . $mv['protoc'] . " &nbsp;</td>";
+      echo "<td align=\"center\"><a href=\"admin_movcon.php?id_tes=" . $mv['id_tes'] . "&Update\" title=\"Modifica il movimento contabile\">id " . $mv['id_tes'] . "</a><br />" . gaz_format_date($mv['datreg']). "</td>";
+      echo "<td>" . $mv['descri'] . " n." . $mv['numdoc'] . $script_transl['of'] . gaz_format_date($mv['datdoc']) . " &nbsp;</td>";
+      echo "<td>" . substr($mv['ragsoc'], 0, 30) . " &nbsp;</td>";
+      echo "<td align=\"right\">" . gaz_format_number($imponi) . " &nbsp;</td>";
+      echo "<td align=\"center\">" . $mv['periva'] . " &nbsp;</td>";
+      echo "<td align=\"right\">" . gaz_format_number($impost) . " &nbsp;</td>";
+      echo "<td align=\"center\">" . substr(gaz_format_date($mv['datliq']),3) . $liq_val." &nbsp;</td>";
+      echo "</tr>";
     }
-    echo "</table>\n";
+    echo '<tr><td colspan="8"><hr/></td></tr>';
+    $totale = number_format(($totimponi + $totimpost), 2, '.', '');
+    foreach ($castle_imponi as $key => $value) {
+      echo "<tr><td colspan=3></td><td class=\"FacetDataTD\">" . $script_transl['tot'] .
+      $castle_descri[$key] . ' '.$script_transl['reg'] .
+      "</td><td align=\"right\">" . gaz_format_number($value) . " &nbsp;</td><td align=\"right\">" . $castle_percen[$key] .
+      "% &nbsp;</td><td align=\"right\">" . gaz_format_number($castle_impost[$key]) . " &nbsp;</td><td></td></tr>";
+    }
+    foreach ($castle_imponi_liq as $key => $value) {
+      echo "<tr><td colspan=3></td><td class=\"info\">" . $script_transl['tot'] .
+      $castle_descri[$key]. ' '.$script_transl['liq']  .
+      "</td><td align=\"right\">" . gaz_format_number($value) . " &nbsp;</td><td align=\"right\">" . $castle_percen[$key] .
+      "% &nbsp;</td><td align=\"right\"></td><td align=\"center\" class=\"info\">" . gaz_format_number($castle_impost_liq[$key]) . " &nbsp; &nbsp;</td></tr>";
+    }
+    echo "<tr><td colspan=3></td><td colspan=4><HR></td></tr>";
+    echo "<tr><td colspan=2></td><td>" . $script_transl['t_gen'] . "</td><td align=\"right\">" . gaz_format_number($totale) . " &nbsp;</td><td align=\"right\">" . gaz_format_number($totimponi, 2, '.', '') . " &nbsp;</td><td></td><td align=\"right\">" . gaz_format_number($totimpost, 2, '.', '') . " &nbsp;</td></tr>";
+    echo "<tr><td colspan=2></td><td class=\"info\">" .$script_transl['t_liq'] . "</td><td align=\"right\">" . gaz_format_number($totimponi_liq+$totimpost_liq) . " &nbsp;</td><td align=\"right\">" . gaz_format_number($totimponi_liq, 2, '.', '') . " &nbsp;</td><td colspan=\"2\"></td><td align=\"center\" class=\"info\">" . gaz_format_number($totimpost_liq, 2, '.', '') . " &nbsp;</td></tr>";
+    echo "\t<tr>\n";
+    if ($err == 0) {
+      echo '<td class="FacetFooterTD" colspan="8" align="center"><input type="submit" class="btn btn-warning" name="print" value="';
+      echo $script_transl['print'].'">';
+    } else {
+      echo '<td class="bg-danger text-danger" colspan=8 align="right"><input type="submit" class="btn btn-danger" name="print" value="';
+      echo $script_transl['errors']['err'].'">' ;
+    }
+    echo "\t </td>\n";
+    echo "\t </tr>\n";
+  }
+  echo "</table>\n";
 }
 ?>
 </form>

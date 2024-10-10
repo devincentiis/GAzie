@@ -98,9 +98,9 @@ if (sizeof($_GET) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti e
 					} else {
 						$country = gaz_dbi_get_row($gTables['country'],"iso",$anagra['country']);
 						if ($country['istat_area']==11){
-							$stato="CE";$iso=$anagra['iso'];$istatpro="";$istatcom="";
+							$stato="CE";$iso=$country['iso'];$istatpro="";$istatcom="";
 						} else {
-							$stato="NE";$iso=$anagra['iso'];$istatpro="";$istatcom="";
+							$stato="NE";$iso=$country['iso'];$istatpro="";$istatcom="";
 						}
 					}
 
@@ -163,7 +163,7 @@ $namefile=substr($namefile,0,-4)
 			<div class="col-md-12">
 				<div class="form-group">
 					<label for="cod_silos" class="col-sm-4 control-label"><?php echo "Accedi al portale dell'olio del SIAN: "; ?></label>
-					<p><a  class="btn btn-info btn-md" href="javascript:;" onclick="window.open('<?php echo"https://www.sian.it/SSLicqrfportaleolio/start.do";?>', 'titolo', 'menubar=no, toolbar=no, width=800, height=400, left=80%, top=80%, resizable, status, scrollbars=1, location');">
+					<p><a  class="btn btn-info btn-md" href="javascript:;" onclick="window.open('<?php echo"https://www.sian.it/icqrfportaleolioAR/start.do";?>', 'titolo', 'menubar=no, toolbar=no, width=800, height=400, left=80%, top=80%, resizable, status, scrollbars=1, location');">
 					<img src="../../modules/camp/media/logo_sian.jpg" alt="Logo portale SIAN" title="Vai al portale dell'olio del SIAN" style="max-width:100%">
 					</a></p>
 				</div>

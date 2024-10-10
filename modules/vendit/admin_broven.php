@@ -816,7 +816,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     } else if (isset($_POST['in_submit'])) {
         $artico = gaz_dbi_get_row($gTables['artico'], "codice", $form['in_codart']);
         gaz_dbi_query ("UPDATE ".$gTables['artico']." SET `last_used`='".date("Y-m-d")."' WHERE codice='".$form['in_codart']."';");
-        if (isset($artici)){
+        if (isset($artico)){
         // addizione ai totali peso,pezzi,volume
         $form['net_weight'] += $form['in_quanti'] * $artico['peso_specifico'];
         $form['gross_weight'] += $form['in_quanti'] * $artico['peso_specifico'];

@@ -2640,6 +2640,7 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 										$count[$key] += $v_lm['rest'];
 									}
 								}
+								$v['id_lotmag']=(isset($v['id_lotmag']))?$v['id_lotmag']:'';
 								$selected_lot = $lm->getLot($v['id_lotmag']);
 								if(!isset($selected_lot['identifier'])){
 									$selected_lot['identifier']="";
