@@ -2717,7 +2717,7 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 							</style>
 							<div class="col-md-4">
 								<div class="form-group">
-									<label for="good_or_service" class="col-sm-5 control-label"><?php echo "Operazione SIAN rigo",$k+1; ?></label>
+									<label for="oper_sian" class="col-sm-5 control-label"><?php echo "Operazione SIAN rigo",$k+1; ?></label>
 									<?php
 									$gForm->variousSelect('rows[' . $k . '][cod_operazione]', $script_transl['cod_operaz_value'], $form['rows'][$k]['cod_operazione'], "col-sm-7", false, '', false, 'style="max-width: 250px;"')
 									?>
@@ -2735,9 +2735,9 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 							}elseif ($campart['confezione']==0){?>
 							<div class="col-md-4">
 								<div class="form-group">
-									<label for="good_or_service" class="col-sm-5 control-label"><?php echo "recipiente stoccaggio rigo ",$k+1; ?></label>
+									<label for="recip_stock" class="col-sm-5 control-label"><?php echo "recipiente stoccaggio rigo ",$k+1; ?></label>
 									<?php
-									$gForm->selectFromDB('camp_recip_stocc', 'rows[' . $k . '][recip_stocc]' ,'cod_silos', $form['rows'][$k]['recip_stocc'], 'cod_silos', 1, ' - kg ','capacita','TRUE','col-sm-7' , null, '');
+									$gForm->selectFromDB('camp_recip_stocc', 'rows[' . $k . '][recip_stocc]' ,'cod_silos', $form['rows'][$k]['recip_stocc'], 'cod_silos', 1, ' - Capacità kg. ','capacita','TRUE','col-sm-7' , null, '');
 									?>
 								</div>
 							</div>

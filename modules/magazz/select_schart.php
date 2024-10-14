@@ -309,7 +309,7 @@ if (isset($_POST['preview']) and $msg=='') {
 			require_once("../".$rshref[$mv['tipdoc']]."/prepare_ref_doc_movmag.php");
 			$funcn=preg_replace('/[0-9]+/', '', $rshref[$mv['tipdoc']]);
 			$funcn=$funcn.'_prepare_ref_doc';
-			$mv['id_rif']=($mv['id_rif']==0 && $mv['id_orderman']>0 && $mv['tipdoc']=="PRO")?$mv['id_orderman']:$mv['id_rif'];
+			$mv['id_rif']=(($mv['id_rif']==0 && $mv['id_orderman']>0 && $mv['tipdoc']=="PRO")||($mv['id_rif']>0 && $mv['operat']==1 && $mv['id_orderman']>0 && $mv['tipdoc']=="PRO"))?$mv['id_orderman']:$mv['id_rif'];
 			$mv['id_rif']=($mv['id_rif']==0 && $mv['tipdoc']=="MAG")?$mv['id_mov']:$mv['id_rif'];
 			$docdata=$funcn($mv['tipdoc'],$mv['id_rif']);
       if ($ctr_mv != $mv['artico']) {
