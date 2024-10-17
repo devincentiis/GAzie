@@ -763,6 +763,14 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
 	$form['cod_operazione'] =($resmov_sian)?$resmov_sian['cod_operazione']:'';
 	$form['recip_stocc'] =($resmov_sian)?$resmov_sian['recip_stocc']:'';
 	$form['recip_stocc_destin'] =($resmov_sian)?$resmov_sian['recip_stocc_destin']:'';
+	if ($resmov_sian){// Controllo se è una movimentazione interna olio
+		$result6 = gaz_dbi_get_row($gTables['movmag'], "id_orderman", intval($_GET['codice']), "AND operat ='-1'");
+		if($result6){// se lo è prendo i recipienti di stoccaggio corretti
+			$resmov_sian = gaz_dbi_get_row($gTables['camp_mov_sian'], "id_movmag", $result6['id_mov']);
+			$form['recip_stocc'] =($resmov_sian)?$resmov_sian['recip_stocc']:'';
+			$form['recip_stocc_destin'] =($resmov_sian)?$resmov_sian['recip_stocc_destin']:'';
+		}
+	}
 	$result2 = gaz_dbi_get_row($gTables['tesbro'], "id_tes", $result['id_tesbro']);
 	$form['gioinp'] = substr(($result2)?$result2['datemi']:'', 8, 2);
 	$form['mesinp'] = substr(($result2)?$result2['datemi']:'', 5, 2);
