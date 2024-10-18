@@ -163,7 +163,7 @@ class silos {
 			return $content ;
 	}
 
-	function getLotRecip($codsil,$codart=""){// funzione per trovare l'ID dell'ultimo lotto inserito nel recipiente di stoccaggio
+	function getLotRecip($codsil,$codart="",$excluded_movmag = 0){// funzione per trovare l'ID dell'ultimo lotto inserito nel recipiente di stoccaggio
 		$id_lotma=false;
 		global $gTables,$admin_aziend;
 		$sil = new lotmag();
@@ -180,8 +180,9 @@ class silos {
 		$lastmovmag=gaz_dbi_dyn_query ($what,$table,$where,$orderby,$limit,$passo,$groupby);
 
 		while ($r = gaz_dbi_fetch_array($lastmovmag)) {
+
 			$id_lotma = $r['id_lotmag'];
-			$cont= $sil -> dispLotID ($r['artico'], $r['id_lotmag']);
+			$cont= $sil -> dispLotID ($r['artico'], $r['id_lotmag'], $excluded_movmag);
 			if ($cont>0){
 				break;
 			}
@@ -233,7 +234,7 @@ class silos {
             $acc .= "\t\t <option value=\"\"></option>\n";
         }
         $result = gaz_dbi_query($query);
-        while ($r = gaz_dbi_fetch_array($result)) {
+        while ($r = gaz_dbi_fetch_array($result)) {// ciclo i silos
             $ok="";
             if (strlen($codart)>0){// se è stato inviato un codice articolo, controllo che sia presente nel silos
               // vedo la data dell'ultimo svuotamento totale e il relativo idmovmag
@@ -241,12 +242,13 @@ class silos {
               foreach ($resmovs as $res) {
                 if ($res==$codart){ // se è presente l'articolo nel silos do l'ok
                   $ok="ok";break;
+
                 }
               }
             }
             if (($ok=="ok" && strlen($codart)>0) || $codart==""){// se è presente lo visualizzo nella select
-              $lot = $campsilos->getLotRecip($r[$key],$codart);
-              $cont = $campsilos->getCont($r[$key]);
+              $lot = $campsilos->getLotRecip($r[$key],"",intval($excluded_movmag) );
+              $cont = $campsilos->getCont($r[$key],"", $excluded_movmag);
               $selected = '';$addlot="";
               if ($r[$key] == $val) {
                   $selected = "selected";

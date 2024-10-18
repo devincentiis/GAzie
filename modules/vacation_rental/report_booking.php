@@ -357,13 +357,17 @@ function pay(ref) {
               dataType: 'json',
               success: function(response){
                 var response = JSON.stringify(response);
-                //alert(response);
+                // alert('success:'+response);
                 arr = $.parseJSON(response); //convert to javascript array
                 var n=0;
                 $.each(arr,function(key,value){
                   n=n+1;
                   $("#cc"+n).html(value);
                 });
+              },
+              error: function(response){
+                var response = JSON.stringify(response);
+                alert ('Error: '+response);
               }
             });
           }

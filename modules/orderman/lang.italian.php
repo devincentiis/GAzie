@@ -41,7 +41,7 @@ $strScript = array("admin_orderman.php" =>
 		"Durata produzione in giorni",
 		"Luogo di produzione",
 		"Ordine",
-		"Articolo prodotto",
+		"Articolo prodotto o movimentato",
 		"Operaio",
 		"Durata produzione in ore",
 		"Tipo di produzione vuoto",

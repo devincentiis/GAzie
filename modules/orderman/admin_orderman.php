@@ -133,12 +133,20 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
 		$form['quality'] = "";
 	}
 	$form['cod_operazione'] = $_POST['cod_operazione'];
-    $form['recip_stocc'] = $_POST['recip_stocc'];
+  $form['recip_stocc'] = $_POST['recip_stocc'];
+  $form['old_recip_stocc'] = $_POST['old_recip_stocc'];
+  $form['id_mov_sian_rif'] = $_POST['id_mov_sian_rif'];
 	$form['recip_stocc_destin'] = $_POST['recip_stocc_destin'];
 	if (strlen($form['recip_stocc'])>0){ // se c'è un recipiente di stoccaggio prendo l'ID del lotto
-		$idlotrecip=$campsilos->getLotRecip($form['recip_stocc'],$form['codart']); // è un array dove [0] è l'ID lotto e [1] è il numero lotto
+    if ($form['recip_stocc']==$form['old_recip_stocc']){// se non è cambiato il contenitore d'origine e stiamo in update
+      $excluded_movmag=$form['id_mov_sian_rif'];// faccio escludere il movimento dal calcolo disponibilità
+    }else{
+      $excluded_movmag=0;
+    }
+
+		$idlotrecip=$campsilos->getLotRecip($form['recip_stocc'],$form['codart'],intval($excluded_movmag) ); // è un array dove [0] è l'ID lotto e [1] è il numero lotto
 		if ($form['cod_operazione']==5){ // se è una movimentazione interna SIAN limito la quantità a quella disponibile per l'ID lotto
-			$qtaLotId = $lm -> dispLotID ($form['codart'], $idlotrecip[0], $_POST['id_movmag']);
+			$qtaLotId = $lm -> dispLotID ($form['codart'], $idlotrecip[0], $excluded_movmag);
 			if ($form['quantip']>$qtaLotId){
 				$form['quantip']=$qtaLotId; $warnmsg.="42+";
 			}
@@ -760,6 +768,8 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
 	$form['quantip'] = ($result4)?$result4['quanti']:0;
 	$form['id_movmag'] = ($result4)?$result4['id_mov']:0;
 	$resmov_sian = gaz_dbi_get_row($gTables['camp_mov_sian'], "id_movmag", $form['id_movmag']);
+  $resmov_sian_connected = gaz_dbi_get_row($gTables['camp_mov_sian'], "id_mov_sian_rif", $resmov_sian['id_mov_sian']);
+  $form['id_mov_sian_rif'] =($resmov_sian_connected)?$resmov_sian_connected['id_movmag']:'';
 	$form['cod_operazione'] =($resmov_sian)?$resmov_sian['cod_operazione']:'';
 	$form['recip_stocc'] =($resmov_sian)?$resmov_sian['recip_stocc']:'';
 	$form['recip_stocc_destin'] =($resmov_sian)?$resmov_sian['recip_stocc_destin']:'';
@@ -771,6 +781,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
 			$form['recip_stocc_destin'] =($resmov_sian)?$resmov_sian['recip_stocc_destin']:'';
 		}
 	}
+  $form['old_recip_stocc']=$form['recip_stocc']; // il contenitore di origine precedentemente inserito
 	$result2 = gaz_dbi_get_row($gTables['tesbro'], "id_tes", $result['id_tesbro']);
 	$form['gioinp'] = substr(($result2)?$result2['datemi']:'', 8, 2);
 	$form['mesinp'] = substr(($result2)?$result2['datemi']:'', 5, 2);
@@ -927,7 +938,9 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
   $form['quality'] = "";
   $form['cod_operazione']="";
   $form['recip_stocc']="";
+  $form['old_recip_stocc']="";
   $form['recip_stocc_destin']="";
+  $form['id_mov_sian_rif']="";
   $form['datreg'] = date("Y-m-d");
   $form['quantip'] = "";
   $form['quantipord'] = "";
@@ -1048,7 +1061,9 @@ if ($form['order_type'] == "IND") {
 } else {
   echo '<input type="hidden" name="datreg" value="">';
 	echo '<input type="hidden" name="recip_stocc" value="">';
+  echo '<input type="hidden" name="old_recip_stocc" value="">';
 	echo '<input type="hidden" name="recip_stocc_destin" value="">';
+  echo '<input type="hidden" name="id_mov_sian_rif" value="">';
 	echo '<input type="hidden" name="cod_operazione" value="">';
   if ($form['order_type'] != "") {
     echo "Non registra magazzino!";
@@ -1623,11 +1638,17 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 
 				?>
 			</div>
-			<?php if ($rescampbase['confezione']==0){ ?>
+			<?php if ($rescampbase['confezione']==0){
+        if ($form['recip_stocc']==$form['old_recip_stocc']){// se non è cambiato il contenitore d'origine e stiamo in update
+          $excluded_movmag=$form['id_mov_sian_rif'];// faccio escludere il movimento dal calcolo disponibilità
+        }else{
+          $excluded_movmag=0;
+        }
+        ?>
 				<div class="row">
 					<label for="camp_recip_stocc" class="col-sm-6"><?php echo "Recipiente stoccaggio"; ?></label>
 					<?php
-					$campsilos->selectSilos('recip_stocc' ,'cod_silos', $form['recip_stocc'], 'cod_silos', 1,'capacita','TRUE','col-sm-6' , null, '');
+					$campsilos->selectSilos('recip_stocc' ,'cod_silos', $form['recip_stocc'], 'cod_silos', 1,'capacita','TRUE','col-sm-6' , null, '', $where = false, $echo=false, $codart="", $excluded_movmag);
 					?>
 				</div>
 				<?php
@@ -1654,6 +1675,8 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 		echo '<input type="hidden" name="recip_stocc_destin" value="">';
 		echo '<input type="hidden" name="cod_operazione" value=""></td></tr>';
 	}
+echo '<input type="hidden" name="old_recip_stocc" value="',$form["old_recip_stocc"],'">';
+echo '<input type="hidden" name="id_mov_sian_rif" value="',$form["id_mov_sian_rif"],'">';
 
 	?>
 	<!--- Antonio Germani - inserimento quantità  -->

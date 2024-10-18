@@ -30,6 +30,31 @@
  */
 
 $strScript = array(
+    "user_login.php"=>
+      array('warning_sess'=>'ATTENZIONE: Nel tuo browser sono state disabilitate le sessioni. Devi abilitarle oppure cambiare browser',
+        'login'=>'Accesso',
+        'log_instr'=>'Si prega di inserire e-mail e password',
+        'forgot'=>'Password dimenticata?',
+        'log_in'=>'Accedi',
+        'required'=>'Necessario',
+        'pw_recover'=>'Recupero password',
+        'recover'=>'Recupera',
+        'wrong_mail'=>'E\' stata mandata una email per recuperare la password. Se non l\'hai ricevuta, vuol dire che hai sbagliato a scrivere indirizzo, oppure è finita nella cartella spam, oppure non sei un utente.',
+        'body_mail_recover'=>'Salve, </br>Per impostare la password cliccare su questo link: ',
+        'pw_confirm'=>'Conferma password',
+        'pw_repeat'=>'Riscrivi la password come sopra',
+        '2fa_title'=>'Autenticazione a due fattori',
+        '2fa_desc'=>'Inserisci il codice che ti è stato appena inviato via mail (se non l\'hai ricevuto, controlla nella cartella spam).',
+        '2fa_body_mail'=>'Per accedere alla tua pagina utente usa questo codice: ',
+        'wrong_pw'=>'Password sbagliata.',
+        'too_er'=>'Troppi tentativi sbagliati. Sei stato bloccato!',
+        'invalid_keys'=>'Credenziali sbagliate.',
+        'invalid_mail'=>'Indirizzo mail non corretto.',
+        'no_user'=>'Non sei stato trovato nell\'archivio: contatta l\'amministratore.',
+        'no_pw_yet'=>'Non hai ancora impostato la tua password: usa \'Password dimenticata\' per inserirla',
+        'reset_success'=>'La password è stata impostata; è possibile effettuare l\'accesso con la nuova password.',
+        'dashboard' => 'Pannello di controllo'
+      ),
     "browse_document.php" =>
       array('title' => "Lista dei Documenti/Certificati",
         'errors' => array('Il formato del file non è stato accettato!',
@@ -463,10 +488,12 @@ $strScript = array(
 			'text_missing' => 'Il testo della recensione è mancante o troppo corto',
 			'err_codfis' => 'Errore nel codice fiscale, correggere e riprovare',
 			'coupon_error' => 'Codice sconto non applicato perché non valido',
-			'cliente_anonimo' => 'Questo preventivo è per un utente anonimo, non puoi usarlo per prenotare. Chiedi un preventivo con i tuoi dati oppure fai una prenotazione nel sito internet'
-        ),
+			'cliente_anonimo' => 'Questo preventivo è per un utente anonimo, non puoi usarlo per prenotare. Chiedi un preventivo con i tuoi dati oppure fai una prenotazione nel sito internet',
+      'accesso_negato' => 'Accesso negato'
+      ),
         'war' => array(
-            'ok' => 'ok riempitura array'
+            'ok' => 'ok riempitura array',
+            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
 		),
 		'guest'=>'Ospiti',
 		'rules_label'=>'Leggere il contratto di locazione',

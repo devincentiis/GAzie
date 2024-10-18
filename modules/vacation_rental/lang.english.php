@@ -30,6 +30,31 @@
  */
 
 $strScript = array(
+    "user_login.php"=>
+      array('warning_sess'=>'ATTENTION: Sessions have been disabled in your browser. You must enable or change browsers',
+        'login'=>'login',
+        'log_instr'=>'Please enter email and password.',
+        'forgot'=>'Forgot password?',
+        'log_in'=>'Login',
+        'required'=>'Required',
+        'pw_recover'=>'Password recovery',
+        'recover'=>'Recover',
+        'wrong_mail'=>'An email has been sent to recover your password. If you did not receive it, it means that you typed the wrong address, or it ended up in the spam folder, or you are not a user.',
+        'body_mail_recover'=>'Hi, </br>To set the password click on this link: ',
+        'pw_confirm'=>'Confirm password',
+        'pw_repeat'=>'Rewrite password as above',
+        '2fa_title'=>'Two-factor authentication',
+        '2fa_desc'=>'Enter the code that was just sent to you by email (if you have not received it, check the spam folder).',
+        '2fa_body_mail'=>'To access your user page use this code: ',
+        'wrong_pw'=>'Wrong Password.',
+        'too_er'=>'Too many wrong attempts. You\'re stuck!',
+        'invalid_keys'=>'Wrong credentials.',
+        'invalid_mail'=>'Incorrect email address.',
+        'no_user'=>'You were not found in the archive: contact the administrator.',
+        'no_pw_yet'=>'You haven\'t set your password yet: use password recovery to enter it',
+        'reset_success'=>'Password has been set; you can log in with the new password.',
+        'dashboard' => 'Dashboard'
+      ),
     "browse_document.php" =>
       array('title' => "Lista dei Documenti/Certificati",
         'errors' => array('Il formato del file non è stato accettato!',
@@ -695,7 +720,8 @@ $strScript = array(
 			'text_missing' => 'Feedback text is missing or too short',
 			'err_codfis' => 'Tax code error: correct it and try again',
 			'coupon_error' => 'Discount code not applied because it is invalid',
-			'cliente_anonimo' => 'This quote is for an anonymous user, you cannot use it to book. Request a quote with your details or make a reservation on the website'
+			'cliente_anonimo' => 'This quote is for an anonymous user, you cannot use it to book. Request a quote with your details or make a reservation on the website',
+       'accesso_negato' => 'Denied access'
         ),
         'war' => array(
             'ok' => 'ok riempitura array'
