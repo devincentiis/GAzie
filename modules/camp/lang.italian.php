@@ -7,7 +7,7 @@
 	  <https://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP
-	  Copyright (C) 2018-2023 - Antonio Germani, Massignano (AP)
+	  Copyright (C) 2018-present - Antonio Germani, Massignano (AP)
 	  https://www.lacasettabio.it
 	  https://www.programmisitiweb.lacasettabio.it
 	  --------------------------------------------------------------------------
@@ -92,7 +92,7 @@ $strScript = array("camp_browse_document.php" =>
 			'Incongruenza con la quantità di un contenitore o silos!'
         ),
 		'header' => array('Data' => '', 'Prodotto' => '', 'Quantit&agrave;' => '',
-            'ID SIAN - Fornitore/Cliente' => '', 'Recipiente di stoccaggio' => '', 'Capacità' => '', 'Descrizione doc.' => '', 'Operazione SIAN' => ''
+            'ID SIAN - Fornitore/Cliente' => '', 'Recipiente di origine' => '', 'Recipiente di stoccaggio' => '', 'Descrizione doc.' => '', 'Operazione SIAN' => '', 'Note su varietà'=>''
 
         )
 	),

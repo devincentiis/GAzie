@@ -303,7 +303,7 @@ if (!isset($_POST['Update']) and isset($_GET['Update'])) { //se è il primo acce
 
 
 } elseif (isset($_POST['Insert']) or isset($_POST['Update'])) {    //     ****    SE NON E' IL PRIMO ACCESSO   ****
-
+	$form['rif_abilitazione'] = $_POST['rif_abilitazione'];
 	$feno_json = $_POST['feno_json'];
 	$form['mov'] = $_POST['mov'];
 	$form['nmov'] = $_POST['nmov'];
@@ -1695,7 +1695,7 @@ if (intval($form['nome_colt']) == 0) {
 						data-content="Inserire il tipo di operazione o causale per indicare cosa si sta facendo, ad esempio, 'Trattamento', 'Concimazione', 'Aratura' etc.<br>
 						La causale fornirà anche l'indicazione di movimentazione magazzino (carico, scarico, non movimenta magazzino).<br>
 						I movimenti con un campo selezionato dovranno obbligatoriamente movimentare il magazzino.<br>
-						Si consiglia di creare o modificare le causali dal modulo Registro di campagna; in questo modo sarà possibile selezionare quali causali mostrare all'inserimento di un movimento del Registro di campagna. Si attiverà, in questo modo, un vero e proprio filtro che escluderà dalla selezione le causali utilizzate dagli altri moduli di GAzie e inutili per il Registro di campagna."
+						Si consiglia di creare o modificare le causali dal modulo Registro di campagna; in questo modo sarà possibile selezionare quali causali mostrare all'inserimento di un movimento del Registro di campagna. Si attiverà, pertanto, un vero e proprio filtro che escluderà dalla selezione le causali utilizzate dagli altri moduli di GAzie e inutili per il Registro di campagna."
 						class="glyphicon glyphicon-info-sign" style="cursor: pointer;">
 						</span>
 						<?php echo $script_transl[2]; ?>
@@ -1732,7 +1732,7 @@ if (intval($form['nome_colt']) == 0) {
 						}
 						echo "\t </select>\n";
 						echo "\t <select name=\"mesreg\" class=\"FacetSelect\" onchange=\"this.form.submit()\">\n";
-            $gazTimeFormatter->setPattern('MMMM');
+					$gazTimeFormatter->setPattern('MMMM');
 						for ($counter = 1;$counter <= 12;$counter++) {
 							$selected = "";
 							if ($counter == $form['mesreg']) $selected = "selected";
@@ -2306,7 +2306,7 @@ if (intval($form['nome_colt']) == 0) {
 					<?php
 
 
-				if ($form['ins_op'][$form['mov']] == "") { // se non è un operaio attivo avversità e fase fenologica
+				if ($form['ins_op'][$form['mov']] == "" && $form['operat'] <> 1) { // se non è un operaio e non siamo in raccolta, attivo avversità e fase fenologica
 					if (intval($form['nome_avv'][$form['mov']]) == 0) {
 						$form['nome_avv'][$form['mov']] = "";
 					}
