@@ -557,7 +557,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
             } elseif ($form['tipdoc'] == 'ADT'  || $form['tipdoc'] == 'AFT' || $form['tipdoc'] == 'RDL') {  //se è un DDT d'acquisto non effettuo controlli sulle date
 				// ma effettuo il controllo se è stato già inserito con lo stesso numero e data
 				if ($form['numdoc']>0){
-					$checkdouble = gaz_dbi_dyn_query("*", $gTables['tesdoc'], "YEAR(datemi) = " . substr($datemi,0,4) . " AND numdoc = " . $form['numdoc'] . " AND seziva = $sezione AND clfoco = ". intval($form['clfoco']), 2,0,1);
+					$checkdouble = gaz_dbi_dyn_query("*", $gTables['tesdoc'], "tipdoc IN ('ADT', 'AFT', 'RDL') AND YEAR(datemi) = " . substr($datemi,0,4) . " AND numdoc = " . $form['numdoc'] . " AND seziva = $sezione AND clfoco = ". intval($form['clfoco']), 2,0,1);
 					$check = gaz_dbi_fetch_array($checkdouble);
 					if ($check){
 						$msg['err'][] = "ddtesist";
