@@ -7,7 +7,7 @@ CREATE TABLE `gaz_cash_register` (
   `serial_port` VARCHAR(32) NOT NULL,
   `driver` VARCHAR(32) NOT NULL,
   `descri` VARCHAR(32) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM;
 INSERT INTO `gaz_cash_register` (`id_cash`, `seziva`, `adminid`, `enterpriseid`, `serial_port`, `driver`, `descri`) VALUES (1, 1, 'amministratore', 1, '0', 'olivetti_ela', 'LM78613134 Underwood Nettuna 500');
 UPDATE `gaz_config` SET `cvalue` = '48' WHERE `id` =2;
 ALTER TABLE `gaz_admin` ADD `last_ip` VARCHAR( 15 ) NOT NULL AFTER `Access`;

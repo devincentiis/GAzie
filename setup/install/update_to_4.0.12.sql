@@ -2,7 +2,7 @@ UPDATE `gaz_config` SET `cvalue` = '57' WHERE `id` =2;
 ALTER TABLE `gaz_contract` CHANGE `id_costumer` `id_customer` INT NOT NULL;
 UPDATE `gaz_config` SET `cvalue` = '58' WHERE `id` =2;
 ALTER TABLE `gaz_admin_module` CHANGE `enterpriseid` `enterprise_id` INT NOT NULL;
-CREATE TABLE `gaz_anagra` ENGINE=MyISAM DEFAULT CHARSET=utf8 AS SELECT codice,ragso1,ragso2,sedleg,legrap,sexper,datnas,luonas,pronas,indspe,capspe,citspe,prospe,country,latitude,longitude,telefo,fax,cell,codfis,pariva,e_mail FROM `gaz_clfoco` WHERE capspe > 0;
+CREATE TABLE `gaz_anagra` ENGINE=MyISAM AS SELECT codice,ragso1,ragso2,sedleg,legrap,sexper,datnas,luonas,pronas,indspe,capspe,citspe,prospe,country,latitude,longitude,telefo,fax,cell,codfis,pariva,e_mail FROM `gaz_clfoco` WHERE capspe > 0;
 ALTER TABLE `gaz_anagra` ADD `id` INT NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY ( `id` );
 ALTER TABLE `gaz_clfoco` ADD `id_anagra` INT NOT NULL AFTER `codice`; 
 UPDATE `gaz_clfoco` LEFT JOIN `gaz_anagra` ON gaz_clfoco.codice=gaz_anagra.codice SET id_anagra=gaz_anagra.id WHERE gaz_clfoco.codice = gaz_anagra.codice;

@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXwharehouse` (
   `adminid` VARCHAR(20) NOT NULL DEFAULT '',
   `last_modified` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM ROW_FORMAT=DYNAMIC;
 ALTER TABLE `gaz_XXXeffett`
 	ADD COLUMN `id_distinta` INT NULL COMMENT 'Riferimento alla distinta degli effetti che a partire dalla versione 7.46 è contenuta in gaz_NNNfiles) ' AFTER `id_con`,
 	ADD INDEX (`id_distinta`),
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXstaff_work_movements` (
   KEY `work_day` (`start_work`) USING BTREE,
   KEY `id_tes` (`id_staff_worked_hours`) USING BTREE,
   KEY `end_work` (`end_work`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Tabella contenente i singoli movimenti del lavoratore. Può essere scritta manualente dalla apposita interfaccia o, se collegato, tramite un marcatempo a badge. Offre la possibilità di indicare la produzione/commessa (id_orderman) sulla quale sta lavorando.';
+) ENGINE=MyISAM ROW_FORMAT=DYNAMIC COMMENT='Tabella contenente i singoli movimenti del lavoratore. Può essere scritta manualente dalla apposita interfaccia o, se collegato, tramite un marcatempo a badge. Offre la possibilità di indicare la produzione/commessa (id_orderman) sulla quale sta lavorando.';
 ALTER TABLE `gaz_XXXorderman`
 	ADD COLUMN `start_work` DATETIME NULL AFTER `id_staff_def`,
 	ADD COLUMN `end_work` DATETIME NULL AFTER `start_work`; 

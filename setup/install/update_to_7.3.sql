@@ -1,6 +1,6 @@
 UPDATE `gaz_config` SET `cvalue` = '97' WHERE `id` =2;
 ALTER TABLE `gaz_admin` CHANGE COLUMN `datpas` `datpas` DATE NULL DEFAULT '2004-01-27' AFTER `datacc`;
-CREATE TABLE IF NOT EXISTS `gaz_admin_config` ( `id` INT NOT NULL AUTO_INCREMENT, `adminid` VARCHAR(20) NOT NULL DEFAULT '', `var_descri` VARCHAR(100) NOT NULL DEFAULT '', `var_name` VARCHAR(100) NOT NULL DEFAULT '', `var_value` text, PRIMARY KEY (`id`), KEY `adminid` (`adminid`), KEY `var_name` (`var_name`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE IF NOT EXISTS `gaz_admin_config` ( `id` INT NOT NULL AUTO_INCREMENT, `adminid` VARCHAR(20) NOT NULL DEFAULT '', `var_descri` VARCHAR(100) NOT NULL DEFAULT '', `var_name` VARCHAR(100) NOT NULL DEFAULT '', `var_value` text, PRIMARY KEY (`id`), KEY `adminid` (`adminid`), KEY `var_name` (`var_name`)) ENGINE=MyISAM;
 INSERT INTO `gaz_admin_config` (`adminid`, `var_descri`, `var_name`, `var_value`) SELECT Login , 'Contenuto in HTML del testo del corpo delle email inviate dell\'utente', 'body_send_doc_email', '' FROM `gaz_admin`;
 INSERT INTO `gaz_admin_config` (`adminid`, `var_descri`, `var_name`, `var_value`) SELECT Login , 'Menu/header/footer personalizzabile', 'theme', '/library/theme/g7' FROM `gaz_admin`;
 DELETE FROM `gaz_config` WHERE  `variable`='theme';

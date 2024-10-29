@@ -26,6 +26,6 @@ ALTER TABLE `gaz_XXXtesbro` ADD `virtual_taxstamp` TINYINT NOT NULL AFTER `taxst
 ALTER TABLE `gaz_XXXtesdoc` CHANGE `vat_susp` `expense_vat` INT NOT NULL;
 ALTER TABLE `gaz_XXXtesbro` CHANGE `vat_susp` `expense_vat` INT NOT NULL;
 TRUNCATE `gaz_XXXpaymov`;
-CREATE TABLE IF NOT EXISTS `gaz_XXXcompany_data` (  `id` INT NOT NULL AUTO_INCREMENT,  `description` VARCHAR(100) DEFAULT '',  `var` VARCHAR(100) NOT NULL DEFAULT '',  `data` text,  `ref` VARCHAR(100) NOT NULL,  PRIMARY KEY (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+CREATE TABLE IF NOT EXISTS `gaz_XXXcompany_data` (  `id` INT NOT NULL AUTO_INCREMENT,  `description` VARCHAR(100) DEFAULT '',  `var` VARCHAR(100) NOT NULL DEFAULT '',  `data` text,  `ref` VARCHAR(100) NOT NULL,  PRIMARY KEY (`id`)) ENGINE=MyISAM AUTO_INCREMENT=1 ;
 ALTER TABLE `gaz_XXXtesmov` CHANGE `descri` `descri` VARCHAR(100) NOT NULL DEFAULT ''; 
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione)

@@ -155,7 +155,7 @@ CREATE TABLE `gaz_contract` (
   `adminid` VARCHAR(20) NOT NULL DEFAULT '',
   `last_modified` TIMESTAMP NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id_contract`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+) ENGINE=MyISAM AUTO_INCREMENT=1;
 
 CREATE TABLE `gaz_contract_row` (
   `id_row` INT NOT NULL auto_increment,
@@ -170,7 +170,7 @@ CREATE TABLE `gaz_contract_row` (
   `id_con` INT NOT NULL,
   `status` VARCHAR(10) NOT NULL DEFAULT '',
   PRIMARY KEY  (`id_contract`,`id_row`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM AUTO_INCREMENT=1 ;
 
 CREATE TABLE `gaz_body_text` (
   `id_body` INT NOT NULL auto_increment,
@@ -179,7 +179,7 @@ CREATE TABLE `gaz_body_text` (
   `body_text` TEXT NOT NULL,
   `iso3_country` CHAR(3) NOT NULL DEFAULT '',
   PRIMARY KEY  (`id_body`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  AUTO_INCREMENT=1 ;
 
 ALTER TABLE `gaz_tesbro` CHANGE `id_iva` `id_contract` INT NOT NULL ;
 ALTER TABLE `gaz_tesdoc` CHANGE `id_iva` `id_contract` INT NOT NULL ;

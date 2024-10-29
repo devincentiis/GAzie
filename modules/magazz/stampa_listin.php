@@ -298,7 +298,7 @@ switch ($_GET['ts']) {
 		$gForm = new magazzForm();
 		$pdf = new Report_template();
 		$pdf->setVars($admin_aziend,$title);
-		$pdf->setAuthor($admin_aziend['ragso1'].' '.$_SESSION['Login']);
+		$pdf->setAuthor($admin_aziend['ragso1'].' '.$_SESSION['user_name']);
 		$pdf->setTitle($title['title']);
 		$pdf->SetTopMargin(39);
 		$pdf->setFooterMargin(10);

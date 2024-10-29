@@ -1,5 +1,5 @@
 UPDATE `gaz_config` SET `cvalue` = '74' WHERE `id` =2;
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, '23', 'browse_document.php', '', '', '10', '', '5'  FROM `gaz_menu_script`;
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
-CREATE TABLE IF NOT EXISTS `gaz_XXXfiles` (  `id_doc` INT NOT NULL AUTO_INCREMENT,  `table_name_ref` VARCHAR(50) NOT NULL DEFAULT '',  `id_ref` INT NOT NULL,  `item_ref` VARCHAR(15) NOT NULL,  `extension` VARCHAR(4) NOT NULL,  `title` VARCHAR(255) NOT NULL,  `adminid` VARCHAR(20) NOT NULL,  `last_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  PRIMARY KEY (`id_doc`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
+CREATE TABLE IF NOT EXISTS `gaz_XXXfiles` (  `id_doc` INT NOT NULL AUTO_INCREMENT,  `table_name_ref` VARCHAR(50) NOT NULL DEFAULT '',  `id_ref` INT NOT NULL,  `item_ref` VARCHAR(15) NOT NULL,  `extension` VARCHAR(4) NOT NULL,  `title` VARCHAR(255) NOT NULL,  `adminid` VARCHAR(20) NOT NULL,  `last_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  PRIMARY KEY (`id_doc`)) ENGINE=MyISAM ; 
 -- STOP_WHILE( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query seguenti su tutte le aziende dell'installazione)

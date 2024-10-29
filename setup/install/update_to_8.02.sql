@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXartico_position` (
   KEY `id_warehouse` (`id_warehouse`),
   KEY `id_shelf` (`id_shelf`),
   KEY `codart` (`codart`)
-) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) AUTO_INCREMENT=0 ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `gaz_XXXshelves` (
   `id_shelf` INT NOT NULL AUTO_INCREMENT,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXshelves` (
   PRIMARY KEY (`id_shelf`) USING BTREE,
   UNIQUE KEY `id_shelf_id_warehouse` (`id_shelf`,`id_warehouse`),
   KEY `id_warehouse` (`id_warehouse`)
-) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) AUTO_INCREMENT=0 ROW_FORMAT=DYNAMIC;
 ALTER TABLE `gaz_XXXcamp_recip_stocc`	ADD COLUMN `nome` VARCHAR(20) NOT NULL AFTER `cod_silos`;
 UPDATE `gaz_XXXcompany_config` SET `description`='Permetti anagrafiche senza dati fiscali' WHERE `var`='consenti_nofisc';
 ALTER TABLE `gaz_XXXartico`	CHANGE COLUMN `codice` `codice` VARCHAR(32) NOT NULL DEFAULT '' FIRST;

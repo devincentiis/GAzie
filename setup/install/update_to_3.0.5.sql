@@ -9,7 +9,7 @@ CREATE TABLE `gaz_menu_module` (
   `accesskey` VARCHAR(1) NOT NULL,
   `weight` INT DEFAULT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM ;
 
 INSERT INTO `gaz_menu_module` (`id`, `id_module`, `link`, `icon`, `class`, `translate_key`, `accesskey`, `weight`) VALUES 
 (0, 1, 'admin.php', ' ', '', 1, '', 1),
@@ -74,7 +74,7 @@ CREATE TABLE `gaz_menu_script` (
   `accesskey` VARCHAR(1) NOT NULL,
   `weight` INT DEFAULT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM;
 
 DROP TABLE `gaz_module`;
 
@@ -87,7 +87,7 @@ CREATE TABLE `gaz_module` (
   `access` INT DEFAULT '0',
   `weight` INT DEFAULT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
+) ENGINE=MyISAM  AUTO_INCREMENT=9 ;
 
 INSERT INTO `gaz_module` (`id`, `name`, `link`, `icon`, `class`, `access`, `weight`) VALUES 
 (1, 'root', 'admin.php', 'root.png', '', 0, 10),

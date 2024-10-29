@@ -20,6 +20,6 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXartico_group` (
   `last_modified` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_artico_group`),
   KEY `ref_ecommerce_id_main_product` (`ref_ecommerce_id_main_product`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM;
 ALTER TABLE `gaz_XXXcatmer`	ADD COLUMN `large_descri` TEXT NOT NULL AFTER `descri`;
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione )

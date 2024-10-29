@@ -35,7 +35,7 @@ CREATE TABLE `gaz_movmag` (
   `adminid` VARCHAR(20) NOT NULL,
   `last_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id_mov`,`datreg`,`artico`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM;
 CREATE TABLE `gaz_caumag` (
   `codice` INT NOT NULL,
   `descri` VARCHAR(50) NOT NULL DEFAULT '',
@@ -45,7 +45,7 @@ CREATE TABLE `gaz_caumag` (
   `adminid` VARCHAR(20) NOT NULL DEFAULT '',
   `last_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`codice`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM;
 UPDATE `gaz_config` SET `cvalue` = '15' WHERE `id` =2;
 ALTER TABLE `gaz_aziend` ADD `magazz` INT NOT NULL AFTER `regime` ;
 ALTER TABLE `gaz_clfoco` ADD `destin` VARCHAR( 100 ) NOT NULL AFTER `listin` ,

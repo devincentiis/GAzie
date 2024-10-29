@@ -26,7 +26,7 @@ CREATE TABLE `gaz_country` (
   `iana` VARCHAR(4) NOT NULL,
   `un_vehicle` VARCHAR(3) NOT NULL,
   PRIMARY KEY (`iso`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM;
 
 
 INSERT INTO `gaz_country` (`iso`, `name`, `iso3`, `postal_code_length`, `IBAN_prefix`, `IBAN_lenght`, `bank_code_pos`, `bank_code_lenght`, `bank_code_fix`, `bank_code_alpha`, `account_number_pos`, `account_number_lenght`, `account_number_fix`, `account_number_alpha`, `VAT_number_lenght`, `VAT_number_alpha`, `black_list`, `istat_continent`, `istat_area`, `istat_country`, `cod_agenzia_entrate`, `istat_name`, `iana`, `un_vehicle`) VALUES

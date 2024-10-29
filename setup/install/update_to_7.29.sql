@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXcamp_recip_stocc` (
   `affitto` INT NOT NULL COMMENT '0=di proprietà 1=in affitto',
   `dop_igp` INT NOT NULL COMMENT '0=non classificato 1=Recipiente destinato a olio DOP o IGP',
   PRIMARY KEY (`cod_silos`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM;
 CREATE TABLE IF NOT EXISTS `gaz_XXXcamp_mov_sian` (
   `id_mov_sian` INT NOT NULL AUTO_INCREMENT,
   `id_mov_sian_rif` INT NOT NULL COMMENT 'Serve in caso di produzione per connettere insieme il prodotto con i suoi componenti',
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXcamp_mov_sian` (
   `cod_operazione` VARCHAR(10) NOT NULL COMMENT 'Codice dell''operazione esguita',
   `stabil_dep` INT NOT NULL COMMENT 'Identificativo dello stabilimento o deposito assegnato dal SIAN',
   PRIMARY KEY (`id_mov_sian`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM;
 ALTER TABLE `gaz_XXXcampi`
 	ADD COLUMN `indirizzo` VARCHAR(50) NULL AFTER `image`,
 	ADD COLUMN `provincia` VARCHAR(2) NULL AFTER `indirizzo`,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXcamp_artico` (
   `confezione` decimal(9,3) NOT NULL COMMENT 'CapacitĂ  singola confezione. 0=sfuso',
   `categoria` INT NOT NULL COMMENT 'Categoria olio come codificato dal SIAN',
   PRIMARY KEY (`id_campartico`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM;
 INSERT INTO `gaz_XXXcompany_config` SELECT MAX(id)+1, 'Identificativo dello stabilimento o deposito del SIAN', 'id_sian', '0' FROM `gaz_XXXcompany_config`;
 INSERT INTO `gaz_XXXcompany_config` SELECT MAX(id)+1, 'Allerta se la lunghezza del codice articolo è diverso da', 'codart_len', '0' FROM `gaz_XXXcompany_config`;
 ALTER TABLE `gaz_XXXpaymov`	DROP INDEX `id_rigmoc_pay`,	ADD INDEX `id_rigmoc_pay` (`id_rigmoc_pay`) USING HASH;

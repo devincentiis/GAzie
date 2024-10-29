@@ -14,6 +14,6 @@ CREATE TABLE `gaz_letter` (
   `adminid` VARCHAR(20) NOT NULL,
   `last_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id_let`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM AUTO_INCREMENT=1 ;
 UPDATE `gaz_config` SET `cvalue` = '21' WHERE `id` =2;
 ALTER TABLE `gaz_catmer` ADD `ricarico` DECIMAL( 4, 1 ) NOT NULL AFTER `image` ;

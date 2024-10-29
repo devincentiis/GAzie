@@ -22,4 +22,10 @@ ALTER TABLE `gaz_XXXstaff_worked_hours`
 	CHANGE COLUMN `hours_other` `hours_other` DECIMAL(4,2) NOT NULL AFTER `id_other_type`;
 ALTER TABLE `gaz_XXXrigdoc`	ADD INDEX (`id_orderman`);
 ALTER TABLE `gaz_XXXmovmag`	ADD INDEX (`id_orderman`);
+INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (1, 'di acquisto', 'preacq', 'Listino di acquisto', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
+INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (2, 'vendita 1', 'preve1', 'Listino di vendita 1', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
+INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (3, 'vendita 2', 'preve2', 'Listino di vendita 2', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
+INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (4, 'vendita 3', 'preve3', 'Listino di vendita 3', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
+INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (5, 'vendita 4', 'preve4', 'Listino di vendita 4', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
+INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (6, 'vendita web', 'web_price', 'Listino di vendita web', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione )

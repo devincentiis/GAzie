@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `gaz_licenses` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `class` (`class`),
   KEY `type` (`sub_class`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='Tabella con i tipi di autorizzazioni necessarie, ad es. per la vendita/acquisto di alcune tipologie di prodotti';
+) ENGINE=MyISAM AUTO_INCREMENT=32mb4 ROW_FORMAT=DYNAMIC COMMENT='Tabella con i tipi di autorizzazioni necessarie, ad es. per la vendita/acquisto di alcune tipologie di prodotti';
 INSERT INTO `gaz_licenses` (`id`, `class`, `class_descri`, `sub_class`, `description`, `data`, `duration`, `show`) VALUES
 	(1, 'FS', 'Fitosanitario', 'FSUSO', 'Abilitazione all’utilizzo di fitofarmaci', '', 5, 1),
 	(2, 'FS', 'Fitosanitario', 'FSVEN', 'Abilitazione alla vendita di fitofarmaci', '', 5, 1),
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `gaz_licenses_anagra` (
   KEY `class` (`id_anagra`) USING BTREE,
   KEY `type` (`description`) USING BTREE,
   KEY `id_licenses` (`id_licenses`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='Tabella con i tipi di autorizzazioni necessarie, ad es. per la vendita/acquisto di alcune tipologie di prodotti';
+) ENGINE=MyISAMmb4 ROW_FORMAT=DYNAMIC COMMENT='Tabella con i tipi di autorizzazioni necessarie, ad es. per la vendita/acquisto di alcune tipologie di prodotti';
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, (SELECT MIN(id) FROM `gaz_menu_module` WHERE `link`='report_anagra.php'), 'custom_from_fae.php', '', '', 14, '', 7  FROM `gaz_menu_script`;
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, (SELECT MIN(id) FROM `gaz_menu_module` WHERE `link`='report_client.php'), 'report_customer_group.php', '', '', 62, '', 40  FROM `gaz_menu_script`;
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, (SELECT MIN(id) FROM `gaz_menu_module` WHERE `link`='report_client.php'), 'admin_customer_group.php?Insert', '', '', 61, '', 45  FROM `gaz_menu_script`;
@@ -49,7 +49,7 @@ CREATE TABLE `gaz_XXXcustomer_group` (
   `last_modified` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `ref_ecommerce_customer_group` (`ref_ecommerce_customer_group`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAMmb4 ROW_FORMAT=DYNAMIC;
 INSERT INTO `gaz_XXXcustomer_group` (`id`, `descri`, `large_descri`, `image`, `ref_ecommerce_customer_group`, `annota`) VALUES (1, 'GRUPPO 1', '', _binary '', 0, 'TEST');
 ALTER TABLE `gaz_XXXclfoco` ADD COLUMN `id_customer_group` INT NOT NULL AFTER `id_anagra`,	ADD INDEX `id_customer_group` (`id_customer_group`);
 ALTER TABLE `gaz_XXXmovmag`	ADD COLUMN `id_artico_position` INT NULL AFTER `id_warehouse`, ADD INDEX `id_artico_position` (`id_artico_position`);
