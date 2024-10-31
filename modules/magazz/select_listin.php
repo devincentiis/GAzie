@@ -235,6 +235,15 @@ function setDate(name) {
 }
 </script>
 ";
+if (isset($admin_aziend['lang'])){
+  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist'", "id_ref ASC");
+  if ($price_list_names->num_rows == 6){
+    $script_transl['listino_value']=array();
+    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
+      $script_transl['listino_value'][]=$list_name["description"];
+    }
+  }
+}
 echo "<form method=\"POST\" name=\"select\">\n";
 echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
 echo "<input type=\"hidden\" value=\"" . $form['ritorno'] . "\" name=\"ritorno\" />\n";

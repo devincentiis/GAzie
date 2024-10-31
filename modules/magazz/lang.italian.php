@@ -328,7 +328,7 @@ $strScript = array(
             'categoria articolo'
         ),
         'tipoStampa' => 'Tipo di Stampa',
-        'alternativeTipoStampa' => array('espansa', 'compatta', 'verticale'),
+        'alternativeTipoStampa' => array('espansa', 'compatta', 'verticale', 'verticale c.iva'),
       ),
     "update_vatrate.php" =>
       array('title' => 'Modifica aliquota IVA degli articoli',

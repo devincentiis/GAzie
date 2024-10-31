@@ -22,27 +22,26 @@
     Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
  --------------------------------------------------------------------------
 */
-$menu_data = array( 'm1'=>array('link'=>"docume_stats.php"),
-                    'm2'=>array(1=>array('link'=>"stats_vendit.php",'weight'=>5),
-								2=>array('link'=>"stats_acquis.php",'weight'=>10),
-								3=>array('link'=>"stats_magazz.php",'weight'=>15)
-                               ),
-                    'm3'=>array('m2'=>array(1=>array(
-                                                    array('translate_key'=>1,'link'=>"select_analisi_acquisti_clienti.php",'weight'=>5),
-                                                    array('translate_key'=>2,'link'=>"select_analisi_agenti.php",'weight'=>10),
-                                                    array('translate_key'=>3,'link'=>"select_analisi_fatturato_clienti.php",'weight'=>15),
-                                                    array('translate_key'=>4,'link'=>"select_analisi_fatturato_cliente_fornitore.php",'weight'=>20),
-                                                    array('translate_key'=>8,'link'=>"report_statis.php",'weight'=>25)
-													),
-											2=>array(
-                                                    array('translate_key'=>5,'link'=>"select_analisi_avanzamento_per_fornitore.php",'weight'=>5),
-													array('translate_key'=>6,'link'=>"esportazione_articoli_venduti_per_fornitore.php",'weight'=>10)
-													),
-											3=>array(
-                                                    array('translate_key'=>7,'link'=>"stats_magazz",'weight'=>5)
-													)
-																						
-											)	
-								)
-);
+$menu_data=
+['m1'=>['link'=>"docume_stats.php"],
+ 'm2'=>[1=>['link'=>"stats_vendit.php",'weight'=>5],
+				2=>['link'=>"stats_acquis.php",'weight'=>10],
+				3=>['link'=>"stats_magazz.php",'weight'=>15]
+       ],
+ 'm3'=>['m2'=>[1=>[['translate_key'=>1,'link'=>"select_analisi_acquisti_clienti.php",'weight'=>5],
+                   ['translate_key'=>2,'link'=>"select_analisi_agenti.php",'weight'=>10],
+                   ['translate_key'=>3,'link'=>"select_analisi_fatturato_clienti.php",'weight'=>15],
+                   ['translate_key'=>9,'link'=>"select_fatturato_pagamenti.php",'weight'=>17],
+                   ['translate_key'=>4,'link'=>"select_analisi_fatturato_cliente_fornitore.php",'weight'=>20],
+                   ['translate_key'=>8,'link'=>"report_statis.php",'weight'=>25]
+									],
+               2=>[['translate_key'=>5,'link'=>"select_analisi_avanzamento_per_fornitore.php",'weight'=>5],
+									 ['translate_key'=>6,'link'=>"esportazione_articoli_venduti_per_fornitore.php",'weight'=>10]
+									],
+							 3=>[['translate_key'=>7,'link'=>"stats_magazz",'weight'=>5]
+									]
+
+              ]
+			 ]
+];
 ?>

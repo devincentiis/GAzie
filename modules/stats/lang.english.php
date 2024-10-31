@@ -129,6 +129,8 @@ $strScript = array("docume_stats.php" =>
         'header' => array('Supplier code' => '', 'Supplier' => '', 'Purchased' => '', 'Sold' => '',
             'Progress %' => ''
         ),
-    )
+    ),
+    "select_fatturato_pagamenti.php" =>
+    array('title' => 'Vendite per tipologia di pagamento')
 );
 ?>

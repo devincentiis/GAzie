@@ -36,7 +36,8 @@ $transl['stats'] = array('name' => "Statistiche",
 					5 => array("Analisi dell'avanzamento delle vendite per fornitore", "Analisi avanzamento vendite fornitori"),
 					6 => array("Esportazione articoli venduti per fornitore", "Esportazione articoli venduti"),
 					7 => array("Vendite da movimenti di magazzino", "Vendite da movimenti (non funz.)"),
-					8 => array("Vendite da righi documenti", "Vendite articoli (da documenti)")
+					8 => array("Vendite da righi documenti", "Vendite articoli (da documenti)"),
+					9 => array("Vendite per tipo pagamento", "Vendite per tipo pagamento")
     )
 );
 ?>

@@ -498,6 +498,19 @@ if ($modal === false) {
 
     $script_transl = $strCommon + $script_transl;
 }
+if (isset($admin_aziend['lang'])){
+  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist'", "id_ref ASC");
+  if ($price_list_names->num_rows == 6){
+    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
+      if ($list_name["var"]=="preacq"){
+        $script_transl[$list_name["var"]][1]= $list_name["description"];
+      }else{
+        $script_transl[$list_name["var"]]= "Prezzo di ".$list_name["description"];
+      }
+    }
+  }
+}
+
 /** ENRICO FEDELE */
 /* Assegno un id al form, quindi distinguo tra modale e non
  * in caso di finestra modale, aggiungo un campo nascosto che mi serve per salvare nel database

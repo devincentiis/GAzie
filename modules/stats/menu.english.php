@@ -23,11 +23,21 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-$transl['orderman'] = array('name' => "Commesse",
-    'title' => "Gestione commesse",
-    'm2' => array(1 => array("Lista delle commesse", "Lista delle commesse")
+$transl['stats'] = array('name' => "Statistiche",
+    'title' => "Statistiche",
+    'm2' => array(	1 => array("Statistiche delle vendite", "Statistiche vendite"),
+					2 => array("Statistiche degli acquisti", "Statistiche acquisti"),
+					3 => array("Statistiche di magazzino", "Statistiche magazzino")
     ),
-    'm3' => array(1 => array("Nuova commessa", "Nuovo commessa")
+    'm3' => array(	1 => array("Analisi acquisti dei clienti", "Analisi acquisti clienti"),
+					2 => array("Analisi vendite agenti", "Analisi agenti"),
+					3 => array("Analisi fatturato clienti", "Analisi fatturato clienti"),
+					4 => array("Analisi fatturato clienti x fornitore", "Analisi fatturato cliente-fornitore"),
+					5 => array("Analisi dell'avanzamento delle vendite per fornitore", "Analisi avanzamento vendite fornitori"),
+					6 => array("Esportazione articoli venduti per fornitore", "Esportazione articoli venduti"),
+					7 => array("Vendite da movimenti di magazzino", "Vendite da movimenti (non funz.)"),
+					8 => array("Vendite da righi documenti", "Vendite articoli (da documenti)"),
+					9 => array("Vendite per tipo pagamento", "Vendite per tipo pagamento")
     )
 );
 ?>

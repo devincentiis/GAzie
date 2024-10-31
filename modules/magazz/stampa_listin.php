@@ -84,34 +84,41 @@ if (empty($order)) {
 
 /** fine modifica FP */
 $result = gaz_dbi_dyn_query($what, $table, $where, $order);
-
+if (isset($admin_aziend['lang'])){
+  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist'", "id_ref ASC");
+  if ($price_list_names->num_rows == 6){
+    $script_transl['listino_value']=array();
+    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
+      $script_transl['listino_value'][]=$list_name["data"];
+    }
+  }
+}
 switch ($_GET['li']) {
    case '0':
-      $descrlis = 'd\'acquisto';
+      $descrlis = (isset($script_transl['listino_value'][0]))?$script_transl['listino_value'][0]:'Listino d\'acquisto';
       break;
    case '1':
-      $descrlis = 'di vendita n.1';
+      $descrlis = (isset($script_transl['listino_value'][1]))?$script_transl['listino_value'][1]:'Listino di vendita n.1';
       break;
    case '2':
-      $descrlis = 'di vendita n.2';
+      $descrlis = (isset($script_transl['listino_value'][2]))?$script_transl['listino_value'][2]:'Listino di vendita n.2';
       break;
    case '3':
-      $descrlis = 'di vendita n.3';
+      $descrlis = (isset($script_transl['listino_value'][3]))?$script_transl['listino_value'][3]:'Listino di vendita n.3';
       break;
    case '4':
-      $descrlis = 'di vendita n.4';
+      $descrlis = (isset($script_transl['listino_value'][4]))?$script_transl['listino_value'][4]:'Listino di vendita n.4';
       break;
-   case 'web':
-      $descrlis = 'di vendita online';
+   case '5':
+      $descrlis = (isset($script_transl['listino_value'][5]))?$script_transl['listino_value'][5]:'Listino di vendita online';
       break;
    default:
-      $descrlis = '';
+      $descrlis = 'Listino';
 }
-
 switch ($_GET['ts']) {
     case '0': // ESPANSA (vecchio layout di stampa)
 	   $title = array('luogo_data' => $luogo_data,
-		   'title' => "Listino " . $descrlis,
+		   'title' => $descrlis,
 		   'hile' => array(
 			   array('lun' => 190, 'nam' => 'Codice'),
 			   array('lun' => 15, 'nam' => 'U.M.'),
@@ -207,7 +214,7 @@ switch ($_GET['ts']) {
 	break;
     case '1': // layout di stampa di FP
 	   $title = array('luogo_data' => $luogo_data,
-		   'title' => "Listino " . $descrlis . $titoloAddizionale,
+		   'title' => $descrlis . $titoloAddizionale,
 		   'hile' => array(
 			   array('lun' => 30, 'nam' => 'Codice'),
 			   array('lun' => 100, 'nam' => 'Descrizione'),
@@ -286,7 +293,7 @@ switch ($_GET['ts']) {
 	break;
     case '2': // Stampa verticale (con confezioni)
 		$title=array('luogo_data'=>$luogo_data,
-					   'title'=>"Listino ".$descrlis,
+					   'title'=>$descrlis,
 					   'hile'=>array(array('lun' => 30,'nam'=>'Codice'),
 									 array('lun' => 85,'nam'=>'Descrizione'),
 									 array('lun' => 15,'nam'=>'U.M.'),
@@ -353,6 +360,86 @@ switch ($_GET['ts']) {
 			  $pdf->Cell(30,5,$row['codart'],1,0,'L',0,'',1);
 			  $pdf->Cell(85,5,$row['desart'],1,0,'L',0,'',1);
 			  $pdf->Cell(15,5,$row['unimis'],1,0,'C',0,'',1);
+			  $pdf->Cell(25,5,number_format($price,$admin_aziend['decimal_price'],',','.'),1,0,'R',0,'',1);
+			  if ($row['pack_units']>0) {
+				  $pdf->Cell(25,5,$row['pack_units'],1,1,'C',0,'',1);
+			  } else {
+				  $pdf->Cell(25,5,'1',1,1,'C',0,'',1);
+			  }
+			  $ctrlcatmer=$row["catmer"];
+		}
+	break;
+  case '3': // Stampa verticale (con confezioni e iva compresa)
+		$title=array('luogo_data'=>$luogo_data,
+					   'title'=>$descrlis." IVA compresa",
+					   'hile'=>array(array('lun' => 30,'nam'=>'Codice'),
+									 array('lun' => 85,'nam'=>'Descrizione'),
+									 array('lun' => 15,'nam'=>'U.M.'),
+									 array('lun' => 25,'nam'=>'Prezzo'),
+									 array('lun' => 25,'nam'=>'Pz.Confezione')
+									 )
+					);
+		$primapag=1;
+		$gForm = new magazzForm();
+		$pdf = new Report_template();
+		$pdf->setVars($admin_aziend,$title);
+		$pdf->setAuthor($admin_aziend['ragso1'].' '.$_SESSION['user_name']);
+		$pdf->setTitle($title['title']);
+		$pdf->SetTopMargin(39);
+		$pdf->setFooterMargin(10);
+		$pdf->setLeftMargin(10);
+		$pdf->AddPage();
+		$pdf->SetFillColor(hexdec(substr($admin_aziend['colore'],0,2)),hexdec(substr($admin_aziend['colore'],2,2)),hexdec(substr($admin_aziend['colore'],4,2)));
+		$ctrlcatmer=0;
+		while ($row = gaz_dbi_fetch_array($result)) {
+			   $pdf->SetFont('helvetica','',10);
+			   switch($_GET['li']) {
+				case '0':
+				$price = $row['preacq'];
+				break;
+				case '1':
+				$price = $row['preve1'];
+				break;
+				case '2':
+				$price = $row['preve2'];
+				break;
+				case '3':
+				$price = $row['preve3'];
+				break;
+        case '4':
+				$price = $row['preve4'];
+				break;
+				case 'web':
+				$price = $row['web_price']*$row['web_multiplier'];
+				$row['unimis'] = $row['web_mu'];
+				break;
+        default:
+        $price = $row['preve1'];
+			  }
+			  if ($row["catmer"] <> $ctrlcatmer) {
+				gaz_set_time_limit (30);
+				$pdf->Cell(180,3,'',0,1);
+			    $pdf->SetFont('helvetica','B',11);
+				$pdf->Cell(180,5,$row['descat'],0,1);
+			    $pdf->SetFont('helvetica','',10);
+				if ($primapag) {
+					$primapag=0;
+				} else {
+				    $pdf->SetFont('helvetica','',9);
+					$pdf->Cell(30,4,'Codice',1,0,'C',1);
+					$pdf->Cell(85,4,'Descrizione',1,0,'C',1);
+					$pdf->Cell(15,4,'U.M.',1,0,'C',1);
+					$pdf->Cell(25,4,'Prezzo',1,0,'C',1);
+					$pdf->Cell(25,4,'Pz.Confezione',1,1,'C',1);
+					$pdf->SetFont('helvetica','',10);
+				}
+			  }
+			    $pdf->SetFont('helvetica','',10);
+			  $pdf->Cell(30,5,$row['codart'],1,0,'L',0,'',1);
+			  $pdf->Cell(85,5,$row['desart'],1,0,'L',0,'',1);
+			  $pdf->Cell(15,5,$row['unimis'],1,0,'C',0,'',1);
+        $price=$price*(1-$row['sconto']/100);
+        $price=$price*(1+$row['aliquo']/100);
 			  $pdf->Cell(25,5,number_format($price,$admin_aziend['decimal_price'],',','.'),1,0,'R',0,'',1);
 			  if ($row['pack_units']>0) {
 				  $pdf->Cell(25,5,$row['pack_units'],1,1,'C',0,'',1);
