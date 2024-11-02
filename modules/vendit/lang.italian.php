@@ -123,6 +123,7 @@ $strScript = array("admin_client.php" =>
         'fatt_email' => 'Inviare fattura:',
         'fatt_email_value' => array(0 => 'No, solo stampa PDF', 1 => 'In formato PDF su email', 2=>'In formato XML su PEC',3=>'In formato PDF su email + XML su PEC'),
         'operation_type' => 'Tipo di operazione',
+        'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 5 => ' di Vendita Online'),
         'ref_ecommerce_id_customer' => 'Riferimento al codice dell\'e-commerce'
     ),
     "report_docven.php" =>
@@ -320,6 +321,7 @@ $strScript = array("admin_client.php" =>
         'id_doc_ritorno_alert' => 'Non è stato selezionato il DdT per cessione in c/visione di riferimento',
         'fae_dati' => 'Altri dati Fattura Elettronica',
         'fae_dati_value' => array(2 => 'DatiOrdineAcquisto', 3 => 'DatiContratto', 4 => 'DatiConvenzione', 5 => 'DatiRicezione', 6 => 'DatiFattureCollegate'),
+        'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 5 => ' di Vendita Online'),
 		'war' => array (
 			'1' =>'Le quantità richieste per lotto non sono disponibili. NB: se si conferma si creeranno errori che dovranno essere corretti manualmente!',
 			'2' =>'Fra le righe ci sono lotti con lo stesso ID lotto. Controllare che ci sia realmente la disponibilità prima di confermare',
@@ -489,7 +491,9 @@ $strScript = array("admin_client.php" =>
         'weight' => 'peso',
         'zero_rows' => 'Il documento non contiene righi o prodotti, compila la ricerca articoli nella sezione corpo per aggiungerne, inserisci il valore % per avere una lista completa o per effettuare una ricerca parziale',
         'discount_alert' => 'sconto da anagrafe articoli',
-        'last_row' => 'Ultimo rigo inserito'
+        'last_row' => 'Ultimo rigo inserito',
+        'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 5 => ' di Vendita Online'),
+
     ),
     "admin_cmr.php" =>
     array(array("CMR" => "CMR", "VPR" => "Preventivo a Cliente", "VOR" => "Ordine da Cliente", "VOW" => "Ordine dal Web", "VOG" => "Ordine settimanale del giorno"),

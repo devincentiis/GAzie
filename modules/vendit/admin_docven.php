@@ -1352,6 +1352,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
             $form['rows'][$old_key]['prelis'] = number_format($artico['preve3'], $admin_aziend['decimal_price'], '.', '');
         } elseif ($form['listin'] == 4) {
             $form['rows'][$old_key]['prelis'] = number_format($artico['preve4'], $admin_aziend['decimal_price'], '.', '');
+        } elseif ($form['listin'] == 5) {
+            $form['rows'][$old_key]['prelis'] = number_format($artico['web_price'], $admin_aziend['decimal_price'], '.', '');
         } else {
             $form['rows'][$old_key]['prelis'] = number_format($artico['preve1'], $admin_aziend['decimal_price'], '.', '');
         }
@@ -1535,6 +1537,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
               $form['rows'][$next_row]['prelis'] = number_format($artico['preve3'], $admin_aziend['decimal_price'], '.', '');
           } elseif ($form['listin'] == 4) {
               $form['rows'][$next_row]['prelis'] = number_format($artico['preve4'], $admin_aziend['decimal_price'], '.', '');
+          } elseif ($form['listin'] == 5) {
+              $form['rows'][$next_row]['prelis'] = number_format($artico['web_price'], $admin_aziend['decimal_price'], '.', '');
           } else {
               $form['rows'][$next_row]['prelis'] = number_format($artico['preve1'], $admin_aziend['decimal_price'], '.', '');
           }
@@ -2362,6 +2366,17 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
 
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup','custom/autocomplete','custom/miojs'));
+if (isset($admin_aziend['lang'])){
+  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist' && var NOT LIKE 'preacq'", "id_ref ASC");
+  if ($price_list_names->num_rows == 5){
+    $script_transl['listino_value']=array();
+    $n=0;
+    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
+      $n++;
+      $script_transl['listino_value'][$n]=$list_name["description"];
+    }
+  }
+}
 ?>
 <script>
   $(function () {
@@ -2512,15 +2527,8 @@ echo "</select></td>\n";
 <?php
 echo "</tr>\n";
 echo "<tr><td class=\"FacetFieldCaptionTD\">$script_transl[7]</td><td class=\"FacetDataTD\">\n";
-echo "<select name=\"listin\" class=\"FacetSelect\">\n";
-for ($lis = 1; $lis <= 4; $lis++) {
-    $selected = "";
-    if ($form["listin"] == $lis) {
-        $selected = " selected ";
-    }
-    echo "<option value=\"" . $lis . "\"" . $selected . ">" . $lis . "</option>\n";
-}
-echo "</select></td>\n";
+$gForm->variousSelect('listin', $script_transl['listino_value'], $form['listin'], 'FacetSelect', false);
+
 echo "<td class=\"FacetFieldCaptionTD\">$script_transl[8]</td><td colspan=\"1\" class=\"FacetDataTD\">\n";
 $select_pagame = new selectpagame("pagame");
 $select_pagame->addSelected($form["pagame"]);

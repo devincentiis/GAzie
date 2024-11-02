@@ -1198,13 +1198,7 @@ if ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup', 'custom/modal_form'));
 
-if ( empty($msg) && $scorrimento == '1' ) { // scrollo solo se voluto e non ci sono errori
-?>
-<script>
-    $("html, body").stop().animate({scrollTop:$(document).height()}, 500, 'swing', function() {
-   });</script>
-<?php
-}
+
 
 echo '<script type="text/javascript">
       $(function() {
@@ -1963,6 +1957,15 @@ if ( $_POST['rigcon']>=1){
 // FINE creazione form dialog-schedule
     ?>
 </form>
+<?php
+if ( empty($msg) && $scorrimento == '1' ) { // scrollo solo se voluto e non ci sono errori
+?>
+<script>
+    $("html, body").stop().animate({scrollTop:$(document).height()}, 400, 'swing', function() {
+   });</script>
+<?php
+}
+?>
 <script>
   $(function () {
     $( "#onlyone_submit" ).trigger( "click" );

@@ -51,7 +51,7 @@ if (isset($_GET['li'])) {
         $listino = 'preve3';
     } elseif (substr($_GET['li'], 0, 3) == '4') {
         $listino = 'preve4';
-    } elseif (substr($_GET['li'], 0, 3) == 'web') {
+    } elseif (substr($_GET['li'], 0, 3) == '5') {
         $listino = 'web_price';
     }
 }

@@ -1746,6 +1746,17 @@ if ($form['id_tes'] > 0) {
 } else {
     $title = ucfirst($script_transl[$toDo] . $script_transl[0][$form['tipdoc']]);
 }
+if (isset($admin_aziend['lang'])){
+  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist' && var NOT LIKE 'preacq'", "id_ref ASC");
+  if ($price_list_names->num_rows == 5){
+    $script_transl['listino_value']=array();
+    $n=0;
+    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
+      $n++;
+      $script_transl['listino_value'][$n]=$list_name["description"];
+    }
+  }
+}
 ?>
 <script>
 var cal = new CalendarPopup();
@@ -2079,17 +2090,10 @@ echo '
 			</tr>
 			<tr>
 				<td class="FacetFieldCaptionTD">' . $script_transl[7] . '</td>
-				<td class="FacetDataTD">
-					<select name="listin" class="FacetSelect">';
-for ($lis = 1; $lis <= 5; $lis++) {
-    $selected = "";
-    if ($form['listin'] == $lis) {
-        $selected = ' selected=""';
-    }
-    echo '					<option value="' . $lis . '"' . $selected . '>' . $lis . '</option>';
-}
-echo '				</select>
-				</td>
+				<td class="FacetDataTD">';
+		$gForm->variousSelect('listin', $script_transl['listino_value'], $form['listin'], 'FacetSelect', false);
+
+	echo '</td>
 				<td class="FacetFieldCaptionTD">' . $script_transl[8] . '</td>
 				<td class="FacetDataTD">';
 $select_pagame = new selectpagame("pagame");

@@ -301,7 +301,7 @@ $strScript = array(
         'jumpcat' => 'Cambio pagina al cambio categoria',
         'barcode_value' => array(0 => 'Immagini', 1 => 'Codici a Barre'),
         'listino' => 'Listino',
-        'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 'web' => ' di Vendita Online')
+        'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 5 => ' di Vendita Online')
       ),
     "select_listin.php" =>
       array('title' => 'Selezione per la stampa dei listini',
