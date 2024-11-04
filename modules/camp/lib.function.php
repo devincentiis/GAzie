@@ -90,7 +90,7 @@ class campForm extends GAzieForm {
 
 class silos {
 
-	function getCont($codsil,$codart="", $excluded_movmag = 0){// restituisce la quantità di olio di un recipiente
+	function getCont($codsil,$codart="", $excluded_movmag = 0, $date=""){// restituisce la quantità di olio di un recipiente, se presente, a quella data data
 		global $gTables,$admin_aziend;
 		$content=0;
 		$orderby=2;
@@ -110,6 +110,9 @@ class silos {
 
 		if (strlen($codart)>0){
 		  $where=$where." AND artico = '". $codart ."'";
+		}
+		if ($date<>""){
+		  $where=$where." AND date(datdoc) < date('".$date."')";
 		}
 			$what=	$gTables['movmag'].".operat, ".$gTables['movmag'].".quanti, ".$gTables['movmag'].".id_orderman, ".
 					$gTables['camp_mov_sian'].".*, ".$gTables['camp_artico'].".confezione ";

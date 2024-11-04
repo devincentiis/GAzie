@@ -33,9 +33,10 @@
 
 require("../../library/include/datlib.inc.php");
 require ("../../modules/magazz/lib.function.php");
+require ("../../modules/vendit/lib.function.php");
 $admin_aziend=checkAdmin();
 $msg='';
-$sil = new silos;
+$silos = new silos;
 
 // controllo che ci sia la cartella sian
 $sianfolder = DATA_DIR.'files/' . $admin_aziend['codice'] . '/sian/';
@@ -65,7 +66,7 @@ if (isset($prevfiles)){ // se ci sono files
 	for ($n=0 ; $n <= $i-1 ; $n++){
 		if (substr($prevfiles[$n]['content'],875,1)=="I"){ // se il file è di inserimento ne prendo la data dell'ultimo record
 			$fileField=explode (";",$prevfiles[$n]['content']);
-			$uldtfile=$fileField[((((count($fileField)-1)/49)-1)*49)+3];
+			$uldtfile=$fileField[((((count($fileField)-1)/49)-1)*49)+3];			
 			$uldtfile=str_replace("-", "", $uldtfile); // imposto la data per la selezione
 			break; // esco dal ciclo
 		} else { // se non è 'I', cioè è 'C', faccio saltare il file successivo perché annullato da questo
@@ -103,8 +104,11 @@ function getMovements($date_ini,$date_fin)
         return $m;
     }
 
-// controllo contenitori e silos
-if (isset($_POST['create'])){
+// controllo contenitori-silos
+$init_mov=substr($uldtfile,4,4)."-".substr($uldtfile,2,2)."-".substr($uldtfile,0,2);
+$dateinit=date_create($init_mov);
+date_sub($dateinit,date_interval_create_from_date_string("2 days"));
+$init_mov= date_format($dateinit,"Y-m-d");
 	$orderby=2;
 	$limit=0;
 	$passo=2000000;
@@ -114,8 +118,12 @@ if (isset($_POST['create'])){
 	$groupby= "";
 	$table=$gTables['camp_recip_stocc'];
 	$ressilos=gaz_dbi_dyn_query ($what,$table,$where,$orderby,$limit,$passo,$groupby);
-	while ($r = gaz_dbi_fetch_array($ressilos)) {
-		$totalcont = $sil->getCont($r['cod_silos']);
+	while ($r = gaz_dbi_fetch_array($ressilos)) { // controllo sul totale iniziale dei silos
+		$totalcont = $silos->getCont($r['cod_silos']);
+				
+		$totcont[$r['cod_silos']]=$silos->getCont($r['cod_silos'],"", 0, $init_mov);
+		$maxcont[$r['cod_silos']]=$r['capacita'];
+		
 		if ($totalcont<0){
 			$message = "Giacenza negativa nel silos ".$r['cod_silos']." !";
 			$msg .='5+';
@@ -125,7 +133,6 @@ if (isset($_POST['create'])){
 			$msg .='5+';
 		}
 	}
-}
 
 if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     $form['hidden_req'] = '';
@@ -285,18 +292,42 @@ if (isset($_POST['preview']) and $msg=='') {
         $linkHeaders->output();
         echo "</tr>";
 		$genera="";		
-
+		$nr=0;
         foreach($m as $key => $mv){
+			$er="";
 			if ($mv['id_movmag']>0){ // se è un movimento del SIAN connesso al movimento di magazzino
+			
 			$legenda_cod_op= array('1'=>'Confezionamento con etichettatura','2'=>'Confezionamento senza etichettatura','3'=>'Etichettatura','4'=>'Svuotamento di olio confezionato','5'=>'Movimentazione interna senza cambio di origine','S7'=>'Scarico di olio destinato ad altri usi','10'=>'Carico olio lampante da recupero','8'=>'Reso olio confezionato da clienti','9'=>'Olio ha ottenuto certificazione DOP');
 				if ($form['date_ini_Y'].$form['date_ini_M'].$form['date_ini_D']==str_replace("-", "", $mv['datdoc']) AND strlen($mv['status'])>1) {
 				// escludo i movimenti già inseriti null'ultimo file con stessa data
 				} else if ($mv['id_orderman']>0 AND $mv['operat']==-1 AND $mv['cod_operazione']<>"S7"){
 					// escludo i movimenti di produzione in uscita
-				} else {					
+						$totcont[$mv['recip_stocc']] -= $mv['quanti'];
+						//echo "<br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
+						if ($totcont[$mv['recip_stocc']]<0){
+							//echo $mv['desdoc'],"ERRORE <",$nr;
+							$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
+							$msg .='5+';$er="style='background-color: red';";
+						}
+						$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
+						//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
+						if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
+							//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
+							$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];
+							$msg .='5+';$er="style='background-color: red';";
+						}
+				} else {	
+					$nr++;
 					if ($mv['id_orderman']==0 AND $mv['operat']==1){
 						$legenda_cod_op['3']='Carico olio da lavorazione/deposito presso terzi';
 						$legenda_cod_op['5']='Carico olio da altro stabilimento/deposito stessa impresa';
+						$totcont[$mv['recip_stocc']] += $mv['quanti'];
+						//echo "<br>carico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
+						if ($totcont[$mv['recip_stocc']]>$maxcont[$mv['recip_stocc']]){
+							//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc']]," - maxcont:",$maxcont[$mv['recip_stocc']];
+							$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc']." è ".$totcont[$mv['recip_stocc']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc']];
+							$msg .='5+';$er="style='background-color: red';";
+						}			
 					}
 					if ($mv['id_orderman']==0 AND $mv['operat']==-1){
 						$legenda_cod_op['0']='Vendita olio a consumatore finale';
@@ -308,6 +339,13 @@ if (isset($_POST['preview']) and $msg=='') {
 						$legenda_cod_op['8']='Scarico olio autoconsumo';
 						$legenda_cod_op['12']='Perdite, cali, campionamento, analisi';
 						$legenda_cod_op['13']='Separazione morchie';
+						$totcont[$mv['recip_stocc_destin']] -= $mv['quanti'];
+						//echo "<br>SCarico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
+						if ($totcont[$mv['recip_stocc_destin']]<0){
+							//echo $mv['desdoc'],"ERRORE <",$nr;
+							$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc_destin']." è negativa";
+							$msg .='5+';$er="style='background-color: red';";
+						}
 					}
 					$genera="ok";
 					$datedoc = substr($mv['datdoc'],8,2).'-'.substr($mv['datdoc'],5,2).'-'.substr($mv['datdoc'],0,4);
@@ -316,7 +354,8 @@ if (isset($_POST['preview']) and $msg=='') {
 					if (strtotime(substr($uldtfile,0,2)."-".substr($uldtfile,2,2)."-".substr($uldtfile,4,4))>=strtotime($datedoc)){
 						$style="style='background-color: #fbd3d3';";
 					}
-					echo "<tr ",$style,"><td class=\"FacetDataTD\">".$datedoc." &nbsp;</td>";
+					$style=($er=="")?$style:$er;
+					echo "<tr ",$style,"><td class=\"FacetDataTD\">".$nr."-  ".$datedoc." &nbsp;</td>";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['artico']." &nbsp;</td>\n";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".gaz_format_quantity($movQuanti,1,3)."</td>\n";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['id_SIAN']." - ".$mv['ragso1']." &nbsp;</td>\n";
@@ -342,7 +381,12 @@ if (isset($_POST['preview']) and $msg=='') {
 			}
          }
          echo "\t<tr class=\"FacetFieldCaptionTD\">\n";
-		 if ($genera=="ok"){
+		 if (!empty($msg)) {
+			echo '<td colspan="2" class="FacetDataTDred">'.$gForm->outputErrors($msg,$script_transl['errors'])."</td></tr>\n";
+			if (!empty($message)){
+				echo "<script type='text/javascript'>alert('$message');</script>";
+			}
+		}elseif ($genera=="ok"){
 			echo '<td colspan="7" align="right"><input type="submit" name="create" value="';
 			echo "Genera file SIAN";
 			echo '">';
