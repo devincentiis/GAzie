@@ -2,9 +2,9 @@
 /*
 	  --------------------------------------------------------------------------
 	  GAzie - Gestione Azienda
-	  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-	  (https://www.devincentiis.it)
-	  <https://gazie.sourceforge.net>
+	  Copyright (C) 2004-2024 - Antonio De Vincentiis Montesilvano (PE)
+	  (http://www.devincentiis.it)
+	  <http://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP
 	  Copyright (C) 2018-2023 - Antonio Germani, Massignano (AP)
@@ -186,7 +186,7 @@ function getMovContainer(cod_silos) {
           clpro = 'bg-danger';
           value.pro ='--- vuoto ---';
         }
-				$("table.list_movcontainer").append("<tr><td> <button onclick='location.href=\"../magazz/admin_movmag.php?Update&id_mov="+value.id+"\"' target='_blank' type='button'>"+value.id+" </button></td><td class='bg-warning'>&nbsp;"+ value.cod + " </td><td>&nbsp; "+value.des+value.id_lot+"&nbsp; </td><td class='bg-info'> "+value.val+ "</td><td> &nbsp;" +value.um+ "&nbsp; </td><td class='text-right "+ clpro +"'> "+value.pro+" </td></tr>");
+				$("table.list_movcontainer").append("<tr><td> <button onclick='location.href=\"../magazz/admin_movmag.php?Update&id_mov="+value.id+"\"' target='_blank' type='button'>"+value.id+" </button></td><td class='bg-warning'>&nbsp;"+ value.cod + " </td><td>&nbsp; "+value.datdoc+":"+value.des+value.id_lot+"&nbsp; </td><td class='bg-info'> "+value.val+ "</td><td> &nbsp;" +value.um+ "&nbsp; </td><td class='text-right "+ clpro +"'> "+value.pro+" </td></tr>");
 				});
 				if (j==0){
 					$(".list_movcontainer").append('<tr><td class="bg-danger">********* Contenitore non movimentato *********</td></tr>');
@@ -294,9 +294,9 @@ $recordnav -> output();
 						echo "Kg.",gaz_format_quantity($content,true)," l.",gaz_format_quantity($content/0.915,true)," Ultimo lotto: ",$lot[1];
 						if ($content > $a_row['capacita']){
 							echo " ERRORE!";
-						}
-            echo ' <a class="btn btn-xs btn-default dialog_content" title="Movimenti nel contenitore" onclick="getMovContainer(\''.$a_row['cod_silos'].'\')" > <i class="glyphicon glyphicon-list"></i></a>';
+						}            
 					}
+					echo ' <a class="btn btn-xs btn-default dialog_content" title="Movimenti nel contenitore" onclick="getMovContainer(\''.$a_row['cod_silos'].'\')" > <i class="glyphicon glyphicon-list"></i></a>';
 					?>
 					<div class="bar">
 						<img src="../../modules/camp/media/white_bar.jpg" alt="Barra silos" title="Contenuto silos" style="padding-left:<?php echo ((($content/$a_row['capacita'])*100)* 280 )/100;?>px;">

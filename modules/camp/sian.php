@@ -105,8 +105,8 @@ function getMovements($date_ini,$date_fin)
     }
 
 // controllo contenitori-silos
-$init_mov=substr($uldtfile,4,4)."-".substr($uldtfile,2,2)."-".substr($uldtfile,0,2);
-$dateinit=date_create($init_mov);
+$ult_mov=substr($uldtfile,4,4)."-".substr($uldtfile,2,2)."-".substr($uldtfile,0,2);
+$dateinit=date_create($ult_mov);
 date_sub($dateinit,date_interval_create_from_date_string("2 days"));
 $init_mov= date_format($dateinit,"Y-m-d");
 	$orderby=2;
@@ -296,38 +296,43 @@ if (isset($_POST['preview']) and $msg=='') {
         foreach($m as $key => $mv){
 			$er="";
 			if ($mv['id_movmag']>0){ // se è un movimento del SIAN connesso al movimento di magazzino
-			
 			$legenda_cod_op= array('1'=>'Confezionamento con etichettatura','2'=>'Confezionamento senza etichettatura','3'=>'Etichettatura','4'=>'Svuotamento di olio confezionato','5'=>'Movimentazione interna senza cambio di origine','S7'=>'Scarico di olio destinato ad altri usi','10'=>'Carico olio lampante da recupero','8'=>'Reso olio confezionato da clienti','9'=>'Olio ha ottenuto certificazione DOP');
 				if ($form['date_ini_Y'].$form['date_ini_M'].$form['date_ini_D']==str_replace("-", "", $mv['datdoc']) AND strlen($mv['status'])>1) {
 				// escludo i movimenti già inseriti null'ultimo file con stessa data
 				} else if ($mv['id_orderman']>0 AND $mv['operat']==-1 AND $mv['cod_operazione']<>"S7"){
 					// escludo i movimenti di produzione in uscita
-						$totcont[$mv['recip_stocc']] -= $mv['quanti'];
-						//echo "<br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
-						if ($totcont[$mv['recip_stocc']]<0){
-							//echo $mv['desdoc'],"ERRORE <",$nr;
-							$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
-							$msg .='5+';$er="style='background-color: red';";
-						}
-						$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
-						//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
-						if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
-							//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
-							$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];
-							$msg .='5+';$er="style='background-color: red';";
+						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
+							$totcont[$mv['recip_stocc']] -= $mv['quanti'];
+						
+							//echo "<br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
+							if ($totcont[$mv['recip_stocc']]<0){
+								//echo $mv['desdoc'],"ERRORE <",$nr;
+								$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
+								$msg .='5+';$er="style='background-color: red';";
+							}
+							$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
+							//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
+						
+							if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
+								//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
+								$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];
+								$msg .='5+';$er="style='background-color: red';";
+							}
 						}
 				} else {	
 					$nr++;
 					if ($mv['id_orderman']==0 AND $mv['operat']==1){
 						$legenda_cod_op['3']='Carico olio da lavorazione/deposito presso terzi';
 						$legenda_cod_op['5']='Carico olio da altro stabilimento/deposito stessa impresa';
-						$totcont[$mv['recip_stocc']] += $mv['quanti'];
-						//echo "<br>carico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
-						if ($totcont[$mv['recip_stocc']]>$maxcont[$mv['recip_stocc']]){
-							//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc']]," - maxcont:",$maxcont[$mv['recip_stocc']];
-							$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc']." è ".$totcont[$mv['recip_stocc']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc']];
-							$msg .='5+';$er="style='background-color: red';";
-						}			
+						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
+							$totcont[$mv['recip_stocc']] += $mv['quanti'];
+							//echo "<br>carico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
+							if ($totcont[$mv['recip_stocc']]>$maxcont[$mv['recip_stocc']]){
+								//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc']]," - maxcont:",$maxcont[$mv['recip_stocc']];
+								$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc']." è ".$totcont[$mv['recip_stocc']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc']];
+								$msg .='5+';$er="style='background-color: red';";
+							}	
+						}						
 					}
 					if ($mv['id_orderman']==0 AND $mv['operat']==-1){
 						$legenda_cod_op['0']='Vendita olio a consumatore finale';
@@ -339,12 +344,14 @@ if (isset($_POST['preview']) and $msg=='') {
 						$legenda_cod_op['8']='Scarico olio autoconsumo';
 						$legenda_cod_op['12']='Perdite, cali, campionamento, analisi';
 						$legenda_cod_op['13']='Separazione morchie';
-						$totcont[$mv['recip_stocc_destin']] -= $mv['quanti'];
-						//echo "<br>SCarico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
-						if ($totcont[$mv['recip_stocc_destin']]<0){
-							//echo $mv['desdoc'],"ERRORE <",$nr;
-							$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc_destin']." è negativa";
-							$msg .='5+';$er="style='background-color: red';";
+						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
+							$totcont[$mv['recip_stocc_destin']] -= $mv['quanti'];
+							//echo "<br>SCarico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
+							if ($totcont[$mv['recip_stocc_destin']]<0){
+								//echo $mv['desdoc'],"ERRORE <",$nr;
+								$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc_destin']." è negativa";
+								$msg .='5+';$er="style='background-color: red';";
+							}
 						}
 					}
 					$genera="ok";
@@ -353,6 +360,7 @@ if (isset($_POST['preview']) and $msg=='') {
 					$style="";
 					if (strtotime(substr($uldtfile,0,2)."-".substr($uldtfile,2,2)."-".substr($uldtfile,4,4))>=strtotime($datedoc)){
 						$style="style='background-color: #fbd3d3';";
+						$nr--;
 					}
 					$style=($er=="")?$style:$er;
 					echo "<tr ",$style,"><td class=\"FacetDataTD\">".$nr."-  ".$datedoc." &nbsp;</td>";
