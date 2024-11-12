@@ -1,0 +1,7 @@
+<phpunit bootstrap="autoload-ci.php">
+    <testsuites>
+        <testsuite name="CipherSweet Minimal Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

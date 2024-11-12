@@ -1452,12 +1452,12 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 
 						// aggiorno idmag nel rigdoc
 						gaz_dbi_query("UPDATE " . $gTables['rigdoc'] . " SET id_mag = " . $id_mag . " WHERE `id_rig` = $id_rif ");
-            if (intval($idlotmag)>0){// aggiorno lotmag
+            if (isset($idlotmag) && intval($idlotmag)>0){// aggiorno lotmag
               gaz_dbi_query("UPDATE " . $gTables['lotmag'] . " SET id_movmag = " . intval($id_mag) . ", id_rigdoc = " . intval($id_rif) . " WHERE id = ".intval($idlotmag));
 
             }
 
-            if (intval($rif_sian_movmag)>0){// aggiorno camp_mov_sian
+            if (isset($rif_sian_movmag) && intval($rif_sian_movmag)>0){// aggiorno camp_mov_sian
               gaz_dbi_query("UPDATE " . $gTables['camp_mov_sian'] . " SET id_movmag = " . $id_mag . " WHERE `id_movmag` = $rif_sian_movmag ");
             }
 					}

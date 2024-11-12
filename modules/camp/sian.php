@@ -107,7 +107,7 @@ function getMovements($date_ini,$date_fin)
 // controllo contenitori-silos
 $ult_mov=substr($uldtfile,4,4)."-".substr($uldtfile,2,2)."-".substr($uldtfile,0,2);
 $dateinit=date_create($ult_mov);
-date_sub($dateinit,date_interval_create_from_date_string("2 days"));
+//date_sub($dateinit,date_interval_create_from_date_string("1 days"));
 $init_mov= date_format($dateinit,"Y-m-d");
 	$orderby=2;
 	$limit=0;
@@ -133,7 +133,6 @@ $init_mov= date_format($dateinit,"Y-m-d");
 			$msg .='5+';
 		}
 	}
-
 if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     $form['hidden_req'] = '';
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
@@ -292,7 +291,7 @@ if (isset($_POST['preview']) and $msg=='') {
         $linkHeaders->output();
         echo "</tr>";
 		$genera="";		
-		$nr=0;
+		$nr=0;$message_rem="";
         foreach($m as $key => $mv){
 			$er="";
 			if ($mv['id_movmag']>0){ // se è un movimento del SIAN connesso al movimento di magazzino
@@ -310,16 +309,24 @@ if (isset($_POST['preview']) and $msg=='') {
 								$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
 								$msg .='5+';$er="style='background-color: red';";
 							}
+							
 							$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
 							//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
 						
 							if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
 								//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
-								$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];
+								$message = "Al rigo ".$nr." di produzione, la quantità del silos di destinazione ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];// ricordo l'errore nel prossimo rigo
 								$msg .='5+';$er="style='background-color: red';";
+								?>
+								<script>
+									const note = document.querySelector('.nr<?php echo $nr; ?>');
+									note.style.backgroundColor = 'red';
+								</script>
+								<?php 
 							}
+							
 						}
-				} else {	
+				} else {
 					$nr++;
 					if ($mv['id_orderman']==0 AND $mv['operat']==1){
 						$legenda_cod_op['3']='Carico olio da lavorazione/deposito presso terzi';
@@ -363,7 +370,7 @@ if (isset($_POST['preview']) and $msg=='') {
 						$nr--;
 					}
 					$style=($er=="")?$style:$er;
-					echo "<tr ",$style,"><td class=\"FacetDataTD\">".$nr."-  ".$datedoc." &nbsp;</td>";
+					echo "<tr class='nr".$nr."'",$style,"><td class=\"FacetDataTD\">".$nr."-  ".$datedoc." &nbsp;</td>";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['artico']." &nbsp;</td>\n";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".gaz_format_quantity($movQuanti,1,3)."</td>\n";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['id_SIAN']." - ".$mv['ragso1']." &nbsp;</td>\n";

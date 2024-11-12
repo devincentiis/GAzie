@@ -7,11 +7,12 @@
         "phpunit/phpunit": "^9.5.4",
         "phpseclib/phpseclib": "^3.0.8",
         "phpoffice/phpspreadsheet": "^1.17.1",
-        "ddeboer/imap":"^1.12.1",
+        "ddeboer/imap":"1.18.0",
         "phpmailer/phpmailer": "^6.5",
         "tecnickcom/tcpdf": "^6.6",
         "setasign/fpdi": "^2.0",
-        "dg/mysql-dump":"^1.5"
+        "dg/mysql-dump":"^1.5",
+        "paragonie/ciphersweet":"^4"
     },
     "repositories": [
         {

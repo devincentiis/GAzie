@@ -112,7 +112,7 @@ class silos {
 		  $where=$where." AND artico = '". $codart ."'";
 		}
 		if ($date<>""){
-		  $where=$where." AND date(datdoc) < date('".$date."')";
+		  $where=$where." AND date(datdoc) <= date('".$date."')";
 		}
 			$what=	$gTables['movmag'].".operat, ".$gTables['movmag'].".quanti, ".$gTables['movmag'].".id_orderman, ".
 					$gTables['camp_mov_sian'].".*, ".$gTables['camp_artico'].".confezione ";
