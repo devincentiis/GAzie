@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `gaz_XXXpagame_distribution` (
   PRIMARY KEY (`id_pagdis`) USING BTREE,
   KEY `codpag` (`codpag`),
   KEY `from_prev` (`from_prev`)
-) ENGINE=MyISAMmb4 COMMENT='Il contenuto di questa tabella serve per gestire i pagamenti con scadenze e rate non costanti nell''importo e nella periodicità. Ed è legata alla tabella gaz_XXXpagame. Ogni rigo di questa tabella rappresenta una rata per il pagamento riferito con la colonna codpag e verranno passate come matrice alla funzione CalcExpiry nel file expiry_calc.php ';
+) ENGINE=MyISAM COMMENT='Il contenuto di questa tabella serve per gestire i pagamenti con scadenze e rate non costanti nell''importo e nella periodicità. Ed è legata alla tabella gaz_XXXpagame. Ogni rigo di questa tabella rappresenta una rata per il pagamento riferito con la colonna codpag e verranno passate come matrice alla funzione CalcExpiry nel file expiry_calc.php ';
 ALTER TABLE `gaz_XXXpagame` CHANGE COLUMN `tippag` `tippag` CHAR(1) NOT NULL DEFAULT '' COMMENT 'C=contanti,O=bonifico,K=carte di pagamento,D=rimessa diretta,I=rapporto interbancario diretto (RID),B=Ricevuta Bancaria,T=Cambiale-Tratta,V=mediante avviso(MAV),F=finanziamento,M=misto. ATTENZIONE se F o M ci si può appoggiare alla tabella gaz_XXXcompany_data per contenere dati quali anticipo, finanziato, importo rate, numero rate, periodicità' AFTER `descri`;
 ALTER TABLE `gaz_XXXcompany_data`	COMMENT='Multipurpose table. Tabella per contenere dati di qualsiasi genere, utilizzabile sulle personalizzazioni per conservare (ad es.) documenti crittografati.', ADD COLUMN `id_ref` INT NULL COMMENT 'Referenza numerica alla fonte' AFTER `id`,	ADD INDEX `id_ref` (`id_ref`);
 ALTER TABLE `gaz_XXXartico`

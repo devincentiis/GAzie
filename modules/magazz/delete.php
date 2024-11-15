@@ -55,7 +55,7 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
 			}
 			$item = gaz_dbi_get_row($gTables['artico'], "codice", $form['artico']);
 			if ($item['SIAN']>0){ // se è SIAN cancello anche il suo movimento
-				gaz_dbi_del_row($gTables['camp_mov_sian'], "id_movmag", intval($_POST['id_mov']));
+				gaz_dbi_del_row($gTables['camp_mov_sian'], "id_movmag", $i);
 			}
 		break;
 		case "artico":

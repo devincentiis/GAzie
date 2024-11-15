@@ -1907,7 +1907,7 @@ class GAzieForm {
       }
     }
 
-    function selectFromDB($table, $name, $key, $val, $order = false, $empty = false, $bridge = '', $key2 = '', $val_hiddenReq = '', $class = 'FacetSelect', $addOption = null, $style = '', $where = false, $echo=false) {
+    function selectFromDB($table, $name, $key, $val, $order = false, $empty = false, $bridge = '', $key2 = '', $val_hiddenReq = '', $class = 'FacetSelect', $addOption = null, $style = '', $where = false, $echo=false, $bridge2 = '', $key3 = '', $sort='') {
         global $gTables;
 		$acc='';
         $refresh = '';
@@ -1918,7 +1918,7 @@ class GAzieForm {
         if ($where) {
             $query .= ' WHERE ' . $where;
         }
-        $query .= ' ORDER BY `' . $order . '`';
+        $query .= ' ORDER BY `' . $order . '` '.strtoupper($sort);
         if (!empty($val_hiddenReq)) {
             $refresh = "onchange=\"this.form.hidden_req.value='$val_hiddenReq'; this.form.submit();\"";
         }
@@ -1934,10 +1934,15 @@ class GAzieForm {
             }
             $acc .= "\t\t <option value=\"" . $r[$key] . "\" $selected >";
             if (empty($key2)) {
-                $acc .= substr($r[$key], 0, 43) . "</option>\n";
+                $acc .= substr($r[$key], 0, 43);
             } else {
-                $acc .= substr($r[$key], 0, 28) . $bridge . substr($r[$key2], 0, 60) . "</option>\n";
+                $acc .= substr($r[$key], 0, 28) . $bridge . substr($r[$key2], 0, 40);
             }
+            if (!empty($key3)) {
+                $acc .= $bridge2 . substr($r[$key3], 0, 20);
+
+            }
+            $acc .= "</option>\n";
         }
         if ($addOption) {
             $acc .= "\t\t <option value=\"" . $addOption['value'] . "\"";

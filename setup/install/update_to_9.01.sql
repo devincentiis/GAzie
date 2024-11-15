@@ -1,5 +1,4 @@
 UPDATE `gaz_config` SET `cvalue` = '151' WHERE `id` =2;
-ALTER TABLE `gaz_anagraes` COLLATE='utf8mb4_0900_ai_ci';
 ALTER TABLE `gaz_anagra` ADD COLUMN `fiscal_reg` VARCHAR(4) NULL AFTER `pariva`;
 ALTER TABLE `gaz_admin_config` ADD COLUMN `company_id` INT NULL DEFAULT 0 AFTER `adminid`, ADD INDEX `company_id` (`company_id`);
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)

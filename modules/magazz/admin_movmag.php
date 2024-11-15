@@ -112,6 +112,11 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
 		$form['cod_operazione'] = $resultsian['cod_operazione'];
 		$form['recip_stocc'] = $resultsian['recip_stocc'];
 		$form['recip_stocc_destin'] = $resultsian['recip_stocc_destin'];
+    $form['tesdoc'] = $resultsian['tesdoc'];
+    if (intval($form['tesdoc'])>0){
+    		$form['clfoco'] = gaz_dbi_get_row($gTables['tesdoc'], "id_tes", $form['tesdoc'])['clfoco'];
+        $form['clorfo'] = 1;
+    }
 	}
 	if ($item_artico['lot_or_serial']==1){
 		$result_lotmag = gaz_dbi_get_row($gTables['lotmag'], "id", $result['id_lotmag']);
@@ -190,6 +195,7 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
 	$form['artico'] = $_POST['artico'];
 	$form['lot_or_serial']=$_POST['lot_or_serial'];
 	$form['SIAN']=$_POST['SIAN'];
+  $form['tesdoc']=$_POST['tesdoc'];
 	$form['cod_operazione'] = $_POST['cod_operazione'];
 	$form['recip_stocc'] = $_POST['recip_stocc'];
 	$form['recip_stocc_destin'] = $_POST['recip_stocc_destin'];
@@ -215,7 +221,10 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
         $form['id_rif'] = 0;
     }
 	}
-
+  if(intval($form['SIAN'])>0){
+    $form['clfoco']=$_POST['clfoco'];
+    $form['clorfo']=0;
+  }
 
 	if (intval($_POST['caumag'])== 82){
 		$form['operat'] = 1;
@@ -339,7 +348,7 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
     if (!checkdate($form['mesdoc'], $form['giodoc'], $form['anndoc'])) $msg .= "15+";
     if ($utsdoc > $utsreg) { $msg .= "17+"; }
     if ($form['lot_or_serial']==1 && $form['caumag']<>99){ // se è un articolo con lotti e non è un movimento inventario
-      if (strlen ($form['identifier'])<= 0 || intval($form['id_lotmag'])==0 ){
+      if (strlen ($form['identifier'])<= 0 ){
         $msg .= "21+"; // manca il lotto
       }else{
 		  $checklot = gaz_dbi_get_row($gTables['lotmag']." LEFT JOIN ".$gTables['movmag']." ON ".$gTables['movmag'].".id_mov = id_movmag", 'id', $form['id_lotmag']);
@@ -380,36 +389,42 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
       }
     }
     // inizio controllo operazioni particolari SIAN
-    if ($form['SIAN']>0 && $form['operat']==1 && $form['cod_operazione']==10 && $camp_artico['confezione']>0){
-      $msg .="23+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==1 && $form['cod_operazione']==10 && $camp_artico['confezione']==0 && $form['recip_stocc']==""){
-      $msg .="24+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==-1 && $form['cod_operazione']==0 && $camp_artico['confezione']==0){
-      $msg .="25+";
-    }
-    if ($form['SIAN']>0 && $form['cod_operazione']==11){
-      $msg .="26+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==-1 && $form['cod_operazione']==6 && $camp_artico['confezione']==0){
-      $msg .="27+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==-1 && $form['cod_operazione']==7 && $camp_artico['confezione']==0 && $form['recip_stocc']==""){
-      $msg .="24+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==-1 && $form['cod_operazione']==8 && $camp_artico['confezione']==0 && $form['recip_stocc']==""){
-      $msg .="24+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==-1 && $form['cod_operazione']==13 && $camp_artico['confezione']>0){
-      $msg .="28+";
-    }
-    if ($form['SIAN']>0 && $form['operat']==-1 && strlen($form['recip_stocc'])>0){
-      $content = $sil -> getCont($form['recip_stocc'],$form['artico'],$prev_idmov);
-      if ($content < $form['quanti']){ // se non c'è suffiente olio nel silos selezionato
-        $msg .="32+";
+    if ($form['SIAN']>0){
+      if ($form['operat']==1 && $form['cod_operazione']==10 && $camp_artico['confezione']>0){
+        $msg .="23+";
+      }
+      if ($form['operat']==1 && $form['cod_operazione']==10 && $camp_artico['confezione']==0 && $form['recip_stocc']==""){
+        $msg .="24+";
+      }
+      if ($form['operat']==-1 && $form['cod_operazione']==0 && $camp_artico['confezione']==0){
+        $msg .="25+";
+      }
+      if ($form['cod_operazione']==11){
+        $msg .="26+";
+      }
+      if ($form['operat']==-1 && $form['cod_operazione']==6 && $camp_artico['confezione']==0){
+        $msg .="27+";
+      }
+      if ($form['operat']==-1 && $form['cod_operazione']==7 && $camp_artico['confezione']==0 && $form['recip_stocc']==""){
+        $msg .="24+";
+      }
+      if ($form['operat']==-1 && $form['cod_operazione']==8 && $camp_artico['confezione']==0 && $form['recip_stocc']==""){
+        $msg .="24+";
+      }
+      if ($form['operat']==-1 && $form['cod_operazione']==13 && $camp_artico['confezione']>0){
+        $msg .="28+";
+      }
+      if ($form['operat']==-1 && strlen($form['recip_stocc'])>0){
+        $content = $sil -> getCont($form['recip_stocc'],$form['artico'],$prev_idmov);
+        if ($content < $form['quanti']){ // se non c'è sufficiente olio nel silos selezionato
+          $msg .="32+";
+        }
+      }
+      if($form['cod_operazione']==3 && (intval($form['tesdoc'])==0 || intval($form['clfoco'])==0)){
+        $msg .= "37+";       // manca il riferimento al documento giustificativo o il fornitore
       }
     }
+
     if (empty($msg)) { // nessun errore
 
       $upd_mm = new magazzForm;
@@ -474,12 +489,14 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
         } else {
           $id_movmag=$upd_mm->uploadMag($form['id_rif'], $form['tipdoc'],0,0,$form['datdoc'], $form['clfoco'], $form['scochi'], $form['caumag'], $form['artico'], $form['quanti'], $form['prezzo'], $form['scorig'], $form['id_mov'], $admin_aziend['stock_eval_method'], array('datreg' => $form['datreg'], 'operat' => $form['operat'], 'desdoc' => $form['desdoc'], 'id_artico_position' => $form['id_position']));
           if ($form['SIAN']>0 && $toDo=="insert"){
+            $form['tesdoc']=($form['cod_operazione']<>3)?NULL:$form['tesdoc'];
             $form['id_movmag']=$id_movmag;// imposto l'id mov mag e salvo il movimento del SIAN
             $form['varieta']=$item_artico['quality'];
             gaz_dbi_table_insert('camp_mov_sian', $form);
           }
           if ($form['SIAN']>0 && $toDo=="update") {
             // aggiorno il movimento del SIAN
+            $form['tesdoc']=($form['cod_operazione']<>3)?NULL:$form['tesdoc'];
             $update = array();
             $update[]="id_movmag";
             $update[]=$form['id_mov'];
@@ -516,6 +533,7 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
   $form['artico'] = "";
 	$form['lot_or_serial']="";
 	$form['SIAN']="";
+  $form['tesdoc']=0;
 	$form['cod_operazione'] = 11;
 	$form['recip_stocc'] = "";
 	$form['recip_stocc_destin'] = "";
@@ -976,7 +994,20 @@ if ($form['SIAN']>0 && $form['operat']<>0){
 						}
 						?>
 					</div>
-					<?php if ($camp_artico['confezione']==0){;?>
+          <?php
+           if (($form['cod_operazione']==3)){// Carico olio da lavorazione o deposito terzi inserita manualmente
+              ?>
+             <div class="row">
+							<label for="tesdoc" class="col-sm-6 control-label"><?php echo "Doc. giustificativo"; ?></label>
+              <?php
+              $gForm->selectFromDB('tesdoc', 'tesdoc' ,'id_tes', $form['tesdoc'], 'datemi', 1, ' - doc. n. ','numdoc','TRUE','col-sm-6' , null, '', "clfoco='".$form['clfoco']."'", FALSE, " del ", "datemi", "DESC" );
+              ?>
+              </div>
+              <?php
+            }else{
+              ?> <input type="hidden" value="" name="tesdoc" /> <?php
+            }
+					if ($camp_artico['confezione']==0){;?>
 						<div class="row">
 							<label for="camp_recip_stocc" class="col-sm-4"><?php echo "Recipiente stoccaggio"; ?></label>
 							<?php
@@ -1009,6 +1040,7 @@ if ($form['SIAN']>0 && $form['operat']<>0){
 	<input type="hidden" name="cod_operazione" value=11>
 	<input type="hidden" name="recip_stocc" value="">
 	<input type="hidden" name="recip_stocc_destin" value="">
+  <input type="hidden" value="" name="tesdoc" />
 	<?php
 }
 ?>

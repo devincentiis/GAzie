@@ -79,4 +79,5 @@ $module_class='fas fa-seedling';
 $update_db[]="ALTER TABLE ".$table_prefix."_camp_fitofarmaci ADD INDEX(`PRODOTTO`);";
 $update_db[]="ALTER TABLE `".$table_prefix."_camp_uso_fitofarmaci` CHANGE `dose` `dose` DECIMAL(8,3) NOT NULL COMMENT 'unità di misura / ha'; ";
 $update_db[]="ALTER TABLE `".$table_prefix."_camp_uso_fitofarmaci` ADD `dose_hl` DECIMAL(8,3) NOT NULL COMMENT 'unità di misura / hl' AFTER `dose`; ";
+$update_db[]="ALTER TABLE `".$table_prefix."_XXXcamp_mov_sian` ADD `tesdoc` INT(11) NULL DEFAULT NULL COMMENT 'Riferimento al documento giustificativo quando si tratta di un movimento di magazzino creato manualmente' AFTER `id_movmag`";
 ?>

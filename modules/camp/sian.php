@@ -66,7 +66,7 @@ if (isset($prevfiles)){ // se ci sono files
 	for ($n=0 ; $n <= $i-1 ; $n++){
 		if (substr($prevfiles[$n]['content'],875,1)=="I"){ // se il file è di inserimento ne prendo la data dell'ultimo record
 			$fileField=explode (";",$prevfiles[$n]['content']);
-			$uldtfile=$fileField[((((count($fileField)-1)/49)-1)*49)+3];			
+			$uldtfile=$fileField[((((count($fileField)-1)/49)-1)*49)+3];
 			$uldtfile=str_replace("-", "", $uldtfile); // imposto la data per la selezione
 			break; // esco dal ciclo
 		} else { // se non è 'I', cioè è 'C', faccio saltare il file successivo perché annullato da questo
@@ -120,10 +120,10 @@ $init_mov= date_format($dateinit,"Y-m-d");
 	$ressilos=gaz_dbi_dyn_query ($what,$table,$where,$orderby,$limit,$passo,$groupby);
 	while ($r = gaz_dbi_fetch_array($ressilos)) { // controllo sul totale iniziale dei silos
 		$totalcont = $silos->getCont($r['cod_silos']);
-				
+
 		$totcont[$r['cod_silos']]=$silos->getCont($r['cod_silos'],"", 0, $init_mov);
 		$maxcont[$r['cod_silos']]=$r['capacita'];
-		
+
 		if ($totalcont<0){
 			$message = "Giacenza negativa nel silos ".$r['cod_silos']." !";
 			$msg .='5+';
@@ -156,7 +156,7 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
 	$form['date_ini_D']=intval($_POST['date_ini_D']);
     $form['date_ini_M']=intval($_POST['date_ini_M']);
     $form['date_ini_Y']=intval($_POST['date_ini_Y']);
-	
+
     $form['date_fin_D']=intval($_POST['date_fin_D']);
     $form['date_fin_M']=intval($_POST['date_fin_M']);
     $form['date_fin_Y']=intval($_POST['date_fin_Y']);
@@ -194,11 +194,11 @@ if ($utsfin>strtotime('-1 day', strtotime(date("Y-m-d")))) {
 // fine controlli
 
 if (isset($_POST['create']) && $msg=='') {
-	
+
 	// per creare devo obbligatoriamente impostare la data di inizio partendo da quella dell'ultimo file creato
-	$form['date_ini_D']=substr($uldtfile,0,2); 
+	$form['date_ini_D']=substr($uldtfile,0,2);
     $form['date_ini_M']=substr($uldtfile,2,2);
-    $form['date_ini_Y']=substr($uldtfile,4,4);	
+    $form['date_ini_Y']=substr($uldtfile,4,4);
 	$utsini= mktime(0,0,0,$form['date_ini_M'],$form['date_ini_D'],$form['date_ini_Y']);
 
     $utsini=date("dmY",$utsini);
@@ -290,7 +290,7 @@ if (isset($_POST['preview']) and $msg=='') {
         $linkHeaders=new linkHeaders($script_transl['header']);
         $linkHeaders->output();
         echo "</tr>";
-		$genera="";		
+		$genera="";
 		$nr=0;$message_rem="";
         foreach($m as $key => $mv){
 			$er="";
@@ -302,17 +302,17 @@ if (isset($_POST['preview']) and $msg=='') {
 					// escludo i movimenti di produzione in uscita
 						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
 							$totcont[$mv['recip_stocc']] -= $mv['quanti'];
-						
+
 							//echo "<br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
 							if ($totcont[$mv['recip_stocc']]<0){
 								//echo $mv['desdoc'],"ERRORE <",$nr;
 								$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
 								$msg .='5+';$er="style='background-color: red';";
 							}
-							
+
 							$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
 							//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
-						
+
 							if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
 								//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
 								$message = "Al rigo ".$nr." di produzione, la quantità del silos di destinazione ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];// ricordo l'errore nel prossimo rigo
@@ -322,9 +322,9 @@ if (isset($_POST['preview']) and $msg=='') {
 									const note = document.querySelector('.nr<?php echo $nr; ?>');
 									note.style.backgroundColor = 'red';
 								</script>
-								<?php 
+								<?php
 							}
-							
+
 						}
 				} else {
 					$nr++;
@@ -338,8 +338,17 @@ if (isset($_POST['preview']) and $msg=='') {
 								//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc']]," - maxcont:",$maxcont[$mv['recip_stocc']];
 								$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc']." è ".$totcont[$mv['recip_stocc']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc']];
 								$msg .='5+';$er="style='background-color: red';";
-							}	
-						}						
+							}
+						}
+            if ($mv['cod_operazione']==3 && intval($mv['tesdoc'])>0){// se è un carico di magazzino effettuato in manuale, aggiungo i riferimenti mancanti
+              $table=$gTables['tesdoc']." LEFT JOIN ".$gTables['clfoco']." ON (".$gTables['tesdoc'].".clfoco = ".$gTables['clfoco'].".codice) LEFT JOIN ".$gTables['anagra']." ON (".$gTables['clfoco'].".id_anagra = ".$gTables['anagra'].".id)";
+              $what = $gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, ".$gTables['anagra'].".id_SIAN";
+              $where=$gTables['tesdoc'].".id_tes = ".intval($mv['tesdoc']);
+              $rif=gaz_dbi_dyn_query ($what,$table,$where);
+              $re=gaz_dbi_fetch_array($rif);
+              $mv['id_SIAN']=$re['id_SIAN'];
+              $mv['ragso1']=$re['ragso1'].' '.$re['ragso2'];
+            }
 					}
 					if ($mv['id_orderman']==0 AND $mv['operat']==-1){
 						$legenda_cod_op['0']='Vendita olio a consumatore finale';
@@ -377,12 +386,12 @@ if (isset($_POST['preview']) and $msg=='') {
 					if ($mv['capacita_destin']>0){
 						echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['recip_stocc_destin']." - cap. Kg ".$mv['capacita_destin']." &nbsp;</td>\n";
 					}else{
-						echo "<td class=\"FacetDataTD\" align=\"center\"></td>\n";	
+						echo "<td class=\"FacetDataTD\" align=\"center\"></td>\n";
 					}
 					if ($mv['capacita']>0){
 						echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['recip_stocc']." - cap. Kg ".$mv['capacita']." &nbsp;</td>\n";
 					}else{
-						echo "<td class=\"FacetDataTD\" align=\"center\"></td>\n";	
+						echo "<td class=\"FacetDataTD\" align=\"center\"></td>\n";
 					}
 
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['desdoc']." &nbsp;</td>\n";
@@ -391,8 +400,8 @@ if (isset($_POST['preview']) and $msg=='') {
 					echo "</tr>\n";
 					$ctr_mv = $mv['artico'];
 				}
-				
-				
+
+
 			}
          }
          echo "\t<tr class=\"FacetFieldCaptionTD\">\n";

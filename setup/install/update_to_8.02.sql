@@ -39,7 +39,7 @@ ALTER TABLE `gaz_XXXassets`	CHANGE COLUMN `codice_artico` `codice_artico` VARCHA
 ALTER TABLE `gaz_XXXassist`	CHANGE COLUMN `codart` `codart` VARCHAR(32) NOT NULL AFTER `ore`;
 ALTER TABLE `gaz_XXXcampi` CHANGE COLUMN `codice_prodotto_usato` `codice_prodotto_usato` VARCHAR(32) NOT NULL AFTER `giorno_decadimento`;
 ALTER TABLE `gaz_XXXcamp_artico` CHANGE COLUMN `codice` `codice` VARCHAR(32) NOT NULL COMMENT 'Codice articolo uguale alla tabella artico' AFTER `id_campartico`;
-ALTER TABLE `gaz_XXXdistinta_base` CHANGE COLUMN `codice_composizione` `codice_composizione` VARCHAR(32) NOT NULL COMMENT 'è il codice dell\'articolo composito' COLLATE 'utf8mb4_general_ci' AFTER `id`,	CHANGE COLUMN `codice_artico_base` `codice_artico_base` VARCHAR(32) NOT NULL COMMENT 'codice dell\'articolo base' AFTER `codice_composizione`;
+ALTER TABLE `gaz_XXXdistinta_base` CHANGE COLUMN `codice_composizione` `codice_composizione` VARCHAR(32) NOT NULL COMMENT 'è il codice dell\'articolo composito' AFTER `id`,	CHANGE COLUMN `codice_artico_base` `codice_artico_base` VARCHAR(32) NOT NULL COMMENT 'codice dell\'articolo base' AFTER `codice_composizione`;
 ALTER TABLE `gaz_XXXlotmag`	CHANGE COLUMN `codart` `codart` VARCHAR(32) NOT NULL DEFAULT '' AFTER `id`;
 ALTER TABLE `gaz_XXXprovvigioni` CHANGE COLUMN `cod_articolo` `cod_articolo` VARCHAR(32) NOT NULL AFTER `id_agente`;
 ALTER TABLE `gaz_XXXragstat` CHANGE COLUMN `codice` `codice` CHAR(32) NOT NULL FIRST;

@@ -80,11 +80,13 @@ function getMovements($date_ini,$date_fin)
         }
         return $m;
     }
-
 $type_array=array();
+
+//**************
 // $type_zero è la stringa formattata SIAN vuota *** NON TOCCARE MAI!!! ***
 $type_zero="                ;0000000000;0000000000;        ;          ;        ;          ;0000000000;0000000000;0000000000000;0000000000000;          ;          ;0000000000;00;00;00;                                                                                ;00;                                                                                ;0000000000000;0000000000000;0000000000000;0000000000000;0000000000000;0000000000000;0000000000000;                    ;                                                                                                                                                                                                                                                                                                            ; ; ; ; ; ; ; ; ; ; ; ;                 ;                 ;0000;          ;          ;             ;        ;          ; ;";
 // $type_zero è la stringa formattata SIAN vuota *** NON TOCCARE MAI!!! ***
+//***************
 
 $giori = substr($_GET['ri'],0,2);
 $mesri = substr($_GET['ri'],2,2);
@@ -129,6 +131,17 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 	$myfile = fopen(DATA_DIR."files/".$admin_aziend['codice']."/sian/".$namefile, "w") or die("Unable to open file!");
 	$nprog=1;$lastdatdoc="";$nprog_preced_file=0;
 	foreach ($result as $key => $row) {
+    if ($row['cod_operazione']==3 && intval($row['tesdoc'])>0){// se è un carico di magazzino effettuato in manuale, aggiungo i riferimenti mancanti ma obbligatori
+      $table=$gTables['tesdoc']." LEFT JOIN ".$gTables['clfoco']." ON (".$gTables['tesdoc'].".clfoco = ".$gTables['clfoco'].".codice) LEFT JOIN ".$gTables['anagra']." ON (".$gTables['clfoco'].".id_anagra = ".$gTables['anagra'].".id)";
+      $what = $gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, ".$gTables['anagra'].".id_SIAN, ".$gTables['tesdoc'].".numdoc, ".$gTables['tesdoc'].".datemi";
+      $where=$gTables['tesdoc'].".id_tes = ".intval($row['tesdoc']);
+      $rif=gaz_dbi_dyn_query ($what,$table,$where);
+      $re=gaz_dbi_fetch_array($rif);
+      $row['id_SIAN']=$re['id_SIAN'];
+      $row['ragso1']=$re['ragso1'].' '.$re['ragso2'];
+      $row['numdoc']=$re['numdoc'];
+      $row['datdoc']=$re['datemi'];
+    }
 		$type_array= explode (";", $type_zero); // azzero il type array per ogni movimento da creare
 		$note="";
 		if ($row['SIAN']>0) {
@@ -161,8 +174,7 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 						$ann = substr($row['datreg'],0,4);
 						$dd=$gio.$mes.$ann;
 					}
-
-				// >> Antonio Germani - caso produzione da orderman
+		// >> Antonio Germani - caso produzione da orderman
 
 					if (intval($row['id_orderman'])>0 AND $row['operat']==1){ // se è una produzione e il movimento è di entrata
 						// cerco il movimento/i di scarico connesso/i
@@ -289,7 +301,7 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 						$datdoc=""; // annullo data documento giustificativo perché con S7 non è ammessa
 					}
 
-				// >> Antonio Germani - Caso Carico da acquisti e magazzino
+		// >> Antonio Germani - Caso Carico da acquisti e magazzino
 
 					if ($row['operat']==1 AND intval($row['id_orderman'])==0){ //se è un carico NON connesso a produzione
 						if ($row['cod_operazione']==10){// carico olio lampante da recupero
@@ -337,7 +349,7 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 						}
 					}
 
-				// >> Antonio Germani - Caso Scarico da vendite, magazzino e da DDL (ddt acquisto in conto la vorazione)
+		// >> Antonio Germani - Caso Scarico da vendite, magazzino e da DDL (ddt acquisto in conto la vorazione)
 
 					if ($row['operat']==-1 AND intval($row['id_orderman'])==0){ // se è uno scarico NON connesso a produzione
 						if ($row['tipdoc'] == "DDL" && $row['cod_operazione']="P"){
@@ -405,7 +417,8 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 						}
 					}
 
-					// Antonio Germani - campi comuni a tutti i casi
+		// Antonio Germani - campi comuni a tutti i casi
+
 					$type_array[0]=str_pad($admin_aziend['codfis'], 16); // aggiunge spazi finali
 					$type_array[1]=sprintf ("%010d",$id_sian['val']); // identificativo stabilimento/deposito
 					$type_array[2]=sprintf ("%010d",$nprog); // num. progressivo
