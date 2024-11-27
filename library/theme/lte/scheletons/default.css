@@ -382,6 +382,9 @@ table.Tmiddle tr>td, table.Tsmall tr>td {
 .form-logo {
     float: left;
 }
+header.main-header .logo{
+  text-align: left;
+}
 .form-main {
     margin: 10px 30%;
     background-color: #77b075;

@@ -3240,7 +3240,7 @@ class Schedule {
         if ($clfoco <= 999 && $clfoco >= 100) { // ho un mastro clienti o foritori
             $clfoco = "999999999 OR " . $gTables['clfoco'] . ".codice LIKE '" . $clfoco . "%'";
         } elseif ($this->target > 0 && $this->id_target > 0) {
-          print $this->target;
+          //print $this->target;
             $clfoco = $this->target . " AND id_tesdoc_ref = '" . $this->id_target . "'";
         } elseif ($this->target > 0 && $clfoco == 0) {
             $clfoco = $this->target;

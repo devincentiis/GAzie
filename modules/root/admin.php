@@ -32,19 +32,24 @@ require( "../../modules/vendit/lib.function.php");
 $lm = new lotmag;
 
 if (!isset($_POST['hidden_req'])) {
-    $form['hidden_req'] = '';
+  $form['hidden_req'] = '';
+  $form['company_id'] = $admin_aziend['company_id'];
+  $form['search']['company_id'] = '';
+} else {
+  if (isset($_POST['logout'])) {
+    redirect('logout.php');
+    exit;
+  }
+  $form['hidden_req'] = $_POST['hidden_req'];
+  if (isset($_POST['company_id'])){
+    $form['company_id'] = intval($_POST['company_id']);
+    if ($company_choice==1 || $admin_aziend['Abilit'] >= 8){
+      $form['search']['company_id'] = $_POST['search']['company_id'];
+    }
+  } else {
     $form['company_id'] = $admin_aziend['company_id'];
     $form['search']['company_id'] = '';
-} else {
-    if (isset($_POST['logout'])) {
-        redirect('logout.php');
-        exit;
-    }
-    $form['hidden_req'] = $_POST['hidden_req'];
-	$form['company_id'] = intval($_POST['company_id']);
-	if ($company_choice==1 || $admin_aziend['Abilit'] >= 8){
-		$form['search']['company_id'] = $_POST['search']['company_id'];
-	}
+  }
 }
 
 

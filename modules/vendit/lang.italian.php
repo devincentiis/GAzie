@@ -1055,7 +1055,23 @@ $strScript = array("admin_client.php" =>
             'I' => ' Totale dei RID'
         ),
         'gen' => 'generer&agrave;',
-        'end' => 'con scadenza '
+        'end' => 'con scadenza ',
+        'group_rid' => 'Raggruppamento RID',
+        'group_rid_value' => array(
+            '0' => 'Non raggruppare i RID',
+            '1' => 'Raggruppa RID per cliente e scadenza',
+            '2' => 'Raggruppa RID per cliente'
+        ),
+        'bool_fixemi' => 'Data emissione RID fissa',
+        'bool_fixemi_value' => array(
+            '0' => 'No, usa quella della fattura',
+            '1' => 'Si, usa per tutti quella scelta sotto'
+        ),
+        'bool_fixsca' => 'Data scadenza RID fissa',
+        'bool_fixsca_value' => array(
+            '0' => 'No, usa quelle visibili sulla anteprima',
+            '1' => 'Si, usa per tutti quella scelta sotto'
+        )
     ),
     "distin_effett.php" =>
     array('title' => 'Stampa distinta cartacea degli effetti per la banca',

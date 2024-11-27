@@ -343,8 +343,16 @@ setInterval(menu_check_from_modules,<?php echo intval((int)$period*60000);?>);
                     <span class="logo-lg">
                         <img src="../../modules/root/view.php?table=aziend&amp;value=<?php echo $admin_aziend["company_id"]; ?>" alt="Logo" border="0" title="<?php echo $admin_aziend["ragso1"]; ?>" />
                         &nbsp;
-<?php echo substr($admin_aziend["ragso1"], 0, 16); ?>
-                    </span>
+<?php
+$rslen=strlen($admin_aziend["ragso1"]);
+if ($rslen < 18) {
+  echo $admin_aziend["ragso1"];
+} elseif ($rslen < 25) {
+  echo '<span style="font-size: 10px;">'.$admin_aziend["ragso1"].'</span>';
+} else {
+  echo '<span style="font-size: 8px;">'.$admin_aziend["ragso1"].'</span>';
+}
+?>                   </span>
                 </a>
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top company-color-bright" role="navigation">

@@ -265,17 +265,17 @@ if (isset($_POST['preview']) and $msg == '') {
         echo '<th class="text-center">IBAN</th>';
         echo '</tr>';
         foreach ($r['data'] as $v) {
-            echo '<tr class="'.($v['status']=='MODAMOUNT'?'text-danger':'').'">';
+            echo '<tr class="'.((str_contains($v['status'],'RAGGR')||str_contains($v['status'],'MODIF'))?'text-danger':'').'">';
             echo "<td><a href=\"./admin_effett.php?Update&id_tes=" . $v['id_tes'] . "\">" . $v["progre"] . "</a>";
-            if ($v['status']=='RAGGRUPPA'){
-              echo '<span class="text-danger">[raggruppato] </span>';
+            if (str_contains($v['status'],'RAGGR')){
+              echo '<br/><span class="text-danger">[raggruppato] </span>';
+            }
+            if (str_contains($v['status'],'MODIF')) {
+              echo '<br/><span class="text-danger">[modificato]</span>';
             }
             echo "</td>";
             echo "<td>" . gaz_format_date($v["scaden"]) . "</td>";
             echo "<td  align=\"right\">". $admin_aziend['html_symbol'] . ' ' . gaz_format_number($v["impeff"]);
-            if ($v['status']=='MODAMOUNT') {
-              echo '<br /><span class="text-danger">[modificato]</span>';
-            }
             echo " </td>";
             echo "<td>" . $v["customer"] . " </td>";
             echo '<td class="text-center">n.' . $v["numfat"] . "/" . $v["seziva"] . " - " . gaz_format_date($v["datfat"]) . ' € '.gaz_format_number($v["totfat"]) . "</td>";

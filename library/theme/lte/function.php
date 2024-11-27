@@ -67,63 +67,59 @@ function pastelColors() {
 }
 
 function submenu($array, $index, $sub="") {
+  $numsub = 0;
+  if(!is_array($array)) { return; }
+  foreach($array as $i => $mnu) {
+    if(!is_array($mnu)) {continue;}
+    $scriptname=pathinfo($mnu["link"], PATHINFO_FILENAME);
+    $is_report=(str_contains($scriptname,'report')||str_contains($scriptname,'list'))?true:false;
     global $admin_aziend;
-    if(!is_array($array)) { return ;}
-    $numsub = 0;
-    foreach($array as $i => $mnu) {
-        if(!is_array($mnu)) {continue;}
     $submnu = '';
-    if ($numsub === 0) {
-            echo "<ul class=\"treeview-menu\">";
+    if ($numsub === 0) { echo "<ul class=\"treeview-menu\">"; }
+    if (count($mnu)>6) {
+      if ( $admin_aziend["Abilit"]>=$mnu["m2_ackey"] ) {
+        echo "<li>";
+        if($is_report){
+          $sub = '<a href="'. $mnu["link"] .'">Lista '.$submnu.stripslashes($mnu["name"]);
+        }else{
+          $sub = '<a href="'. $mnu["link"] .'">'.$submnu.stripslashes($mnu["name"]);
         }
-	if (count($mnu)>6) {
-            if ( $admin_aziend["Abilit"]>=$mnu["m2_ackey"] ) {
-            echo "<li>";
-            if ( $mnu["name"]=="Azienda" ) {
-                $sub = '<a href="'. $mnu["link"] .'">Modifica '.$submnu.stripslashes($mnu["name"]);
-            } else if ( $mnu["name"]=="Lista delle produzioni" ) {
-                $sub = '<a href="'. $mnu["link"] .'">'.$submnu.stripslashes($mnu["name"]);
-            } else if ( $mnu["name"]!="Documentazione" ) {
-                $sub = '<a href="'. $mnu["link"] .'">Lista '.$submnu.stripslashes($mnu["name"]);
-            } else {
-                $sub = '<a href="'. $mnu["link"] .'">'.$submnu.stripslashes($mnu["name"]);
-            }
-            echo "  <a href=\"#\" hint=\"".$submnu.stripslashes($mnu["name"])."\">". $submnu.stripslashes($mnu["name"]);
-            echo "      <i class=\"fa fa-angle-left pull-right\"></i>";
-            echo "  </a>";
-            submenu($mnu, 1, $sub);
+        echo "  <a href=\"#\" hint=\"".$submnu.stripslashes($mnu["name"])."\">". $submnu.stripslashes($mnu["name"]);
+        echo "      <i class=\"fa fa-angle-left pull-right\"></i>";
+        echo "  </a>";
+        submenu($mnu, 1, $sub);
+        $sub="";
+        echo "</li>";
+      }
+    } else {
+      if ( isset($mnu["m2_ackey"])  ) {
+        if ( $admin_aziend["Abilit"]>=$mnu["m2_ackey"] ) {
+          if ( $sub!="" ) {
+            echo "<li>$sub</a></li>";
             $sub="";
-            echo "</li>";
-            }
-        } else {
-            if ( isset($mnu["m2_ackey"])  ) {
-                if ( $admin_aziend["Abilit"]>=$mnu["m2_ackey"] ) {
-                    if ( $sub!="" ) {
-                        echo "<li>$sub</a></li>";
-                        $sub="";
-                    }
-                    echo "<li >";
-                    echo "  <a href=\"". $mnu['link'] ."\">". $submnu.stripslashes($mnu['name']) ."</a>";
-                    echo "</li>";
-                }
-            }
-            if ( isset($mnu["m3_ackey"]) ) {
-                if ( $admin_aziend["Abilit"]>=$mnu["m3_ackey"] ) {
-                    if ( $sub!="" ) {
-                        echo "<li>$sub</a></li>";
-                        $sub="";
-                    }
-                    echo "<li >";
-                    echo "  <a href=\"". $mnu['link'] ."\">". $submnu.stripslashes($mnu['name']) ."</a>";
-                    echo "</li>";
-                }
-            }
+          }
+          echo "<li >";
+          echo "  <a href=\"". $mnu['link'] ."\">". $submnu.stripslashes($mnu['name']) ."</a>";
+          echo "</li>";
         }
-	$numsub++;
+      }
+      if ( isset($mnu["m3_ackey"]) ) {
+        if ( $admin_aziend["Abilit"]>=$mnu["m3_ackey"] ) {
+          if ( $sub!="" ) {
+            echo "<li>$sub</a></li>";
+            $sub="";
+          }
+          echo "<li >";
+          echo "  <a href=\"". $mnu['link'] ."\">". $submnu.stripslashes($mnu['name']) ."</a>";
+          echo "</li>";
+        }
+      }
     }
-    if ($numsub > 0) {
-        echo "    </ul>";
-    }
+    $numsub++;
+  }
+  if ($numsub > 0) {
+    echo "    </ul>";
+  }
 }
 
 function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $cssArray = '') {
@@ -329,8 +325,9 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
             if ( $admin_aziend["Abilit"]>=$r["accesskey"] && !in_array($linkbase,$acc_excluded) ) echo '<li><a href="'.$r["link"].'">'.stripslashes ($transl[$module]["m3"][$r["translate_key"]]["1"]).'</a></li>';
           }
         } else { // siamo su una pagina di 3 livello nel menu principale
-          $posizionexsez = explode ("&seziva",$posizione ); // sui report fatture/ddt aggiungo con js la sezione iva all'url per proporre quella corrente, questo fa si che non coincida con quanto sta sul db allora pulisco la referenza
-          $result3    = gaz_dbi_dyn_query("*", $gTables['menu_script'] , ' link="'.$posizionexsez[0].'"',' id',0,1);
+          $posizione_s = explode ("&seziva",$posizione ); // sui report fatture/ddt aggiungo con js la sezione iva all'url per proporre quella corrente, questo fa si che non coincida con quanto sta sul db allora pulisco la referenza
+          $posizione_php = explode (".php",$posizione_s[0]); // pulisco le referenze passate sull'url
+          $result3    = gaz_dbi_dyn_query("*", $gTables['menu_script'] ," link LIKE '".$posizione_php[0].".php%'",'id',0,1);
           if ( $ms = gaz_dbi_fetch_array($result3) ) { // disegno i bottoni di accesso alle funzioni di questa pagina
               $result4    = gaz_dbi_dyn_query($gTables['menu_script'].".*,".$gTables['menu_module'].".link AS lmm,".$gTables['menu_module'].".translate_key AS tmm ", $gTables['menu_script']. " LEFT JOIN ".$gTables['menu_module']." ON ".$gTables['menu_script'].".id_menu = ".$gTables['menu_module'].".id LEFT JOIN ".$gTables['module']." ON ".$gTables['menu_module'].".id_module = ".$gTables['module'].".id", $gTables['menu_script'].".id_menu =".$ms['id_menu']." AND ".$gTables['module'].".name = '".$module."'",'name',0,99);
               echo '<div><ol class="breadcrumb">';

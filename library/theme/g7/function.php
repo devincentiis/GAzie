@@ -59,8 +59,9 @@ function printDash($gTables,$module,$admin_aziend,$transl,$excluded_script){
         }
         $ci_sono_tasti_nel_menu=true;
       } else { // siamo su una pagina di 3 livello nel menu principale
-        $posizionexsez = explode ("&seziva",$posizione ); // sui report fatture/ddt aggiungo con js la sezione iva all'url per proporre quella corrente, questo fa si che non coincida con quanto sta sul db allora pulisco la referenza
-        $result3    = gaz_dbi_dyn_query("*", $gTables['menu_script'] , ' link="'.$posizionexsez[0].'"',' id',0,1);
+        $posizione_s = explode ("&seziva",$posizione ); // sui report fatture/ddt aggiungo con js la sezione iva all'url per proporre quella corrente, questo fa si che non coincida con quanto sta sul db allora pulisco la referenza
+        $posizione_php = explode (".php",$posizione_s[0]); // pulisco le referenze passate sull'url
+        $result3    = gaz_dbi_dyn_query("*", $gTables['menu_script'] ," link LIKE '".$posizione_php[0].".php%'",'id',0,1);
         if ( $ms = gaz_dbi_fetch_array($result3) ) { // disegno i bottoni di accesso alle funzioni di questa pagina
             $result4    = gaz_dbi_dyn_query($gTables['menu_script'].".*,".$gTables['menu_module'].".link AS lmm,".$gTables['menu_module'].".translate_key AS tmm ", $gTables['menu_script']. " LEFT JOIN ".$gTables['menu_module']." ON ".$gTables['menu_script'].".id_menu = ".$gTables['menu_module'].".id LEFT JOIN ".$gTables['module']." ON ".$gTables['menu_module'].".id_module = ".$gTables['module'].".id", $gTables['menu_script'].".id_menu =".$ms['id_menu']." AND ".$gTables['module'].".name = '".$module."'",'name',0,99);
             echo "<ol class=\"breadcrumb\">";

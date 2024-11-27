@@ -113,12 +113,10 @@ $recordnav->output();
             <td class="FacetFieldCaptionTD">Num.:
                 <input type="text" name="progre" value="<?php if (isset($progressivo)) print $progressivo; ?>" maxlength="6" tabindex="1" class="FacetInput">
             </td>
-            <td class="FacetFieldCaptionTD" colspan="9"></td>
             <td class="FacetFieldCaptionTD">
                 <input type="submit" name="search" value="<?php echo $script_transl['search']; ?>" tabindex="1" onClick="javascript:document.report.all.value = 1;">
             </td>
-            <td class="FacetFieldCaptionTD">
-                <input type="submit" name="all" value="<?php echo $script_transl['vall']; ?>" onClick="javascript:document.report.all.value = 1;">
+            <td class="FacetFieldCaptionTD" colspan=8>
             </td>
         </tr>
         <?php
@@ -151,7 +149,7 @@ $recordnav->output();
             echo "<td align=\"right\"><a class=\"btn btn-xs btn-edit\" href=\"admin_effett.php?Update&id_tes=" . $r["id_tes"] . "\"><i class=\"glyphicon glyphicon-edit\"></i>&nbsp;" . $r["id_tes"] . "</a> &nbsp</td>";
             echo "<td align=\"right\"><a href=\"admin_effett.php?Update&id=" . $r["id_tes"] . "\">" . $r["progre"] . "</a> &nbsp</td>";
             echo "<td align=\"right\">" . gaz_format_date($r["datemi"]) . "</td>";
-            echo "<td align=\"center\">" .  $script_transl['type_value'][$r["tipeff"]] . (($r['status']=='RAGGRUPPA')?' <span class="text-danger">[raggruppato] </span>':'')."</td>";
+            echo "<td align=\"center\">" .  $script_transl['type_value'][$r["tipeff"]] . (str_contains($r['status'],'RAGGR')?'<br/><span class="text-danger">[raggruppato] </span>':''). (str_contains($r['status'],'MODIF')?'<br/><span class="text-danger">[modificato] </span>':'')."</td>";
             echo "<td align=\"center\">" . gaz_format_date($r["scaden"]) . " &nbsp;</td>";
             echo "<td title=\"" . $script_transl['date_doc'] . ": " . gaz_format_date($r["datfat"]) . " n." . $r["numfat"] . "/" . $r["seziva"] . ' ' . $admin_aziend['html_symbol'] . " " . gaz_format_number($r["totfat"]) . "\">" . $cliente["ragso1"] . " &nbsp;</td>";
             echo "<td align=\"right\">" . gaz_format_number($r["impeff"]) . " &nbsp;</td>";
