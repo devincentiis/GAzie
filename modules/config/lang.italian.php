@@ -470,7 +470,7 @@ $strScript = array(
         'az_email' => "Mail aziendale dell'utente",
         'image' => 'Immagine dell\'utente<br />(solo in formato JPG, max 64kb)',
         'Abilit' => "Livello",
-        'Abilit_value' => array('9' => 'Amministratore', '8' => 'Avanzato/Studente','6'=>'Utente dirigente','5'=>'Utente','0'=>'Nessuno'),
+        'Abilit_value' => array('9' => 'Amministratore', '8' => 'Dirigente','7'=>'Coordinatore','6'=>'Operatore','5'=>'Utente','0'=>'Nessuno'),
 		'company'=>'Azienda',
         'mesg_co' => array('Non &egrave; stato trovato nulla!', 'Minimo 2 caratteri', 'Azienda di lavoro'),
         'Access' => "Accessi",

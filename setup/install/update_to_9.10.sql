@@ -30,4 +30,45 @@ INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`
 INSERT INTO `gaz_XXXcompany_data` (`id_ref`, `description`, `var`, `data`, `ref`, `adminid`, `last_modified`) VALUES (6, 'vendita web', 'web_price', 'Listino di vendita web', 'italian_artico_pricelist', '', '2025-01-01 00:00:00');
 ALTER TABLE `gaz_XXXeffett` CHANGE COLUMN `id_con` `id_con` INT NOT NULL DEFAULT '0' COMMENT 'Riferimento ad id_tes del movimento contabile (gaz_NNNtesmov) generato dall\'effetto, se -1 è un RID insoluto il cui movimento contabile è stato cancellato' AFTER `id_doc`,	ADD COLUMN `id_ins` INT NOT NULL DEFAULT '0' COMMENT 'Riferimento ad id_tes del movimento contabile (gaz_NNNtesmov) generato da un eventuale insoluto' AFTER `id_con`, ADD INDEX `id_ins` (`id_ins`);
 UPDATE `gaz_XXXcompany_config` SET `description`='Numerazione delle Fatture separate da quella di Note Credito/Debito (0=No-DEFAULT 1=Si)', `val`='0' WHERE  `var`='num_note_separate';
+ALTER TABLE `gaz_XXXclfoco`	CHANGE COLUMN `id_anagra` `id_anagra` INT NOT NULL COMMENT 'Se id_anagra è negativo fa riferimento alla tabella gaz_anagra_chiper (anagrafica criptata)' AFTER `codice`;
+DROP TABLE IF EXISTS `gaz_anagraes`;
+CREATE TABLE IF NOT EXISTS `gaz_anagra_chiper` (
+  `id_anagraes` varchar(200) NOT NULL,
+  `id_anagraes_bidx` varchar(8) DEFAULT NULL,
+  `ragso1` varchar(300) DEFAULT NULL,
+  `ragso1_bidx` varchar(8) DEFAULT NULL,
+  `ragso2` varchar(300) DEFAULT NULL,
+  `ragso2_bidx` varchar(8) DEFAULT NULL,
+  `sedleg` varchar(300) DEFAULT NULL,
+  `legrap_pf_nome` varchar(200) DEFAULT NULL,
+  `legrap_pf_cognome` varchar(200) DEFAULT NULL,
+  `sexper` varchar(160) DEFAULT NULL,
+  `datnas` varchar(200) DEFAULT NULL,
+  `luonas` varchar(200) DEFAULT NULL,
+  `pronas` varchar(160) DEFAULT NULL,
+  `counas` varchar(200) DEFAULT NULL,
+  `indspe` varchar(300) DEFAULT NULL,
+  `capspe` varchar(200) DEFAULT NULL,
+  `citspe` varchar(250) DEFAULT NULL,
+  `prospe` varchar(160) DEFAULT NULL,
+  `country` varchar(160) DEFAULT NULL,
+  `telefo` varchar(200) DEFAULT NULL,
+  `fax` varchar(200) DEFAULT NULL,
+  `cell` varchar(200) DEFAULT NULL,
+  `codfis` varchar(200) DEFAULT NULL,
+  `codfis_bidx` varchar(8) DEFAULT NULL,
+  `pariva` varchar(200) DEFAULT NULL,
+  `pariva_bidx` varchar(8) DEFAULT NULL,
+  `fe_cod_univoco` varchar(200) DEFAULT NULL,
+  `e_mail` varchar(200) DEFAULT NULL,
+  `e_mail2` varchar(200) DEFAULT NULL,
+  `pec_email` varchar(200) DEFAULT NULL,
+  `adminid` varchar(20) DEFAULT NULL,
+  `last_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `id_anagraes_bidx` (`id_anagraes_bidx`),
+  KEY `ragso1_bidx` (`ragso1_bidx`),
+  KEY `ragso2_bidx` (`ragso2_bidx`),
+  KEY `codfis_bidx` (`codfis_bidx`),
+  KEY `pariva_bidx` (`pariva_bidx`)
+) COMMENT='Archivia le anagrafiche criptate, predisposta per contenere gli indici delle colonne indicizzate/ricercabili usando la libreria ChiperSweet';
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione )

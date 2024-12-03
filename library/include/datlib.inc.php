@@ -38,7 +38,7 @@ if ($debug_active) {
 }
 
 if (isset($_SESSION['table_prefix'])) {
-   $table_prefix=substr($_SESSION['table_prefix'],0,12);
+  $table_prefix=substr($_SESSION['table_prefix'],0,12);
 } elseif(isset($_GET['tp'])) {
 	if ( defined('FILTER_SANITIZE_ADD_SLASHES') ) {
 		$table_prefix=filter_var(substr($_GET['tp'],0,12),FILTER_SANITIZE_ADD_SLASHES);
@@ -54,11 +54,11 @@ if (isset($_SESSION['table_prefix'])) {
 }
 
 // tabelle comuni alle aziende della stessa gestione
-$tn = array('admin','admin_config','admin_module','anagra','anagraes','aziend','bank','breadcrumb',
+$tn = ['admin','admin_config','admin_module','anagra','anagra_chiper','aziend','bank','breadcrumb',
     'camp_avversita','camp_colture','camp_fitofarmaci','camp_uso_fitofarmaci','classroom',
     'config','country','currencies','currency_history','destina','forme_giuridiche','languages',
     'menu_module','menu_script','menu_usage','module','municipalities','provinces','regions',
-    'staff_absence_type','staff_work_type','students');
+    'staff_absence_type','staff_work_type','students'];
 foreach ($tn as $v) {
     $gTables[$v] = $table_prefix . "_" . $v;
 }
@@ -79,7 +79,7 @@ $gazTimeFormatter = new IntlDateFormatter($gazie_locale,IntlDateFormatter::FULL,
 
 $id = 1;
 if (isset($_SESSION['company_id'])) {
-    $id = sprintf('%03d', $_SESSION['company_id']);
+  $id = sprintf('%03d', $_SESSION['company_id']);
 }
 
 /* controllo anche se includere il file dei nomi di tabelle specifico del modulo
@@ -87,19 +87,18 @@ if (isset($_SESSION['company_id'])) {
   modules/nome_modulo/lib.data.php
  */
 if (@file_exists('./lib.data.php')) {
-    require('./lib.data.php');
+  require('./lib.data.php');
 }
 
 //tabelle aziendali
-$tn = array('agenti','agenti_forn','aliiva','artico','artico_group','artico_position','assets','assist','banapp','body_text',
+$tn = ['agenti','agenti_forn','aliiva','artico','artico_group','artico_position','assets','assist','banapp','body_text',
 'campi','camp_artico','camp_mov_sian','camp_recip_stocc','cash_register','cash_register_reparto','cash_register_tender',
 'catmer','caucon','caucon_rows','caumag','clfoco','company_config','company_data','comunicazioni_dati_fatture','customer_group',
 'contract', 'contract_row','distinta_base','effett','expdoc','extcon','fae_flux','files','imball','instal','letter',
 'liquidazioni_iva', 'lotmag', 'movmag','orderman','pagame','pagame_distribution','paymov','portos','provvigioni','ragstat',
 'registro_trattamento_dati','rigbro','rigdoc','rigmoc','rigmoi','sconti_articoli','sconti_raggruppamenti','shelves','spediz',
-'staff','staff_skills','staff_worked_hours','staff_work_movements','tesbro','tesdoc','tesmov','vettor','warehouse');
+'staff','staff_skills','staff_worked_hours','staff_work_movements','tesbro','tesdoc','tesmov','vettor','warehouse'];
 foreach ($tn as $v) {
-    $gTables[$v] = $table_prefix . "_" . $id . $v;
+  $gTables[$v] = $table_prefix . "_" . $id . $v;
 }
-
 ?>
