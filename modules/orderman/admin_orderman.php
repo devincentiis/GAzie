@@ -1174,7 +1174,7 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
                   </div>
                   <?php
                   $content=$campsilos->getCont($form['recip_stocc_comp'][$nc],'',$excluded_movmag);// la quantita totale disponibile nel silos
-                  $row['quantita_artico_base'] = number_format ((floatval($row['quantita_artico_base']) * floatval($form['quantip'])),6);// la quantità necessaria per la produzione
+                  $row['quantita_artico_base'] = floatval(number_format ((floatval($row['quantita_artico_base']) * floatval($form['quantip'])),6));// la quantità necessaria per la produzione
 
                   if ($content >= $row['quantita_artico_base']){//controllo disponibilità
                     $perc_util=number_format((($row['quantita_artico_base']/$content)*100),8);// percentuale di utilizzo con 8 cifre decimali max

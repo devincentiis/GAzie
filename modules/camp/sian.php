@@ -340,15 +340,15 @@ if (isset($_POST['preview']) and $msg=='') {
 								$msg .='5+';$er="style='background-color: red';";
 							}
 						}
-            if ($mv['cod_operazione']==3 && intval($mv['tesdoc'])>0){// se è un carico di magazzino effettuato in manuale, aggiungo i riferimenti mancanti
-              $table=$gTables['tesdoc']." LEFT JOIN ".$gTables['clfoco']." ON (".$gTables['tesdoc'].".clfoco = ".$gTables['clfoco'].".codice) LEFT JOIN ".$gTables['anagra']." ON (".$gTables['clfoco'].".id_anagra = ".$gTables['anagra'].".id)";
-              $what = $gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, ".$gTables['anagra'].".id_SIAN";
-              $where=$gTables['tesdoc'].".id_tes = ".intval($mv['tesdoc']);
-              $rif=gaz_dbi_dyn_query ($what,$table,$where);
-              $re=gaz_dbi_fetch_array($rif);
-              $mv['id_SIAN']=$re['id_SIAN'];
-              $mv['ragso1']=$re['ragso1'].' '.$re['ragso2'];
-            }
+						if ($mv['cod_operazione']==3 && intval($mv['tesdoc'])>0){// se è un carico di magazzino effettuato in manuale, aggiungo i riferimenti mancanti
+						  $table=$gTables['tesdoc']." LEFT JOIN ".$gTables['clfoco']." ON (".$gTables['tesdoc'].".clfoco = ".$gTables['clfoco'].".codice) LEFT JOIN ".$gTables['anagra']." ON (".$gTables['clfoco'].".id_anagra = ".$gTables['anagra'].".id)";
+						  $what = $gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, ".$gTables['anagra'].".id_SIAN";
+						  $where=$gTables['tesdoc'].".id_tes = ".intval($mv['tesdoc']);
+						  $rif=gaz_dbi_dyn_query ($what,$table,$where);
+						  $re=gaz_dbi_fetch_array($rif);
+						  $mv['id_SIAN']=$re['id_SIAN'];
+						  $mv['ragso1']=$re['ragso1'].' '.$re['ragso2'];
+						}
 					}
 					if ($mv['id_orderman']==0 AND $mv['operat']==-1){
 						$legenda_cod_op['0']='Vendita olio a consumatore finale';
@@ -361,11 +361,15 @@ if (isset($_POST['preview']) and $msg=='') {
 						$legenda_cod_op['12']='Perdite, cali, campionamento, analisi';
 						$legenda_cod_op['13']='Separazione morchie';
 						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
-							$totcont[$mv['recip_stocc_destin']] -= $mv['quanti'];
-							//echo "<br>SCarico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
-							if ($totcont[$mv['recip_stocc_destin']]<0){
-								//echo $mv['desdoc'],"ERRORE <",$nr;
-								$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc_destin']." è negativa";
+							//echo "<br>recip stocc:",$mv['recip_stocc']," - rec stoc destin:",$mv['recip_stocc_destin'];
+							//$totcont[$mv['recip_stocc']]=(isset($totcont[$mv['recip_stocc']]))?$totcont[$mv['recip_stocc']]:0;
+							//echo "<br>SCarico fusto ",$mv['recip_stocc'],", contenente kg",$totcont[$mv['recip_stocc']],", di kg:",$mv['quanti'];
+							$totcont[$mv['recip_stocc']] -= $mv['quanti'];
+							$totcont[$mv['recip_stocc']]=(number_format($totcont[$mv['recip_stocc']], 5)==0)?0:$totcont[$mv['recip_stocc']];
+
+							if ($totcont[$mv['recip_stocc']]<0){
+								//echo"<br>", $mv['desdoc'],"ERRORE  al rigo ",$nr, " - contenuto kg:",$totcont[$mv['recip_stocc']];
+								$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
 								$msg .='5+';$er="style='background-color: red';";
 							}
 						}
