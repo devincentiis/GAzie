@@ -1027,9 +1027,10 @@ $strScript = array("admin_client.php" =>
     "genera_effett.php" =>
     array('title' => 'Genera gli effetti a partire dai documenti fiscali',
         'errors' => array('noeff'=>'Non ci sono documenti che possono generare effetti nell\'intervallo selezionato',
-        'nomandato'=>'ERRORE! Modifica il cliente senza un mandato, altrimenti <b>NON</b> si',
-        'noiban'=>'ERRORE! Modifica il cliente senza IBAN, e si ',
-        'nobanapp'=>'ERRORE! Modifica la fattura ed il cliente che sono senza banca d\'appoggio, e si'
+        'nomandato'=>'ERRORE! Bloccante! Modifica il cliente senza un mandato',
+        'noiban'=>'ERRORE! Bloccante! Modifica il cliente senza IBAN',
+        'nobanapp'=>'ERRORE! Bloccante! Modifica la fattura ed il cliente che sono senza banca d\'appoggio',
+        'nocontab'=>'Bloccante! Fattura non contabilizzata'
         ),
         'preview' => 'Anteprima della generazione degli effetti',
         'date_reg' => 'Data',

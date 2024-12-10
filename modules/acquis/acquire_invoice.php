@@ -1357,7 +1357,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 							} else {
 								$ddt_type="T";
 							}
-							$form['tipdoc']="AFT";$form['ddt_type']=$ddt_type;$form['numdoc']=$v['NumeroDDT'];$form['datemi']=$v['DataDDT'];
+							$form['tipdoc']="AFT";$form['ddt_type']=$ddt_type;$form['numdoc']=substr($v['NumeroDDT'],-9);$form['datemi']=$v['DataDDT'];
 							$ultimo_id =tesdocInsert($form); // Antonio Germani - creo fattura differita
 							$fn = DATA_DIR . 'files/' . $admin_aziend["codice"] . '/'.$ultimo_id.'.inv';
 							file_put_contents($fn,$form['fattura_elettronica_original_content']);

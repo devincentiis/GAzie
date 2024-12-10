@@ -917,7 +917,7 @@ if (isset($_POST['ddt']) || isset($_POST['ddo']) ||isset($_POST['ddm']) || isset
                   $value_sian['cod_operazione']= $form['righi'][$k]['cod_operazione'];
                   $value_sian['recip_stocc']= $form['righi'][$k]['recip_stocc'];
                   $value_sian['varieta']= $form['righi'][$k]['quality'];
-                  $value_sian['recip_stocc_destin']= $form['righi'][$k]['recip_stocc_destin'];
+                  $value_sian['recip_stocc_destin']= (isset($form['righi'][$k]['recip_stocc_destin']))?$form['righi'][$k]['recip_stocc_destin']:'';
                   $value_sian['id_movmag']=$id_movmag;
                   gaz_dbi_table_insert('camp_mov_sian', $value_sian);
                 }
@@ -1620,7 +1620,7 @@ function choice_ddt_type() {
 									$form['righi'][$kk][$key]=$val;
 								}
 							}
-							
+
 							echo "<input type=\"hidden\" value=\"" . $kk . "\" name=\"addto[$k][rigo]\">\n";
 							echo "<input type=\"hidden\" value=\"" . $k . "\" name=\"addto[$k][origine]\">\n";
 							echo "<input type=\"text\" value=\"" . $evadibile[$k] . "\" name=\"addto[$k][origine_evadibile]\">\n";

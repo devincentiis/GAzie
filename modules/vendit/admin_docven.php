@@ -1965,7 +1965,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
 					$count[$key] += $v_lm['rest'];
 				}
 			}
-			if ($countric[$v['identifier'].$v['codart']] > $count[$v['identifier']] && $form['tipdoc']<>"FNC"){ // confronto con la quantità richiesta
+			if (isset($countric[$v['identifier'].$v['codart']]) && $countric[$v['identifier'].$v['codart']] > $count[$v['identifier']] && $form['tipdoc']<>"FNC"){ // confronto con la quantità richiesta
 				$msgrigo = $i + 1;
 				$msg['war'][] = "1";
 			}
