@@ -127,7 +127,7 @@ $strScript = array(
         'table_selection' => 'Backup di',
         'table_selection_value' => array(0 => ' tutte le tabelle della base di dati ', 1 => ' le sole tabelle con prefisso '),
         'text_encoding' => 'Codifica',
-        'sql_submit' => 'Stai per generare e scaricare un file sql di backup del database di GAzie in formato .gz',
+        'sql_submit' => 'Stai per generare e scaricare lo zip del backup del <b>database</b> e della cartella <b>data</b>',
     ),
     "report_backup.php" =>
     array('title' => "Lista dei backup interni ",

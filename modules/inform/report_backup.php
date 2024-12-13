@@ -124,7 +124,7 @@ $freespace = gaz_dbi_get_row($gTables['config'], 'variable', 'freespace_backup')
                 $files = array();
                 if ($handle = opendir(DATA_DIR.'files/backups/')) {
                     while (false !== ($file = readdir($handle))) {
-                        if ($file != "." && $file != ".." && strpos($file, ".gz")) {
+                        if ($file != "." && $file != ".." && preg_match("/(gz|zip)$/", $file)) {
                             $files[filemtime(DATA_DIR.'files/backups/' . $file)] = $file;
                         }
                     }
@@ -144,7 +144,7 @@ $freespace = gaz_dbi_get_row($gTables['config'], 'variable', 'freespace_backup')
                                     </a></td>
                                 <td>
                                     <?php
-                                        if ( preg_match('/-v(.*?).sql/',$file, $versione)>0 )
+                                        if ( preg_match('/-v(.*?).(zip|sql)/',$file, $versione)>0 )
                                             echo $versione[1];
                                     ?>
                                 </td>

@@ -92,17 +92,27 @@ print "<div align=\"center\" class=\"FacetFormHeaderFont\">".$script_transl['war
 print "<table class=\"Tmiddle table-striped\" align=\"center\">\n";
 
 if (isset($_POST['Recover']) && $_POST['Conferma']=="accetto") {
-  $dump = new MySQLImport($link);
-
-  try {@$dump->load(DATA_DIR.'files/backups/'.$_GET["id"]);
-    echo "<td align=\"center\"><strong>Ripristino eseguito con successo</strong></td></tr>";
-
+  $zip = new ZipArchive();
+  if ($zip->open(DATA_DIR.'files/backups/'.$_GET["id"])) {
+    $sqlTmpName=substr($_GET["id"],0,-3).'sql';
+    $fp = $zip->getStream($sqlTmpName);
+    if(!$fp) exit("failed\n");
+    $sqlData='';
+    while (!feof($fp)) {
+      $sqlData .= fread($fp, 8192);
+    }
+    fclose($fp);
+    file_put_contents(DATA_DIR.'files/tmp/'.$sqlTmpName, $sqlData);
   }
-
-  catch(Exception $e){
+  $dump = new MySQLImport($link);
+  try {@$dump->load(DATA_DIR.'files/tmp/'.$sqlTmpName);
+    unlink(DATA_DIR.'files/tmp/'.$sqlTmpName);
+    echo "<td align=\"center\"><strong>Ripristino eseguito con successo</strong></td></tr>";
+  } catch(Exception $e){
     echo "<tr><td align=\"center\"><strong>Errore nell'eseguire il backup".$e->getMessage()."</strong></td></tr>";
   }
-    print "<tr><td align=\"left\"><input type=\"submit\" name=\"Return\" value=\"".$script_transl['return']."\"></td></tr>";
+
+  print "<tr><td align=\"left\"><input type=\"submit\" name=\"Return\" value=\"".$script_transl['return']."\"></td></tr>";
 }else{
   echo "<tr><td colspan=\"2\" align=\"center\"><strong>L'attuale database sarà sostituito con il seguente</strong></td></tr>";
 print "<tr><td class=\"FacetFieldCaptionTD\">".$script_transl['sure']."</td><td class=\"FacetDataTD\">".$_GET["id"]."</td></tr>";

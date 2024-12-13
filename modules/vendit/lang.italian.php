@@ -331,6 +331,7 @@ $strScript = array("admin_client.php" =>
 			'emptylot' => 'Non è stato inserito il lotto'
 		),
 		'cod_operaz_value' => array(11=>'',0=>'S0-Vendita olio a consumatore finale',1=>'S1-Vendita olio a ditta italiana',2=>'S2-Vendita olio a ditta comunitaria',3=>'S3-Vendita olio a ditta extracomunitaria',4=>'S4-Scarico olio trasferimento stabilimento stessa impresa',5=>'S5-Scarico olio trasferimento a terzista',6=>'S6-Cessione omaggio olio confezionato',7=>'S7-Scarico olio destinato ad altri usi',8=>'S8-Scarico olio autoconsumo',9=>'S9-Trasferimento olio a punti vendita aziendali',10=>'S10-Scarico olio reso al fornitore'),
+    'cod_operaz_value_carico' => array(11=>'',7=>'C7->TO DO< Reso di olio sfuso da clienti',8=>'C8-Reso di olio confezionato da clienti'),
         'err' => array(
 			'37' =>"La data di inizio trasporto non &egrave; corretta!",
             '38' =>"La data di inizio trasporto non pu&ograve; essere precedente alla data di emissione!",

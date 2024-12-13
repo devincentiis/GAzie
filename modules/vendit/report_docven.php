@@ -555,6 +555,7 @@ function printPdf(urlPrintDoc){
           $ctrl_eff = 999999;
           $last_fae_packet = '';
           $paymov = new Schedule();
+          $disabledbyflux="";
           while ($r = gaz_dbi_fetch_array($result)) {
             // se contabilizzato trovo l'eventuale stato dei pagamenti e se qualcosa non è andato a buon fine riporto la contabilizzazione nello stato ancora da eseguire
             $paymov_status = false;
@@ -669,6 +670,7 @@ function printPdf(urlPrintDoc){
                         $idcon_maggiore_0 .= '<a class="btn btn-xs btn-success" title="Pacchetto di fatture elettroniche in cui &egrave; contenuta questa fattura" href="../vendit/download_zip_package.php?fn='.$revch['fattura_elettronica_zip_package'].'">'.$zipped.'.zip<i class="glyphicon glyphicon-compressed"></i> </a>';
                       }
                     }
+
                     if ($sdi_flux && $sdi_flux <> 'filezip') { // ho un modulo per la gestione dei flussi con il SdI: posso visualizzare lo stato
                       $zip_ref = 'fae_packaging.php?sdiflux='.$sdi_flux;
                       if ($revch['refs_flux_status']==null) {
@@ -684,6 +686,9 @@ function printPdf(urlPrintDoc){
                         $sdihilight = ( !empty($revch['refs_flux_status']) ) ? $script_transl['flux_status_val'][$last_flux_status][1] : 'default';
                         $sdilabel = ( !empty($revch['refs_flux_status']) ) ? $script_transl['flux_status_val'][$last_flux_status][0] : 'ZIP da inviare';
                         $last_flux_status = 'ZI';
+                      }
+                      if ($last_flux_status<>"DI" && $last_flux_status<>"NS" && $last_flux_status<>"MC" && $last_flux_status<>"AT"){// Se la fae è stata correttamente inviata o ricevuta da ADE, non posso più cancellare
+                        $disabledbyflux="disabled";
                       }
                     } else { //// installazione senza gestore dei flussi con il SdI
                       $last_flux_status = ($zipped)?'RZ':'RE'; // gestendo il flusso manualmente darò sempre la possibilità di scegliere se reinviare o scaricare l'xml
@@ -828,6 +833,9 @@ function printPdf(urlPrintDoc){
                           $last_flux_status = 'DI';
                         }
                       }
+					  if ($last_flux_status<>"DI" && $last_flux_status<>"NS" && $last_flux_status<>"MC" && $last_flux_status<>"AT"){// Se la fae è stata inviata o ricevuta da ADE, non posso più cancellare
+                        $disabledbyflux="disabled";
+                      }
                       if ( !empty($r['fattura_elettronica_zip_package']) && strlen($r['fattura_elettronica_zip_package'])>10 && ($last_flux_status=='DI' || $last_flux_status=='PI')) { // il documento è impacchettato e da inviare
                         //$r['fae_attuale']=$r['fattura_elettronica_original_name'];
                         $sdihilight = ( !empty($r['refs_flux_status']) ) ? $script_transl['flux_status_val'][$last_flux_status][1] : 'default';
@@ -954,20 +962,25 @@ function printPdf(urlPrintDoc){
                 // Colonna "Cancella"
                 echo "<td align=\"center\">";
                 if ($ultimo_documento && ($ultimo_documento['id_tes'] == $r["id_tes"] || ($ultimo_documento['tipdoc'] == 'FAD' && $ultimo_documento['protoc'] == $r['protoc']))) {
-                  // Permette di cancellare il documento.
-                  if ($r["id_con"] > 0) {
-                  ?>
-                    <a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il documento e la registrazione contabile relativa" ref="<?php echo $r['protoc'];?>" ragso1="<?php echo $r['ragso1']; ?>" seziva="<?php echo $r['seziva']; ?>" anno="<?php echo substr($r["datfat"], 0, 4); ?>">
-                      <i class="glyphicon glyphicon-trash"></i>
-                    </a>
-                  <?php
-                  } else {
-                  ?>
-                    <a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il documento" ref="<?php echo $r['protoc'];?>" ragso1="<?php echo $r['ragso1']; ?>" seziva="<?php echo $r['seziva']; ?>" anno="<?php echo substr($r["datfat"], 0, 4); ?>">
-                      <i class="glyphicon glyphicon-trash"></i>
-                    </a>
-                  <?php
-                  }
+                  if ($disabledbyflux==""){
+					  // Permette di cancellare il documento.
+					  
+					  if ($r["id_con"] > 0) {
+					  ?>
+						<a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il documento e la registrazione contabile relativa" ref="<?php echo $r['protoc'];?>" ragso1="<?php echo $r['ragso1']; ?>" seziva="<?php echo $r['seziva']; ?>" anno="<?php echo substr($r["datfat"], 0, 4); ?>" <?php echo $disabledbyflux; ?>>
+						  <i class="glyphicon glyphicon-trash"></i>
+						</a>
+					  <?php
+					  } else {
+					  ?>
+						<a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il documento" ref="<?php echo $r['protoc'];?>" ragso1="<?php echo $r['ragso1']; ?>" seziva="<?php echo $r['seziva']; ?>" anno="<?php echo substr($r["datfat"], 0, 4); ?>" <?php echo $disabledbyflux; ?>>
+						  <i class="glyphicon glyphicon-trash"></i>
+						</a>
+					  <?php
+					  }
+				  }else{
+					  echo "<button title=\"Non &egrave; possibile cancellare un documento inviato o accettato dall'Agenzia delle Entrate\" class=\"btn btn-xs   disabled\"><i class=\"glyphicon glyphicon-trash\"></i></button>";
+				  }
                 } else {
                   echo "<button title=\"Per garantire la sequenza corretta della numerazione, non &egrave; possibile cancellare un documento diverso dall'ultimo\" class=\"btn btn-xs   disabled\"><i class=\"glyphicon glyphicon-trash\"></i></button>";
                 }

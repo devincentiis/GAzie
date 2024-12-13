@@ -299,22 +299,22 @@ if (isset($_POST['preview']) and $msg=='') {
 				if ($form['date_ini_Y'].$form['date_ini_M'].$form['date_ini_D']==str_replace("-", "", $mv['datdoc']) AND strlen($mv['status'])>1) {
 				// escludo i movimenti già inseriti null'ultimo file con stessa data
 				} else if ($mv['id_orderman']>0 AND $mv['operat']==-1 AND $mv['cod_operazione']<>"S7"){
-					
+
 						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
 							if (intval($mv['cod_operazione'])<>3 ){// escludo codice operazione 3
 								$totcont[$mv['recip_stocc']] -= $mv['quanti'];
 								//echo "<br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
-								
+
 								if ($totcont[$mv['recip_stocc']]<0){
 									//echo $mv['desdoc'],"ERRORE <",$nr;
 									$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
 									$msg .='5+';$er="style='background-color: red';";
 								}
-														
-								if (intval($mv['recip_stocc_destin'])>0){// se c'è recipiente stoccaggio destinazione 
+
+								if (intval($mv['recip_stocc_destin'])>0){// se c'è recipiente stoccaggio destinazione
 									$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
-									//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];					
-								
+									//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
+
 									if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
 										echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
 										$message = "Al rigo ".$nr." di produzione, la quantità del silos di destinazione ".$mv['recip_stocc_destin']." è ".$totcont[$mv['recip_stocc_destin']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc_destin']];// ricordo l'errore nel prossimo rigo
@@ -326,24 +326,30 @@ if (isset($_POST['preview']) and $msg=='') {
 										</script>
 										<?php
 									}
-								}	
+								}
 							}
-							
+
 						}
 				} else {
 					$nr++;
 					if ($mv['id_orderman']==0 AND $mv['operat']==1){
 						$legenda_cod_op['3']='Carico olio da lavorazione/deposito presso terzi';
 						$legenda_cod_op['5']='Carico olio da altro stabilimento/deposito stessa impresa';
-						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
-							$totcont[$mv['recip_stocc']] += $mv['quanti'];
-							//echo "<br>carico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
-							if ($totcont[$mv['recip_stocc']]>$maxcont[$mv['recip_stocc']]){
-								//echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc']]," - maxcont:",$maxcont[$mv['recip_stocc']];
-								$message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc']." è ".$totcont[$mv['recip_stocc']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc']];
-								$msg .='5+';$er="style='background-color: red';";
-							}
-						}
+            $legenda_cod_op['7']='Reso di olio sfuso da clienti';
+            $legenda_cod_op['0']='Acquisto olio da ditta italiana';
+            $legenda_cod_op['1']='Acquisto olio da ditta comunitaria';
+
+            if (isset($mv['recip_stocc']) && $mv['cod_operazione']<>8 && $mv['cod_operazione']<>0){ // se non è carico di olio confezionato
+              if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
+                $totcont[$mv['recip_stocc']] += $mv['quanti'];
+                //echo "<br>carico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
+                if ($totcont[$mv['recip_stocc']]>$maxcont[$mv['recip_stocc']]){
+                  //echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc']]," - maxcont:",$maxcont[$mv['recip_stocc']];
+                  $message = "Al rigo ".$nr." la quantità del silos ".$mv['recip_stocc']." è ".$totcont[$mv['recip_stocc']]." e supera la sua capacità dichiarata di ".$maxcont[$mv['recip_stocc']];
+                  $msg .='5+';$er="style='background-color: red';";
+                }
+              }
+            }
 						if ($mv['cod_operazione']==3 && intval($mv['tesdoc'])>0){// se è un carico di magazzino effettuato in manuale, aggiungo i riferimenti mancanti
 						  $table=$gTables['tesdoc']." LEFT JOIN ".$gTables['clfoco']." ON (".$gTables['tesdoc'].".clfoco = ".$gTables['clfoco'].".codice) LEFT JOIN ".$gTables['anagra']." ON (".$gTables['clfoco'].".id_anagra = ".$gTables['anagra'].".id)";
 						  $what = $gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, ".$gTables['anagra'].".id_SIAN";

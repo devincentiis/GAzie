@@ -2430,7 +2430,7 @@ if (count($msg['war']) > 0) { // ho un alert-danger
     $gForm->gazHeadMessage($msg['war'], $script_transl['war'], 'war');
 	echo "</b></div></div>\n";
 }
-echo '';
+echo "tipdoc:",$form['tipdoc'];
 ?>
 <form method="POST" name="docven" enctype="multipart/form-data">
 <div class="framePdf panel panel-success" style="display: none; position: absolute; left: 5%; top: 100px">
@@ -2874,8 +2874,12 @@ foreach ($form['rows'] as $k => $v) {
 					<div class="row">
 						<label for="cod_operazione" class="col-sm-6 control-label"><?php echo "Tipo operazione SIAN"; ?></label>
 						<?php
-						$gForm->variousSelect('rows[' . $k . '][cod_operazione]', $script_transl['cod_operaz_value'], $form['rows'][$k]['cod_operazione'], "col-sm-6", false, '', false)
-						?>
+            if($form['tipdoc']=="FNC"){// se è una nota credito, al Sian devo operare un carico
+              $gForm->variousSelect('rows[' . $k . '][cod_operazione]', $script_transl['cod_operaz_value_carico'], $form['rows'][$k]['cod_operazione'], "col-sm-6", false, '', false);
+            }else{// se è vendita è scarico
+              $gForm->variousSelect('rows[' . $k . '][cod_operazione]', $script_transl['cod_operaz_value'], $form['rows'][$k]['cod_operazione'], "col-sm-6", false, '', false);
+						}
+            ?>
 					</div>
 					<?php if ($art['confezione']==0){ ?>
 					<div class="row">

@@ -43,8 +43,11 @@ if (isset($_GET['type'])) {
   $admin_aziend = checkAdmin(9);
 	switch ($_GET['type']) {
 		case "save":
-			$dump = new MySQLDump($link);
-			try {@$dump->save(DATA_DIR.'files/backups/' . $Database . '-' . date("YmdHi") . '-v' . GAZIE_VERSION . '.sql.gz');
+      $gbackup = new gazBackup($link);
+			try {@$gbackup->save(DATA_DIR.'files/tmp/tmp-backup.sql');
+        $zipname=$Database . '-' . date("YmdHi") . '-v' . GAZIE_VERSION ;
+        $gbackup->gazDataDir($zipname);
+        rename(DATA_DIR.'files/tmp/'.$zipname.'.zip', DATA_DIR.'files/backups/'.$zipname.'.zip');
 				gaz_dbi_put_row($gTables['config'], 'variable', 'last_backup', 'cvalue', date('Y-m-d'));
 			}
 			catch(Exception $e){

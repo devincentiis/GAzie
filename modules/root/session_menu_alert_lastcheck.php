@@ -35,4 +35,10 @@ $_SESSION['menu_alerts_lastcheck'] = round(time()/60);
 if (isset($_GET['menu_alerts_data'])){
 	$_SESSION['menu_alerts_data'] = intval($_GET['menu_alerts_data']);
 }
+foreach (glob( DATA_DIR . 'files/tmp/*[!{htaccess}]') as $fn) {
+  $lastmod = filemtime($fn);
+  if((time() - $lastmod) > 1200) { // dopo venti minuti, al primo accesso, cancello tutti i file temporanei
+    unlink($fn);
+  }
+}
 ?>
