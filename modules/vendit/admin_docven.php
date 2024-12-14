@@ -2430,7 +2430,6 @@ if (count($msg['war']) > 0) { // ho un alert-danger
     $gForm->gazHeadMessage($msg['war'], $script_transl['war'], 'war');
 	echo "</b></div></div>\n";
 }
-echo "tipdoc:",$form['tipdoc'];
 ?>
 <form method="POST" name="docven" enctype="multipart/form-data">
 <div class="framePdf panel panel-success" style="display: none; position: absolute; left: 5%; top: 100px">

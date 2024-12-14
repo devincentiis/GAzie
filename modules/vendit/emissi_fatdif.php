@@ -35,70 +35,59 @@ if ( isset($_GET['tipodocumento'])) {
 }
 
 function getDateLimits($sez=1, $tipodocumento='DDT') {
-    $acc = [];
-    $now = new DateTime;
-    $acc['date_exe'] = $now->format("Y-m-d");
-    $acc['date_fin'] = $acc['date_exe'];
-    $acc['date_ini'] = $acc['date_exe'];
-    global $gTables;
-    // ricavo i limiti di fatturabilitÃ  e le date dei vari tipi di DdT
-    $doctype = $tipodocumento=='CMR'?['CMR']:['DDT','DDV','DDY','DDS','DDM','DDO'];
-    foreach ($doctype as $k => $v) {
-        switch ($v) {
-            default :
-            case 'DDT':
-            case 'DDM':
-            case 'DDO':
-            case 'CMR':
-                $rs_first = gaz_dbi_dyn_query("*", $gTables['tesdoc'], "tipdoc = '$v' AND seziva = $sez", "numdoc ASC", 0, 1);
-                $rs_last = gaz_dbi_dyn_query("*", $gTables['tesdoc'], "tipdoc = '$v' AND seziva = $sez", "numdoc DESC", 0, 1);
-                // in questo caso modifico la data di emissione e di fine periodo con l'ultimo del mese del primo ddt fatturabile
-                $ddtfirst = gaz_dbi_fetch_array($rs_first);
-                if ($ddtfirst) {
-                    $nd = new DateTime($ddtfirst['datemi']);
-                    $di = new DateTime($acc['date_ini']);
-                    if ($di>$nd){
-                      $acc['date_ini'] = $ddtfirst['datemi'];
-                    }
-                    $nd->modify('last day of this month');
-                    $acc['date_fin'] = $nd->format('Y-m-d');
-                    $acc['date_exe'] = $acc['date_fin'];
-					if (strtotime($acc['date_exe'])>strtotime($now->format("Y-m-d"))){
-						$acc['date_exe']=$now->format("Y-m-d");// NON posso emettere una fattura in un giorno successivo alla data odierna
-						if (strtotime($acc['date_fin'])>strtotime($acc['date_exe'])){
-							$acc['date_fin']=$acc['date_exe'];
-						}						
-					}
-                }
-                break;
-            case 'DDV':
-                // per quelli in c/visione non apporto modifiche ai limiti di date, mi baso sulla
-                // data di emissione e quindi sull'obbligo di fatturazione  dopo 1 anno
-                $nd = new DateTime($acc['date_exe']);
-                $nd->modify('-1 year');
-                break;
-            case 'DDY':
-            case 'DDS':
-                // se sono notule di servizio o in conto triangolazione non apporto modifiche e al momento non li fatturo salvo richiesta contraria
-                break;
+  global $gTables;
+  $acc = [];
+  $now = new DateTime;
+  $acc['date_exe'] = $now->format("Y-m-d");
+  $acc['date_fin'] = $acc['date_exe'];
+  $acc['date_ini'] = $acc['date_exe'];
+  // ricavo i limiti di fatturabilitÃ  e le date dei vari tipi di DdT
+  $doctype = $tipodocumento=='CMR'?['CMR']:['DDT','DDV','DDY','DDS','DDM','DDO'];
+  foreach ($doctype as $k => $v) {
+    switch ($v) {
+      default :
+      case 'DDT':
+      case 'DDM':
+      case 'DDO':
+      case 'CMR':
+        $rs_first = gaz_dbi_dyn_query("*", $gTables['tesdoc'], "tipdoc = '$v' AND seziva = $sez", "numdoc ASC", 0, 1);
+        $ddtfirst = gaz_dbi_fetch_array($rs_first);
+        if ($ddtfirst) {
+          $nd = new DateTime($ddtfirst['datemi']);
+          $di = new DateTime($acc['date_ini']);
+          if ($di>$nd){
+            $acc['date_ini'] = $ddtfirst['datemi'];
+          }
+          $nd->modify('last day of this month');
+          if ($now < $nd) {
+            $acc['date_exe'] = $acc['date_fin'] = $now->format('Y-m-d');
+          } else {
+            $acc['date_exe'] = $acc['date_fin'] = $nd->format('Y-m-d');
+          }
         }
+      break;
+      case 'DDV':
+          // per quelli in c/visione non apporto modifiche ai limiti di date, mi baso sulla
+          // data di emissione e quindi sull'obbligo di fatturazione  dopo 1 anno
+          $nd = new DateTime($acc['date_exe']);
+          $nd->modify('-1 year');
+          break;
+      case 'DDY':
+      case 'DDS':
+        // se sono notule di servizio o in conto triangolazione non apporto modifiche e al momento non li fatturo salvo richiesta contraria
+      break;
     }
-    $acc['date_exe_Y'] = date("Y", strtotime($acc['date_exe']));
-    $acc['date_exe_M'] = date("m", strtotime($acc['date_exe']));
-    $acc['date_exe_D'] = date("d", strtotime($acc['date_exe']));
-    $acc['date_ini_Y'] = date("Y", strtotime($acc['date_ini']));
-    $acc['date_ini_M'] = date("m", strtotime($acc['date_ini']));
-    $acc['date_ini_D'] = date("d", strtotime($acc['date_ini']));
-    $acc['date_fin_Y'] = date("Y", strtotime($acc['date_fin']));
-    $acc['date_fin_M'] = date("m", strtotime($acc['date_fin']));
-    $acc['date_fin_D'] = date("d", strtotime($acc['date_fin']));
-
-    return $acc;
-}
-
-function getBillsStatus($data_fin, $sez = 1) {
-    $acc['n'][$v]['n_invoiceable'] = gaz_dbi_record_count($gTables['tesdoc'], "tipdoc = '$v' AND seziva = $sez AND datemi <= '" . $nd->format('Y-m-d') . "'");
-    $acc['n'][$v]['n_remainder'] = gaz_dbi_record_count($gTables['tesdoc'], "tipdoc = '$v' AND seziva = $sez AND datemi > '" . $nd->format('Y-m-d') . "'");
+  }
+  $acc['date_exe_Y'] = date("Y", strtotime($acc['date_exe']));
+  $acc['date_exe_M'] = date("m", strtotime($acc['date_exe']));
+  $acc['date_exe_D'] = date("d", strtotime($acc['date_exe']));
+  $acc['date_ini_Y'] = date("Y", strtotime($acc['date_ini']));
+  $acc['date_ini_M'] = date("m", strtotime($acc['date_ini']));
+  $acc['date_ini_D'] = date("d", strtotime($acc['date_ini']));
+  $acc['date_fin_Y'] = date("Y", strtotime($acc['date_fin']));
+  $acc['date_fin_M'] = date("m", strtotime($acc['date_fin']));
+  $acc['date_fin_D'] = date("d", strtotime($acc['date_fin']));
+  return $acc;
 }
 
 function getInvoiceableBills($date, $sez = 1, $cliente = 0) {
