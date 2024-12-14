@@ -1254,8 +1254,8 @@ if (!(count($msg['err']) > 0 || count($msg['war']) > 0)) { // ho un errore non s
                     $btn_class = 'btn-success';
 					$btn_title = gaz_format_quantity($v['quamag'], 1, $admin_aziend['decimal_quantity']).' '.$v['unimis'].' disponibili';
                 }
-                if ($v['pesosp'] <> 0) {
-                    $peso = gaz_format_number($v['quanti'] / $v['pesosp']);
+                if (floatval($v['pesosp'])<>0 && $v['pesosp'] <> 0) {
+                    $peso = gaz_format_number($v['quanti'] / floatval($v['pesosp']));
                 }
             } elseif ($v['tiprig'] == 1) {
                 $v['codart'] ='Forfait';

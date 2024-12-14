@@ -203,14 +203,14 @@ $freespace = gaz_dbi_get_row($gTables['config'], 'variable', 'freespace_backup')
                         <h4>Automatico</h4>
                         <ul class="licheck">
                            <!-- <li>Esegui backup dei files (la cartella di gazie verrà salvata) : <input <?php echo ($filebackup['cvalue']==1) ? 'checked="checked"' : ''; ?> type="checkbox" name="filebackup" value="1" /> </li> -->
-                            <li>Numero di backup da conservare : <input type="text" name="keep_backup" value="<?php echo $keep['cvalue']; ?>" /> inserire 0 per tutti</li>
+                            <li>Numero di backup da conservare, periodicità in giorni : <input type="text" name="keep_backup" value="<?php echo $keep['cvalue']; ?>" /> separati da virgola esempio "52,7" </li>
                             <li>Spazio da lasciare libero (%) : <input type="text" name="freespace_backup" value="<?php echo $freespace['cvalue']; ?>" /> raggiunto il limite i backup vecchi verranno cancellati</li>
                         </ul>
                     </div>
                 </div>
                 <div class="div-table-row">
                     <div class="div-table-col" >
-                        <input type="submit" name="save_config" value="<?php echo $script_transl['update']; ?>" />
+                        <input class="btn btn-md btn-warning" type="submit" name="save_config" value=" <?php echo $script_transl['update']; ?>" />
                     </div>
                 </div>
             </div>

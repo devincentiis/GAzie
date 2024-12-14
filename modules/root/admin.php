@@ -55,63 +55,20 @@ if (!isset($_POST['hidden_req'])) {
 
 $checkUpd = new CheckDbAlign;
 $data = $checkUpd->TestDbAlign();
+$backupMode = $checkUpd->backupMode();
+$keep = $checkUpd->keepMode();
+$lastBackup = $checkUpd->testDbBackup($keep[1]); // controllo se sono passati i giorni stabiliti in configurazione dall'ultimo backup
 if (is_array($data)) {
-    // induco l'utente ad aggiornare il db
-    redirect( '../../setup/install/install.php?tp=' . $table_prefix);
-    exit;
+  // induco l'utente ad aggiornare il db
+  redirect( '../../setup/install/install.php?tp=' . $table_prefix);
+  exit;
 }
 
 $folderMissing = controllaEsistenzaCartelle();
-$lastBackup = $checkUpd->testDbBackup();
 
-//Andrea backup automatico
-$backupMode = $checkUpd->backupMode();
-if ($backupMode == "automatic") {
-    if ($checkUpd->testDbBackup(0) != date("Y-m-d")) {
-        $sysdisk = $checkUpd->get_system_disk();
-        $gazpath = $checkUpd->get_backup_path();
-        $freespace = gaz_dbi_get_row($gTables['config'], 'variable', 'freespace_backup');
-        $percspace = (disk_total_space($sysdisk) / 100) * $freespace["cvalue"];
-
-        $files = glob($gazpath . '*.gz');
-        array_multisort(array_map('filemtime', $files), SORT_NUMERIC, SORT_ASC, $files);
-
-        $keep = gaz_dbi_get_row($gTables['config'], 'variable', 'keep_backup');
-        if (count($files) > $keep["cvalue"]) {
-            if (count($files) > $keep["cvalue"] && $keep["cvalue"] > 0) {
-                for ($i = 0; $i < count($files) - ($keep["cvalue"]); $i++)
-                    unlink($files[$i]);
-                // unlink(dirname(__FILE__) . $files[$i];
-                //echo $files[$i] . "<br>";
-            }
-        }
-        if (disk_free_space($sysdisk) < $percspace) {
-            $i = 0;
-            while (disk_free_space($sysdisk) < $freespace && $i < count($files)) {
-                if ($i <= count($files) - 30) {
-                    unlink($files[$i]);
-                }
-                $i++;
-            }
-        }
-        if ($admin_aziend['Abilit'] >= 8 && checkAccessRights($_SESSION['user_name'], 'inform', $_SESSION['company_id']) != 0) {
-
-			?>
-			<script>
-				var xhttp = new XMLHttpRequest();
-				xhttp.open("GET", '../../modules/inform/ajax.php?type=save&t='+ Math.random(), false);
-				xhttp.onreadystatechange = function() {
-					window.location.href = "../../modules/inform/report_backup.php";
-				};
-				xhttp.send();
-			</script>
-			<?php
-            //redirect( '../../modules/inform/report_backup.php');
-        }
-    }
-}
 
 require("../../library/include/header.php");
+
 $script_transl = HeadMain();
 ?>
 <style>
@@ -188,6 +145,45 @@ $(function(){
 	}
 });
 </script>
+<?php
+//Backup automatico
+if ($backupMode == "automatic" && $lastBackup && $admin_aziend['Abilit'] == 9) {
+    $sysdisk = $checkUpd->get_system_disk();
+    $freespace = gaz_dbi_get_row($gTables['config'], 'variable', 'freespace_backup');
+    $percspace = (disk_total_space($sysdisk) / 100) * $freespace["cvalue"];
+    $files = glob(DATA_DIR.'files/backups/*.zip');
+    array_multisort(array_map('filemtime', $files), SORT_NUMERIC, SORT_ASC, $files);
+    if (count($files) > intval($keep[0])) {
+      if (count($files) > $keep[0] && $keep[0] > 0) {
+        for ($i = 0; $i < count($files) - ($keep[0]); $i++)
+        unlink($files[$i]);
+      }
+    }
+    if (disk_free_space($sysdisk) < $percspace) {
+      $i = 0;
+      while (disk_free_space($sysdisk) < $freespace && $i < count($files)) {
+        if ($i <= count($files) - 30) {
+          unlink($files[$i]);
+        }
+        $i++;
+      }
+    }
+?>
+ <script>
+    $.ajax({
+      data: {'type':'save'},
+      type: 'GET',
+      url: '../inform/ajax.php',
+      success: function(output){
+        alert('Backup terminato');
+        window.location.replace("./admin.php");
+      }
+    });
+  </script>
+  <h1 class="text-center text-warning bg-warning">Attendi la fine del backup automatico (ogni <?php echo $keep[1]; ?> giorni)<h1>
+<?php
+} else {
+?>
 <div class="container-fluid">
   <form method="POST" name="gaz_form">
     <input type="hidden" value="<?php echo $form['hidden_req'];?>" name="hidden_req" />
@@ -205,14 +201,14 @@ $(function(){
 			$rs_student = gaz_dbi_dyn_query("*", $tp[1] . '_students', "student_name = '" .  trim($admin_aziend["user_name"]) . "'");
 			$student = gaz_dbi_fetch_array($rs_student);
 		}
-    if ( $lastBackup && !is_array($student)) {
+    if ( $lastBackup && !is_array($student) && $backupMode <> "automatic") {
             ?>
             <div class="alert alert-danger text-center" role="alert">
                 <?php
                 if ($admin_aziend['Abilit'] > 8) {
-                    echo $script_transl['errors'][4] . ' : <a href="../inform/backup.php?' . $checkUpd->backupMode() . '">BACKUP!</a>(' . $checkUpd->backupMode() . ')';
+                    echo $script_transl['errors'][4] .' '.$keep[1].' giorni : <a  class="btn btn-md btn-warning" href="../inform/backup.php?' . $checkUpd->backupMode() . '">BACKUP!</a> &nbsp; (' . $checkUpd->backupMode() . ')';
                 } else {
-                    echo $script_transl['errors'][4] . ' o avvisa il tuo amministratore!';
+                    echo $script_transl['errors'][4] .' '.$keep[1].' giorni, avvisa l\'amministratore di sistema';
                 }
                 ?>
             </div>
@@ -318,5 +314,6 @@ $(function() {
 </script>
 </div>
 <?php
+}
 require('../../library/include/footer.php');
 ?>

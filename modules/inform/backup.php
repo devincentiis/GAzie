@@ -157,6 +157,8 @@ if ($form['do_backup'] != 1 && isset($_GET['external'])) {// è il primo accesso
       header("Content-Disposition: attachment; filename=\"".$zipname.".zip\"");
       readfile(DATA_DIR.'files/tmp/'.$zipname.'.zip');
       unlink(DATA_DIR.'files/tmp/'.$zipname.'.zip');
+      // aggiorno la data dell'ultimo backup
+			gaz_dbi_put_row($gTables['config'], 'variable', 'last_backup', 'cvalue', date('Y-m-d'));
     }
   }
 }

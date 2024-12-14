@@ -45,7 +45,7 @@ class CheckDbAlign {
     }
 
     function backupMode($new_mode = false) {
-        /* in $new_mode di deve passare il valore della nuova modalità 
+        /* in $new_mode di deve passare il valore della nuova modalità
          * (external o internal) se la si vuole modificare tramite l'apposita
          * interfaccia sul report, altrimenti restituisce il valore presente sul db
          */
@@ -58,20 +58,16 @@ class CheckDbAlign {
             return $r['cvalue'];
         }
     }
-    
-    function get_backup_path() {
-        $sysdisk = getcwd();
-        if(php_uname('s')=='Windows NT'){
-            $sysdisk=explode("\\", $sysdisk );
-            $sysdisk = array_slice( $sysdisk, 0, count($sysdisk)-2);
-            return implode("\\", $sysdisk)."\\data\\files\\backups\\";
-        } else {
-            $sysdisk=explode("/", $sysdisk );
-            $sysdisk = array_slice( $sysdisk, 0, count($sysdisk)-2);
-            return implode("/", $sysdisk)."/data/files/backups/";
-        }
+
+    function keepMode(){
+      global $gTables;
+      $keep = gaz_dbi_get_row($gTables['config'], 'variable', 'keep_backup');
+      $kvals= preg_split('/([^0-9]{1,})/', $keep['cvalue']);
+      if (!isset($kvals[1])) $kvals[1] = '7';
+      if (intval($kvals[0])<1) $kvals[0] = '1';
+      return $kvals;
     }
-    
+
     function get_system_disk() {
         $sysdisk = getcwd();
         if(php_uname('s')=='Windows NT'){
@@ -84,22 +80,21 @@ class CheckDbAlign {
         }
     }
 
-    function testDbBackup( $days = 10 ) {
-        // Antonio De Vincentiis 2 Luglio 2009
-        global $gTables;
-        $r = gaz_dbi_get_row($gTables['config'], 'variable', 'last_backup');
-        if ( $days>0) {
-            $dl = new DateTime($r['cvalue']);
-            $dl->modify('+'.$days.' days');
-            $dn = new DateTime("now");
-            if ($dn > $dl) {
-                return TRUE;
-            } else {
-                return FALSE;
-            }
+    function testDbBackup( int $days ) {
+      global $gTables;
+      $r = gaz_dbi_get_row($gTables['config'], 'variable', 'last_backup');
+      if ( $days>0) {
+        $dl = new DateTime($r['cvalue']);
+        $dl->modify('+'.$days.' days');
+        $dn = new DateTime("now");
+        if ($dn > $dl) {
+          return true;
         } else {
-            return $r['cvalue'];
+          return false;
         }
+      } else {
+        return false;
+      }
     }
 
     function getSqlFileVersion() {

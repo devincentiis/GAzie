@@ -63,6 +63,12 @@ function getDateLimits($sez=1, $tipodocumento='DDT') {
                     $nd->modify('last day of this month');
                     $acc['date_fin'] = $nd->format('Y-m-d');
                     $acc['date_exe'] = $acc['date_fin'];
+					if (strtotime($acc['date_exe'])>strtotime($now->format("Y-m-d"))){
+						$acc['date_exe']=$now->format("Y-m-d");// NON posso emettere una fattura in un giorno successivo alla data odierna
+						if (strtotime($acc['date_fin'])>strtotime($acc['date_exe'])){
+							$acc['date_fin']=$acc['date_exe'];
+						}						
+					}
                 }
                 break;
             case 'DDV':
