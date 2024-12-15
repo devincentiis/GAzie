@@ -172,6 +172,7 @@ if (!defined("MESSAGE_WELCOME")) {
         define("MESSAGE_PASSWORD_SAME", "Non puoi usare la stessa password precedente");
         define("MESSAGE_PASSWORD_CHANGE_FAILED", "Spiacente, la tua password non è stata cambiata, non coincidono le due digitate o potresti aver usato la stessa precedente");
         define("MESSAGE_PASSWORD_CHANGED_SUCCESSFULLY", "La password è stata cambiata con successo! Adesso puoi entrare usando la nuova");
+        define("MESSAGE_IP_BANNED", "Il tuo indirizzo IP è stato bannato, rivolgiti all'amministratore di sistema");
         define("MESSAGE_PASSWORD_EMPTY", "Password field was empty");
         define("MESSAGE_PASSWORD_RESET_MAIL_FAILED", "Password reset mail NOT successfully sent! Error: ");
         define("MESSAGE_PASSWORD_RESET_MAIL_SUCCESSFULLY_SENT", "La mail per la reimpostazione della password è stata inviata con successo!");

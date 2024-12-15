@@ -3,8 +3,6 @@
     "description": "GAzie Gestione Aziendale",
     "type": "project",
     "require": {
-        "twig/twig": "^3.3.0",
-        "phpunit/phpunit": "^9.5.4",
         "phpseclib/phpseclib": "^3.0.8",
         "phpoffice/phpspreadsheet": "^1.17.1",
         "ddeboer/imap":"1.18.0",

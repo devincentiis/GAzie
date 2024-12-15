@@ -343,9 +343,18 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 								$type_array[13]=sprintf ("%010d",$row['id_SIAN']); // identificativo stabilimento di provenienza/destinazione olio
 							}
 						}
-						$type_array[6]=str_pad("C".$row['cod_operazione'], 10); // codice operazione
+						$type_array[6]=str_pad("C".$row['cod_operazione'], 10); // codice operazione						
 						if (strlen($row['varieta'])>3){
 							$type_array[28]=str_pad(substr(("Varietà ".$row['varieta']), 0, 300 ), 300); // Note (varietà)
+						}
+						if (intval($row['cod_operazione'])==8 && intval($row['id_SIAN'])==0){// se è un reso di olio confezionato da clienti privati(senza codice SIAN)
+							$type_array[6]=str_pad("Z", 10); // codice operazione generica
+							if (strlen($row['varieta'])>3){
+								$type_array[28]=str_pad(substr(("Reso olio confezionato da cliente privato - Varietà ".$row['varieta']), 0, 300 ), 300); // Note (reso da privato e varietà)
+							}else{
+								$type_array[28]=str_pad(substr(("Reso olio confezionato da cliente privato"), 0, 300 ), 300); // Note (reso da privato)
+
+							}
 						}
 					}
 

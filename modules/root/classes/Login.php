@@ -212,7 +212,7 @@ class Login
 		// if database connection opened
 		if ($this->databaseConnection()) {
 			// database query, getting all the info of the selected user
-			$query_user = $this->db_connection->prepare("SELECT *, SHA2(CONVERT(AES_DECRYPT(UNHEX(aes_key), UNHEX(SHA2('".$user_password_sha."', 512))) USING utf8), 512) AS aes_key_pass FROM " . DB_TABLE_PREFIX . '_admin WHERE user_name = :user_name COLLATE utf8_bin');
+			$query_user = $this->db_connection->prepare("SELECT *, SHA2(CONVERT(AES_DECRYPT(UNHEX(aes_key), UNHEX(SHA2('".$user_password_sha."', 512))) USING utf8), 512) AS aes_key_pass FROM " . DB_TABLE_PREFIX . '_admin WHERE user_name = :user_name');
 			$query_user->bindValue(':user_name', $user_name, PDO::PARAM_STR);
 			$query_user->execute();
 			// get result row (as an object)
@@ -239,115 +239,50 @@ class Login
 
 	// recupero ip chiamante
 	private function getUserIP() {
-		$client = @$_SERVER['HTTP_CLIENT_IP'];
-		$forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-		$remote = $_SERVER['REMOTE_ADDR'];
-		if (filter_var($client, FILTER_VALIDATE_IP)) {
-			$ip = $client;
-		} elseif (filter_var($forward, FILTER_VALIDATE_IP)) {
-			$ip = $forward;
+    if (getenv('HTTP_CLIENT_IP')) { $ip = getenv('HTTP_CLIENT_IP');
+    } elseif (getenv('HTTP_X_FORWARDED_FOR')) { $ip = getenv('HTTP_X_FORWARDED_FOR');
+    } elseif (getenv('HTTP_X_FORWARDED')) { $ip = getenv('HTTP_X_FORWARDED');
+    } elseif (getenv('HTTP_FORWARDED_FOR')) { $ip = getenv('HTTP_FORWARDED_FOR');
+    } elseif (getenv('HTTP_FORWARDED')) { $ip = getenv('HTTP_FORWARDED');
+    } else { $ip = $_SERVER['REMOTE_ADDR']; }
+    return $ip;
+  }
+
+	// store failed IP
+	private function storeFailedIP() {
+    // increase the failed attempts counter in order to ban the originating IP
+    $query_ip = $this->db_connection->prepare("SELECT * FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE ipv4 = :ipv4 AND `reference` ='postlogin';");
+    $query_ip->bindValue(':ipv4', $this->getUserIP(), PDO::PARAM_STR);
+    $query_ip->execute();
+    $ip_row = $query_ip->fetchObject();
+    if (isset($ip_row->id)) {
+      $acc = $this->db_connection->prepare("UPDATE " . DB_TABLE_PREFIX . "_banned_ip  SET `attempts` = attempts + 1 WHERE `id`= ".$ip_row->id.";");
+    } else {
+      $acc = $this->db_connection->prepare("INSERT INTO ". DB_TABLE_PREFIX . "_banned_ip  (`reference`, `ipv4`, `attempts`) VALUES ('postlogin','".$this->getUserIP()."',1);");
+    }
+    $acc->execute();
+  }
+
+	private function checkBanned() {
+    $query_ban = $this->db_connection->prepare("SELECT * FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE ipv4 = '".$this->getUserIP()."' AND `reference` ='postlogin';");
+    $query_ban->execute();
+    $ip_ban = $query_ban->fetchObject();
+    if (isset($ip_ban->id) && $ip_ban->attempts >10 ) { // questo IP ha fattto oltre 10 tentativi falliti, non potrà più accedere a meno che non lo si rimuove dalla tabella del DB
+			return true;
 		} else {
-			$ip = $remote;
+			return false;
 		}
-		return $ip;
 	}
 
-	/**
-	* Logs in via the Cookie
-	* @return bool success state of cookie login
 
-	private function loginWithCookieData()
-	{
-		if (isset($_COOKIE['rememberme'])) {
-			// get cookie_secret_key from gaz_config
-			$csk = $this->db_connection->prepare("SELECT cvalue FROM  ". DB_TABLE_PREFIX . "_config WHERE variable = 'cookie_secret_key'");
-			$csk->execute();
-			// get result row (as an object)
-			$csk_row = $csk->fetchObject();
-			// extract data from the cookie
-			list ($user_id, $token, $hash) = explode(':', $_COOKIE['rememberme']);
-			// check cookie hash validity
-			if ($hash == hash('sha256', $user_id . ':' . $token . $csk_row->cvalue) && !empty($token)) {
-				// cookie looks good, try to select corresponding user
-				if ($this->databaseConnection()) {
-					// get real token from database (and all other data)
-					$sth = $this->db_connection->prepare('SELECT user_id, user_name, user_email, company_id, SHA2(CONVERT(AES_DECRYPT(UNHEX(aes_key), UNHEX(SHA2(user_password_hash, 512))) USING utf8), 512) AS aes_key_pass FROM ' . DB_TABLE_PREFIX . '_admin WHERE user_id = :user_id AND user_rememberme_token = :user_rememberme_token AND user_rememberme_token IS NOT NULL');
-					$sth->bindValue(':user_id', $user_id, PDO::PARAM_INT);
-					$sth->bindValue(':user_rememberme_token', $token, PDO::PARAM_STR);
-					$sth->execute();
-					// get result row (as an object)
-					$userdata = $sth->fetchObject();
 
-					if (isset($userdata->user_id)) {
-						// INIZIO ---- ripresa del valore del tema (g6,g7,lte)
-						$rt = $this->db_connection->prepare('SELECT var_value FROM ' . DB_TABLE_PREFIX . '_admin_config WHERE var_name = \'theme\' AND adminid = :user_name COLLATE utf8_bin');
-						$rt->bindValue(':user_name', $userdata->user_name, PDO::PARAM_STR);
-						$rt->execute();
-						// get result row (as an object)
-						$rt_row = $rt->fetchObject();
-						$_SESSION['theme'] = $rt_row->var_value;
-						// FINE ---- ripresa del valore del tema (g6,g7,lte)
-
-						//  se sul file config/config/gconfig.php scelgo di comunicare ad un hosting d'appoggio
-						//	il mio eventuale nuovo IP DINAMICO del router ADSL faccio un ping ad esso così altri utenti
-						//	che sono a conoscenza del meccanismo possono richiederlo e successivamente essere ridiretti
-						//	qui tramite HTTPS
-						if (SET_DYNAMIC_IP != '') {
-							@ini_set('default_socket_timeout',3);
-							@file_get_contents(SET_DYNAMIC_IP);
-						}
-
-						// increment the login counter for that user
-						$acc = $this->db_connection->prepare('UPDATE ' . DB_TABLE_PREFIX . '_admin '
-						. " SET Access = Access+1, last_ip = '". $this->getUserIP()."' WHERE user_name = :user_name ;");
-						$acc->execute(array(':user_name' => $userdata->user_name));
-
-						// insert login user data into gaz_admin_login_history
-						$acc = $this->db_connection->prepare('INSERT INTO ' . DB_TABLE_PREFIX . '_admin_login_history '
-						. ' (`login_user_id`, `login_datetime`, `login_user_ip`) VALUES ('. $userdata->user_id.",'".date('Y-m-d H:i:s')."', '".$this->getUserIP()."');");
-						$acc->execute();
-
-						// write user data into PHP SESSION [a file on your server]
-						$_SESSION['user_id'] = $userdata->user_id;
-						$_SESSION['user_name'] = $userdata->user_name;
-						$_SESSION['user_email'] = $userdata->user_email;
-						$_SESSION['company_id'] = $userdata->company_id;
-						$_SESSION['user_logged_in'] = 1;
-						$_SESSION['aes_key'] = $userdata->aes_key_pass;
-
-						// declare user id, set the login status to true
-						$this->user_id = $userdata->user_id;
-						$this->user_name = $userdata->user_name;
-						$this->user_email = $userdata->user_email;
-						$this->company_id = $userdata->company_id;
-						$this->user_is_logged_in = true;
-
-						// Cookie token usable only once
-						$this->newRememberMeCookie();
-						return true;
-					}
-				}
-			}
-			// A cookie has been used but is not valid... we delete it
-			$this->deleteRememberMeCookie();
-			$this->errors[] = MESSAGE_COOKIE_INVALID;
-		}
-		return false;
-	}
-	*/
-	/**
-	* Logs in with the data provided in $_POST, coming from the login form
-	* @param $user_name
-	* @param $user_password
-	* @param $user_rememberme
-	*/
 	private function loginWithPostData($user_name, $user_password, $user_rememberme)
 	{
-		if (empty($user_name)) {
+		$chkbnd=true;
+    if (empty($user_name)) {
 			$this->errors[] = MESSAGE_USERNAME_EMPTY;
 		} else if (empty($user_password)) {
 			$this->errors[] = MESSAGE_PASSWORD_EMPTY;
-
 			// if POST data (from login form) contains non-empty user_name and non-empty user_password
 		} else {
 			// user can login with his username or his email address.
@@ -364,11 +299,11 @@ class Login
 				// get result row (as an object)
 				$userdata = $query_user->fetchObject();
 			}
-
-			// if this user not exists
-			if (! isset($userdata->user_id)) {
+      if ($this->checkBanned()) {
+        $this->errors[] = MESSAGE_IP_BANNED;
+      } elseif (! isset($userdata->user_id)) { // if this user not exists
 				// se la password risulta essere sbagliata ed ho un il vecchio nome della colonna "Password" propongo di aggiornare il database
-				$query_us = $this->db_connection->prepare('SELECT * FROM ' . DB_TABLE_PREFIX . '_admin WHERE user_name = :user_name COLLATE utf8_bin');
+				$query_us = $this->db_connection->prepare('SELECT * FROM ' . DB_TABLE_PREFIX . '_admin WHERE user_name = :user_name');
 				$query_us->bindValue(':user_name', trim($user_name), PDO::PARAM_STR);
 				$query_us->execute();
 				// get result row (as an object)
@@ -380,6 +315,7 @@ class Login
 					// to prevent potential attackers showing if the user exists
 					$this->errors[] = MESSAGE_LOGIN_FAILED;
 				}
+        $this->storeFailedIP();
 			} else if (($userdata->user_failed_logins >= 3) && ($userdata->user_last_failed_login > (time() - 60))) {
 				$this->errors[] = MESSAGE_PASSWORD_WRONG_3_TIMES;
 				// using PHP 5.5's password_verify() function to check if the provided passwords fits to the hash of that user's password
@@ -389,14 +325,14 @@ class Login
 				. 'SET user_failed_logins = user_failed_logins+1, user_last_failed_login = :user_last_failed_login '
 				. 'WHERE user_name = :user_name OR user_email = :user_name');
 				$sth->execute(array(':user_name' => $user_name, ':user_last_failed_login' => time()));
-
 				$this->errors[] = MESSAGE_PASSWORD_WRONG;
+        $this->storeFailedIP();
 				// has the user activated their account with the verification email
 			} else if ($userdata->user_active != 1) {
 				$this->errors[] = MESSAGE_ACCOUNT_NOT_ACTIVATED;
 			} else {
 				// INIZIO ---- ripresa del valore del tema (g7,lte o altri personalizzati)
-				$rt = $this->db_connection->prepare('SELECT var_value FROM ' . DB_TABLE_PREFIX . '_admin_config WHERE var_name = \'theme\' AND adminid = :user_name COLLATE utf8_bin');
+				$rt = $this->db_connection->prepare('SELECT var_value FROM ' . DB_TABLE_PREFIX . '_admin_config WHERE var_name = \'theme\' AND adminid = :user_name');
 				$rt->bindValue(':user_name', $userdata->user_name, PDO::PARAM_STR);
 				$rt->execute();
 				// get result row (as an object)
@@ -460,6 +396,9 @@ class Login
           . 'SET user_failed_logins = 0, user_last_failed_login = NULL '
           . 'WHERE user_id = :user_id AND user_failed_logins != 0');
           $sth->execute(array(':user_id' => $userdata->user_id));
+          // clear banned IP
+          $acc = $this->db_connection->prepare("DELETE FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE `ipv4` = '".$this->getUserIP()."' AND `reference` = 'postlogin';");
+          $acc->execute();
           // if user has check the "remember me" checkbox, then generate token and write cookie
           if (isset($user_rememberme)) {
             $this->newRememberMeCookie();
