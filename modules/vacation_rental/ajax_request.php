@@ -2,7 +2,7 @@
 /*
  --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
   (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
@@ -553,6 +553,12 @@ if (isset($_GET['term'])) {
       case 'restore_files':
       $err=0;
         $directory = "prices_backup/".$_GET['ref']."/".$_GET['term'];
+        if (strlen($_GET['year'])<>4 || intval($_GET['year'])==0){
+          echo "Impostare correttamente l'anno in cui importare";
+          $err=1;
+          return;
+          break;
+        }
         if (file_exists($directory)){
           $xml = simplexml_load_file($directory);
           //echo "<pre>",print_r($xml);
@@ -565,9 +571,12 @@ if (isset($_GET['term'])) {
               if (((string) $col['name'])=="id"){
                 continue;
               }
-               $cols .=$first.((string) $col['name']);
-               $values .= $first."'".$col[0]."'";
-               $first=', ';
+              if ($col['name']=="start" || $col['name']=="end"){
+                $col[0]=$_GET['year'].substr($col[0],-6);// modifico la data con l'anno richiesto
+              }
+              $cols .=$first.((string) $col['name']);
+              $values .= $first."'".$col[0]."'";
+              $first=', ';
             }
 
             $query = "INSERT INTO ".$table." (".$cols.") VALUES (".$values.")";

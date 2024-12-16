@@ -3,15 +3,15 @@
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
 
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
   Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -40,7 +40,7 @@ if ($ivac=="si"){
 }else {
   $ivac="imponibili";
 }
-$firstpart_ical_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']!='off') ? 'https://'.$_SERVER['SERVER_NAME'] : 'https://'.$_SERVER['SERVER_NAME'];
+$firstpart_ical_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']!='off') ? 'https://'.$_SERVER['SERVER_NAME'] : 'http://'.$_SERVER['SERVER_NAME'];
 // campi ammissibili per la ricerca
 $search_fields = [
     'sea_codice' => "{$gTables['artico']}.codice LIKE '%%%s%%'",
@@ -83,7 +83,7 @@ $(function() {
   $("#dialog_import").dialog({ autoOpen: false });
 	$('.dialog_import').click(function() {
     $("#dialog_import" ).dialog( "open" );
-		$("p#idcodice_exp").append($(this).attr("ref"));
+	$("p#idcodice_exp").append($(this).attr("ref"));
     var ref = $(this).attr('ref');
     $.ajax({
       data: {'opt':'get_files', 'term':ref},
@@ -129,6 +129,7 @@ $(function() {
     });
 		$( function() {
       var rest= $("#restorefile").text();
+
       var dialog,
       dialog = $("#dialog_import").dialog({
         modal: true,
@@ -143,11 +144,13 @@ $(function() {
           },
           Conferma: function() {
               var rest= $("#restorefile").text();
+			  var imp_year = $("#import_into").val();
               $.ajax({
-                data: {'opt':'restore_files', 'term':rest, 'ref':ref},
+                data: {'opt':'restore_files', 'term':rest, 'ref':ref, 'year':imp_year},
                 type: 'GET',
                 url: '../vacation_rental/ajax_request.php',
                 success: function(data){
+
                   alert(data);
                   $("#filebutt div").remove();
                   $("#dialog_import").dialog("close");
@@ -158,8 +161,6 @@ $(function() {
         }
       });
     });
-
-
   });
 
    $("#dialog_export").dialog({ autoOpen: false });
@@ -177,7 +178,6 @@ $(function() {
 					text:'Esporta',
 					'class':'btn btn-danger delete-button',
 					click:function (event, ui) {
-
             	var export_year = $("#export_year").val(); // The value of the selected option parent
             	var child_year = $("#child_year").val(); // The value of the selected option child
               var operat = $("#operat").val(); // The value of the selected option child
@@ -191,7 +191,6 @@ $(function() {
                   window.location.replace("./report_accommodation.php");
                 }
               });
-
 				}},
 				"Annulla": function() {
 					$(this).dialog("close");
@@ -570,6 +569,9 @@ $ts->output_navbar();
   <div class="modal" id="dialog_import" title="Importa prezzi">
       <fieldset>
           <div>
+			<div >Importa nell'anno
+               <input pattern=".{4,4}" required id="import_into" type="text" name="import_into" class="FacetInput" maxlength="4" onkeypress="return /[0-9]/i.test(event.key)" value="<?php echo date('Y'); ?>">
+			</div>
               <div id="restorefile">File da importare</div>
           </div>
           <div id="filebutt"> </div>
