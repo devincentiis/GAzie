@@ -88,6 +88,7 @@ class Login
 	/**
 	* @var array $errors Collection of error messages
 	*/
+	private $table_banned = false;
 
 	public $errors = array();
 	/**
@@ -264,14 +265,21 @@ class Login
   }
 
 	private function checkBanned() {
+    try {
+      $tabex = $this->db_connection->query("SELECT 1 FROM `". DB_TABLE_PREFIX ."_banned_ip` LIMIT 1");
+    } catch (Exception $e) {
+      $this->table_banned = false;
+      return false;
+    }
+    $this->table_banned = true;
     $query_ban = $this->db_connection->prepare("SELECT * FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE ipv4 = '".$this->getUserIP()."' AND `reference` ='postlogin';");
     $query_ban->execute();
     $ip_ban = $query_ban->fetchObject();
     if (isset($ip_ban->id) && $ip_ban->attempts >10 ) { // questo IP ha fattto oltre 10 tentativi falliti, non potrà più accedere a meno che non lo si rimuove dalla tabella del DB
-			return true;
-		} else {
-			return false;
-		}
+      return true;
+    } else {
+      return false;
+    }
 	}
 
 
@@ -396,9 +404,10 @@ class Login
           . 'SET user_failed_logins = 0, user_last_failed_login = NULL '
           . 'WHERE user_id = :user_id AND user_failed_logins != 0');
           $sth->execute(array(':user_id' => $userdata->user_id));
-          // clear banned IP
-          $acc = $this->db_connection->prepare("DELETE FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE `ipv4` = '".$this->getUserIP()."' AND `reference` = 'postlogin';");
-          $acc->execute();
+          if ($this->table_banned){ // clear banned IP only if table exist
+            $acc = $this->db_connection->prepare("DELETE FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE `ipv4` = '".$this->getUserIP()."' AND `reference` = 'postlogin';");
+            $acc->execute();
+          }
           // if user has check the "remember me" checkbox, then generate token and write cookie
           if (isset($user_rememberme)) {
             $this->newRememberMeCookie();

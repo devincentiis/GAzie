@@ -336,28 +336,30 @@ class informForm extends GAzieForm {
 }
 class gazBackup extends MySQLDump {
 
-  public function gazDataDir($zipname)
+  public function gazDataDir($zipname, $datafiles=true)
   {
     $rootPath = realpath(DATA_DIR.'files');
     $zip = new ZipArchive();
     $zip->open(DATA_DIR.'files/tmp/'.$zipname.'.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
     $zip->addFile(DATA_DIR.'files/tmp/tmp-backup.sql',$zipname.'.sql');
-    $files = new RecursiveIteratorIterator(
+    if ($datafiles) {
+      $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($rootPath),
         RecursiveIteratorIterator::LEAVES_ONLY
-    );
-    foreach ($files as $name => $file) {
-      if (!$file->isDir()) { // è un file
-        $filePath = $file->getRealPath();
-        $relativePath = substr($filePath, strlen($rootPath) + 1);
-        if (preg_match("/tmp|backups|htaccess/", $relativePath)==false) {
-          $zip->addFile($filePath, $relativePath);
-        }
-      } else { // è una dir
-        $end2 = substr($file,-2);
-        if ($end2 == "/.") {
-          $folder = substr($file, 0, -2);
-          $zip->addEmptyDir($folder);
+      );
+      foreach ($files as $name => $file) {
+        if (!$file->isDir()) { // è un file
+          $filePath = $file->getRealPath();
+          $relativePath = substr($filePath, strlen($rootPath) + 1);
+          if (preg_match("/tmp|backups|htaccess/", $relativePath)==false) {
+            $zip->addFile($filePath, $relativePath);
+          }
+        } else { // è una dir
+          $end2 = substr($file,-2);
+          if ($end2 == "/.") {
+            $folder = substr($file, 0, -2);
+            $zip->addEmptyDir($folder);
+          }
         }
       }
     }

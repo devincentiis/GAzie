@@ -53,7 +53,25 @@ if (isset($_GET['type'])) {
 			catch(Exception $e){
 			  echo $e->getMessage();
 			}
-			break;
+		break;
+		case "bckextyed": // con data/files
+      $gbackup = new gazBackup($link);
+			try {@$gbackup->save(DATA_DIR.'files/tmp/tmp-backup.sql');
+        $gbackup->gazDataDir('bckupext');
+			}
+			catch(Exception $e){
+			  echo $e->getMessage();
+			}
+		break;
+		case "bckextnod": // senza data/files
+      $gbackup = new gazBackup($link);
+			try {@$gbackup->save(DATA_DIR.'files/tmp/tmp-backup.sql');
+        $gbackup->gazDataDir('bckupext', false);
+			}
+			catch(Exception $e){
+			  echo $e->getMessage();
+			}
+		break;
 	}
 }
 ?>
