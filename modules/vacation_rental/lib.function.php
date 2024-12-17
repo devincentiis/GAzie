@@ -285,18 +285,22 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
     $where = " WHERE id_tes = '".$tesbro."'";
     if ($tourist_tax == TRUE && $add_extra==FALSE){// se richiesta la tassa turistica ma esclusi gli extra
       $where .= " AND (codart LIKE 'TASSA-TURISTICA%' OR (".$tableart.".custom_field REGEXP 'accommodation_type'))";
+      $on="";
     }
     if ($add_extra==FALSE && $tourist_tax == FALSE){// escludo gli extra ma anche la tassa turistica
       $where .= " AND (".$tableart.".custom_field REGEXP 'accommodation_type')";
+      $on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
     }
     if ($tourist_tax == TRUE && $add_extra==TRUE){// se richiesta la tassa turistica e gli extra
       $where .= "";
+      $on="";
     }
      if ($tourist_tax == FALSE && $add_extra==TRUE){// se richiesti solo gli extra
       $where .= " AND codart NOT LIKE 'TASSA-TURISTICA%'";
+      $on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
     }
     if ($vat==FALSE){// devo restituire l'imponibile
-      $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON ".$tablerig.".codart = ".$tableart.".codice ".$where;
+      $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice OR ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
       if ($result = mysqli_query($link, $sql)) {
          $row = mysqli_fetch_assoc($result);
           $where = " WHERE id_tes = '".$tesbro."'";

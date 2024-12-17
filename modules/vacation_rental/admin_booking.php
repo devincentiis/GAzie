@@ -906,7 +906,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $form['rows'][$next_row]['quamag'] = 0;
         $form['rows'][$next_row]['tiprig'] = 6;
         $next_row++;
-    } else if ((isset($_POST['in_submit']) && strlen($form['in_codart'])>0 && $form['start']!="" && $form['end']!="") || (isset($_POST['extra_submit']) && strlen($form['extra'][$_POST['extra_submit']])>0 && isset($_POST['rows']))) { // conferma inserimento alloggio o extra o tassa turistica
+    } else if ((isset($_POST['in_submit']) && strlen($form['in_codart'])>0 && $form['start']!="" && $form['end']!="") || (isset($_POST['extra_submit']) && strlen($form['extra'][   $_POST['extra_submit']])>0 && isset($_POST['rows']))) { // conferma inserimento alloggio o extra o tassa turistica
 
       if (isset($_POST['extra_submit']) && strlen($form['extra'][$_POST['extra_submit']])>0){// se è un extra (ci deve per forza essere l'alloggio e quindi per forza anche le date)
         // faccio tutto più sotto
@@ -917,7 +917,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 
       $total_price=0;// inizializzo il prezzo totale della locazione per il successivo calcolo
       $artico = gaz_dbi_get_row($gTables['artico'], "codice", $form['in_codart']);
-	  $form['in_fixquote'] = 0;
+      $form['in_fixquote'] = 0;
       if (isset($_POST['in_submit']) && strlen($form['in_codart'])>0 && $form['start']!="" && $form['end']!="" && $form['in_codart']<>"TASSA-TURISTICA"){// se è un alloggio e ci sono le date CALCOLO IL PREZZO
         if ($data = json_decode($artico['custom_field'], TRUE)) { // se esiste un json nel custom field
           if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['accommodation_type'])){// se è un alloggio
@@ -928,10 +928,10 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $gen_iva_perc = gaz_dbi_get_row($gTables['aliiva'], 'codice', $artico['aliiva'])['aliquo'];
         $gen_iva_code = $artico['aliiva'];
         $night=0;
-		$check_availability=check_availability($form['start'],$form['end'],$form['in_codart'], $open_from="", $open_to="");// controllo disponibilità
-		if (intval($check_availability)==0){
-			$overbooking=1;
-		}
+        $check_availability=check_availability($form['start'],$form['end'],$form['in_codart'], $open_from="", $open_to="");// controllo disponibilità
+        if (intval($check_availability)==0){
+          $overbooking=1;
+        }
         while (strtotime($start) < strtotime($form['end'])) {// ciclo il periodo della locazione giorno per giorno
           //Calcolo del prezzo locazione e conteggio notti
           $what = "price";
@@ -971,8 +971,9 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 
         // calcolo gli sconti
         $discounts=searchdiscount($form['in_codart'],$artico['id_artico_group'],$form['start'],$form['end'],$night,$anagra=0,$gTables['rental_discounts']);
-        $form['discount']=0;
-        $form['descri_discount']="";
+        $form['discount']=array();
+        $form['descri_discount']=array();
+        $form['discountable_price']=array();
         $total_price_disc=$total_price;
         $today=date('Y-m-d');
         if (isset($discounts) && $discounts->num_rows >0){// se c'è almeno uno sconto
@@ -1008,18 +1009,19 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             }
 
             if ($expired<>1 && $pointenable==1 && (intval($discount['level_points'])>0 && intval($level)==intval($discount['level_points'])) || intval($discount['level_points'])==0){//calcolo sconti se c'è un livello punti raggiunto dal cliente o se gli sconti sono senza livello punti
-				if ($form['discount']>0){
-					$form['descri_discount'].="+";
-					$total_price_disc = $total_price-$form['discount'];
-				}
-              if ($discount['is_percent']==1){
-                $form['discount']+= (floatval($total_price_disc)*floatval($discount['value']))/100;// aggiungo al totale sconti, lo sconto calcolato in percentuale
-                $form['descri_discount'].=$discount['title']." ".$discount['value']."%";// incremento la descrizione con lo sconto applicato
-              }else{
-                $form['discount']+= floatval($discount['value'])/floatval("1.".$gen_iva_perc);// aggiungo al totale sconti, lo sconto a valore scorporando IVA
 
-                $form['descri_discount'].= $discount['title']." ". number_format(floatval($discount['value'])/floatval("1.".$gen_iva_perc),3)."€";/// incremento la descrizione con lo sconto applicato
+              if ($discount['is_percent']==1){
+                $form['discountable_price'][]=$total_price_disc;
+                $form['discount'][]= (floatval($total_price_disc)*floatval($discount['value']))/100;// aggiungo al totale sconti, lo sconto calcolato in percentuale
+                $form['descri_discount'][]=$discount['title']." ".$discount['value']."%";// incremento la descrizione con lo sconto applicato
+                $total_price_disc = $total_price-((floatval($total_price_disc)*floatval($discount['value']))/100);
+              }else{
+                $form['discountable_price'][]=$total_price_disc;
+                $form['discount'][]= floatval($discount['value'])/floatval("1.".$gen_iva_perc);// aggiungo al totale sconti, lo sconto a valore scorporando IVA
+                $form['descri_discount'][]= $discount['title']." ". number_format(floatval($discount['value'])/floatval("1.".$gen_iva_perc),3)."€";/// incremento la descrizione con lo sconto applicato
+                $total_price_disc = $total_price-(floatval($discount['value'])/floatval("1.".$gen_iva_perc));
               }
+
               if ($discount['stop_further_processing']==1){// se questo deve bloccare i successivi eventuali, interrompo il conteggio
                 break;
               }
@@ -1030,7 +1032,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
       }else{
         $form['discount']=0;
       }
-      $form['in_prelis'] -= $form['discount'];
+
 
       gaz_dbi_query ("UPDATE ".$gTables['artico']." SET `last_used`='".date("Y-m-d")."' WHERE codice='".$form['in_codart']."';");
       // addizione ai totali peso,pezzi,volume
@@ -1388,10 +1390,12 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                     $form['rows'][$next_row]['pervat'] = $iva_row['aliquo'];
                     $form['rows'][$next_row]['tipiva'] = $iva_row['tipiva'];
                 }
+
                 if (intval($artico['codcon']) > 0) {
                     $form['rows'][$next_row]['codric'] = $artico['codcon'];
                     $form['in_codric'] = $artico['codcon'];
                 }
+
                 if ($form['in_codart']=="TASSA-TURISTICA") {//SE E' tassa turistica
                   $form['rows'][$next_row]['pervat']=0;// iva imposta turistica è esclusa art15
                 }
@@ -1549,38 +1553,48 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             }
 
 
-			if ($form['in_tiprig'] == 0) {   // è un rigo normale controllo se l'articolo ha avuto uno sconto
+            if ($form['in_tiprig'] == 0) {   // è un rigo normale controllo se l'articolo ha avuto uno sconto
 
-              if (floatval($form['discount'])>0 && intval($form['in_accommodation_type'])>1) { // lo sconto c'è e non è un extra(accomodation_type>1)
-                $next_row++;
-                $form["row_$next_row"] = "";
-                $form['rows'][$next_row]['tiprig'] = 2;
-                $form['rows'][$next_row]['descri'] = 'Applicato sconto di €'.number_format($form['discount'], $admin_aziend['decimal_price'], '.', '').": ".$form['descri_discount'];
-                $form['rows'][$next_row]['id_mag'] = 0;
-                $form['rows'][$next_row]['id_lotmag'] = 0;
-                $form['rows'][$next_row]['identifier'] = '';
-                $form['rows'][$next_row]['cod_operazione'] = 11;
-                $form['rows'][$next_row]['recip_stocc'] = '';
-                $form['rows'][$next_row]['recip_stocc_destin'] = '';
-                $form['rows'][$next_row]['lot_or_serial'] = 0;
-                $form['rows'][$next_row]['SIAN'] = 0;
-                $form['rows'][$next_row]['status'] = '';
-                $form['rows'][$next_row]['scorta'] = 0;
-                $form['rows'][$next_row]['quamag'] = 0;
-                $form['rows'][$next_row]['codart'] = '';
-                $form['rows'][$next_row]['annota'] = '';
-                $form['rows'][$next_row]['pesosp'] = '';
-                $form['rows'][$next_row]['gooser'] = 0;
-                $form['rows'][$next_row]['unimis'] = '';
-                $form['rows'][$next_row]['quanti'] = 0;
-                $form['rows'][$next_row]['prelis'] = 0;
-                $form['rows'][$next_row]['codric'] = 0;
-                $form['rows'][$next_row]['sconto'] = 0;
-                $form['rows'][$next_row]['pervat'] = 0;
-                $form['rows'][$next_row]['tipiva'] = 0;
-                $form['rows'][$next_row]['ritenuta'] = 0;
-                $form['rows'][$next_row]['codvat'] = 0;
-
+              if (is_array($form['discount']) && count($form['discount'])>0 && intval($form['in_accommodation_type'])>1) { // lo sconto c'è e non è un extra(accomodation_type>1)
+                $ndis=0;
+                $codvat=$form['rows'][$next_row]['codvat'];// prendo i codici iva dell'appartamento
+                $pervat=$form['rows'][$next_row]['pervat'];
+                $tipiva=$form['rows'][$next_row]['tipiva'];
+                $provv=$form['rows'][$next_row]['provvigione'];
+                foreach($form['discount'] as $dis){
+                  $next_row++;
+                  $form["row_$next_row"] = "";
+                  $form['rows'][$next_row]['tiprig'] = 0;
+                  $form['rows'][$next_row]['descri'] = 'Applicato '.$form['descri_discount'][$ndis].' su € '.number_format($form['discountable_price'][$ndis], $admin_aziend['decimal_price'], '.', '');
+                  $form['rows'][$next_row]['id_mag'] = 0;
+                  $form['rows'][$next_row]['id_lotmag'] = 0;
+                  $form['rows'][$next_row]['identifier'] = '';
+                  $form['rows'][$next_row]['cod_operazione'] = 11;
+                  $form['rows'][$next_row]['recip_stocc'] = '';
+                  $form['rows'][$next_row]['recip_stocc_destin'] = '';
+                  $form['rows'][$next_row]['codice_fornitore'] = $form['in_codart'];
+                  $form['rows'][$next_row]['lot_or_serial'] = 0;
+                  $form['rows'][$next_row]['SIAN'] = 0;
+                  $form['rows'][$next_row]['status'] = '';
+                  $form['rows'][$next_row]['scorta'] = 0;
+                  $form['rows'][$next_row]['quamag'] = 0;
+                  $form['rows'][$next_row]['codart'] = '';
+                  $form['rows'][$next_row]['annota'] = '';
+                  $form['rows'][$next_row]['pesosp'] = '';
+                  $form['rows'][$next_row]['gooser'] = 0;
+                  $form['rows'][$next_row]['unimis'] = 'n';
+                  $form['rows'][$next_row]['quanti'] = 1;
+                  $form['rows'][$next_row]['prelis'] = number_format(-$dis, $admin_aziend['decimal_price'], '.', '');
+                  $form['rows'][$next_row]['codric'] = 0;
+                  $form['rows'][$next_row]['sconto'] = 0;
+                  $form['rows'][$next_row]['pervat'] = $pervat;
+                  $form['rows'][$next_row]['tipiva'] = $tipiva;
+                  $form['rows'][$next_row]['ritenuta'] = 0;
+                  $form['rows'][$next_row]['codvat'] = $codvat;
+                  $form['rows'][$next_row]['provvigione'] = $provv;
+                  $form['rows'][$next_row]['codric'] = $form['in_codric'];
+                  $ndis++;
+                }
               }
             }
             if ($form['in_tiprig'] == 0) {   // è un rigo normale controllo se l'articolo prevede un rigo testuale a seguire
@@ -2439,7 +2453,7 @@ $vp = gaz_dbi_get_row($gTables['company_config'], 'var', 'vat_price')['val'];
 foreach ($form['rows'] as $k => $v) {
     //creo il castelletto IVA
     $imprig = 0;
-    if ($v['tiprig'] <= 1 && $v['prelis']>0) {
+    if ($v['tiprig'] <= 1) {
         $imprig = CalcolaImportoRigo($v['quanti'], $v['prelis'], $v['sconto']);
         $v_for_castle = CalcolaImportoRigo($v['quanti'], $v['prelis'], array($v['sconto'], $form['sconto']));
         if ($v['tiprig'] == 1) {//ma se del tipo forfait

@@ -274,8 +274,15 @@ if (isset($_GET['anteprima']) and $msg == "") {
                 $conta[$facil][$room_type]=(isset($conta[$facil][$room_type]))?$conta[$facil][$room_type]+1:1;// contatore locazioni per struttura e per tipo alloggio
 
                 //tariffa applicata a notte
-                $tarif_night= (($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100))/$nights;
-
+                $tabella = $gTables['rigbro'];
+                $select = "quanti, prelis";
+                $where = "codice_fornitore = '".$val_row['codice']."' AND codart NOT LIKE 'TASSA-TURISTICA'";
+                $resdis = gaz_dbi_dyn_query($select, $tabella, $where);// prendo eventuali righi sconto riferiti all'alloggio
+                $discount=0;
+                while ($dis = gaz_dbi_fetch_array($resdis)){ // per ogni eventuale rigo sconto
+                  $discount+=$dis['prelis']*$dis['quanti'];
+                }
+                $tarif_night= ((($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100))+$discount)/$nights;
                 if( !array_key_exists('tot_tarif_periodo', $count[$facil])){
                   $count[$facil]['tot_tarif_periodo'] =  $tarif_night*$row['dayStat'];// totale vendite per la struttura imponibile
                   $count[$facil]['tot_tarif_periodo_ivac'] =  ($tarif_night*$row['dayStat'])+((($tarif_night*$row['dayStat'])*$val_row['aliquo'])/100);// per B12 andrà diviso per pernottamenti totali
@@ -303,7 +310,7 @@ if (isset($_GET['anteprima']) and $msg == "") {
                   while ($currentDate <= strtotime($open_to)){ // ciclo un giorno alla volta l'intervallo del periodo di apertura
 
                     if (($currentDate >= strtotime($row['start'])) && ($currentDate <= strtotime($row['end']))){ // se il giorno che sto analizzando è dentro la locazione
-	
+
                         if (($currentDate >= strtotime($open_from) && ($currentDate <= strtotime($open_to)))){// il giorno fa parte della locazione quindi vedo se è dentro il periodo di apertura
                           // conteggio l'occupazione giornaliera della struttura (una sola volta al giorno)
                             if (isset($countDay[$facil]) && (!in_array($currentDate,$countDay[$facil]))){
@@ -399,36 +406,33 @@ if (isset($_GET['anteprima']) and $msg == "") {
                   }
                   $currentDate = strtotime("+1 day", $currentDate);
                 }
-				$tot_memo = 0;
-				foreach ($tot_turtax_memo as $key => $value){// controllo finale con tassa realmente addebitata
-					$tot_memo +=$value;
-				}
-				if ($tot_memo <> $val_row['prelis']){// se c'è differenza fra il calcolato e l'addebitato correggo
-					//echo "<br>RISCONTRATA differenza. Calcolata:",$tot_memo," - Addebitata:",$val_row['prelis'];
-					foreach ($presenze_turtax_memo as $key => $value){
-						if (isset($count[$facil][$key]['presenze']) && intval($count[$facil][$key]['presenze'])>0 && intval($value)>0){
-							$count[$facil][$key]['presenze']= $count[$facil][$key]['presenze'] - $value + ($val_row['prelis']/floatval($data_rif['vacation_rental']['tur_tax']));
-						}
-					}
-					foreach ($tot_turtax_memo as $key => $value){
-						if (isset($count[$facil][$key]['tot_turtax']) && intval($count[$facil][$key]['tot_turtax'])>0 && intval($value)>0){
-							$count[$facil][$key]['tot_turtax']= $count[$facil][$key]['tot_turtax'] - $value + $val_row['prelis'];
-							$val_row['prelis']=0;
-						}
-					}
-
-				}
+                $tot_memo = 0;
+                foreach ($tot_turtax_memo as $key => $value){// controllo finale con tassa realmente addebitata
+                  $tot_memo +=$value;
+                }
+                if ($tot_memo <> $val_row['prelis']){// se c'è differenza fra il calcolato e l'addebitato correggo
+                  //echo "<br>RISCONTRATA differenza. Calcolata:",$tot_memo," - Addebitata:",$val_row['prelis'];
+                  foreach ($presenze_turtax_memo as $key => $value){
+                    if (isset($count[$facil][$key]['presenze']) && intval($count[$facil][$key]['presenze'])>0 && intval($value)>0){
+                      $count[$facil][$key]['presenze']= $count[$facil][$key]['presenze'] - $value + ($val_row['prelis']/floatval($data_rif['vacation_rental']['tur_tax']));
+                    }
+                  }
+                  foreach ($tot_turtax_memo as $key => $value){
+                    if (isset($count[$facil][$key]['tot_turtax']) && intval($count[$facil][$key]['tot_turtax'])>0 && intval($value)>0){
+                      $count[$facil][$key]['tot_turtax']= $count[$facil][$key]['tot_turtax'] - $value + $val_row['prelis'];
+                      $val_row['prelis']=0;
+                    }
+                  }
+                }
               }else{// altrimenti è un extra o un rigo testo
-				if (floatval($val_row['prelis'])>0 && isset($val_row['custom_field']) && ($custom_field=json_decode($val_row['custom_field'], TRUE)) && isset($custom_field['vacation_rental']['extra'])){// se c'è un prezzo allora è un extra e lo conteggio
-					if( !array_key_exists('tot_extra_periodo', $count[$facil])){
-					  $count[$facil]['tot_extra_periodo'] =  number_format((($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100)),2);
-					} else {
-					  $count[$facil]['tot_extra_periodo'] +=  number_format((($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100)),2);
-					}
-				}
-			  }
-
-
+                if (floatval($val_row['prelis'])>0 && isset($val_row['custom_field']) && ($custom_field=json_decode($val_row['custom_field'], TRUE)) && isset($custom_field['vacation_rental']['extra'])){// se c'è un prezzo allora è un extra e lo conteggio
+                  if( !array_key_exists('tot_extra_periodo', $count[$facil])){
+                    $count[$facil]['tot_extra_periodo'] =  number_format((($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100)),2);
+                  } else {
+                    $count[$facil]['tot_extra_periodo'] +=  number_format((($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100)),2);
+                  }
+                }
+              }
             }
         }
       }
