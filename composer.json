@@ -11,11 +11,5 @@
         "setasign/fpdi": "^2.0",
         "dg/mysql-dump":"^1.5",
         "paragonie/ciphersweet":"^4"
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:tecnickcom/tc-lib-pdf.git"
-        }
-    ]
+    }
 }
