@@ -26,24 +26,32 @@
 
 class CbiSepa {
 
+    private $azienda = [];
+    private $bank = [];
+    private $OthrId = '';
+    private $CreDtTm = '';
+    private $MsgId = '';
+    private $CtgyPurpCd = false;
+    private $FileName = '';
+
     function setCbiPayReqVars($gTables,$head) {
-		// qui setto tutti i valori per l'intestazione
-        $this->azienda = gaz_dbi_get_row($gTables['aziend'], 'codice', $_SESSION['company_id']);
-        $this->bank = gaz_dbi_get_row($gTables['clfoco'].' LEFT JOIN '.$gTables['banapp'].' ON '.$gTables['clfoco'].'.banapp = '.$gTables['banapp'].".codice", $gTables['clfoco'].'.codice',$head['bank']);
-        $this->OthrId = (intval($this->azienda['pariva'])>=100)?$this->azienda['pariva']:$this->azienda['codfis'];
-		$this->CreDtTm = date('Y-m-d\TH:i:s');
-        $this->MsgId = dechex(rand(100,999).date('siHdmY')).'-';
-		$this->CtgyPurpCd = (isset($head['CtgyPurpCd']) && strlen($head['CtgyPurpCd']) == 4) ? $head['CtgyPurpCd'] : false;
-		// INTC  IntraCompanyPayment  Intra-company payment
-		// INTE  Interest  Payment of interest.
-		// PENS  PensionPayment  Payment of pension.
-		// SALA  SalaryPayment  Payment of salaries.
-		// SSBE  SocialSecurityBenefit  Payment of child benefit, family allowance.
-		// SUPP  SupplierPayment  Payment to a supplier.
-		// TAXS  TaxPayment  Payment of taxes.
-		// TREA  TreasuryPayment  Treasury transaction
-		// OTHR  Other
-		$this->FileName = (isset($head['FileName']) && strlen($head['FileName']) >= 16) ? $head['FileName'] : 'XMLCBIpay'.date('Ymdhis');
+      // qui setto tutti i valori per l'intestazione
+      $this->azienda = gaz_dbi_get_row($gTables['aziend'], 'codice', $_SESSION['company_id']);
+      $this->bank = gaz_dbi_get_row($gTables['clfoco'].' LEFT JOIN '.$gTables['banapp'].' ON '.$gTables['clfoco'].'.banapp = '.$gTables['banapp'].".codice", $gTables['clfoco'].'.codice',$head['bank']);
+      $this->OthrId = (intval($this->azienda['pariva'])>=100)?$this->azienda['pariva']:$this->azienda['codfis'];
+      $this->CreDtTm = date('Y-m-d\TH:i:s');
+      $this->MsgId = dechex(rand(100,999).date('siHdmY')).'-';
+      $this->CtgyPurpCd = (isset($head['CtgyPurpCd']) && strlen($head['CtgyPurpCd']) == 4) ? $head['CtgyPurpCd'] : false;
+      // INTC  IntraCompanyPayment  Intra-company payment
+      // INTE  Interest  Payment of interest.
+      // PENS  PensionPayment  Payment of pension.
+      // SALA  SalaryPayment  Payment of salaries.
+      // SSBE  SocialSecurityBenefit  Payment of child benefit, family allowance.
+      // SUPP  SupplierPayment  Payment to a supplier.
+      // TAXS  TaxPayment  Payment of taxes.
+      // TREA  TreasuryPayment  Treasury transaction
+      // OTHR  Other
+      $this->FileName = (isset($head['FileName']) && strlen($head['FileName']) >= 16) ? $head['FileName'] : 'XMLCBIpay'.date('Ymdhis');
     }
 
     function create_XML_CBIPaymentRequest($gTables,$head,$data,$save_id_doc=false) {
