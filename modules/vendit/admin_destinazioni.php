@@ -74,7 +74,26 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 }
 
 require("../../library/include/header.php");
-$script_transl = HeadMain();
+$script_transl = HeadMain(0,['custom/autocomplete']);
+?>
+<script>
+$(function() {
+  $("#search_id_anagra").autocomplete({
+    html: true,
+    source: "../../modules/root/search.php",
+    minLength: 2,
+    open: function(event, ui) {
+      $(".ui-autocomplete").css("z-index", 1000);
+    },
+		select: function(event, ui) {
+			$("#search_id_anagra").val(ui.item.value);
+			$("#id_anagra").val(ui.item.id);
+			$(this).closest("form").submit();
+		}
+  });
+});
+</script>
+<?php
 echo "<form method=\"POST\" name=\"form\" enctype=\"multipart/form-data\">\n";
 echo "<input type=\"hidden\" name=\"ritorno\" value=\"" . $form['ritorno'] . "\">\n";
 echo "<input type=\"hidden\" name=\"ref_code\" value=\"" . $form['ref_code'] . "\">\n";

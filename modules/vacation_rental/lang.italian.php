@@ -286,7 +286,7 @@ $strScript = array(
         'Deposito cauzionale da versare in contanti al check-in: EURO ',
         'In assenza di danni il deposito sarà restituito al check-out',
         'Proprietario',
-        'access1' => '<p>Le inviamo, in allegato, una copia della sua prenotazione</p><p>Per accedere alla prenotazione online, aggiungere extra, effettuare pagamenti e controllarne lo stato usi questo link',
+        'access1' => '<p>Le inviamo, in allegato, una copia della sua prenotazione</p><p>Può accedere alle sue prenotazioni, aggiungere extra, effettuare pagamenti e controllarne lo stato direttamente nel sito dal menu \'Utente\'. Oppure usi questo link rapido',
         'access2' => 'e i seguenti codici di accesso',
         'booking_number' => 'Numero prenotazione',
         'best_regards' => 'Grazie, cordiali saluti',

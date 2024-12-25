@@ -34,7 +34,6 @@ $calc = new Compute;
 $magazz = new magazzForm;
 $docOperat = $magazz->getOperators();
 $lm = new lotmag;
-
 function getFAIseziva($tipdoc) {
   global $admin_aziend, $gTables, $auxil;
   if ($tipdoc == 'FAI'||$tipdoc == 'FAA'||$tipdoc == 'FAF'||$tipdoc == 'FAP') { // se è una fattura immediata
@@ -207,7 +206,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $form['portos'] = $_POST['portos'];
   $form['imball'] = $_POST['imball'];
   $form['destin'] = $_POST['destin'];
-  $form['id_des'] = substr($_POST['id_des'], 3);
+  $form['id_des'] = intval($_POST['id_des']);
   $form['id_des_same_company'] = intval($_POST['id_des_same_company']);
   $form['traspo'] = $_POST['traspo'];
   $form['spevar'] = $_POST['spevar'];
@@ -1146,8 +1145,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
     }
     $form['hidden_req'] = '';
   }
-  // Se viene modificato l'agente
-  if ($_POST['hidden_req'] == 'AGENTE') {
+
+  if ($_POST['hidden_req'] == 'AGENTE') { // Se viene modificato l'agente
     if ($form['id_agente'] > 0) { // carico la provvigione standard
       $provvigione = new Agenti;
       $form['in_provvigione'] = $provvigione->getPercent($form['id_agente']);
@@ -1158,6 +1157,10 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         }
       }
     }
+    $form['hidden_req'] = '';
+  } else if ($_POST['hidden_req']=='id_des_same_company') {// se viene scelta una destinazione interna azzero quella di un eventuale partner
+    $form['id_des']=0;
+    $form['search']['id_des']='';
     $form['hidden_req'] = '';
   }
 
@@ -2379,17 +2382,30 @@ if (isset($admin_aziend['lang'])){
 }
 ?>
 <script>
-  $(function () {
-    $("#initra").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
-    $("#datemi").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
+$(function () {
+  $("#initra").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
+  $("#datemi").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
+  $("#search_id_des").autocomplete({
+    html: true,
+    source: "../../modules/root/search.php",
+    minLength: 2,
+    open: function(event, ui) {
+      $(".ui-autocomplete").css("z-index", 1000);
+    },
+		select: function(event, ui) {
+			$("#search_id_des").val(ui.item.value);
+			$("#id_des").val(ui.item.id);
+			$(this).closest("form").submit();
+		}
+  });
 <?php
-if ( count($msg['err'])<=0 && count($msg['war'])<=0 && $form['clfoco']>=100000000  && $scorrimento == '1' ) { // scrollo solo se voluto, ho selezionato il cliente e non ci sono errori
-    ?>
-            $("html, body").delay(100).animate({scrollTop: $('#search_cosear').offset().top-100}, 200);
-    <?php
-}
+  if ( count($msg['err'])<=0 && count($msg['war'])<=0 && $form['clfoco']>=100000000  && $scorrimento == '1' ) { // scrollo solo se voluto, ho selezionato il cliente e non ci sono errori
 ?>
-    });
+              $("html, body").delay(100).animate({scrollTop: $('#search_cosear').offset().top-100}, 200);
+<?php
+  }
+?>
+});
     function pulldown_menu(selectName, destField)
     {
         // Create a variable url to contain the value of the
@@ -3729,33 +3745,14 @@ if ($form['tipdoc'] == 'DDT' || $form['tipdoc'] == 'DDV' || $form['tipdoc'] == '
     echo "				\t</select>
 						</div></td>
 						<td class=\"FacetFieldCaptionTD\">$script_transl[10]</td>\n";
-//    if ($form['id_des_same_company'] > 0) { //  è una destinazione legata all'anagrafica
-    $tmpIdAnagra=(isset($cliente['id_anagra']) ? $cliente['id_anagra'] : "");
-    if (!empty($tmpIdAnagra) && gaz_dbi_record_count($gTables['destina'], "id_anagra=$tmpIdAnagra") > 0) { //  è una destinazione legata all'anagrafica
-
-        echo "<td class=\"FacetDataTD\">\n";
-        $gForm->selectFromDB('destina', 'id_des_same_company', 'codice', $form['id_des_same_company'], 'codice', true, '-', 'unita_locale1', '', 'FacetSelect', null, '', "id_anagra = '" . $cliente['id_anagra'] . "'");
-//        echo selectDestinazione($cliente['id_anagra']);
-        echo "	<br/><textarea rows=\"1\" cols=\"30\" name=\"destin\" class=\"FacetInput\">" . $form["destin"] . "</textarea>
-						</td>
-						<input type=\"hidden\" name=\"id_des\" value=\"" . $form['id_des'] . "\">
-						<input type=\"hidden\" name=\"search[id_des]\" value=\"" . $form['search']['id_des'] . "\">\n";
-    } elseif ($form['id_des'] > 0) { // la destinazione è un'altra anagrafica
-        echo "<td class=\"FacetDataTD\">\n";
-        $select_id_des = new selectPartner('id_des');
-        $select_id_des->selectDocPartner('id_des', 'id_' . $form['id_des'], $form['search']['id_des'], 'id_des', $script_transl['mesg'], $admin_aziend['mascli']);
-        echo "			<input type=\"hidden\" name=\"id_des_same_company\" value=\"" . $form['id_des_same_company'] . "\">
-                                <input type=\"hidden\" name=\"destin\" value=\"" . $form['destin'] . "\" />
-						</td>\n";
-    } else {
-        echo "			<td class=\"FacetDataTD\">";
-        echo "				<textarea rows=\"1\" cols=\"30\" name=\"destin\" class=\"FacetInput\">" . $form["destin"] . "</textarea>
-						</td>
-						<input type=\"hidden\" name=\"id_des_same_company\" value=\"" . $form['id_des_same_company'] . "\">
-						<input type=\"hidden\" name=\"id_des\" value=\"" . $form['id_des'] . "\">
-						<input type=\"hidden\" name=\"search[id_des]\" value=\"" . $form['search']['id_des'] . "\">\n";
-    }
-    echo "			<td align=\"right\" class=\"FacetFieldCaptionTD\">$script_transl[54]</td>
+    echo '<td class="FacetDataTD">';
+      $select_destin = new selectPartner('id_des');
+      $select_destin->selectDestin( $form['clfoco'],
+      ['id_des'=>'id_des','destin'=>'destin','id_des_same_company'=>'id_des_same_company'],
+      ['id_des'=> $form['id_des'],'destin'=>$form['destin'],'id_des_same_company'=> $form['id_des_same_company']],
+      $form['search']['id_des']);
+    echo '</td>';
+    echo "<td align=\"right\" class=\"FacetFieldCaptionTD\">$script_transl[54]</td>
 					<td class=\"FacetDataTD\"><input type=\"text\" value=\"" . $form['units'] . "\" name=\"units\" maxlength=6 size=6 ></td>
 					<td align=\"right\" class=\"FacetFieldCaptionTD\">$script_transl[55]</td>
 					<td class=\"FacetDataTD\"><input type=\"text\" value=\"" . $form['volume'] . "\" name=\"volume\" maxlength=20 size=20  ></td>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DespatchAdvice xmlns="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
+	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+	<cbc:CustomizationID>urn:fdc:peppol.eu:poacc:trns:despatch_advice:3:extended:urn:www.agid.gov.it:trns:ddt:3.1</cbc:CustomizationID>
+	<cbc:ProfileID>urn:fdc:peppol.eu:poacc:bis:despatch_advice:3</cbc:ProfileID>
+	<cbc:ID/>
+	<cbc:IssueDate/>
+	<cbc:Note/>
+	<cac:DespatchSupplierParty>
+		<cac:Party/>
+	</cac:DespatchSupplierParty>
+	<cac:DeliveryCustomerParty>
+		<cac:Party/>
+	</cac:DeliveryCustomerParty>
+	<cac:BuyerCustomerParty>
+		<cac:Party/>
+	</cac:BuyerCustomerParty>
+	<cac:SellerSupplierParty>
+		<cac:Party/>
+	</cac:SellerSupplierParty>
+	<cac:Shipment/>
+</DespatchAdvice>

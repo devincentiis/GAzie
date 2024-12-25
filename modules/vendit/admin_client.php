@@ -25,11 +25,11 @@
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $msg = '';
-$tab = 'home';
 if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo accesso
     $form = array_merge(gaz_dbi_parse_post('clfoco'), gaz_dbi_parse_post('anagra'));
     $form['ritorno'] = $_POST['ritorno'];
     $form['hidden_req'] = $_POST['hidden_req'];
+    $form['tab'] = substr($_POST['tab'],0,20);
     if (!empty($_FILES['docfile']['name'])) { // ho aggiunto un documento
       if (!($_FILES['docfile']['type'] == "image/png" ||
               $_FILES['docfile']['type'] == "image/x-png" ||
@@ -43,7 +43,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $fileinfo = pathinfo($_FILES['docfile']['name']);
         gaz_dbi_query("INSERT INTO ".$gTables['files']." (table_name_ref, id_ref, content, extension, title, adminid) VALUES ('clfoco_doc', '" .intval($admin_aziend['mascli'] * 1000000 + $_POST['codice']). "', TO_BASE64(AES_ENCRYPT('".bin2hex(file_get_contents($_FILES['docfile']['tmp_name']))."','".$_SESSION['aes_key']."')), '".$fileinfo['extension']."','".$fileinfo['filename']."', '".$_SESSION['user_name']."' )");
       }
-      $tab = 'licenses';
+      $form['tab'] = 'licenses';
     }
     $form['pec_email'] = trim($form['pec_email']);
     $form['e_mail'] = trim($form['e_mail']);
@@ -77,7 +77,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form = array_merge($form, $rs_a);
     }
 
-    if (isset($_POST['Submit'])) { // conferma tutto
+    if (isset($_POST['Conferma'])) { // conferma tutto
         // inizio controllo campi
         $real_code = $admin_aziend['mascli'] * 1000000 + $form['codice'];
         $rs_same_code = gaz_dbi_dyn_query('*', $gTables['clfoco'], " codice = " . $real_code, "codice", 0, 1);
@@ -266,6 +266,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['search']['fiscal_rapresentative_id'] = '';
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
     $form['hidden_req'] = '';
+    $form['tab'] = 'home';
     $form['datnas_Y'] = substr($form['datnas'], 0, 4);
     $form['datnas_M'] = substr($form['datnas'], 5, 2);
     $form['datnas_D'] = substr($form['datnas'], 8, 2);
@@ -300,6 +301,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['stapre'] = 'N';
   $form['allegato'] = 1;
   $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+  $form['tab'] = 'home';
   $form['hidden_req'] = '';
   $form['visannota'] = 'N';
 	$form['id_SIAN']="";
@@ -353,6 +355,23 @@ function setDate(name) {
 }";
 ?>
 $(function() {
+	$('.tabtoggle').click(function() {
+    $("#tab").val($(this).attr("href").substring(1));
+  });
+  $("#search_id_des").autocomplete({
+    html: true,
+    source: "../../modules/root/search.php",
+    minLength: 2,
+    open: function(event, ui) {
+      $(".ui-autocomplete").css("z-index", 1000);
+    },
+		select: function(event, ui) {
+			$("#search_id_des").val(ui.item.value);
+			$("#id_des").val(ui.item.id);
+			$(this).closest("form").submit();
+		}
+  });
+
 	$("#dialog_delete").dialog({ autoOpen: false });
 	$('.dialog_delete').click(function() {
 		$("p#idcodice").html($(this).attr("mndtid"));
@@ -471,6 +490,7 @@ function printDoc(urlPrintDoc,nf){
 <?php
 
 echo "<input type=\"hidden\" name=\"ritorno\" value=\"" . $form['ritorno'] . "\">\n";
+echo '<input type="hidden" value="'. $form['tab'] .'" name="tab" id="tab" />';
 echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
 echo "<input type=\"hidden\" value=\"" . $form['id_anagra'] . "\" name=\"id_anagra\" />\n";
 echo "<input type=\"hidden\" name=\"" . ucfirst($toDo) . "\" value=\"\">";
@@ -517,14 +537,14 @@ if (!empty($msg)) {
 <div class="panel panel-default gaz-table-form div-bordered">
   <div class="container-fluid">
   <ul class="nav nav-pills">
-    <li class="<?php echo $tab=='home'?'active':''; ?>"><a data-toggle="pill" href="#home">Anagrafica</a></li>
-    <li class="<?php echo $tab=='commer'?'active':''; ?>"><a data-toggle="pill" href="#commer">Impostazioni</a></li>
-    <li class="<?php echo $tab=='licenses'?'active':''; ?>"><a data-toggle="pill" href="#licenses">Documenti</a></li>
-    <li style="float: right;"><input class="btn btn-warning" name="Submit" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
+    <li class="<?php echo $form['tab']=='home'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#home">Anagrafica</a></li>
+    <li class="<?php echo $form['tab']=='commer'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#commer">Impostazioni</a></li>
+    <li class="<?php echo $form['tab']=='licenses'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#licenses">Documenti</a></li>
+    <li style="float: right;"><input class="btn btn-warning" name="Conferma" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
   </ul>
 
   <div class="tab-content">
-    <div id="home" class="tab-pane fade <?php echo $tab=='home'?'in active':''; ?>">
+    <div id="home" class="tab-pane fade <?php echo $form['tab']=='home'?'in active':''; ?>">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
@@ -766,7 +786,7 @@ $gForm->variousSelect('fatt_email', $script_transl['fatt_email_value'], $form['f
             </div>
         </div><!-- chiude row  -->
       </div><!-- chiude tab-pane  -->
-      <div id="commer" class="tab-pane fade <?php echo $tab=='commer'?'in active':''; ?>">
+      <div id="commer" class="tab-pane fade <?php echo $form['tab']=='commer'?'in active':''; ?>">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
@@ -1073,7 +1093,7 @@ $gForm->variousSelect('status', $script_transl['status_value'], $form['status'],
           </div>
         </div><!-- chiude row  -->
   </div>
-      <div id="licenses" class="tab-pane fade <?php echo $tab=='licenses'?'in active':''; ?>">
+      <div id="licenses" class="tab-pane fade <?php echo $form['tab']=='licenses'?'in active':''; ?>">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">

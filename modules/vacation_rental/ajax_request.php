@@ -52,6 +52,41 @@ if (isset($_GET['term'])) {
         $opt = 'orders';
     }
     switch ($opt) {
+
+      case 'reg_movcon_payment':
+        $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($_GET['term']));
+        $query = "SELECT * FROM " . $gTables['rental_payments'] . " WHERE id_tesbro ='". intval($_GET['term']) ."' ORDER BY payment_id ASC";
+        $result = gaz_dbi_query($query);// prendo tutti i pagamenti effettuati e non registrati in contabilità
+        while ($r = gaz_dbi_fetch_array($result)){// Registro ogni pagamento
+          if ($r['id_paymov']>0){// se questo pagamento è stato già registrato, controllo che esista ancora la registrazione
+            $check = gaz_dbi_get_row($gTables['paymov'], 'id', $r['id_paymov']);
+            if(is_array($check)){
+              echo "Pagamento del ",substr($r['created'],0,10)," di € ",gaz_format_quantity($r['payment_gross'],1,2)," già registrato\n";
+              continue;
+            }else{
+              echo "Esisteva ma è stato cancellato: procedo nella registrazione\n";
+            }
+          }
+            $tes_val = array('caucon' => '',
+              'descri' => "RISCOSSO ".$r['type'],
+              'datreg' => substr($r['created'],0,10),
+              'datdoc' => substr($r['created'],0,10),
+              'clfoco' => $tesbro['clfoco']
+            );
+            tesmovInsert($tes_val);
+            $tes_id = gaz_dbi_last_id();
+            rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => '108000030', 'import' => $r['payment_gross'] ));// conto pagamento TO DO! al momento metto debaro in cassa default
+            rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $tesbro['clfoco'], 'import' => $r['payment_gross'] ));
+            $rig_id = gaz_dbi_last_id();
+            $res_rigmoc = gaz_dbi_get_row($gTables['rigmoc'], 'id_tes', intval($_GET['tescon']), " AND codcon = ".intval($_GET['codcon']));// prendo il rigo della registrazione documento
+            $k = gaz_dbi_get_row($gTables['paymov'], 'id_rigmoc_doc', $res_rigmoc['id_rig']);
+            paymovInsert(array('id_tesdoc_ref' => $k['id_tesdoc_ref'], 'id_rigmoc_pay' => $rig_id, 'amount' => $r['payment_gross'], 'expiry' => substr($r['created'],0,10)));
+            $paymov_id = gaz_dbi_last_id();
+            gaz_dbi_put_query($gTables['rental_payments'], " payment_id = ".$r['payment_id'], "id_paymov", $paymov_id);
+        }
+        echo "\nRegistrazione terminata";
+      break;
+
       case 'point':
         // Antonio Germani prendo i dati IMAP utente, se ci sono
         $custom_field = gaz_dbi_get_row($gTables['anagra'], 'id', $admin_aziend['id_anagra'])['custom_field'];

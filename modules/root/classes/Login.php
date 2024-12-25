@@ -251,17 +251,19 @@ class Login
 
 	// store failed IP
 	private function storeFailedIP() {
-    // increase the failed attempts counter in order to ban the originating IP
-    $query_ip = $this->db_connection->prepare("SELECT * FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE ipv4 = :ipv4 AND `reference` ='postlogin';");
-    $query_ip->bindValue(':ipv4', $this->getUserIP(), PDO::PARAM_STR);
-    $query_ip->execute();
-    $ip_row = $query_ip->fetchObject();
-    if (isset($ip_row->id)) {
-      $acc = $this->db_connection->prepare("UPDATE " . DB_TABLE_PREFIX . "_banned_ip  SET `attempts` = attempts + 1 WHERE `id`= ".$ip_row->id.";");
-    } else {
-      $acc = $this->db_connection->prepare("INSERT INTO ". DB_TABLE_PREFIX . "_banned_ip  (`reference`, `ipv4`, `attempts`) VALUES ('postlogin','".$this->getUserIP()."',1);");
+    if ($this->table_banned) {
+      // increase the failed attempts counter in order to ban the originating IP
+      $query_ip = $this->db_connection->prepare("SELECT * FROM " . DB_TABLE_PREFIX . "_banned_ip WHERE ipv4 = :ipv4 AND `reference` ='postlogin';");
+      $query_ip->bindValue(':ipv4', $this->getUserIP(), PDO::PARAM_STR);
+      $query_ip->execute();
+      $ip_row = $query_ip->fetchObject();
+      if (isset($ip_row->id)) {
+        $acc = $this->db_connection->prepare("UPDATE " . DB_TABLE_PREFIX . "_banned_ip  SET `attempts` = attempts + 1 WHERE `id`= ".$ip_row->id.";");
+      } else {
+        $acc = $this->db_connection->prepare("INSERT INTO ". DB_TABLE_PREFIX . "_banned_ip  (`reference`, `ipv4`, `attempts`) VALUES ('postlogin','".$this->getUserIP()."',1);");
+      }
+      $acc->execute();
     }
-    $acc->execute();
   }
 
 	private function checkBanned() {

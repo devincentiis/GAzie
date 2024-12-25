@@ -94,4 +94,5 @@ $update_db[]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `v
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXartico` CHANGE `web_url` `web_url` VARCHAR(700) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL;";
 $update_db[]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `var`, `val`) VALUES ('URL front-end del regolamento web sel check-in', 'vacation_url_selfcheck', '')";
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_feedback_elements` ADD `description` VARCHAR(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT '' COMMENT 'Breve descrizione' AFTER `element`";
+$update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_payments` ADD `id_paymov` INT(11) NULL DEFAULT '0' COMMENT 'Connessione al movimento contabile di pagamento' AFTER `id_tesbro`, ADD `conto` INT(11) NOT NULL DEFAULT '0' COMMENT 'Conto di accredito' AFTER `id_paymov`;";
 ?>

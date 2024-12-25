@@ -29,6 +29,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form = array_merge(gaz_dbi_parse_post('clfoco'), gaz_dbi_parse_post('anagra'));
   $form['old_id_SIAN']=$_POST['old_id_SIAN'];
   $form['ritorno'] = $_POST['ritorno'];
+  $form['tab'] = substr($_POST['tab'],0,20);
   $form['hidden_req'] = $_POST['hidden_req'];
   $form['pec_email'] = trim($form['pec_email']);
   $form['e_mail'] = trim($form['e_mail']);
@@ -218,6 +219,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['search']['id_des'] = '';
   $form['search']['fiscal_rapresentative_id'] = '';
   $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+  $form['tab'] = 'home';
   $form['hidden_req'] = '';
   $form['datnas_Y'] = ($form['datnas'])?substr($form['datnas'], 0, 4):'';
   $form['datnas_M'] = ($form['datnas'])?substr($form['datnas'], 5, 2):'';
@@ -243,6 +245,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['stapre'] = 'N';
   $form['allegato'] = 1;
   $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+  $form['tab'] = 'home';
   $form['hidden_req'] = '';
 	$form['external_resp']="";
 	$form["external_service_descri"]="";
@@ -295,15 +298,18 @@ function setDate(name) {
 ";
 ?>
 $(function() {
-    $('#iban,#codfis').keyup(function(){
-        this.value = this.value.toUpperCase();
-    });
-
+	$('.tabtoggle').click(function() {
+    $("#tab").val($(this).attr("href").substring(1));
+  });
+  $('#iban,#codfis').keyup(function(){
+      this.value = this.value.toUpperCase();
+  });
 });
 </script>
 <?php
 echo "<form method=\"POST\" name=\"form\">\n";
 echo "<input type=\"hidden\" name=\"ritorno\" value=\"" . $form['ritorno'] . "\">\n";
+echo '<input type="hidden" value="'. $form['tab'] .'" name="tab" id="tab" />';
 echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
 echo "<input type=\"hidden\" value=\"" . $form['id_anagra'] . "\" name=\"id_anagra\" />\n";
 echo "<input type=\"hidden\" name=\"" . ucfirst($toDo) . "\" value=\"\">";
@@ -344,12 +350,12 @@ if (!empty($msg)) {
 <div class="panel panel-default gaz-table-form div-bordered">
   <div class="container-fluid">
   <ul class="nav nav-pills">
-    <li class="active"><a data-toggle="pill" href="#home">Anagrafica</a></li>
-    <li><a data-toggle="pill" href="#commer">Impostazioni</a></li>
+    <li class="<?php echo $form['tab']=='home'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#home">Anagrafica</a></li>
+    <li class="<?php echo $form['tab']=='commer'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#commer">Impostazioni</a></li>
     <li style="float: right;"><input class="btn btn-warning" name="Submit" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
   </ul>
   <div class="tab-content">
-    <div id="home" class="tab-pane fade in active">
+    <div id="home" class="tab-pane fade <?php echo $form['tab']=='home'?'in active':''; ?>">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
@@ -566,7 +572,7 @@ $gForm->selectFromDB('country', 'counas', 'iso', $form['counas'], 'iso', 1, ' - 
             </div>
         </div><!-- chiude row  -->
       </div><!-- chiude tab-pane  -->
-      <div id="commer" class="tab-pane fade">
+      <div id="commer" class="tab-pane fade <?php echo $form['tab']=='commer'?'in active':''; ?>">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">

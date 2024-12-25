@@ -38,6 +38,7 @@ if ($exist_true) {
 if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo accesso
     $form = gaz_dbi_parse_post('aziend');
     $form['ritorno'] = $_POST['ritorno'];
+    $form['tab'] = substr($_POST['tab'],0,20);
     $form['pec'] = trim($form['pec']);
     $form['e_mail'] = trim($form['e_mail']);
     $form['web_url'] = trim($form['web_url']);
@@ -248,6 +249,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 } elseif ($exist_true) { //se e' il primo accesso per UPDATE
     $form = gaz_dbi_get_row($gTables['aziend'], 'codice', intval($_SESSION['company_id']));
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+    $form['tab'] = 'home';
     $form['datnas'] = gaz_format_date($form['datnas'], false, false);
     $form['virtual_stamp_auth_date'] = gaz_format_date($form['virtual_stamp_auth_date'], false, false);
     // rilevo l'eventuale intermediario
@@ -271,6 +273,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 } elseif (!isset($_POST['Insert'])) { //se e' il primo accesso per INSERT
     $form = gaz_dbi_fields('aziend');
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+    $form['tab'] = 'home';
     $form['datnas'] = date("d/m/Y");
     $form['virtual_stamp_auth_date'] = '1/1/2000';
     $form['country'] = 'IT';
@@ -296,6 +299,9 @@ $script_transl = HeadMain(0,['calendarpopup/CalendarPopup','custom/autocomplete'
 ?>
 <script>
 $(function () {
+	$('.tabtoggle').click(function() {
+    $("#tab").val($(this).attr("href").substring(1));
+  });
   $('#amm_min').selectmenu();
   $('#fae_tipo_cassa').selectmenu();
   $('#causale_pagam_770').selectmenu();
@@ -354,19 +360,19 @@ if (count($msg['err']) > 0) { // ho un errore
         echo '<div class="text-center"><b>' . $script_transl['upd_this'] . " '" . $form['codice'] . "'</b></div>\n";
         echo '<input type="hidden" value="' . $form['codice'] . '" name="codice" />';
     }
+    echo '<input type="hidden" value="'. $form['tab'] .'" name="tab" id="tab" />';
     ?>
     <div class="panel panel-default gaz-table-form div-bordered">
     <div class="container-fluid">
     <ul class="nav nav-pills">
-      <li class="active"><a data-toggle="pill" href="#home">Dati principali</a></li>
-      <li><a data-toggle="pill" href="#setup">Impostazioni</a></li>
-      <li><a data-toggle="pill" href="#contab">Contabilità</a></li>
+      <li class="<?php echo $form['tab']=='home'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#home">Dati principali</a></li>
+      <li class="<?php echo $form['tab']=='setup'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#setup">Impostazioni</a></li>
+      <li class="<?php echo $form['tab']=='contab'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#contab">Contabilità</a></li>
       <li><a id="config_aziend" href="" style="color:black; background-color:white" data-toggle="modal" data-target="#edit-modal"><i class="glyphicon glyphicon-export"></i>Avanzata<i class="glyphicon glyphicon-lock"></i></a></li>
-<!--            <li><a href="config_aziend.php" style="color:black; background-color:white" target="blank"><i class="glyphicon glyphicon-export"></i>Avanzata<i class="glyphicon glyphicon-lock"></i></a></li> -->
       <li style="float: right;"><input class="btn btn-warning" name="Submit" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
     </ul>
         <div class="tab-content">
-          <div id="home" class="tab-pane fade in active">
+          <div id="home" class="tab-pane fade <?php echo $form['tab']=='home'?'in active':''; ?>">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
@@ -595,7 +601,7 @@ if (count($msg['err']) > 0) { // ho un errore
                 </div>
             </div><!-- chiude row  -->
           </div><!-- chiude tab-pane  -->
-          <div id="setup" class="tab-pane fade">
+          <div id="setup" class="tab-pane fade <?php echo $form['tab']=='setup'?'in active':''; ?>">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
@@ -625,7 +631,7 @@ if (count($msg['err']) > 0) { // ho un errore
                     <div class="form-group">
                         <label for="colore" class="col-sm-4 control-label"><?php echo $script_transl['colore']; ?></label>
                         <div class="col-md-8 company-color">
-                            <input class="simple_color_custom" type="text" value="#<?php echo $form['colore']; ?>" name="colore"  />
+                            <input class="simple_color_custom" type="text" value="#<?php echo $form['colore']; ?>" name="colore"   />
                         </div>
                     </div>
                 </div>
@@ -681,7 +687,7 @@ if (count($msg['err']) > 0) { // ho un errore
                 </div>
             </div><!-- chiude row  -->
           </div><!-- chiude tab-pane  -->
-          <div id="contab" class="tab-pane fade">
+          <div id="contab" class="tab-pane fade <?php echo $form['tab']=='contab'?'in active':''; ?>">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">

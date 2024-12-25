@@ -363,6 +363,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                             echo "<td>";
                             echo '<a class="btn btn-xs btn-default" style="cursor:pointer;" '.$targetPrintDoc.' ><i class="glyphicon glyphicon-print" title="Stampa documento"></i></a>';
                             echo "<a class=\"btn btn-xs btn-default\" style=\"cursor:pointer;\" onclick=\"printPdf('".$urlPrintEtichette."')\" data-toggle=\"modal\" data-target=\"#print_doc\" ><i class=\"glyphicon glyphicon-tag\" title=\"Stampa etichetta\"></i></a>";
+                            echo ' <a class="btn btn-xs btn-default" title="XML Peppol" href="./peppol.php?id_tes='.$r['id_tes'].'&viewxml" target="_blank"> XML </a>';
                             echo "</td>\n";
 
                             // Colonna "Mail"

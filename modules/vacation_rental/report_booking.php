@@ -47,42 +47,63 @@ function cols_from($table_name, ...$col_names) {
 }
 
 // visualizza i bottoni dei documenti di evasione associati all'ordine
-function mostra_documenti_associati($ordine) {
+function mostra_documenti_associati($ordine, $paid) {
     global $gTables;
+    $admin_aziend = checkAdmin();
+    include_once("manual_settings.php");
+
     // seleziono i documenti evasi che contengono gli articoli di questo ordine
     $rigdoc_result = gaz_dbi_dyn_query('DISTINCT id_tes', $gTables['rigdoc'], "id_order = " . $ordine, 'id_tes ASC');
     while ( $rigdoc = gaz_dbi_fetch_array($rigdoc_result) ) {
         // per ogni documento vado a leggere il numero documento
         $tesdoc_result = gaz_dbi_dyn_query('*', $gTables['tesdoc'], "id_tes = " . $rigdoc['id_tes'], 'id_tes DESC');
         $tesdoc_r = gaz_dbi_fetch_array($tesdoc_result);
+
         // a seconda del tipo di documento visualizzo il bottone corrispondente
+        $btn="btn-default";
+        if ($tesdoc_r["id_con"] > 0) {// se è già stato contabilizzato rendo verde il pulsante e chiedo se contabilizzare i pagamenti
+          $btn="btn-success";
+          if (floatval($paid)>0){// se sono stati anticipati dei pagamenti, visualizzo la possibilità di contabilizzarli
+            $sqlquery= "SELECT COUNT(DISTINCT ".$gTables['rigmoc'].".id_tes) as nummov,codcon,".$gTables['clfoco'].".codice, sum(import*(darave='D')) as dare,sum(import*(darave='A')) as avere, sum(import*(darave='D') - import*(darave='A')) as saldo, darave FROM ".$gTables['rigmoc']." LEFT JOIN ".$gTables['tesmov']." ON ".$gTables['rigmoc'].".id_tes = ".$gTables['tesmov'].".id_tes LEFT JOIN ".$gTables['clfoco']." ON ".$gTables['rigmoc'].".codcon = ".$gTables['clfoco'].".codice LEFT JOIN ".$gTables['anagra']." ON ".$gTables['anagra'].".id = ".$gTables['clfoco'].".id_anagra WHERE ".$gTables['rigmoc'].".id_tes = ".intval($tesdoc_r['id_con'])." AND codcon like '".$admin_aziend['mascli']."%' and caucon <> 'CHI' and caucon <> 'APE' or (caucon = 'APE' and codcon like '".$admin_aziend['mascli']."%') GROUP BY codcon ORDER BY darave";
+            $rs_castel = gaz_dbi_query($sqlquery);
+            $r = gaz_dbi_fetch_array($rs_castel);
+            if (abs($r['saldo']) >= 0.001) {
+              echo "<a  class=\"btn btn-xs btn-default \"";
+              echo " style=\"cursor:pointer;\" onclick=\"reg_movcon_payment('". $ordine."','". $r['codcon'] ."','".$tesdoc_r['id_con']."')\"";// devo passare id_tes di tesbro perché i rental payment sono connessi alla prenotazione
+              echo "><i class=\"glyphicon glyphicon-transfer \" title=\"Contabilizza i Pagamenti\"></i></a>";
+            }
+          }
+        }
         if ($tesdoc_r["tipdoc"] == "FAI") {
             // fattura immediata
-            echo "<a class=\"btn btn-xs btn-default\" title=\"visualizza la fattura immediata\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "\">";
+            echo "<a class=\"btn btn-xs ",$btn,"\" title=\"visualizza la fattura immediata\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "\">";
             echo "fatt. " . $tesdoc_r["numfat"];
             echo "</a> ";
         } elseif ($tesdoc_r["tipdoc"] == "DDT" || ($tesdoc_r["tipdoc"] == "FAD" && $tesdoc_r["ddt_type"]!='R')) {
             // documento di trasporto
-            echo "<a class=\"btn btn-xs btn-default\" title=\"visualizza il documento di trasporto\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=DDT\">";
+            echo "<a class=\"btn btn-xs ",$btn,"\" title=\"visualizza il documento di trasporto\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=DDT\">";
             echo "ddt " . $tesdoc_r["numdoc"];
             echo "</a> ";
         } elseif ($tesdoc_r["tipdoc"] == "CMR" || ($tesdoc_r["tipdoc"] == "FAD" && $tesdoc_r["ddt_type"]='R')) {
             // documento cmr
-            echo "<a class=\"btn btn-xs btn-default\" title=\"visualizza il cmr\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=CMR\">";
+            echo "<a class=\"btn btn-xs ",$btn,"\" title=\"visualizza il cmr\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=CMR\">";
             echo "cmr " . $tesdoc_r["numdoc"];
             echo "</a> ";
         } elseif ($tesdoc_r["tipdoc"] == "VCO") {
             // scontrino
-            echo "<a class=\"btn btn-xs btn-default\" title=\"visualizza lo scontrino come fattura\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=".$tesdoc_r["template"]."\">";
+            echo "<a class=\"btn btn-xs ",$btn,"\" title=\"visualizza lo scontrino come fattura\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=".$tesdoc_r["template"]."\">";
             echo "scontr. " . $tesdoc_r["numdoc"] . "<br /> " . gaz_format_date($tesdoc_r["datemi"]);
             echo "</a> ";
         } elseif ($tesdoc_r["tipdoc"] == "VRI") {
             // ricevuta
-            echo "<a class=\"btn btn-xs btn-default\" title=\"visualizza la ricevuta\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=Received\">";
+            echo "<a class=\"btn btn-xs ",$btn,"\" title=\"visualizza la ricevuta\" href=\"../vendit/stampa_docven.php?id_tes=" . $tesdoc_r['id_tes'] . "&template=Received\">";
             echo "ricevuta " . $tesdoc_r["numdoc"] . "<br /> " . gaz_format_date($tesdoc_r["datemi"]);
             echo "</a> ";
         } else {
             echo $tesdoc_r["tipdoc"];
+        }
+        if ($tesdoc_r["id_con"] == 0) {
+          echo " <a class=\"btn btn-xs btn-default btn-cont\" style=\"font-size:10px;\" href=\"../../modules/vendit/accounting_documents.php?type=F&vat_section=" . $seziva . "&last=" . $tesdoc_r["protoc"] . "\"><i class=\"glyphicon glyphicon-euro\"></i>&nbsp;CONTABILIZZA</a>";
         }
     }
 }
@@ -449,8 +470,24 @@ function delete_payment(ref,tes) {
   }
 }
 
-var tot=0;
+
+function reg_movcon_payment(ref,codcon,tescon) {
+  if (confirm("Stai per registrare in contabilità i pagamenti effettuati.")){
+        var tot=0;
+        $.ajax({
+          data: {opt:'reg_movcon_payment',term:ref,codcon:codcon,tescon:tescon},
+          type: 'GET',
+          url: '../vacation_rental/ajax_request.php',
+          dataType: 'html',
+          success: function(response){
+            alert(response);
+          }
+        });
+  }
+}
+
 function payment(ref) {
+  var tot=0;
   setTimeout(function(){
         // all'apertura del dialog prendo tutti i pagamenti già fatti e mostro il totale;
         $.ajax({
@@ -1380,7 +1417,7 @@ $ts->output_navbar();
                 }elseif ($remains_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
                       // l'a prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
                       $ultimo_documento = 0;
-                      mostra_documenti_associati( $r['id_tes'] );
+                      mostra_documenti_associati( $r['id_tes'], $paid );
                       if ( $tipo == "VOG" ) {
                           echo "<a class=\"btn btn-xs btn-default\" href=\"../../modules/vendit/select_evaord_gio.php\">evadi il rimanente</a>";
                       } else {
@@ -1390,7 +1427,7 @@ $ts->output_navbar();
                   } else {
                       // la prenotazione è completamente evasa, mostro i riferimenti ai documenti che l'hanno evasa
                       $ultimo_documento = 0;
-                      mostra_documenti_associati( $r['id_tes'] );
+                      mostra_documenti_associati( $r['id_tes'], $paid );
                   }
                  echo "</td>";
               }elseif(isset($datatesbro['vacation_rental']['id_booking']) && intval($datatesbro['vacation_rental']['id_booking'])>0){

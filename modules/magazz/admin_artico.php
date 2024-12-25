@@ -106,6 +106,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	$form = gaz_dbi_parse_post('artico');
 	$form['codice'] = trim($form['codice']);
 	$form['ritorno'] = $_POST['ritorno'];
+  $form['tab'] = substr($_POST['tab'],0,20);
 	$form['hidden_req'] = $_POST['hidden_req'];
 	$form['web_public_init'] = $_POST['web_public_init'];
 	$form['var_id'] = (isset($_POST['var_id']))?$_POST['var_id']:'';
@@ -373,13 +374,14 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       exit;
   }
 } elseif (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo accesso per UPDATE
-    $form = gaz_dbi_get_row($gTables['artico'], 'codice', substr($_GET['codice'],0,32));
-    /** ENRICO FEDELE */
-    if ($modal === false) {
-        $form['ritorno'] = $_SERVER['HTTP_REFERER'];
-    } else {
-        $form['ritorno'] = 'admin_artico.php';
-    }
+  $form = gaz_dbi_get_row($gTables['artico'], 'codice', substr($_GET['codice'],0,32));
+  /** ENRICO FEDELE */
+  if ($modal === false) {
+      $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+  } else {
+      $form['ritorno'] = 'admin_artico.php';
+  }
+  $form['tab'] = 'home';
   $form['hidden_req'] = '';
 	$form['web_public_init']=$form['web_public'];
 	if (json_decode($form['ecomm_option_attribute']) != null){ // se esiste un json per attributo della variante dell'e-commerce
@@ -392,68 +394,69 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 			$form['var_name'] = "";
 		}
 	}
-    /** ENRICO FEDELE */
-    $form['ref_code'] = $form['codice'];
-    // i prezzi devono essere arrotondati come richiesti dalle impostazioni aziendali
-    $form["preacq"] = number_format($form['preacq'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve1"] = number_format($form['preve1'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve2"] = number_format($form['preve2'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve3"] = number_format($form['preve3'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve4"] = number_format($form['preve4'], $admin_aziend['decimal_price'], '.', '');
-    $form["web_price"] = number_format($form['web_price'], $admin_aziend['decimal_price'], '.', '');
-    $form['rows'] = array();
-    $form['id_anagra'] = $form['clfoco'];
-    $form['search']['id_anagra'] = '';
-    /** fine modifica FP */
-    // inizio documenti/certificati
-    $ndoc = 0;
-    $rs_row = gaz_dbi_dyn_query("*", $gTables['files'], "item_ref = '" . $form['codice'] . "' AND id_ref = '0'", "id_doc DESC");
-    while ($row = gaz_dbi_fetch_array($rs_row)) {
-        $form['rows'][$ndoc] = $row;
-        $ndoc++;
-    }
-    // fine documenti/certificati
+  /** ENRICO FEDELE */
+  $form['ref_code'] = $form['codice'];
+  // i prezzi devono essere arrotondati come richiesti dalle impostazioni aziendali
+  $form["preacq"] = number_format($form['preacq'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve1"] = number_format($form['preve1'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve2"] = number_format($form['preve2'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve3"] = number_format($form['preve3'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve4"] = number_format($form['preve4'], $admin_aziend['decimal_price'], '.', '');
+  $form["web_price"] = number_format($form['web_price'], $admin_aziend['decimal_price'], '.', '');
+  $form['rows'] = array();
+  $form['id_anagra'] = $form['clfoco'];
+  $form['search']['id_anagra'] = '';
+  /** fine modifica FP */
+  // inizio documenti/certificati
+  $ndoc = 0;
+  $rs_row = gaz_dbi_dyn_query("*", $gTables['files'], "item_ref = '" . $form['codice'] . "' AND id_ref = '0'", "id_doc DESC");
+  while ($row = gaz_dbi_fetch_array($rs_row)) {
+      $form['rows'][$ndoc] = $row;
+      $ndoc++;
+  }
+  // fine documenti/certificati
 	// Antonio Germani - inizio immagini e-commerce
-    $nimg = 0;
-    $rs_row = gaz_dbi_dyn_query("*", $gTables['files'], "item_ref = '" . $form['codice'] . "' AND id_ref = '1'", "id_doc DESC");
-    while ($row = gaz_dbi_fetch_array($rs_row)) {
-        $form['imgrows'][$nimg] = $row;
-        $nimg++;
-    }
-    // fine immagini e-commerce
-    $bodytext = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_' . $form['codice']);
-    $form['body_text'] = ($bodytext)?$bodytext['body_text']:'';
+  $nimg = 0;
+  $rs_row = gaz_dbi_dyn_query("*", $gTables['files'], "item_ref = '" . $form['codice'] . "' AND id_ref = '1'", "id_doc DESC");
+  while ($row = gaz_dbi_fetch_array($rs_row)) {
+      $form['imgrows'][$nimg] = $row;
+      $nimg++;
+  }
+  // fine immagini e-commerce
+  $bodytext = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_' . $form['codice']);
+  $form['body_text'] = ($bodytext)?$bodytext['body_text']:'';
 } else { //se e' il primo accesso per INSERT
 	$autoincrement_id_ecomm = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoincrement_id_ecomm')['val'];// acquisico impostazione per autoincremento ID ref ecommerce
-    $form = gaz_dbi_fields('artico');
-    /** ENRICO FEDELE */
-    if ($modal === false) {
-        $form['ritorno'] = $_SERVER['HTTP_REFERER'];
-    } else {
-        $form['ritorno'] = 'admin_artico.php';
-    }
+  $form = gaz_dbi_fields('artico');
+  /** ENRICO FEDELE */
+  if ($modal === false) {
+      $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+  } else {
+      $form['ritorno'] = 'admin_artico.php';
+  }
+  $form['tab'] = 'home';
   $form['hidden_req'] = '';
 	$form['web_public_init'] = 0;
-    /** ENRICO FEDELE */
-    $form['ref_code'] = '';
-    $form['aliiva'] = $admin_aziend['preeminent_vat'];
-    // i prezzi devono essere arrotondati come richiesti dalle impostazioni aziendali
-    $form["preacq"] = number_format($form['preacq'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve1"] = number_format($form['preve1'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve2"] = number_format($form['preve2'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve3"] = number_format($form['preve3'], $admin_aziend['decimal_price'], '.', '');
-    $form["preve4"] = number_format($form['preve4'], $admin_aziend['decimal_price'], '.', '');
-    $form["web_price"] = number_format($form['web_price'], $admin_aziend['decimal_price'], '.', '');
-    $form['web_public'] = 0;
-    $form['depli_public'] = 1;
-    $form['cosepos']= '';
-    $form['id_position'] = 0;
-    $form['id_anagra'] = '';
-    $form['search']['id_anagra'] = '';
-    /** fine modifica FP */
-    // eventuale descrizione amplia
-    $form['body_text'] = '';
-    // propongo il primo ID libero per l'ecommerce
+  /** ENRICO FEDELE */
+  $form['ref_code'] = '';
+  $form['aliiva'] = $admin_aziend['preeminent_vat'];
+  // i prezzi devono essere arrotondati come richiesti dalle impostazioni aziendali
+  $form["preacq"] = number_format($form['preacq'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve1"] = number_format($form['preve1'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve2"] = number_format($form['preve2'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve3"] = number_format($form['preve3'], $admin_aziend['decimal_price'], '.', '');
+  $form["preve4"] = number_format($form['preve4'], $admin_aziend['decimal_price'], '.', '');
+  $form["web_price"] = number_format($form['web_price'], $admin_aziend['decimal_price'], '.', '');
+  $form['web_public'] = 0;
+  $form['depli_public'] = 1;
+  $form['cosepos']= '';
+  $form['id_position'] = 0;
+  $form['id_anagra'] = '';
+  $form['search']['id_anagra'] = '';
+  /** fine modifica FP */
+  // eventuale descrizione amplia
+  $form['body_text'] = '';
+  // propongo il primo ID libero per l'ecommerce
 	if ($autoincrement_id_ecomm==1){// se è stato impostato in configurazione avanzata azienda
 		$max_ref_ecommerce_id_product = gaz_dbi_query("select ref_ecommerce_id_product from ".$gTables['artico']." ORDER BY ref_ecommerce_id_product DESC LIMIT 1");
 		$max_id = gaz_dbi_fetch_array($max_ref_ecommerce_id_product);
@@ -461,13 +464,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	} else {// altrimenti lascio non impostato
 		$form['ref_ecommerce_id_product']="";
 	}
-    // ripropongo le ultime unità di misura più utilizzate
-    $rs_unimis = gaz_dbi_query("SELECT unimis, COUNT(unimis) c FROM ".$gTables['artico']." GROUP BY unimis ORDER BY c DESC LIMIT 1");
-    $unimis = gaz_dbi_fetch_array($rs_unimis);
-    $form['unimis'] = $unimis['unimis'];
-    $rs_uniacq = gaz_dbi_query("SELECT uniacq, COUNT(uniacq) c FROM ".$gTables['artico']." GROUP BY uniacq ORDER BY c DESC LIMIT 1");
-    $uniacq = gaz_dbi_fetch_array($rs_uniacq);
-    $form['uniacq'] = $uniacq['uniacq'];
+  // ripropongo le ultime unità di misura più utilizzate
+  $rs_unimis = gaz_dbi_query("SELECT unimis, COUNT(unimis) c FROM ".$gTables['artico']." GROUP BY unimis ORDER BY c DESC LIMIT 1");
+  $unimis = gaz_dbi_fetch_array($rs_unimis);
+  $form['unimis'] = $unimis['unimis'];
+  $rs_uniacq = gaz_dbi_query("SELECT uniacq, COUNT(uniacq) c FROM ".$gTables['artico']." GROUP BY uniacq ORDER BY c DESC LIMIT 1");
+  $uniacq = gaz_dbi_fetch_array($rs_uniacq);
+  $form['uniacq'] = $uniacq['uniacq'];
 }
 
 /** ENRICO FEDELE */
@@ -530,7 +533,9 @@ function calcDiscount() {
 }
 
 $(function () {
-
+	$('.tabtoggle').click(function() {
+    $("#tab").val($(this).attr("href").substring(1));
+  });
   $("#dialog_delete_blob").dialog({ autoOpen: false });
 	$('.dialog_delete_blob').click(function() {
 		$("p#idcodice").html($(this).attr("ref"));
@@ -724,6 +729,7 @@ if ($modal === true) {
 }
 echo '<input type="hidden" name="ritorno" value="' . $form['ritorno'] . '" />';
 echo '<input type="hidden" name="hidden_req" value="' . $form['hidden_req'] . '" />';
+echo '<input type="hidden" value="'. $form['tab'] .'" name="tab" id="tab" />';
 echo '<input type="hidden" name="ref_code" value="' . $form['ref_code'] . '" />';
 
 if ($modal_ok_insert === true) {
@@ -769,14 +775,14 @@ if ($modal_ok_insert === true) {
         <div class="panel panel-default gaz-table-form div-bordered">
             <div class="container-fluid">
             <ul class="nav nav-pills">
-                <li class="active"><a data-toggle="pill" href="#home">Dati principali</a></li>
-                <li><a data-toggle="pill" href="#magazz">Magazzino</a></li>
-                <li><a data-toggle="pill" href="#contab">Contabilità</a></li>
-                <li><a data-toggle="pill" href="#chifis">Chimico-fisiche</a></li>
+                <li class="<?php echo $form['tab']=='home'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#home">Dati principali</a></li>
+                <li class="<?php echo $form['tab']=='magazz'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#magazz">Magazzino</a></li>
+                <li class="<?php echo $form['tab']=='contab'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#contab">Contabilità</a></li>
+                <li class="<?php echo $form['tab']=='chifis'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#chifis">Chimico-fisiche</a></li>
                 <li style="float: right;"><?php echo '<input name="Confirm" type="submit" class="btn btn-warning" value="' . ucfirst($script_transl[$toDo]) . '" />'; ?></li>
             </ul>
             <div class="tab-content">
-              <div id="home" class="tab-pane fade in active">
+              <div id="home" class="tab-pane fade <?php echo $form['tab']=='home'?'in active':''; ?>">
                  <div class="row">
                     <div class="col-xs-12">
                         <div class="form-group">
@@ -987,7 +993,7 @@ if ($modal_ok_insert === true) {
                     </div>
                 </div><!-- chiude row  -->
               </div><!-- chiude tab-pane  -->
-              <div id="magazz" class="tab-pane fade">
+              <div id="magazz" class="tab-pane fade <?php echo $form['tab']=='magazz'?'in active':''; ?>">
                 <div id="esiste" class="row IERincludeExcludeRow">
                     <div class="col-md-12">
                         <div class="form-group">
@@ -1190,7 +1196,7 @@ if ($modal === false && $toDo=='update') {
                     </div>
                 </div><!-- chiude row  -->
               </div><!-- chiude tab-pane  -->
-              <div id="contab" class="tab-pane fade">
+              <div id="contab" class="tab-pane fade <?php echo $form['tab']=='contab'?'in active':''; ?>">
                 <div id="webPrice" class="row IERincludeExcludeRow">
                     <div class="col-md-12">
                         <div class="form-group">
@@ -1265,7 +1271,7 @@ if ($modal === false && $toDo=='update') {
                     </div>
                 </div><!-- chiude row  -->
               </div><!-- chiude tab-pane  -->
-              <div id="chifis" class="tab-pane fade">
+              <div id="chifis" class="tab-pane fade <?php echo $form['tab']=='chifis'?'in active':''; ?>">
                 <div id="quality" class="row IERincludeExcludeRow">
                     <div class="col-md-12">
                         <div class="form-group">
