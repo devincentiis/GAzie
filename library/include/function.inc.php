@@ -2838,8 +2838,8 @@ class Schedule {
   public $docData = [];
   public $PartnerStatus = [];
   public $Partners;
-  private $Entries = [];
-  private $RigmocEntries = [];
+  public $Entries = [];
+  public $RigmocEntries = [];
 
   function setPartnerTarget($account) {
   // setta il valore del conto (piano dei conti) del partner (cliente o fornitore)

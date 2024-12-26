@@ -164,6 +164,7 @@ class calPdf extends Fpdi {
       // fine composizione mese precedente
 
       // inizio composizione mese successivo
+      $this->SetTextColor(0);
       $this->SetXY(178,40);
       $this->SetFont('helvetica','B',10);
       for ($j=1; $j<=31; $j++) {
@@ -193,7 +194,7 @@ class calPdf extends Fpdi {
   public function Footer() {
     $this->SetDrawColor(hexdec(substr($this->azienda['colore'], 0, 2)), hexdec(substr($this->azienda['colore'], 2, 2)), hexdec(substr($this->azienda['colore'], 4, 2)));
     $this->SetLineStyle(['width'=>3]);
-    $this->RoundedRect(5,266,200,28,2);
+    $this->RoundedRect(2,266,206,29,2);
     if ($this->logoy>20){
       $this->logox=20;
       $this->logoy=0;

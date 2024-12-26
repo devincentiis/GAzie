@@ -56,26 +56,34 @@ if (isset($_GET['term'])) {
       case 'reg_movcon_payment':
         $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($_GET['term']));
         $query = "SELECT * FROM " . $gTables['rental_payments'] . " WHERE id_tesbro ='". intval($_GET['term']) ."' ORDER BY payment_id ASC";
-        $result = gaz_dbi_query($query);// prendo tutti i pagamenti effettuati e non registrati in contabilità
-        while ($r = gaz_dbi_fetch_array($result)){// Registro ogni pagamento
+        $result = gaz_dbi_query($query);// prendo tutti i pagamenti ricevuti
+        while ($r = gaz_dbi_fetch_array($result)){// li ciclo e, dopo controllo, li registro
+          $descri="RISCOSSO ";
           if ($r['id_paymov']>0){// se questo pagamento è stato già registrato, controllo che esista ancora la registrazione
             $check = gaz_dbi_get_row($gTables['paymov'], 'id', $r['id_paymov']);
-            if(is_array($check)){
-              echo "Pagamento del ",substr($r['created'],0,10)," di € ",gaz_format_quantity($r['payment_gross'],1,2)," già registrato\n";
-              continue;
+            if(is_array($check)){// se è già registrato e non è caparra lo salto
+              if ($r['type']=="Caparra_confirmatoria"){// se è una caparra precedentemente registrata, la attribuisco al cliente
+                $descri="IMPUTATA ";
+                $r['type'].=" alla locazione";
+                $r['conto']=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_caparra_dare')['val'];// imposto il corretto conto di imputazione
+
+              }else{
+                echo "Pagamento del ",substr($r['created'],0,10)," di € ",gaz_format_quantity($r['payment_gross'],1,2)," già registrato\n";
+                continue;
+              }
             }else{
-              echo "Esisteva ma è stato cancellato: procedo nella registrazione\n";
+              echo "Esisteva ma è stato cancellato: procedo in una nuova registrazione\n";
             }
-          }
+          }// registro il movimento contabile del pagamento
             $tes_val = array('caucon' => '',
-              'descri' => "RISCOSSO ".$r['type'],
+              'descri' => $descri.$r['type'],
               'datreg' => substr($r['created'],0,10),
               'datdoc' => substr($r['created'],0,10),
               'clfoco' => $tesbro['clfoco']
             );
             tesmovInsert($tes_val);
             $tes_id = gaz_dbi_last_id();
-            rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => '108000030', 'import' => $r['payment_gross'] ));// conto pagamento TO DO! al momento metto debaro in cassa default
+            rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => $r['conto'], 'import' => $r['payment_gross'] ));
             rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $tesbro['clfoco'], 'import' => $r['payment_gross'] ));
             $rig_id = gaz_dbi_last_id();
             $res_rigmoc = gaz_dbi_get_row($gTables['rigmoc'], 'id_tes', intval($_GET['tescon']), " AND codcon = ".intval($_GET['codcon']));// prendo il rigo della registrazione documento

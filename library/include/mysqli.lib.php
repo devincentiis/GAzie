@@ -821,14 +821,14 @@ function rigmoiInsert($newValue) {
 
 function rigmocInsert($newValue) {
    $table = 'rigmoc';
-   $columns = array('id_rig', 'id_tes', 'darave', 'codcon', 'import');
+   $columns = array('id_tes', 'darave', 'codcon', 'import', 'id_orderman');
    $last_id = tableInsert($table, $columns, $newValue);
    return $last_id;
 }
 
 function paymovInsert($newValue) {
    $table = 'paymov';
-   $columns = array('id', 'id_tesdoc_ref', 'id_rigmoc_pay', 'id_rigmoc_doc', 'amount', 'expiry');
+   $columns = array('id_tesdoc_ref', 'id_rigmoc_pay', 'id_rigmoc_doc', 'amount', 'expiry');
    tableInsert($table, $columns, $newValue);
 }
 

@@ -139,6 +139,14 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 		break;
 		case "delete_payment":
 			// elimino il pagamento
+      $rent_pay=gaz_dbi_get_row($gTables['rental_payments'], 'payment_id', intval($_POST['ref']));
+      if (intval($rent_pay['id_paymov'])>0){// se c'è stata, cancello la registrazione contabile del pagamento
+        $paymov=gaz_dbi_get_row($gTables['paymov'], 'id', intval($rent_pay['id_paymov']));
+        gaz_dbi_del_row($gTables['paymov'], 'id', intval($rent_pay['id_paymov']));
+        $rigmoc=gaz_dbi_get_row($gTables['rigmoc'], 'id_rig', intval($paymov['id_rigmoc_pay']));
+        gaz_dbi_del_row($gTables['rigmoc'], 'id_tes', intval($rigmoc['id_tes']));
+        gaz_dbi_del_row($gTables['tesmov'], 'id_tes', intval($rigmoc['id_tes']));
+      }
 			gaz_dbi_del_row($gTables['rental_payments'], 'payment_id', intval($_POST['ref']));
 		break;
 		case "delete_data":

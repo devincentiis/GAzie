@@ -70,5 +70,7 @@ $upgrade_db[155][]="INSERT INTO ".$table_prefix."_XXXcompany_config (`descriptio
 $upgrade_db[155][]="ALTER TABLE `".$table_prefix."_XXXartico` CHANGE `web_url` `web_url` VARCHAR(700) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL;";
 $upgrade_db[155][]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `var`, `val`) VALUES ('URL front-end del regolamento web sel check-in', 'vacation_url_selfcheck', '')";
 $upgrade_db[160][]="ALTER TABLE `".$table_prefix."_XXXrental_feedback_elements` ADD `description` VARCHAR(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT '' COMMENT 'Breve descrizione' AFTER `element`";
-$upgrade_db[160][]="ALTER TABLE `".$table_prefix."_XXXrental_payments` ADD `id_paymov` INT(11) NULL DEFAULT '0' COMMENT 'Connessione al movimento contabile di pagamento' AFTER `id_tesbro`, ADD `conto` INT(11) NOT NULL DEFAULT '0' COMMENT 'Conto di accredito' AFTER `id_paymov`;"
+$upgrade_db[160][]="ALTER TABLE `".$table_prefix."_XXXrental_payments` ADD `id_paymov` INT(11) NULL DEFAULT '0' COMMENT 'Connessione al movimento contabile di pagamento' AFTER `id_tesbro`, ADD `conto` INT(11) NOT NULL DEFAULT '0' COMMENT 'Conto di accredito' AFTER `id_paymov`;";
+$upgrade_db[160][]="ALTER TABLE `".$table_prefix."_XXXrental_payments` CHANGE `type` `type` VARCHAR(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL;";
+$upgrade_db[160][]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `var`, `val`) VALUES ('Conto CAPARRE DA CLIENTI (dare: imputata caparra al prezzo)', 'vacation_caparra_dare', '0'),('Conto CAPARRE DA CLIENTI (avere: ricevuta caparra) ', 'vacation_caparra_avere', '0');";
 ?>

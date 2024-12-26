@@ -521,11 +521,12 @@ function payment(ref) {
 					text:'conferma',
 					'class':'btn btn-danger delete-button',
 					click:function (event, ui) {
+            var sel = $("#target_account").val();
             var type = $("#type").val();
             var txn_id = $("#txn_id").val();
             var payment_gross = $("#payment_gross").val();
             $.ajax({
-              data: {'type':'payment',ref:ref,type:type,txn_id:txn_id,payment_gross:payment_gross},
+              data: {'type':'payment',ref:ref,type:type,txn_id:txn_id,payment_gross:payment_gross,target_account:sel},
               type: 'POST',
               url: '../vacation_rental/manual_payment.php',
               dataType: 'text',
@@ -904,9 +905,29 @@ $ts->output_navbar();
   <p class="ui-state-highlight" id="payment_des"></p>
     <p><b>Inserisci pagamento manuale:</b></p>
     <p>
-    <label>tipo pagamento:</label>
-    <input style="float: right;" id="type" name="type" type="text">
-    </p><p>
+    <label>Tipo pagamento:</label>
+    <select style="float: right;" name="type" id="type" tabindex="4" class="FacetSelect" >
+      <option value="Locazione" > Locazione </option>
+      <option value="Caparra_confirmatoria" > Caparra confirmatoria </option>
+      <option value="Deposito_cauzionale" > Deposito cauzionale </option>
+    </select>
+    </p>
+    <p>
+    <label>Modalità pagamento:</label>
+     <select style="float: right;" name="target_account" id="target_account" tabindex="4" class="FacetSelect" >
+    <?php
+    $masban = $admin_aziend['masban'] * 1000000;
+    $casse = substr($admin_aziend['cassa_'], 0, 3);
+    $mascas = $casse * 1000000;
+    //recupero i conti correnti
+    $res = gaz_dbi_dyn_query('*', $gTables['clfoco'], "(codice LIKE '$casse%' AND codice > '$mascas') or (codice LIKE '{$admin_aziend['masban']}%' AND codice > '$masban')", "codice ASC");
+    while ($conto = gaz_dbi_fetch_array($res)) {
+        echo "<option value=\"{$conto['codice']}-{$conto['descri']}\"> {$conto['codice']}-{$conto['descri']} </option>\n";
+    }
+    ?>
+    </select>
+    </p>
+    <p>
     <label>ID:</label>
     <input style="float: right;" id="txn_id" name="txn_id" type="text">
     </p><p>
