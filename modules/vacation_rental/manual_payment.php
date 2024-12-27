@@ -89,7 +89,7 @@ if (isset($_POST['type']) && isset($_POST['ref']) && isset($_POST['payment_gross
     $vacation_caparra_avere=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_caparra_avere')['val'];
     if($vacation_caparra_dare>0 && $vacation_caparra_avere>0){// se sono stati impostati i conti
       // registro il movimento contabile del pagamento 'provvisorio'
-      //DA IMPOSTARE bene dopo che in configurazione sono stati impostati i conti
+
       $tesbro=gaz_dbi_get_row($gTables['tesbro'], "id_tes", $id_tesbro);
       $tes_val = array('caucon' => '',
         'descri' => "RISCOSSO ".$type." prenotazione n.".$tesbro['numdoc']." del ".gaz_format_date($tesbro["datemi"]),
@@ -108,12 +108,44 @@ if (isset($_POST['type']) && isset($_POST['ref']) && isset($_POST['payment_gross
       rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => intval($conto), 'import' => $payment_gross, 'id_orderman' => 0 ));
       rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $vacation_caparra_avere, 'import' => $payment_gross, 'id_orderman' => 0 ));
       $rig_id = gaz_dbi_last_id();
+      $id_tesdoc_ref=intval(date("Y").str_pad($rig_id,11,"0",STR_PAD_LEFT));
+      paymovInsert(array('id_tesdoc_ref' => $id_tesdoc_ref, 'id_rigmoc_pay' => $rig_id, 'id_rigmoc_doc' => 0, 'amount' => $payment_gross, 'expiry' => substr(date("Y-m-d"),0,10)));
+      $paymov_id = gaz_dbi_last_id();
+      gaz_dbi_put_query($gTables['rental_payments'], " payment_id = ".$rental_id, "id_paymov", $paymov_id);
+
+    }
+  }
+  if (substr($type,0,21)=="Deposito_cauzionale"){// se è stato inserito un deposito cauzionale
+    $vacation_cauzione_dare=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_cauzione_dare')['val'];
+    $vacation_cauzione_avere=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_cauzione_avere')['val'];
+    if($vacation_cauzione_dare>0 && $vacation_cauzione_avere>0){// se sono stati impostati i conti
+      // registro il movimento contabile del pagamento 'provvisorio'
+
+      $tesbro=gaz_dbi_get_row($gTables['tesbro'], "id_tes", $id_tesbro);
+      $tes_val = array('caucon' => '',
+        'descri' => "RISCOSSO ".$type." prenotazione n.".$tesbro['numdoc']." del ".gaz_format_date($tesbro["datemi"]),
+        'datreg' => date("Y-m-d"),
+        'datdoc' => date("Y-m-d"),
+        'datliq' => date("Y-m-d"),
+        'seziva' => $seziva,
+        'clfoco' => $tesbro['clfoco'],
+        'id_doc' => 0,
+        'protoc' => 0,
+        'operat' => 0
+      );
+      tesmovInsert($tes_val);
+
+      $tes_id = gaz_dbi_last_id();
+      rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => intval($conto), 'import' => $payment_gross, 'id_orderman' => 0 ));
+      rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $vacation_cauzione_avere, 'import' => $payment_gross, 'id_orderman' => 0 ));
+      $rig_id = gaz_dbi_last_id();
       $id_tesdoc_ref=intval(date("Y").str_pad($rig_id,7,"0",STR_PAD_LEFT));
       paymovInsert(array('id_tesdoc_ref' => $id_tesdoc_ref, 'id_rigmoc_pay' => $rig_id, 'id_rigmoc_doc' => 0, 'amount' => $payment_gross, 'expiry' => substr(date("Y-m-d"),0,10)));
       $paymov_id = gaz_dbi_last_id();
       gaz_dbi_put_query($gTables['rental_payments'], " payment_id = ".$rental_id, "id_paymov", $paymov_id);
 
     }
+
   }
 
   echo "Pagamento registrato";

@@ -58,25 +58,28 @@ class calPdf extends Fpdi {
   public function setGlobalData($aziend,$clfoco) {
     $this->azienda = $aziend;
     $this->clfoco = $clfoco;
+    $im = imagecreatefromstring ($this->azienda['image']);
+    $ratio = round(imagesx($im)/imagesy($im),2);
+    $this->logox=50;$this->logoy=0;
+    if ($ratio<1.55){ $this->logox=0; $this->logoy=32.5; }
+    //var_dump($this->azienda['web_url']);
+    $this->imglink = !empty($this->azienda['web_url']) ? $this->azienda['web_url'] : '../config/admin_aziend.php';
   }
 
   public function Header() {
     $this->SetFillColor(hexdec(substr($this->azienda['colore'], 0, 2)), hexdec(substr($this->azienda['colore'], 2, 2)), hexdec(substr($this->azienda['colore'], 4, 2)));
     $this->SetDrawColor(hexdec(substr($this->azienda['colore'], 0, 2)), hexdec(substr($this->azienda['colore'], 2, 2)), hexdec(substr($this->azienda['colore'], 4, 2)));
-    $this->SetLineStyle(['width'=>3]);
-    $this->RoundedRect(2,2,206,36,2);
-    $im = imagecreatefromstring ($this->azienda['image']);
-    $ratio = round(imagesx($im)/imagesy($im),2);
-    $this->logox=50;$this->logoy=0;
-    if ($ratio<1.55){ $this->logox=0; $this->logoy=32.5; }
-    $imglink = !empty($this->azienda['web_url']) ? $this->azienda['web_url'] : '../config/admin_aziend.php';
+    $this->Circle(105,8,2,0,360,'DF');
     $this->SetFont('helvetica', '', 10);
     $this->SetFont('times','B',34);
-    $this->SetXY(35,8);
-    $this->Cell(116,15,strtoupper($this->month),0,2,'C',false,'',0,false,'T','B');
+    $this->SetXY(48,15);
+    $this->Cell(116,8,strtoupper($this->month),0,2,'C',false,'',0,false,'T','B');
+    $this->SetXY(48,28);
     $this->SetFont('times','B',22);
     $this->Cell(116,6,$this->year,0,2,'C');
     $this->SetFont('helvetica', 'B', 10);
+    $this->SetLineStyle(['width'=>3]);
+    $this->RoundedRect(2,2,206,36,2);
     $this->SetXY(130,4);
     $this->Cell(75,6,$this->azienda['ragso1'].' '.$this->azienda['ragso2'],0,0,'R',0,'',1);
     $this->Image('@'.$this->azienda['image'],5,5,$this->logox,$this->logoy,'',$this->imglink);
@@ -196,12 +199,15 @@ class calPdf extends Fpdi {
     $this->SetLineStyle(['width'=>3]);
     $this->RoundedRect(2,266,206,29,2);
     if ($this->logoy>20){
-      $this->logox=20;
-      $this->logoy=0;
+      $logox=20;
+      $logoy=0;
+    } else {
+      $logox=$this->logox;
+      $logoy=$this->logoy;
     }
-    $this->Image('@'.$this->azienda['image'],153,270,$this->logox,$this->logoy,'',$this->imglink);
+    $this->Image('@'.$this->azienda['image'],153,270,$logox,$logoy,'',$this->imglink);
     $this->SetFont('helvetica','B',10);
-    $this->SetXY(10,270);
+    $this->SetXY(10,268);
     $this->Cell(160,5,$this->azienda['ragso1'].' '.$this->azienda['ragso2'],0,1);
     $this->SetFont('helvetica','',10);
     $this->SetX(10);
@@ -209,7 +215,10 @@ class calPdf extends Fpdi {
     $this->SetX(10);
     $this->Cell(160,4,$this->azienda['capspe'].' '.$this->azienda['citspe'].' ('.$this->azienda['prospe'].')',0,1,0,0,'',1);
     $this->SetX(10);
-    $this->Cell(160,4,'Tel: '.$this->azienda['telefo'].' - e-mail: '.$this->azienda['e_mail'],0,0,0,0,'',1);
+    $this->Cell(105,4,'Tel: '.$this->azienda['telefo'].' - e-mail: '.$this->azienda['e_mail'],0,1,0,0,'',1);
+    $this->SetFont('helvetica','B',14);
+    $this->SetTextColor(100,100,100);
+    $this->Cell(200,8,$this->imglink,0,0,'C',0,$this->imglink,1);
   }
 
 }
@@ -218,7 +227,9 @@ $pdf = new calPdf();
 $pdf->setGlobalData($admin_aziend,$clfoco);
 $pdf->SetMargins(0,5,3);
 $pdf->SetFooterMargin(5);
-$pdf->SetCreator('GAzie - ' . $admin_aziend['ragso1'] . ' ' . $admin_aziend['ragso2']);
+$pdf->setAuthor($admin_aziend['user_lastname'] . ' ' . $admin_aziend['user_firstname']);
+$pdf->SetCreator('GAzie ' .GAZIE_VERSION.' - '. $admin_aziend['ragso1'] . ' ' . $admin_aziend['ragso2']);
+$pdf->setTitle('Calendario olandese dell\'anno '.$yobj);
 $pdf->SetFont('helvetica','',7);
 $ctrl_month=0;
 $acc=[];
@@ -246,5 +257,5 @@ foreach($period as $dt) {
   $ctrl_month=$m;
 }
 $pdf->Compose($acc,$gazTimeFormatter);
-$pdf->Output();
+$pdf->Output('Calendario_olandese_'.$yobj.'_with_love_from_'.str_replace(' ','_',$admin_aziend['ragso1']).'_'.str_replace(' ','_',$admin_aziend['ragso2']).'.pdf');
 ?>

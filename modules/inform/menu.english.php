@@ -32,7 +32,8 @@ $transl['inform'] = array('name' => "Tools & Info",
         5 => array("Update website", "Update website"),
         6 => array("Rubrica URL", "Siti Aziendali"),
         7 => array("Anagrafiche comuni a tutte le aziende", "Anagrafiche comuni"),
-        8 => array("Ricostruzione scadenzario", "Ricostruzione scadenzario")
+        8 => array("Ricostruzione scadenzario", "Ricostruzione scadenzario"),
+        9 => array("Calendario olandese", "Calendario olandese")
     ),
     'm3' => array(1 => array("Controllo sbilancio dare-avere dei movimenti contabili", "Controllo sbilancio movimenti contabili"),
         2 => array("Controllo numerazione protocolli IVA", "Controllo numerazione protocolli IVA"),
@@ -48,7 +49,6 @@ $transl['inform'] = array('name' => "Tools & Info",
         12 => array("Province","Province"),
         13 => array("Bank branches","Bank branches"),
         14 => array("Anagrafiche da fatture elettroniche ","Importa anagrafiche")
-
     )
 );
 ?>

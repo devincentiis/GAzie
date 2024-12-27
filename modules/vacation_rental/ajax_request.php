@@ -60,9 +60,14 @@ if (isset($_GET['term'])) {
         while ($r = gaz_dbi_fetch_array($result)){// li ciclo e, dopo controllo, li registro
           $descri="RISCOSSO ";
           if ($r['id_paymov']>0){// se questo pagamento è stato già registrato, controllo che esista ancora la registrazione
+
             $check = gaz_dbi_get_row($gTables['paymov'], 'id', $r['id_paymov']);
-            if(is_array($check)){// se è già registrato e non è caparra lo salto
-              if ($r['type']=="Caparra_confirmatoria"){// se è una caparra precedentemente registrata, la attribuisco al cliente
+
+            if(is_array($check) || $r['type']=="Caparra_confirmatoria"){// se è già registrato oppure è caparra
+              $vacation_caparra_avere=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_caparra_avere')['val'];
+              $check_rigmoc = gaz_dbi_get_row($gTables['rigmoc'], 'id_rig', $check['id_rigmoc_pay']);
+
+              if ($r['type']=="Caparra_confirmatoria" && $check_rigmoc['codcon']==$vacation_caparra_avere){// se è una caparra non imputata, la imputo al cliente
                 $descri="IMPUTATA ";
                 $r['type'].=" alla locazione";
                 $r['conto']=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_caparra_dare')['val'];// imposto il corretto conto di imputazione

@@ -56,8 +56,7 @@ CREATE TABLE IF NOT EXISTS `gaz_banned_ip` (
   KEY `last_attempt` (`last_attempt`),
   KEY `reference` (`reference`)
 ) ENGINE=MyISAM COMMENT='Tabella utilizzabile sui moduli personalizzati per bannare gli IP dai quali arrivano tentativi falliti ';
-INSERT INTO `gaz_config` ( `description`, `variable`, `cvalue`) SELECT 'Numero e giorni periodicità backup (separati da virgola) ', 'keep_backup', '52,7' FROM `gaz_config` WHERE (`variable`='keep_backup') HAVING COUNT(*) = 0;
-INSERT INTO `gaz_config` (`id`, `description`, `variable`, `cvalue`, `weight`, `show`, `last_modified`) VALUES (15, 'Numero e giorni periodicità backup (separati da virgola) ', 'keep_backup', '52,7', 0, 0, '2024-12-24 14:45:26');
+INSERT INTO `gaz_config` (`description`, `variable`, `cvalue`) SELECT 'Numero e giorni periodicità backup (separati da virgola) ', 'keep_backup', '52,7' FROM `gaz_config` WHERE (`variable`='keep_backup') HAVING COUNT(*) = 0;
 UPDATE `gaz_config` SET `description`='Numero e giorni periodicità backup (separati da virgola) ', `cvalue`='52,7' WHERE  `variable`='keep_backup';
 ALTER TABLE `gaz_destina`	ADD INDEX (`id_anagra`);
 CREATE TABLE IF NOT EXISTS `gaz_calendar` (
@@ -66,7 +65,6 @@ CREATE TABLE IF NOT EXISTS `gaz_calendar` (
   `holiday` tinyint DEFAULT NULL,
   `info` varchar(255) DEFAULT NULL,
   `iso_country` varchar(2) NOT NULL DEFAULT 'IT',
-  UNIQUE KEY `day_month` (`day`,`month`),
   KEY `month` (`month`),
   KEY `day` (`day`),
   KEY `iso_country` (`iso_country`)

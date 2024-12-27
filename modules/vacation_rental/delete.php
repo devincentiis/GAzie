@@ -146,6 +146,17 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
         $rigmoc=gaz_dbi_get_row($gTables['rigmoc'], 'id_rig', intval($paymov['id_rigmoc_pay']));
         gaz_dbi_del_row($gTables['rigmoc'], 'id_tes', intval($rigmoc['id_tes']));
         gaz_dbi_del_row($gTables['tesmov'], 'id_tes', intval($rigmoc['id_tes']));
+        if ($rent_pay['type']=="Caparra_confirmatoria"){
+          $vacation_caparra_avere=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_caparra_avere')['val'];
+          // cerco la registrazione di ricevimento caparra, ante imputazione
+          $rigmoc2=gaz_dbi_get_row($gTables['rigmoc'], 'codcon', intval($vacation_caparra_avere), " AND import = ".$rigmoc['import']);
+          if (isset($rigmoc2['id_tes'])){// se c'è, cancello i relativi rigmoc, paymov e tesmov anche del ricevimento
+            gaz_dbi_del_row($gTables['rigmoc'], 'id_tes', intval($rigmoc2['id_tes']));
+            gaz_dbi_del_row($gTables['tesmov'], 'id_tes', intval($rigmoc2['id_tes']));
+            gaz_dbi_del_row($gTables['paymov'], 'id_rigmoc_pay', intval($rigmoc2['id_rig']));
+
+          }
+        }
       }
 			gaz_dbi_del_row($gTables['rental_payments'], 'payment_id', intval($_POST['ref']));
 		break;

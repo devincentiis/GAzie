@@ -8,7 +8,8 @@
  */
 $transl['lims'] = array( 'name' => "LIMS",
                            'title' => "LIMS",
-                           'm2' => array(1 => array("Configura LIMS","Configura LIMS")
+                           'm2' => array(1 => array("Configura LIMS","Configura LIMS"),
+                                         2 => array("Parametri Acque potabili","Parametri Acque potabili")
                                         ),
                          );
 ?>

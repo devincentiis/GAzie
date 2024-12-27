@@ -23,9 +23,9 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-$transl['orderman'] = array('name' => "Commesse",
-    'title' => "Gestione commesse",
-    'm2' => array(1 => array("Lista delle commesse", "Lista delle commesse")
+$transl['orderman'] = array('name' => "Order Management",
+    'title' => "Order Management",
+    'm2' => array(1 => array("Order List", "Order List")
     ),
     'm3' => array(1 => array("Nuova produzione", "Nuova produzione"),
 				  2 => array("Luoghi produzione", "Luoghi produzione"),

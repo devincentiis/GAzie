@@ -22,9 +22,9 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
 */
-$transl['fourzero'] = array('name' => "Industria 4.0",
-    'title' => "Sincronizzazioni per Industria 4.0",
-    'm2' => array(1 => array("Configurazione 4.0", "Configurazione 4.0")
+$transl['fourzero'] = array('name' => "Industry 4.0",
+    'title' => "Synchro for Industry 4.0",
+    'm2' => array(1 => array("Config Industry 4.0", "Config Industry 4.0")
                 )
 );
 ?>
