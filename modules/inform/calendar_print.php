@@ -106,18 +106,23 @@ class calPdf extends Fpdi {
         $first=false;
       }
     }
+    $ctrl_moon=false;
     for ($i=1; $i<=12; $i++) {
       $mo=str_pad($i,2,'0',STR_PAD_LEFT);
       $dtm = new DateTime($this->year.'-'.$mo.'-01');
       $this->month = $gazTF->format($dtm);
       $this->AddPage();
       // inizio composizione mese attuale
+      $y=40;
       for ($j=1; $j<=32; $j++) {
+        $y += 14;
         if($j==17){
           $x=106;
+          $y=40;
           $this->SetXY(106,40);
         } elseif($j==1){
           $x=38;
+          $y=40;
           $this->SetXY(38,40);
         } elseif($j>17){
           $x=106;
@@ -126,17 +131,35 @@ class calPdf extends Fpdi {
           $x=38;
           $this->SetX(38);
         }
-        $cday=isset($acc[$this->year.$mo][$j])?$acc[$this->year.$mo][$j]['label']:'';
-        $iday=isset($acc[$this->year.$mo][$j])?explode(',',$acc[$this->year.$mo][$j]['info'])[0]:'';
-        if (isset($acc[$this->year.$mo][$j]) && $acc[$this->year.$mo][$j]['holiday']==1) {
-          $this->SetTextColor(255,0,0);
+        $moon=false;
+        $week='';
+        if (isset($acc[$this->year.$mo][$j])){
+          $cday=$acc[$this->year.$mo][$j]['label'];
+          $iday=explode(',',$acc[$this->year.$mo][$j]['info'])[0];
+          if ($ctrl_moon <> $acc[$this->year.$mo][$j]['moonphase']) { // è cambiata la fase lunare
+            $moon = './img/moon'.$acc[$this->year.$mo][$j]['moonphase'].'.svg';
+          }
+          $ctrl_moon=$acc[$this->year.$mo][$j]['moonphase'];
+          if ($acc[$this->year.$mo][$j]['week']) { // è cambiata la settimana
+            $week = $acc[$this->year.$mo][$j]['week'].'^ settimana';
+          }
+          if ($acc[$this->year.$mo][$j]['holiday']==1) {
+            $this->SetTextColor(255,0,0);
+          }
+        } else {
+          $cday='';
+          $iday='';
         }
         $this->SetFont('helvetica','B',20);
         $this->Cell(6,10,'','TL');
-        $this->Cell(62,10,$cday,'TR',1,'',false,'',0,false,'T','T');
-        $this->SetX($x);
-        $this->SetTextColor(0);
+        $this->Cell(32,10,$cday,'T',0,'',false,'',0,false,'T','T');
         $this->SetFont('helvetica','',8);
+        $this->SetTextColor(0);
+        $this->Cell(30,10,$week,'TR',1,'',false,'',0,false,'T','T');
+        if ($moon){
+      		$this->ImageSVG($moon,$x+55,$y+4,0,6);
+        }
+        $this->SetX($x);
         $this->Cell(68,4,$iday,'LBR',1,'',false,'',1,false,'T','T');
       }
       // fine composizione mese attuale
@@ -221,6 +244,19 @@ class calPdf extends Fpdi {
     $this->Cell(200,8,$this->imglink,0,0,'C',0,$this->imglink,1);
   }
 
+  public function getMoonPhase($day,$month,$year) {
+    if ($month < 4) { $year = $year - 1; $month = $month + 12; }
+    $days_y = 365.25 * $year;
+    $days_m = 30.42 * $month;
+    $julian = $days_y + $days_m + $day - 694039.09;
+    $julian = $julian / 29.53;
+    $phase = intval($julian);
+    $julian = $julian - $phase;
+    $phase = round($julian * 8 + 0.5);
+    if ($phase == 8) { $phase = 0; }
+    return $phase;
+  }
+
 }
 
 $pdf = new calPdf();
@@ -234,11 +270,14 @@ $pdf->SetFont('helvetica','',7);
 $ctrl_month=0;
 $acc=[];
 $gazTimeFormatter->setPattern('d eee');
+$week=false;
 foreach($period as $dt) {
   $m=$dt->format('n');
   $d=$dt->format('j');
   $kd=$dt->format('md');
   $ym=$dt->format('Ym');
+  $mf=$pdf->getMoonPhase($d,$m,$yobj);
+  $w=$dt->format('w');
   $dbdaycal=gaz_dbi_get_row($gTables['calendar'],'day',$d," AND month = ".$m);
   if ($kd == $easter_date) {
     $start_easter=true;
@@ -252,8 +291,13 @@ foreach($period as $dt) {
       $dbdaycal['info']='Lunedì dell\'Angelo';
     }
   }
-  if ($dt->format('w')==0) $dbdaycal['holiday']=1;
-  $acc[$ym][$d]=['label'=>$gazTimeFormatter->format($dt),'holiday'=>$dbdaycal['holiday'],'info'=>$dbdaycal['info']];
+  $week=false;
+  if ($w==0) {
+    $dbdaycal['holiday']=1;
+  } elseif ($w==1) {
+    $week = intval($dt->format("W"));
+  }
+  $acc[$ym][$d]=['label'=>$gazTimeFormatter->format($dt),'holiday'=>$dbdaycal['holiday'],'info'=>$dbdaycal['info'],'week'=>$week,'moonphase'=>$mf];
   $ctrl_month=$m;
 }
 $pdf->Compose($acc,$gazTimeFormatter);

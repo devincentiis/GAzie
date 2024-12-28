@@ -88,8 +88,15 @@ if (isset($_GET['term'])) {
             );
             tesmovInsert($tes_val);
             $tes_id = gaz_dbi_last_id();
-            rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => $r['conto'], 'import' => $r['payment_gross'] ));
-            rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $tesbro['clfoco'], 'import' => $r['payment_gross'] ));
+            $vacation_caparra_avere=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_caparra_avere')['val'];
+
+            if($r['type']=="Caparra_confirmatoria" && intval($vacation_caparra_avere)>0){// se è una caparra confirmatoria proveniente dal website, quindi mai registrata, la registro ricevuta ma non ancora imputata
+              rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => $r['conto'], 'import' => $r['payment_gross'] ));
+              rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $vacation_caparra_avere, 'import' => $r['payment_gross'] ));
+            }else{
+              rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'D', 'codcon' => $r['conto'], 'import' => $r['payment_gross'] ));
+              rigmocInsert(array('id_tes' => $tes_id, 'darave' => 'A', 'codcon' => $tesbro['clfoco'], 'import' => $r['payment_gross'] ));
+            }
             $rig_id = gaz_dbi_last_id();
             $res_rigmoc = gaz_dbi_get_row($gTables['rigmoc'], 'id_tes', intval($_GET['tescon']), " AND codcon = ".intval($_GET['codcon']));// prendo il rigo della registrazione documento
             $k = gaz_dbi_get_row($gTables['paymov'], 'id_rigmoc_doc', $res_rigmoc['id_rig']);

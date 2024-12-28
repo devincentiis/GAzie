@@ -153,7 +153,7 @@ if (isset($_POST['type']) && isset($_POST['ref']) && isset($_POST['payment_gross
 }elseif (isset($_POST['type']) && $_POST['type']=="payment_list" && isset($_POST['ref'])){
   $n=0;
   $id_tesbro=  intval($_POST['ref']);
-   $sql = "SELECT * FROM ".$azTables."rental_payments"." WHERE id_tesbro = '".$id_tesbro."'";
+   $sql = "SELECT * FROM ".$azTables."rental_payments"." LEFT JOIN ".$azTables."clfoco"." ON ".$azTables."rental_payments".".conto = ".$azTables."clfoco".".codice WHERE id_tesbro = '".$id_tesbro."'";
   if ($result = mysqli_query($link, $sql)) {
     $return=array();
     while ($res = $result->fetch_assoc()){
@@ -162,7 +162,7 @@ if (isset($_POST['type']) && isset($_POST['ref']) && isset($_POST['payment_gross
 		}
     echo json_encode($return);
   }else{
-    echo "Error: " . $sql . "<br>" . mysqli_error($link);
+    echo "Error: " , $sql ;
   }
 }else{
   echo "Non posso registrare pagamento";

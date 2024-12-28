@@ -496,17 +496,23 @@ function payment(ref) {
           url: '../vacation_rental/manual_payment.php',
           dataType: 'json',
           success: function(response){
+
             var response = JSON.stringify(response);
             arr = $.parseJSON(response); //convert to javascript array
             tot=0;
             $.each(arr, function(n, val) {
-              $("p#payment_des").append(val.currency_code+" "+val.payment_gross+" - "+val.payment_status+" - "+val.created+" "+val.type+" <input type='submit' class='btn btn-sm btn-default' name='delete form='report_form' onClick='delete_payment("+val.payment_id+","+ref+");' value='ELIMINA'><br>");
+              $("p#payment_des").append(val.currency_code+" "+val.payment_gross+" - "+val.payment_status+" - "+val.created+" "+val.type+" - "+val.descri+" <input type='submit' class='btn btn-sm btn-default' name='delete form='report_form' onClick='delete_payment("+val.payment_id+","+ref+");' value='ELIMINA'><br>");
               if (val.payment_status=="Completed"){
                 tot = tot+parseFloat(val.payment_gross);
               }
             });
             $("p#payment_des").append("<br><b>TOTALE "+tot.toFixed(2)+"</b>");
+          },
+          error: function(error){
+            var error = JSON.stringify(error);
+            alert(error);
           }
+
         });
     },100);
 
