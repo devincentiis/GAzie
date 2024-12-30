@@ -59,6 +59,9 @@ if (isset($_GET['term'])) {
         $result = gaz_dbi_query($query);// prendo tutti i pagamenti ricevuti
         while ($r = gaz_dbi_fetch_array($result)){// li ciclo e, dopo controllo, li registro
           $descri="RISCOSSO ";
+          if($r['payment_gross']<0){
+            $descri="RIMBORSATO ";
+          }
           if ($r['id_paymov']>0){// se questo pagamento è stato già registrato, controllo che esista ancora la registrazione
 
             $check = gaz_dbi_get_row($gTables['paymov'], 'id', $r['id_paymov']);
