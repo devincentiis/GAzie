@@ -99,7 +99,7 @@ function printPdf(urlPrintDoc){
 <input type="hidden" name="ritorno" value="<?php echo $form['ritorno']; ?>">
 <input type="hidden" name="hidden_req" value="<?php echo $form['hidden_req']; ?>">
 <div class="h3 text-center">Genera un calandario olandese </div>
-<div class="panel panel-default div-bordered">
+<div class="panel panel-default div-bordered gaz-table-form">
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-12">

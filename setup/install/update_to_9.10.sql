@@ -260,7 +260,7 @@ INSERT INTO `gaz_calendar` (`day`, `month`, `holiday`, `info`, `iso_country`) VA
 	(6, 7, NULL, 'Santa Maria Goretti', 'IT'),
 	(7, 7, NULL, 'Beato Benedetto XI', 'IT'),
 	(8, 7, NULL, 'Santi Aquila e Priscilla', 'IT'),
-	(9, 7, NULL, 'Beata Maria di Gasù crocifisso (Maria Petkovic)', 'IT'),
+	(9, 7, NULL, 'Beata Maria di Gesù crocifisso (Maria Petkovic)', 'IT'),
 	(10, 7, NULL, 'Sante Seconda e Rufina, San Canuto IV', 'IT'),
 	(11, 7, NULL, 'San Pio I, San Benedetto da Norcia', 'IT'),
 	(12, 7, NULL, 'Santi Ermagora e Fortunato, Santa Veronica', 'IT'),

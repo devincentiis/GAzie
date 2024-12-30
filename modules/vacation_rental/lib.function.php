@@ -581,8 +581,26 @@ function get_total_paid($idtesbro){// totale pagato nella locazione
   }else{
     $tablerent_pay = $gTables['rental_payments'];
   }
-  $where = " WHERE id_tesbro = '".$idtesbro."' AND payment_status = 'Completed'";
+  $where = " WHERE id_tesbro = '".$idtesbro."' AND payment_status = 'Completed' AND type <> 'Deposito_cauzionale'";
   $sql = "SELECT SUM(payment_gross) AS totalpaid FROM ".$tablerent_pay.$where;
+  if ($result = mysqli_query($link, $sql)) {
+    $row = mysqli_fetch_assoc($result);
+
+    return $row['totalpaid'];
+  }else {
+     echo "Error: " . $sql . "<br>" . mysqli_error($link);
+  }
+}
+function get_secdep_paid($idtesbro){// totale deposito cauzionale pagato per la locazione
+  global $link, $azTables, $gTables;// posso chiamare la funzione con entrambi i metodi
+  if ($azTables){
+    $tablerent_pay = $azTables."rental_payments";
+  }else{
+    $tablerent_pay = $gTables['rental_payments'];
+  }
+  $where = " WHERE id_tesbro = '".$idtesbro."' AND payment_status = 'Completed' AND type = 'Deposito_cauzionale'";
+  $sql = "SELECT SUM(payment_gross) as totalpaid FROM ".$tablerent_pay.$where;
+
   if ($result = mysqli_query($link, $sql)) {
     $row = mysqli_fetch_assoc($result);
 

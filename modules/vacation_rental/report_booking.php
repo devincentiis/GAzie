@@ -433,6 +433,7 @@ function delete_payment(ref,tes) {
       url: '../vacation_rental/delete.php',
       success: function(output){
         var tot=0;
+        var tot_secdep=0;
         $.ajax({
           data: {'type':'payment_list',ref:tes},
           type: 'POST',
@@ -441,9 +442,13 @@ function delete_payment(ref,tes) {
           success: function(response){
             var response = JSON.stringify(response);
             arr = $.parseJSON(response); //convert to javascript array
-            $.each(arr, function(n, val) {
-              if (val.payment_gross>0){
+            $.each(arr, function(n, val) {              
+              if (val.payment_status=="Completed"){
+                if (val.type != "Deposito_cauzionale"){
                 tot = tot+parseFloat(val.payment_gross);
+                }else{
+                  tot_secdep = tot_secdep+parseFloat(val.payment_gross)
+                }
               }
             });
             if (tot>0){
@@ -454,7 +459,13 @@ function delete_payment(ref,tes) {
               $("#atest"+tes).addClass("btn-default");
               $("#test"+tes).html("");
             }
+            if (tot_secdep>0){              
+              $("#secdep"+tes).html(" Pagato "+tot_secdep.toFixed(2)+"");
+            }else if(tot<=0){              
+              $("#secdep"+tes).html("");
+            }
             tot=0;
+            tot_secdep=0;
             //$("p#payment_des").append("<br><b>TOTALE "+tot.toFixed(2)+"</b>");
           }
         });
@@ -488,6 +499,7 @@ function reg_movcon_payment(ref,codcon,tescon) {
 
 function payment(ref) {
   var tot=0;
+  var tot_secdep=0;
   setTimeout(function(){
         // all'apertura del dialog prendo tutti i pagamenti già fatti e mostro il totale;
         $.ajax({
@@ -499,11 +511,15 @@ function payment(ref) {
 
             var response = JSON.stringify(response);
             arr = $.parseJSON(response); //convert to javascript array
-            tot=0;
+            tot=0;tot_secdep=0;
             $.each(arr, function(n, val) {
               $("p#payment_des").append(val.currency_code+" "+val.payment_gross+" - "+val.payment_status+" - "+val.created+" "+val.type+" - "+val.descri+" <input type='submit' class='btn btn-sm btn-default' name='delete form='report_form' onClick='delete_payment("+val.payment_id+","+ref+");' value='ELIMINA'><br>");
               if (val.payment_status=="Completed"){
+                if (val.type != "Deposito_cauzionale"){
                 tot = tot+parseFloat(val.payment_gross);
+                }else{
+                  tot_secdep = tot_secdep+parseFloat(val.payment_gross)
+                }
               }
             });
             $("p#payment_des").append("<br><b>TOTALE "+tot.toFixed(2)+"</b>");
@@ -538,10 +554,18 @@ function payment(ref) {
               dataType: 'text',
               success: function(response){
                 alert(response);
-                tot=parseFloat(tot)+parseFloat(payment_gross);
+                if (type != "Deposito_cauzionale"){
+                  tot=parseFloat(tot)+parseFloat(payment_gross);
+                }else{
+                  tot_secdep=parseFloat(tot_secdep)+parseFloat(payment_gross);
+                }
                 if (tot>0 && payment_gross){
-                  $("#atest"+ref).addClass("btn-success");
-                  $("#test"+ref).html(" Pagato "+tot.toFixed(2)+"");
+                  if(type != 'Deposito_cauzionale'){
+                    $("#atest"+ref).addClass("btn-success");
+                    $("#test"+ref).html(" Pagato "+tot.toFixed(2)+"");
+                  }else{
+                    $("#secdep"+ref).html(" Pagato "+tot_secdep.toFixed(2)+"");
+                  }
                 }else if(tot<=0){
                   $("#atest"+ref).addClass("btn-default");
                   $("#test"+ref).html("");
@@ -552,6 +576,7 @@ function payment(ref) {
                 $("#payment_des").html('');
                 $("#dialog_payment").dialog("close");
                 tot=0;
+                tot_secdep=0;
               }
             });
 				}},
@@ -1417,21 +1442,28 @@ $ts->output_navbar();
                 echo "<br>","Dep.cauz. € ".gaz_format_quantity($amountvat_secdep-$amountvat,1,2),"";
               }
               if ( $tipo !== "VPR" ) {
-              $paid=get_total_paid($r['id_tes']);
-              $stato_pig_btn = ($paid>0)?'btn-warning':'btn-default';
-              $stato_pig_btn = ($paid>=gaz_format_quantity($amountvat,0,2))?'btn-success':$stato_pig_btn;
-              $addtext=($paid>0)?"&nbsp;Pagato ".gaz_format_quantity($paid,1,2):"";
-              echo "<br><a id=\"atest",$r['id_tes'],"\" class=\"btn btn-xs btn-default ",$stato_pig_btn,"\"";
-              echo " style=\"cursor:pointer;\" onclick=\"payment('". $r['id_tes'] ."')\"";
-              $balance=gaz_format_quantity(($amountvat-$paid),1,2);
-              $addtitle="";
-              if (floatval($balance)>0){
-                $addtitle="- ancora da pagare € ".$balance;
+                $paid=get_total_paid($r['id_tes']);
+                $secdep_paid=get_secdep_paid($r['id_tes']);
+
+                $stato_pig_btn = ($paid>0)?'btn-warning':'btn-default';
+                $stato_pig_btn = ($paid>=gaz_format_quantity($amountvat,0,2))?'btn-success':$stato_pig_btn;
+                $addtext=($paid>0)?"&nbsp;Pagato ".gaz_format_quantity($paid,1,2):"";
+                echo "<br><a id=\"atest",$r['id_tes'],"\" class=\"btn btn-xs btn-default ",$stato_pig_btn,"\"";
+                echo " style=\"cursor:pointer;\" onclick=\"payment('". $r['id_tes'] ."')\"";
+                $balance=gaz_format_quantity(($amountvat-$paid),1,2);
+                $addtitle="";
+                if (floatval($balance)>0){
+                  $addtitle="- ancora da pagare € ".$balance;
+                }
+                echo "><i id=\"test",$r['id_tes'],"\" class=\"glyphicon glyphicon-piggy-bank \" title=\"Pagamenti",$addtitle,"\">",$addtext,"</i></a>";
+                if (floatval($secdep_paid)>0){
+                  $addtitle="- pagato € ".$secdep_paid;
+                  $addtext=($secdep_paid>0)?"&nbsp;Deposito ".gaz_format_quantity($secdep_paid,1,2):"";
+                  echo "<br/><i id=\"secdep",$r['id_tes'],"\" style='cursor: default;' class=\"btn btn-xs btn-default glyphicon glyphicon-piggy-bank \" title=\"Deposito cauzionale",$addtitle,"\">",$addtext,"</i></a>";
+                }
               }
-              echo "><i id=\"test",$r['id_tes'],"\" class=\"glyphicon glyphicon-piggy-bank \" title=\"Pagamenti",$addtitle,"\">",$addtext,"</i></a></td>";
-              }else{
-                echo"</td>";
-              }
+              echo"</td>";
+
 
               // colonna fiscale
               if ( $tipo !== "VPR" ) {// la visualizzo se non è preventivo
