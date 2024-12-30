@@ -1017,7 +1017,9 @@ class selectPartner extends SelectBox {
         if ($first===false) echo '</select><br/>';
         if ($vals['id_des'] > 1) { //vengo da una modifica della precedente select case quindi non serve la ricerca
           $destpartner = gaz_dbi_get_row($this->gTables['anagra'], "id", $vals['id_des']);
-          echo '<input type="hidden" id="'.$names['id_des_same_company'].'" name="'.$names['id_des_same_company'].'" value="'.$vals['id_des_same_company'].'">';
+          if ($first==1) {
+            echo '<input type="hidden" id="'.$names['id_des_same_company'].'" name="'.$names['id_des_same_company'].'" value="'.$vals['id_des_same_company'].'">';
+          }
           echo '<input type="hidden" id="'.$names['id_des'].'" name="'.$names['id_des'].'" value="'.$vals['id_des'].'">';
           echo '<input type="hidden" name="search['.$names['id_des'].']" value="'. substr($destpartner['ragso1'],0,15) .'">';
           echo '<input type="submit" class="btn btn-success btn-xs" value="'.$destpartner['ragso1'].'" name="change_'.$names['id_des'].'" onclick="this.form.'.$names['id_des'].'.value=\'0\'; this.form.hidden_req.value=\'change_'.$names['id_des'].'\';" title="Cambia destinazione">';
@@ -1057,7 +1059,9 @@ class selectPartner extends SelectBox {
               echo ' <span style="color:red;"> '.$msg.' </span> ';
           }
           echo '<button type="submit" class="btn btn-default btn-xs" name="search_'.$names['id_des'].'"><i class="glyphicon glyphicon-search"></i></button>';
-          echo '<input type="hidden" id="'.$names['id_des_same_company'].'" name="'.$names['id_des_same_company'].'" value="'.$vals['id_des_same_company'].'">';
+          if ($first==1) {
+            echo '<input type="hidden" id="'.$names['id_des_same_company'].'" name="'.$names['id_des_same_company'].'" value="'.$vals['id_des_same_company'].'">';
+          }
         }
       } else {
         echo '<input type="hidden" id="'.$names['id_des_same_company'].'" name="'.$names['id_des_same_company'].'" value="0">';

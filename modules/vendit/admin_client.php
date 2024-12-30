@@ -451,6 +451,42 @@ $(function() {
 		});
 		$("#dialog_clfoco_doc_del" ).dialog( "open" );
 	});
+  // inserisci unità locale
+  $("#addmodal").click(function () {
+    var id_anagra = $('#id_anagra').val();
+    $.ajax({
+      type: "POST",
+      url: "./admin_destinazioni.php",
+      data: {'mode':'modal','id_anagra':id_anagra},
+      success: function (msg) {
+        $("#edit-modal .modal-sm").css('width', '100%');
+        $("#edit-modal .modal-body").html(msg);
+      },
+      error: function () {
+        alert("failure");
+      }
+    });
+  });
+  // aggiorna unità locale
+  $(".upd-ul").click(function () {
+		var codice = $(this).attr('codice');
+    $.ajax({
+      type: "POST",
+      url: "./admin_destinazioni.php",
+      data: {'mode':'modal','codice':codice,'Update':'ok'},
+      success: function (msg) {
+        $("#edit-modal .modal-sm").css('width', '100%');
+        $("#edit-modal .modal-body").html(msg);
+      },
+      error: function () {
+        alert("failure");
+      }
+    });
+  });
+
+  $("#edit-modal").on("hidden.bs.modal", function () {
+    $(this).closest("form").submit();
+  });
 
 });
 function printDoc(urlPrintDoc,nf){
@@ -465,7 +501,7 @@ function printDoc(urlPrintDoc,nf){
 	});
 };
 </script>
-<form method="POST" name="form" enctype="multipart/form-data">
+<form method="POST" name="form" enctype="multipart/form-data" id="myform">
 	<div style="display:none" id="dialog_delete" title="Conferma eliminazione Mandato">
     <p><b>Mandato RID</b></p>
     <p>Numero:</p>
@@ -487,19 +523,30 @@ function printDoc(urlPrintDoc,nf){
 		</div>
 		<iframe id="frameDoc" style="height: auto; width: 100%;" src=""></iframe>
 	</div>
+  <div id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header active">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Unità locale del cliente</h4>
+        </div>
+        <div class="modal-body edit-content small"></div>
+      </div>
+    </div>
+  </div>
 <?php
 
 echo "<input type=\"hidden\" name=\"ritorno\" value=\"" . $form['ritorno'] . "\">\n";
 echo '<input type="hidden" value="'. $form['tab'] .'" name="tab" id="tab" />';
 echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
-echo "<input type=\"hidden\" value=\"" . $form['id_anagra'] . "\" name=\"id_anagra\" />\n";
+echo '<input type="hidden" value="' . $form['id_anagra'] .'" name="id_anagra" id="id_anagra" />';
 echo "<input type=\"hidden\" name=\"" . ucfirst($toDo) . "\" value=\"\">";
 $gForm = new venditForm();
 if ($toDo == 'insert') {
     echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . $script_transl['ins_this'] . ' con ' . $script_transl['codice'] . " n° <input type=\"text\" name=\"codice\" value=\"" . $form['codice'] . "\" align=\"right\" maxlength=\"6\" /></div>\n";
 } else {
     echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . $script_transl['upd_this'] . " '" . $form['codice'] . "'";
-    echo "<input type=\"hidden\" value=\"" . $form['codice'] . "\" name=\"codice\" /></div>\n";
+    echo '<input type="hidden" value="' . $form['codice'] .'" name="codice" /></div>';
 }
 ?>
 <?php
@@ -959,6 +1006,20 @@ $gForm->selectFromXML('../../library/include/operation_type.xml', 'operation_typ
 $select_id_des = new selectPartner("id_des");
 $select_id_des->selectAnagra('id_des', $form['id_des'], $form['search']['id_des'], 'id_des', $script_transl['mesg']);
     ?>
+                </div>
+            </div>
+        </div><!-- chiude row  -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="destin" class="col-sm-4 control-label"><?php echo $script_transl['id_des_same_company']; ?></label>
+<?php
+  $rs_ul = gaz_dbi_dyn_query("*", $gTables['destina'], "id_anagra = ".$form['id_anagra']);
+  while ($r = gaz_dbi_fetch_array($rs_ul)) {
+    echo '<a codice="'.$r['codice'].'" class="btn btn-xs btn-edit upd-ul"  data-toggle="modal" data-target="#edit-modal"><i class="glyphicon glyphicon-edit"></i>'.$r['unita_locale1'].'</a> &nbsp; ';
+  }
+?>
+                      <a id="addmodal" href="#myModal" data-toggle="modal" data-target="#edit-modal" class="btn btn-sm btn-default" title="Aggiungi unità locale"><i class="glyphicon glyphicon-plus"></i></a>
                 </div>
             </div>
         </div><!-- chiude row  -->
