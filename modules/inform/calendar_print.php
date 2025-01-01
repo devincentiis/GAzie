@@ -227,15 +227,18 @@ class calPdf extends Fpdi {
     $this->SetDrawColor(hexdec(substr($this->azienda['colore'], 0, 2)), hexdec(substr($this->azienda['colore'], 2, 2)), hexdec(substr($this->azienda['colore'], 4, 2)));
     $this->SetLineStyle(['width'=>3]);
     $this->RoundedRect(2,266,206,29,2);
+    $yofs = 0;
     if ($this->logoy>25){
-      $logox=25;
-      $logoy=0;
+      $logoy=25;
+      $logox=0;
+      // compenso la differenza sull'offset
+      $yofs = round(30-$this->logoy,1);
     } else {
       $logox=$this->logox;
       $logoy=$this->logoy;
     }
-    $yofs=($this->logoyoffset>=0.1)?round($this->logoyoffset*0.5,1):0;
-    $this->Image('@'.$this->azienda['image'],153,269+$yofs,$logox,$logoy,'',$this->imglink);
+    $yofs += ($this->logoyoffset>=0.1)?round($this->logoyoffset*0.5,1):0;
+    $this->Image('@'.$this->azienda['image'],153,268+$yofs,$logox,$logoy,'',$this->imglink);
     $this->SetFont('helvetica','B',10);
     $this->SetXY(10,268);
     $this->Cell(160,5,$this->azienda['ragso1'].' '.$this->azienda['ragso2'],0,1);

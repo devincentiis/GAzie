@@ -55,6 +55,8 @@ use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Net\SFTP;
 
 class shopsynchronizegazSynchro {
+  public $rawres =[];
+  public $api_token = TRUE;
 
 	function __construct() {
 		// Quando istanzio questa classe prendo il token, sempre.
@@ -77,8 +79,8 @@ class shopsynchronizegazSynchro {
 			curl_close($curl);
 		}*/
 		$this->api_token=TRUE; //la sincronizzazione via FTP non ha bisogno di TOKEN, quindi è TRUE
-
 	}
+
 	function SetupStore() {
 		// aggiorno i dati comuni a tutto lo store: Anagrafica Azienda, Aliquote IVA, dati richiesti ai nuovi clienti (CF,PI,indirizzo,ecc) in custom_field e tutto ciò che necessita per evitare di digitarlo a mano su ecommerce-admin
 	}
