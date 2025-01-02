@@ -158,7 +158,7 @@ define('DATA_DIR', (defined('MY_DATA_DIR')) ? MY_DATA_DIR : '../../data/');
 //
 define('K_PATH_CACHE', (defined('MY_K_PATH_CACHE')) ? MY_K_PATH_CACHE : '../../data/files/tmp/');
 
-////////////////////////////////////////////////////////////////////////
+//
 // definisce il nome della sessione ma solo in caso di uso dei domini di livello superiore al secondo, in
 // caso di installazione su domini di secondo livello viene attribuito automaticamente
 // il nome del direttorio di installazione
@@ -177,8 +177,10 @@ define( 'HELPDIR',  (defined('MY_HELPDIR')) ? MY_HELPDIR : 'help');
 define( 'GAZIE_VERSION',  (defined('MY_GAZIE_VERSION')) ? MY_GAZIE_VERSION: '9.10');
 
 // versioning degli asset (file statici)
-//define('STATIC_VERSION', ''); // se si usa nginx e non c'è la direttiva su nginx.conf si disattiva con la stringa vuota
-define('STATIC_VERSION', 'gazieVersion' . GAZIE_VERSION . '/');
+// se si usa nginx e non c'è la direttiva su nginx.conf si disattiva con la stringa vuota
+// per evitare sovrascritture quando viene aggiornato GAzie può essere definita MY_STATIC_VERSION (stringa vuota) in gconfig.myconf.php
+// define('STATIC_VERSION', '');
+define('STATIC_VERSION', (defined('MY_STATIC_VERSION')) ? MY_STATIC_VERSION : 'gazieVersion' . GAZIE_VERSION . '/');
 
 // permetti la modifica dei ddt fatturati, utile se bisogna modificare i prezzi degli articoli
 $modifica_fatture_ddt = (defined('modifica_fatture_ddt')) ? modifica_fatture_ddt : FALSE;

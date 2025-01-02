@@ -146,11 +146,17 @@ define('MY_DATA_DIR', '../../data/');
 //
 define('MY_K_PATH_CACHE', '../../data/files/tmp/');
 
-////////////////////////////////////////////////////////////////////////
+//
 // definisce il nome della sessione ma solo in caso di uso dei domini di livello superiore al secondo, in
 // caso di installazione su domini di secondo livello viene attribuito automaticamente
 // il nome del direttorio di installazione
 define('MY_SESSION_NAME', 'technical');
+
+//
+// definisce il nome dei file statici (assets js e css)
+// se si usa nginx e non c'è la direttiva su nginx.conf si disattiva con la stringa vuota
+// lo stesso vale per il PHP build in server dove basta decommentare il rigo seguente
+// define('MY_STATIC_VERSION', '');
 
 //url di default per l'aggiornamento di GAzie
 define('update_URI_files', 'https://sourceforge.net/projects/gazie');
