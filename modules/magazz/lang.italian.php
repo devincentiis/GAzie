@@ -411,7 +411,7 @@ $strScript = array(
         'lot_or_serial' => 'Lotti o numeri seriali',
         'lot_or_serial_value' => array(0 => 'No', 1 => 'Lotti', 2 => 'Seriale/Matricola'),
         'barcode' => "Codice a Barre EAN13",
-        'image' => "Immagine (jpg,png,gif) max 64Kb",
+        'image' => "Immagine (jpg,png,gif)",
         'unimis' => "Unit&agrave; di misura vendite",
         'quality' => "Qualità",
         'larghezza' => "Larghezza (mm)",

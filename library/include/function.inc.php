@@ -1476,7 +1476,7 @@ class GAzieMail {
       // Antonio Germani prendo i dati IMAP utente, se ci sono
       $custom_field = gaz_dbi_get_row($gTables['anagra'], 'id', $user['id_anagra'])['custom_field'];
       $imap_usr='';
-      if ($data = json_decode($custom_field,true)){// se c'è un json e c'è una mail aziendale utente
+      if (isset($custom_field) && $data = json_decode($custom_field,true)){// se c'è un json e c'è una mail aziendale utente
         if (isset($data['config'][$admin_data['codice']]) && is_array($data['config'])){ // se c'è il modulo "config" e c'è l'azienda attuale posso procedere
           list($encrypted_data, $iv) = explode('::', base64_decode($data['config'][$admin_data['codice']]['imap_pwr']), 2);
           $imap_pwr=openssl_decrypt($encrypted_data, 'aes-128-cbc', $_SESSION['aes_key'], 0, $iv);
@@ -2057,6 +2057,27 @@ class GAzieForm {
     function selSearchItem($name, $val, $class = 'FacetDataTDsmall') {
         global $script_transl;
         $this->variousSelect($name, $script_transl['search_item'], $val, $class, true);
+    }
+
+    function selectLanguage($name,$val,$ret_type=false,$class='', $refresh=false) {
+      global $gTables;
+      $query = 'SELECT * FROM ' . $gTables['languages'].' WHERE 1 ORDER BY lang_id';
+      $acc = '<select id="'.$name.'" name="'.$name.'" class="'.$class.'" '.($refresh?'onchange="this.form.hidden_req.value=\''.$refresh.'\'; this.form.submit();"':'').' >';
+      $rs = gaz_dbi_query($query);
+      while ($r = gaz_dbi_fetch_array($rs)) {
+        $selected = '';
+        if ($r['lang_id'] == intval($val)) {
+          $selected = "selected";
+        }
+        $acc .= '<option value="'.$r['lang_id'] . '" '.$selected.' > '.base64_decode($r['emoji']).' '.$r['title'];
+        $acc .= '</option>';
+      }
+      $acc .='</select>';
+      if ($ret_type){
+        return $acc;
+      } else {
+        echo $acc;
+      }
     }
 
     function gazHeadMessage($message, $transl, $type = 'err') {

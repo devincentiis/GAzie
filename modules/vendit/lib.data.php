@@ -50,20 +50,6 @@ function agentiUpdate ($codice, $newValue)
     tableUpdate($table, $columns, $codice, $newValue);
 }
 
-function bodytextInsert ($newValue)
-{
-    $table = 'body_text';
-    $columns = array('table_name_ref','id_ref','body_text','lang_id');
-    return tableInsert($table, $columns, $newValue);
-}
-
-function bodytextUpdate ($codice, $newValue)
-{
-    $table = 'body_text';
-    $columns = array('table_name_ref','id_ref','body_text','lang_id');
-    tableUpdate($table, $columns, $codice, $newValue);
-}
-
 function contractUpdate ($newValue,$codice=false,$tesdoc='')
 {
   // per fare l'upload in $codice dev'essere passato un: array(0=>'id_contract',1=>valore di id_contract da aggiornare)

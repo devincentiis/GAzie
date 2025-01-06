@@ -385,7 +385,7 @@ $strScript = array("browse_document.php" =>
         'lot_or_serial' => 'Lot or serial number',
         'lot_or_serial_value' => array(0 => 'No', 1 => 'Lot', 2 => 'Serial'),
         'barcode' => "Barcode EAN13",
-        'image' => "Image (jpg,png,gif) max 64Kb",
+        'image' => "Image (jpg,png,gif)",
         'unimis' => "Measurement Unit for sales",
         'quality' => "Quality",
         'larghezza' => "Height (mm)",

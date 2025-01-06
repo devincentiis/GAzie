@@ -687,7 +687,7 @@ function printPdf(urlPrintDoc){
                         $sdilabel = ( !empty($revch['refs_flux_status']) ) ? $script_transl['flux_status_val'][$last_flux_status][0] : 'ZIP da inviare';
                         $last_flux_status = 'ZI';
                       }
-                      if ($last_flux_status<>"DI" && $last_flux_status<>"NS" && $last_flux_status<>"MC" && $last_flux_status<>"AT"){// Se la fae è stata correttamente inviata o ricevuta da ADE, non posso più cancellare
+                      if ($last_flux_status<>"DI" && $last_flux_status<>"MC" && $last_flux_status<>"AT"){// Se la fae è stata correttamente inviata o ricevuta da ADE, non posso più cancellare
                         $disabledbyflux="disabled";
                       }
                     } else { //// installazione senza gestore dei flussi con il SdI
@@ -964,7 +964,7 @@ function printPdf(urlPrintDoc){
                 if ($ultimo_documento && ($ultimo_documento['id_tes'] == $r["id_tes"] || ($ultimo_documento['tipdoc'] == 'FAD' && $ultimo_documento['protoc'] == $r['protoc']))) {
                   if ($disabledbyflux==""){
 					  // Permette di cancellare il documento.
-					  
+
 					  if ($r["id_con"] > 0) {
 					  ?>
 						<a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il documento e la registrazione contabile relativa" ref="<?php echo $r['protoc'];?>" ragso1="<?php echo $r['ragso1']; ?>" seziva="<?php echo $r['seziva']; ?>" anno="<?php echo substr($r["datfat"], 0, 4); ?>" <?php echo $disabledbyflux; ?>>

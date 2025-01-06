@@ -387,7 +387,7 @@ $strScript = array("browse_document.php" =>
         'lot_or_serial' => 'Lot or serial number',
         'lot_or_serial_value' => array(0 => 'No', 1 => 'Lot', 2 => 'Serial'),
         'barcode' => "Barcode EAN13",
-        'image' => "Image (jpg,png,gif) max 64kb",
+        'image' => "Image (jpg,png,gif)",
         'unimis' => "Measurement Unit for sales",
         'quality' => "Quality",
         'larghezza' => "Height (mm)",
@@ -456,9 +456,9 @@ $strScript = array("browse_document.php" =>
         'upd_this' => 'Modifica il gruppo delle varianti',
         'err' => array(
             'codice' => 'Il codice articolo &egrave; gi&agrave; esistente',
-            'empty_var' => 'Deve esserci per forza almeno una variante',			
+            'empty_var' => 'Deve esserci per forza almeno una variante',
             'grcod' => 'Questo articolo appartiene già ad un altro gruppo',
-            'descri' => 'Inserire una descrizione',           
+            'descri' => 'Inserire una descrizione',
             'no_ins' => 'Non sono riuscito ad inserire l\'articolo sul database',
             'char' => 'Sul codice articolo ho sostituito i caratteri speciali non consentiti con "_" ',
             'codart_len' => 'Il codice articolo ha una lunghezza diversa da quella stabilita in configurazione avanzata azienda '
@@ -470,8 +470,8 @@ $strScript = array("browse_document.php" =>
 		'home' => "ID gruppo",
 		'variant' => "Varianti, opzioni, attributi",
 		'codice' => "ID gruppo",
-        'descri' => "Descrizione",        
-		'image' => 'immagine',        
+        'descri' => "Descrizione",
+		'image' => 'immagine',
         'web_public' => 'Pubblica sul sito web',
         'web_public_value' => array(0 => 'No', 1 => 'Si'),
 		'body_text' => 'Descrizione estesa',
@@ -482,6 +482,6 @@ $strScript = array("browse_document.php" =>
         'mesg' => array(
         )
     ),
-    
+
 );
 ?>

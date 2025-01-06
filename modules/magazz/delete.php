@@ -66,8 +66,10 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
 				gaz_dbi_del_row($gTables['files'], "id_doc", $delimg['id_doc']);
 				unlink (DATA_DIR."files/".$admin_aziend['codice']."/images/". $delimg['id_doc'] . "." . $delimg['extension']);
 			}
-			// Cancello l'eventuale body_text
+			// Cancello l'eventuale body_text italiano
 			gaz_dbi_del_row($gTables['body_text'], "table_name_ref", "artico_".$i);
+      // e le traduzioni
+			gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'artico' AND code_ref", $i);
 			//Cancello se presenti gli articoli in distinta base
 			$result = gaz_dbi_del_row($gTables['distinta_base'], "codice_composizione", $i );
 			//Cancello l'articolo

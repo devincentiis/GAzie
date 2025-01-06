@@ -667,3 +667,6 @@ section.content-header div h1 {
 .line-through {
   text-decoration: line-through;
 }
+.lang-select {
+  padding:8px; height: 42px;
+}
