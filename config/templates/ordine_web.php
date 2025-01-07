@@ -23,7 +23,7 @@
  --------------------------------------------------------------------------
 */
 require('template.php');
-
+#[AllowDynamicProperties]
 class OrdineWeb extends Template
 {
     function setTesDoc()

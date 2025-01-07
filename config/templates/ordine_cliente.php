@@ -23,7 +23,7 @@
  --------------------------------------------------------------------------
 */
 require('template.php');
-
+#[AllowDynamicProperties]
 class OrdineCliente extends Template
 {
 
