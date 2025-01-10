@@ -59,7 +59,7 @@ while ($row = gaz_dbi_fetch_array($result)) {
 	$aziend_codice = sprintf("%03s", $row["codice"]);
   $bts=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*", $table_prefix . "_" . $aziend_codice.'body_text',"table_name_ref LIKE 'artico%'",'id_body'));
   foreach($bts as $v) {
-    $codart=explode('_',$v['table_name_ref'],1)[1];
+    $codart=explode('_',$v['table_name_ref'],2)[1];
     gaz_dbi_query("UPDATE ". $table_prefix . "_" . $aziend_codice."body_text SET code_ref='".$codart."' WHERE table_name_ref='".$v['table_name_ref']."'");
     echo "<p>Azienda n. ".$row["codice"]." aggiornata descrizione estesa per l'articolo: ".$codart."</p>";
   }

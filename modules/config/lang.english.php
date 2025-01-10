@@ -451,6 +451,7 @@ $strScript = array("admin_aziend.php" =>
         'user_lastname' => "Surname",
         'user_firstname' => "Name",
         'user_email' => "Mail (anche per recupero password)",
+        'az_email' => 'Company e-mail',
         'image' => 'Image<br />(only JPG format, max 64kb)',
         'Abilit' => "Level",
         'Abilit_value' => array('9' => 'Admin', '8' => 'Advanced/Student','5'=>'User','0'=>'None'),

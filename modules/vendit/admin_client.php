@@ -847,6 +847,24 @@ $gForm->selectFromDB('pagame', 'codpag', 'codice', $form['codpag'], 'tippag`, `g
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
+                  <label for="max_overdraft" class="col-sm-4 control-label"><?= $script_transl['max_overdraft']; ?></label>
+                  <input class="col-sm-8" type="text" value="<?php echo $form['max_overdraft']; ?>" name="max_overdraft" id="max_overdraft" maxlength="10" />
+                </div>
+            </div>
+        </div><!-- chiude row  -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="commercial_reliability" class="col-sm-4 control-label"><?php echo $script_transl['commercial_reliability']; ?> </label>
+    <?php
+$gForm->variousSelect('commercial_reliability', $script_transl['commercial_reliability_value'], $form['commercial_reliability'], '', true);
+    ?>
+                </div>
+            </div>
+        </div><!-- chiude row  -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
                     <label for="id_customer_group" class="col-sm-4 control-label"><?php echo $script_transl['customer_group']; ?> </label>
     <?php
 $gForm->selectFromDB('customer_group', 'id_customer_group', 'id', $form['id_customer_group'], 'id', true, ' ', 'descri');
