@@ -2,7 +2,7 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
          (https://www.devincentiis.it)
            <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
@@ -21,6 +21,12 @@
     scriva   alla   Free  Software Foundation, 51 Franklin Street,
     Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
  --------------------------------------------------------------------------
+  --------------------------------------------------------------------------
+  GAzie - MODULO 'VACATION RENTAL'
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
+  (https://www.programmisitiweb.lacasettabio.it)
+
+  --------------------------------------------------------------------------
 */
 require('booking_template_lease.php');
 

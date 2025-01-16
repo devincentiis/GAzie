@@ -654,7 +654,9 @@ $strScript = array(
 	'sign_by'=>'Umowa podpisana online przez ',
 	'sign_ip'=>'. Podpisanie umowy zostało zarejestrowane z IP ',
 	'in_data'=>' w dniu  ',
-	'alle_ore'=>' o godzinie '
+	'alle_ore'=>' o godzinie ',
+	'cancell_payment' => 'Anuluj płatność',
+	'refund' => 'Zwrot'
     ),
 
   "admin_extra.php" =>

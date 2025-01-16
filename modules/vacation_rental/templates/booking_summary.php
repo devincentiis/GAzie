@@ -21,6 +21,12 @@
     scriva   alla   Free  Software Foundation, 51 Franklin Street,
     Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
  --------------------------------------------------------------------------
+  --------------------------------------------------------------------------
+  GAzie - MODULO 'VACATION RENTAL'
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
+  (https://www.programmisitiweb.lacasettabio.it)
+
+  --------------------------------------------------------------------------
 */
 require('booking_template.php');
 #[AllowDynamicProperties]
@@ -178,8 +184,10 @@ class BookingSummary extends Template
 		}
 
 		$this->SetY(224);
+		if (isset($payments) && count($payments)>0){
 		$this->Cell(100, 6, 'Pagamenti effettuati', 'LTR', 0, 'C', 1);
 		$this->Cell(30, 6, 'Importo', 'LTR', 1, 'C', 1);
+		}
 		$payments = $this->docVars->getPag();
 		$payed=0;
 		foreach ($payments AS $key => $pay) {

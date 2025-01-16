@@ -416,7 +416,7 @@ function pay(ref) {
             $("#cc2").html('');
             $("#cc3").html('');
             $("#cc4").html('');
-            window.location.replace("./report_booking.php");
+            window.location.replace("./report_booking.php?auxil=VOR");
           }
         });
       }else{
@@ -442,7 +442,7 @@ function delete_payment(ref,tes) {
           success: function(response){
             var response = JSON.stringify(response);
             arr = $.parseJSON(response); //convert to javascript array
-            $.each(arr, function(n, val) {              
+            $.each(arr, function(n, val) {
               if (val.payment_status=="Completed"){
                 if (val.type != "Deposito_cauzionale"){
                 tot = tot+parseFloat(val.payment_gross);
@@ -459,9 +459,9 @@ function delete_payment(ref,tes) {
               $("#atest"+tes).addClass("btn-default");
               $("#test"+tes).html("");
             }
-            if (tot_secdep>0){              
+            if (tot_secdep>0){
               $("#secdep"+tes).html(" Pagato "+tot_secdep.toFixed(2)+"");
-            }else if(tot<=0){              
+            }else if(tot<=0){
               $("#secdep"+tes).html("");
             }
             tot=0;
@@ -693,7 +693,7 @@ $(function() {
           dataType: 'text',
           success: function(response){
             //alert(response);
-            window.location.replace("./report_booking.php");
+            window.location.replace("./report_booking.php?auxil=VOR");
           }
         });
       }
@@ -762,7 +762,7 @@ $(function() {
               success: function(output) {
                  // alert('id:'+refsta+' new:'+new_stato_lavorazione+' email:'+email);
                  // alert(output);
-                window.location.replace("./report_booking.php");
+                window.location.replace("./report_booking.php?auxil=VOR");
               }
             });
           }},
@@ -838,7 +838,7 @@ $(function() {
               success: function(output) {
                   //alert('id:'+refcheck+' new:'+new_stato_check+' email:'+email + ' datetime:'+d);
                   //alert(output);
-                window.location.replace("./report_booking.php");
+                window.location.replace("./report_booking.php?auxil=VOR");
               }
             });
           }},
@@ -898,7 +898,7 @@ $(function() {
               success: function(output) {
                  //alert('ho passato questi >> ref:'+ref+' new:'+new_stato_lavorazione+' email:'+email+' cust mail:'+cust_mail+' text:'+msgself);
                  //alert(output);
-                window.location.replace("./report_booking.php");
+                window.location.replace("./report_booking.php?auxil=VOR");
               }
             });
           }},

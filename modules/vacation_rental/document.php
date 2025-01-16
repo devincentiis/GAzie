@@ -51,7 +51,6 @@ class DocContabVars {
         } else {
           echo "Error: " . $sql . "<br>" . mysqli_error($link);
         }
-
         $this->ecr = $ecr;
         $this->gTables = $gTables;
 

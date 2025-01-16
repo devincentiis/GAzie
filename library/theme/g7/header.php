@@ -38,7 +38,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
     <link rel="stylesheet" href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/font-awesome/css/font-awesome.min.css">
     <link href="../../<?php echo(STATIC_VERSION);?>js/jquery.ui/jquery-ui.css" rel="stylesheet">
     <link href="../../<?php echo(STATIC_VERSION);?>library/theme/g7/smartmenus-master/bootstrap/jquery.smartmenus.bootstrap.css" rel="stylesheet" />
-    <script src="../../js/jquery/jquery-3.7.0.min.js"></script>
+    <script src="../../js/jquery/jquery-3.7.1.min.js"></script>
     <?php
     // carico il css strutturale grandezza font, posizione, ecc
     $style = 'base.css';

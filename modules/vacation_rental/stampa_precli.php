@@ -2,7 +2,7 @@
 /*
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-2024 - Antonio Germani, Massignano (AP)
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
   (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
@@ -44,8 +44,14 @@ if ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0){// se �
     $lang_template = '';$lang="it";
 } elseif ($stato AND $stato['id_language'] == 2 ) {// se è inglese
   $lang_template = 'english';$lang="en";
-}elseif ($stato AND $stato['id_language'] == 3 ) {// se è spagnolo
+}elseif ($stato AND ($stato['id_language'] == 3 || $stato['id_language'] == 4 || $stato['id_language'] == 5) ) {// se è spagnolo
   $lang_template = 'spanish';$lang="es";
+}elseif ($stato AND $stato['id_language'] == 6 ) {// se è inglese
+  $lang_template = 'french';$lang="fr";
+}elseif ($stato AND $stato['id_language'] == 7 ) {// se è inglese
+  $lang_template = 'polish';$lang="pl";
+}else{
+	$lang_template = '';$lang="it";
 }
 $user_level=get_user_points_level($id_anagra['id_anagra']);
 

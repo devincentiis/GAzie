@@ -575,7 +575,7 @@ $strScript = array(
 		'email_confirm_addbody' => '<p>Entro  6 ore, dovrà effettuare il pagamento della caparra confirmatoria così come segue:</p>',
 		'email_confirm_addbody_warning' => '<p>Nota bene: il mancato pagamento o il mancato invio della ricevuta comporterà automaticamente la cancellazione della prenotazione.</p>',
 		'email_confirm_addbody_receipt' => '<p>Effettuato il pagamento ne dovrà inviare la ricevuta rispondendo a questa e-mail.</p>',
-		'email_confirm_add_access_url' => 'Per accedere alla prenotazione online, aggiungere extra, modificare il pagamento e controllarne lo stato usi questo link',
+		'email_confirm_add_access_url' => 'Troverà la prenotazione nella sua pagina personale utente del sito web (dashboard) dove potrà anche aggiungere extra ed effettuare ulteriori pagamenti. Oppure, può accedere direttamente a questa specifica prenotazione con questo link',
 		'email_confirm_add_access_code' => ' e i seguenti codici di accesso: ',
 		'regards' => 'Cordiali saluti',
 		'of' => 'del',
@@ -655,7 +655,9 @@ $strScript = array(
 		'sign_by'=>'Contratto firmato online da',
 		'sign_ip'=>'La firma del contratto è stata registrata con IP',
 		'in_data'=>'in data',
-		'alle_ore'=>'alle ore'
+		'alle_ore'=>'alle ore',
+		'cancell_payment' => 'Annulla pagamento',
+		'refund' => 'Rimborso'
     ),
 
   "admin_extra.php" =>

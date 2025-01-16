@@ -22,14 +22,18 @@
   scriva   alla   Free  Software Foundation, 51 Franklin Street,
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
+   --------------------------------------------------------------------------
+  GAzie - MODULO 'VACATION RENTAL'
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
+  (https://www.programmisitiweb.lacasettabio.it)
+
+  --------------------------------------------------------------------------
  */
 
-
-use setasign\Fpdi\Tcpdf\Fpdi;
-
+require('../../library/tcpdf/tcpdf.php');
+require('../../library/tcpdf/tcpdi.php');
 #[AllowDynamicProperties]
-
-class Template extends Fpdi {
+class Template extends TCPDI {
 
     function setVars(&$docVars, $Template = '') {
         $this->docVars = & $docVars;

@@ -653,7 +653,9 @@ $strScript = array(
 	'sign_by'=>'Contrato firmado en línea por ',
 	'sign_ip'=>'. La firma del contrato se ha registrado con IP ',
 	'in_data'=>' con fecha ',
-	'alle_ore'=>' a '
+	'alle_ore'=>' a ',
+	'cancell_payment' => 'Cancelar pago',
+	'refund' => 'Reembolso'
     ),
 
   "admin_extra.php" =>
