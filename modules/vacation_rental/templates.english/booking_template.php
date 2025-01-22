@@ -65,7 +65,9 @@ class Template extends Fpdi {
         $this->agente = $docVars->name_agente;
         $this->status = $docVars->status;
         $this->alloggio = $docVars->alloggio;
-		$this->checkinout = $docVars->checkinout;
+        $this->adult = $docVars->adult;
+        $this->child = $docVars->child;
+        $this->checkinout = $docVars->checkinout;
         $this->extras = $docVars->extras;
         /*
         if ( $docVars->destinazione == "" && isset($docVars->client['destin'])) {
@@ -151,14 +153,16 @@ class Template extends Fpdi {
             $this->Line(0, 93, 3, 93); //questa marca la linea d'aiuto per la piegatura del documento
             $this->Line(0, 143, 3, 143); //questa marca la linea d'aiuto per la foratura del documento
             $this->Ln($interlinea);
-			if (!empty($this->efattura)){
-				$this->SetFont('helvetica','B',9);
-				$this->SetTextColor(255,0,0);
-				$this->Cell(110,0,'Copy of the electronic document sent to the Italian Exchange System ('.$this->efattura.')',0,1,'L',0,'',1);
-				$this->SetTextColor(0,0,0);
-			}
+            if (!empty($this->efattura)){
+              $this->SetFont('helvetica','B',9);
+              $this->SetTextColor(255,0,0);
+              $this->Cell(110,0,'Copy of the electronic document sent to the Italian Exchange System ('.$this->efattura.')',0,1,'L',0,'',1);
+              $this->SetTextColor(0,0,0);
+            }
             $this->SetFont('helvetica', '', 11);
-			$this->Cell(95, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);// tipo documento es.: prenotazione n. etc
+            $this->Cell(95, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);// tipo documento es.: prenotazione n. etc
+            $this->SetFillColor(200, 220, 255);
+            $this->Cell(95, 5, "Adult:".$this->adult." Child:".$this->child, 1, 1, 'L', 1, '', 1);// Numero adulti e minori
             if ($this->tesdoc['tipdoc'] == 'NOP' || $this->withoutPageGroup) {
                 $this->Cell(25, 5);
             } else {
@@ -168,7 +172,7 @@ class Template extends Fpdi {
             $interlinea = $this->GetY();
             $this->Ln(6);
             $this->SetFont('helvetica', '', 9);
-            $this->SetY($interlinea - 11);
+            $this->SetY($interlinea - 16);
             $add_int=0;$extras="";
 
             $this->SetX(105);$this->Cell(93, 5, $this->alloggio, 1, 1, 'C', 0, '', 1);

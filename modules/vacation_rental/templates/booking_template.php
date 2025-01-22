@@ -23,7 +23,7 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-//*** ENGLISH LANGUAGE ***
+//*** ITALIAN LANGUAGE ***
 use setasign\Fpdi\Tcpdf\Fpdi;
 #[AllowDynamicProperties]
 class Template extends Fpdi  {
@@ -65,7 +65,9 @@ class Template extends Fpdi  {
         $this->agente = $docVars->name_agente;
         $this->status = $docVars->status;
         $this->alloggio = $docVars->alloggio;
-		$this->checkinout = $docVars->checkinout;
+        $this->adult = $docVars->adult;
+        $this->child = $docVars->child;
+        $this->checkinout = $docVars->checkinout;
         $this->extras = $docVars->extras;
         /*
         if ( $docVars->destinazione == "" && isset($docVars->client['destin'])) {
@@ -89,7 +91,7 @@ class Template extends Fpdi  {
         $this->month = $docVars->month;
         $this->year = $docVars->year;
         $this->withoutPageGroup = $docVars->withoutPageGroup;
-		$this->efattura = $docVars->efattura;
+        $this->efattura = $docVars->efattura;
         $this->descriptive_last_row = $this->docVars->descriptive_last_row;
         $this->descriptive_last_ddt = $this->docVars->descriptive_last_ddt;
 
@@ -151,14 +153,16 @@ class Template extends Fpdi  {
             $this->Line(0, 93, 3, 93); //questa marca la linea d'aiuto per la piegatura del documento
             $this->Line(0, 143, 3, 143); //questa marca la linea d'aiuto per la foratura del documento
             $this->Ln($interlinea);
-			if (!empty($this->efattura)){
-				$this->SetFont('helvetica','B',9);
-				$this->SetTextColor(255,0,0);
-				$this->Cell(110,0,'Copia di cortesia del documento elettronico inviato al sistema di interscambio ('.$this->efattura.')',0,1,'L',0,'',1);
-				$this->SetTextColor(0,0,0);
-			}
+            if (!empty($this->efattura)){
+              $this->SetFont('helvetica','B',9);
+              $this->SetTextColor(255,0,0);
+              $this->Cell(110,0,'Copia di cortesia del documento elettronico inviato al sistema di interscambio ('.$this->efattura.')',0,1,'L',0,'',1);
+              $this->SetTextColor(0,0,0);
+            }
             $this->SetFont('helvetica', '', 10);
-			$this->Cell(95, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);// tipo documento es.: prenotazione n. etc
+            $this->Cell(95, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);// tipo documento es.: prenotazione n. etc
+            $this->SetFillColor(200, 220, 255);
+            $this->Cell(95, 5, "Adulti:".$this->adult." Minori:".$this->child, 1, 1, 'L', 1, '', 1);// Numero adulti e minori
             if ($this->tesdoc['tipdoc'] == 'NOP' || $this->withoutPageGroup) {
                 $this->Cell(25, 3);
             } else {
@@ -168,11 +172,11 @@ class Template extends Fpdi  {
             $interlinea = $this->GetY();
             $this->Ln(6);
             $this->SetFont('helvetica', '', 9);
-            $this->SetY($interlinea - 11);
+            $this->SetY($interlinea - 16);
             $add_int=0;$extras="";
 
             $this->SetX(105);$this->Cell(93, 5, $this->alloggio, 1, 1, 'C', 0, '', 1);
-			$this->SetX(105);$this->Cell(93, 5, $this->checkinout, 1, 1, 'C', 0, '', 1);
+            $this->SetX(105);$this->Cell(93, 5, $this->checkinout, 1, 1, 'C', 0, '', 1);
             $extraDes='';
             foreach ($this->extras as $extra){
               $extraDes .=$extra;
@@ -189,7 +193,7 @@ class Template extends Fpdi  {
             }
             if ($this->codice_partner > 0){
               $this->SetXY(30, $interlinea +$add_int - 6);
-              $this->Cell(13, 4, $this->descri_partner, 'LT', 0, 'R', 1, '', 1);
+              $this->Cell(13, 4, $this->descri_partner, 'LT', 0, 'R', 0, '', 1);
               $this->Cell(62, 4, ': ' . $this->cliente5, 'TR', 1, 0, '', 1,1);//cod.fisc. cliente
               $this->Cell(20);
               $this->Cell(20, 4, ' cod.: ' . $this->codice_partner, 'LB', 0, 'L');// id codice cliente
@@ -220,10 +224,10 @@ class Template extends Fpdi  {
             $this->Cell(75, 5, $this->cliente3, 0, 1, 'L', 0, '', 1);
             $this->Cell(105);
             $this->Cell(75, 5, $this->cliente4, 0, 1, 'L', 0, '', 1);
-			if (!empty($this->clientetel)) {
-                $this->Cell(105);
-                $this->Cell(75, 5, "tel: ".$this->clientetel, 0, 1, 'L', 0, '', 1);
-			}
+            if (!empty($this->clientetel)) {
+                      $this->Cell(105);
+                      $this->Cell(75, 5, "tel: ".$this->clientetel, 0, 1, 'L', 0, '', 1);
+            }
 
             $this->SetFont('helvetica', '', 7);
             if (!empty($this->c_Attenzione)) {

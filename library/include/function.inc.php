@@ -2616,59 +2616,51 @@ function redirect($filename) {
 	exit;
 }
 
-
 function checkAdmin($Livaut = 0) {
+  global $gTables, $module, $table_prefix, $link;
   if (!isset($_SESSION["from_uri"])){
     $dn=explode('/',$_SERVER['REQUEST_URI']);
     if (isset($dn[2]) && $dn[2]=='modules' && $dn[3]!='root'){
       $_SESSION["from_uri"]='../'.$dn[3].'/'.basename($_SERVER['REQUEST_URI']);
     }
   }
-    global $gTables, $module, $table_prefix, $link;
-    $_SESSION["Abilit"] = false;
-    if (!$link) exit;
-    // Se utente non è loggato lo mandiamo alla pagina di login
-    if (!isset($_SESSION["user_name"])) {
-        redirect('../root/login_user.php?tp=' . $table_prefix);
-    }
-    $rschk = checkAccessRights($_SESSION["user_name"], $module, $_SESSION['company_id']);
-    if ($rschk == 0) {
-      // Se utente non ha il diritto di accedere al modulo specifico lo invito a tornare alla home
-      redirect("../root/access_error.php?module=" . $module);
+  $_SESSION["Abilit"] = false;
+  if (!$link) exit;
+  // Se utente non è loggato lo mandiamo alla pagina di login
+  if (!isset($_SESSION["user_name"])) {
+    redirect('../root/login_user.php?tp=' . $table_prefix);
+  }
+  $rschk = checkAccessRights($_SESSION["user_name"], $module, $_SESSION['company_id']);
+  if ($rschk == 0) {
+    // Se utente non ha il diritto di accedere al modulo specifico lo invito a tornare alla home
+    redirect("../root/access_error.php?module=" . $module);
+    exit;
+  } elseif (is_array($rschk)) { // questo utente ha almeno un script da escludere su questo modulo
+    $bn = basename($_SERVER['PHP_SELF'],'.php');
+    if (in_array($bn,$rschk)){
+      redirect("../root/access_error.php?script=" . $bn);
       exit;
-    } elseif (is_array($rschk)) { // questo utente ha almeno un script da escludere su questo modulo
-      $bn = basename($_SERVER['PHP_SELF'],'.php');
-      if (in_array($bn,$rschk)){
-        redirect("../root/access_error.php?script=" . $bn);
-        exit;
-      }
     }
-    $test = gaz_dbi_query("SHOW COLUMNS FROM `" . $gTables['admin'] . "` LIKE 'enterprise_id'");
-    $exists = (gaz_dbi_num_rows($test)) ? TRUE : FALSE;
-    if ($exists) {
-        $c_e = 'enterprise_id';
-    } else {
-        $c_e = 'company_id';
+  }
+  $admin_aziend = gaz_dbi_get_row($gTables['admin'] . ' LEFT JOIN ' . $gTables['aziend'] . ' ON ' . $gTables['admin'] . '.company_id = ' . $gTables['aziend'] . '.codice', "user_name", $_SESSION["user_name"]);
+  $currency = [];
+  if (isset($admin_aziend['id_currency'])) {
+    $currency = gaz_dbi_get_row($gTables['currencies'], "id", $admin_aziend['id_currency']);
+  }
+  if ($Livaut > $admin_aziend["Abilit"]) {
+    redirect("../root/login_user.php?tp=" . $table_prefix);
+    exit;
+  } else {
+    $_SESSION["Abilit"] = $admin_aziend["Abilit"];
+    // includo le funzioni per la sincronizzazione dello shop online, il nome del modulo per il sync dell'ecommerce dev'essere sempre il primo rispetto ad altri eventuali moduli
+    $admin_aziend['synccommerce_classname'] = '';
+    $synccommerce=explode(',',$admin_aziend['gazSynchro'])[0];
+    if ($synccommerce && file_exists('../'.$synccommerce.'/sync.function.php')) {
+      include_once('../'.$synccommerce.'/sync.function.php');
+      $admin_aziend['synccommerce_classname'] = preg_replace("/[^a-zA-Z]/","",$synccommerce)."gazSynchro";
     }
-    $admin_aziend = gaz_dbi_get_row($gTables['admin'] . ' LEFT JOIN ' . $gTables['aziend'] . ' ON ' . $gTables['admin'] . '.' . $c_e . '= ' . $gTables['aziend'] . '.codice', "user_name", $_SESSION["user_name"]);
-    $currency = array();
-    if (isset($admin_aziend['id_currency'])) {
-        $currency = gaz_dbi_get_row($gTables['currencies'], "id", $admin_aziend['id_currency']);
-    }
-    if ($Livaut > $admin_aziend["Abilit"]) {
-        redirect("../root/login_user.php?tp=" . $table_prefix);
-        exit;
-    } else {
-        $_SESSION["Abilit"] = $admin_aziend["Abilit"];
-		// includo le funzioni per la sincronizzazione dello shop online, il nome del modulo per il sync dell'ecommerce dev'essere sempre il primo rispetto ad altri eventuali moduli
-        $admin_aziend['synccommerce_classname'] = '';
-        $synccommerce=explode(',',$admin_aziend['gazSynchro'])[0];
-		if ($synccommerce && file_exists('../'.$synccommerce.'/sync.function.php')) {
-			include_once('../'.$synccommerce.'/sync.function.php');
-            $admin_aziend['synccommerce_classname'] = preg_replace("/[^a-zA-Z]/", "",$synccommerce)."gazSynchro";
-		}
-    }
-    return array_merge($admin_aziend, $currency);
+  }
+  return array_merge($admin_aziend,$currency);
 }
 
 function changeEnterprise($new_co = 1) {

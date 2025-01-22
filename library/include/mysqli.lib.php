@@ -174,83 +174,83 @@ function gaz_dbi_get_fields_meta($result) {
 }
 
 function gaz_dbi_get_row($table, $fnm, $fval, $other="", $cell="*") {
-   global $link;
-   $fval = mysqli_real_escape_string($link, $fval);
-   $query = "SELECT $cell FROM $table WHERE $fnm = '$fval' $other";
-   $result = gaz_dbi_query($query);
-   if (!$result) gaz_die ( $query, "168", __FUNCTION__ );
-   if (strpos($cell, "*") === FALSE) {
-      $row = gaz_dbi_fetch_array($result);
-      if ($row) {
-         return $row[$cell];
-      } else {
-         return '';
-      }
-   } else {
-      return gaz_dbi_fetch_array($result);
-   }
+  global $link;
+  $fval = mysqli_real_escape_string($link, $fval);
+  $query = "SELECT $cell FROM $table WHERE $fnm = '$fval' $other";
+  $result = gaz_dbi_query($query);
+  if (!$result) gaz_die ( $query, "168", __FUNCTION__ );
+  if (strpos($cell, "*") === FALSE) {
+    $row = gaz_dbi_fetch_assoc($result);
+    if ($row) {
+      return $row[$cell];
+    } else {
+      return '';
+    }
+  } else {
+    return gaz_dbi_fetch_assoc($result);
+  }
 }
 
 function gaz_dbi_get_single_value($table, $campo, $where) {
-   global $link;
-   $query = "SELECT $campo FROM $table WHERE $where";
-   $result = gaz_dbi_query($query);
-   if (!$result) gaz_die ( $query, "182", __FUNCTION__ );
-   $ris = gaz_dbi_fetch_array($result, MYSQLI_NUM);
-   $rn = gaz_dbi_num_rows($result);
-   if ($rn == 1) {
-      return $ris[0];
-   } else {
-      return null;
-   }
+  global $link;
+  $query = "SELECT $campo FROM $table WHERE $where";
+  $result = gaz_dbi_query($query);
+  if (!$result) gaz_die ( $query, "182", __FUNCTION__ );
+  $ris = gaz_dbi_fetch_array($result, MYSQLI_NUM);
+  $rn = gaz_dbi_num_rows($result);
+  if ($rn == 1) {
+    return $ris[0];
+  } else {
+    return null;
+  }
 }
 
 function gaz_dbi_put_row($table, $CampoCond, $ValoreCond, $Campo, $Valore) {
-   $field_results = gaz_dbi_query("SELECT * FROM " . $table . " LIMIT 1");
-   $field_meta = gaz_dbi_get_fields_meta($field_results);
-   $where = ' WHERE ' . $CampoCond . ' = ';
-   $query = "UPDATE " . $table . ' SET ' . $Campo . ' = ';
-   for ($j = 0; $j < $field_meta['num']; $j++) {
-      if ($field_meta['data'][$j]->name == $Campo) {
-         if ($field_meta['data'][$j]->blob && !empty($Valore)) {
-            $query .= '0x' . bin2hex($Valore);
-         } elseif ($field_meta['data'][$j]->numeric && $field_meta['data'][$j]->type != 'timestamp') {
-            $query .= floatval($Valore);
-         } else {
-            $elem = addslashes($Valore); // risolve il classico problema dei caratteri speciali per inserimenti in SQL
-            $elem = preg_replace("/\\\'/", "''", $elem); //cambia lo backslash+singlequote con 2 singlequote come fa phpmyadmin.
-            $query .= "'" . $elem . "'";
-         }
-      }
-      if ($field_meta['data'][$j]->name == $CampoCond) {
-         if ($field_meta['data'][$j]->blob && !empty($ValoreCond)) {
-            $where .= '0x' . bin2hex($Valore);
-         } elseif ($field_meta['data'][$j]->numeric && $field_meta['data'][$j]->type != 'timestamp') {
-            $where .= floatval($ValoreCond);
-         } else {
-            $elem = addslashes($ValoreCond); // risolve il classico problema dei caratteri speciali per inserimenti in SQL
-            $elem = preg_replace("/\\\'/", "''", $elem); //cambia lo backslash+singlequote con 2 singlequote come fa phpmyadmin.
-            $where .= "'" . $elem . "'";
-         }
-      }
-   }
-   $query .= $where . ' LIMIT 1';
-   $result = gaz_dbi_query($query);
-   if (!$result) gaz_die ( $query, "224", __FUNCTION__ );
-   return $result;
+  $field_results = gaz_dbi_query("SELECT * FROM " . $table . " LIMIT 1");
+  $field_meta = gaz_dbi_get_fields_meta($field_results);
+  $where = ' WHERE ' . $CampoCond . ' = ';
+  $query = "UPDATE " . $table . ' SET ' . $Campo . ' = ';
+  for ($j = 0; $j < $field_meta['num']; $j++) {
+    if ($field_meta['data'][$j]->name == $Campo) {
+       if ($field_meta['data'][$j]->blob && !empty($Valore)) {
+          $query .= '0x' . bin2hex($Valore);
+       } elseif ($field_meta['data'][$j]->numeric && $field_meta['data'][$j]->type != 'timestamp') {
+          $query .= floatval($Valore);
+       } else {
+          $elem = addslashes($Valore); // risolve il classico problema dei caratteri speciali per inserimenti in SQL
+          $elem = preg_replace("/\\\'/", "''", $elem); //cambia lo backslash+singlequote con 2 singlequote come fa phpmyadmin.
+          $query .= "'" . $elem . "'";
+       }
+    }
+    if ($field_meta['data'][$j]->name == $CampoCond) {
+       if ($field_meta['data'][$j]->blob && !empty($ValoreCond)) {
+          $where .= '0x' . bin2hex($Valore);
+       } elseif ($field_meta['data'][$j]->numeric && $field_meta['data'][$j]->type != 'timestamp') {
+          $where .= floatval($ValoreCond);
+       } else {
+          $elem = addslashes($ValoreCond); // risolve il classico problema dei caratteri speciali per inserimenti in SQL
+          $elem = preg_replace("/\\\'/", "''", $elem); //cambia lo backslash+singlequote con 2 singlequote come fa phpmyadmin.
+          $where .= "'" . $elem . "'";
+       }
+    }
+  }
+  $query .= $where . ' LIMIT 1';
+  $result = gaz_dbi_query($query);
+  if (!$result) gaz_die ( $query, "224", __FUNCTION__ );
+  return $result;
 }
 
 function gaz_dbi_put_query($table, $where, $Campo, $Valore) {
-   $query = "UPDATE $table SET $Campo='$Valore' WHERE $where";
-   $result = gaz_dbi_query($query);
-   if (!$result) gaz_die ( $query, "231", __FUNCTION__ );
+  $query = "UPDATE $table SET $Campo='$Valore' WHERE $where";
+  $result = gaz_dbi_query($query);
+  if (!$result) gaz_die ( $query, "231", __FUNCTION__ );
 }
 
 function gaz_dbi_del_row($table, $fname, $fval) {
-   global $link;
-   $query = "DELETE FROM $table WHERE $fname = '$fval'";
-   $result = gaz_dbi_query($query) or die(" Errore di cancellazione: " . mysqli_error($link));
-   if (!$result) gaz_die ( $query, "238", __FUNCTION__ );
+  global $link;
+  $query = "DELETE FROM $table WHERE $fname = '$fval'";
+  $result = gaz_dbi_query($query) or die(" Errore di cancellazione: " . mysqli_error($link));
+  if (!$result) gaz_die ( $query, "238", __FUNCTION__ );
 }
 
 // restituisce l'id dell'ultimo insert
@@ -370,7 +370,7 @@ function gaz_dbi_get_anagra($table, $fnm, $fval) {
    $query = "SELECT $fields, " . $gTables['clfoco'] . ".* FROM $table WHERE $fnm = '$fval'";
    $result = gaz_dbi_query($query);
    if (!$result) gaz_die ( $query, "353", __FUNCTION__ );
-   return gaz_dbi_fetch_array($result);
+   return gaz_dbi_fetch_assoc($result);
 }
 
 // funzione gaz_dbi_query_anagra
@@ -1067,7 +1067,7 @@ function checkAccessRights($adminid, $module, $company_id = 0) {
   if (gaz_dbi_num_rows($result) < 1) {
      return 0;
   }
-  $row = gaz_dbi_fetch_array($result);
+  $row = gaz_dbi_fetch_assoc($result);
   $chkes = is_string($row['custom_field'])? json_decode($row['custom_field']) : false;
   if ($chkes && isset($chkes->excluded_script)) {
     return $chkes->excluded_script;

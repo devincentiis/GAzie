@@ -23,10 +23,10 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-function getDashFiles()
+function getDashFiles($mod)
 {
 	$fileArr=[];
-	foreach(glob('../*', GLOB_ONLYDIR) as $dir) {
+	foreach(glob('../'.$mod, GLOB_ONLYDIR) as $dir) {
 	    if ($handle = opendir($dir)) {
 			while ($file = readdir($handle)) {
 				if(($file == ".")||($file == "..")||($file == "dash_order_update.php")) continue;
@@ -65,60 +65,65 @@ if(isset($_POST['addrow'])&&!empty($_POST['addrow'])){ // aggiungo il widget
 	gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET exec_mode = 9 WHERE file = '".$_POST['delrow'].".php' AND adminid = '".$admin_aziend['user_name']."' AND (codice_aziend = 0 OR codice_aziend = ".$admin_aziend['codice'].")");
 }
 ?>
-<style>
-.vertical-align {
-    display: flex;
-    align-items: center;
-}
-</style>
-<script type="text/javascript">
-    $(function () {
-		$(".yn_toggle").bootstrapSwitch({
-			on: 'YES',
-			off: 'NO',
-			onClass: 'success'}, true);
-		$(".yn_toggle").change(function () {
-			var str = $(this).attr('name');
-            if($(this).is(":checked")){
-				$('#delrow').disabled = true;
-				$('#addrow').disabled = false;
-				$('#addrow').val(str);
-            } else if($(this).is(":not(:checked)")){
-				$('#addrow').disabled = true;
-				$('#delrow').disabled = false;
-				$('#delrow').val(str);
-            }
-			$('form#widform').submit();
-			})
-    });
+<script>
+$(function () {
+  $(".yn_toggle").bootstrapSwitch({
+    on: 'YES',
+    off: 'NO',
+    onClass: 'success'}, true);
+  $(".yn_toggle").change(function () {
+    var str = $(this).attr('name');
+    if($(this).is(":checked")){
+      $('#delrow').disabled = true;
+      $('#addrow').disabled = false;
+      $('#addrow').val(str);
+          } else if($(this).is(":not(:checked)")){
+      $('#addrow').disabled = true;
+      $('#delrow').disabled = false;
+      $('#delrow').val(str);
+    }
+    $('form#widform').submit();
+  })
+});
 </script>
 <form id="widform" method='post' class="form-horizontal">
-   <div class="panel panel-default gaz-table-form">
-     <input type="hidden" id="delrow" name="delrow" />
-     <input type="hidden" id="addrow" name="addrow" />
+  <div class="panel panel-default gaz-table-form">
+    <div class="container-fluid">
+      <input type="hidden" id="delrow" name="delrow" />
+      <input type="hidden" id="addrow" name="addrow" />
 <?php
-foreach(getDashFiles() as $w){
-	$v=substr($w,0,-4);
-	// controllo se sulla tabella del database ho il relativo rigo ed è attivato (exec_mode=2)
-	$widget_exist=gaz_dbi_get_row($gTables['breadcrumb'], "exec_mode=2 AND adminid ='".$admin_aziend['user_name']."' AND (codice_aziend = 0 OR codice_aziend = ".$admin_aziend['codice'].") AND file", $w);
-	$cked='';
-	if($widget_exist){
-		$cked='checked';
-	}else{
-		$widget_exist['titolo']='';
-	}
-	echo '<div class="row vertical-align">
-			<div class="col-xs-7" title="'.$v.'"><img class="img-thumbnail" src="../'.$v.'.png">
-			</div>
-			<div class="col-xs-3">
-			<input type="text"  name="title-'.$v.'" value="'.$widget_exist['titolo'].'"/>
-			</div>
-			<div class="col-xs-2">
-			<input type="checkbox" '.$cked.' class="yn_toggle" name="'.$v.'" data-on-text="YES" data-off-text="NO" />
-			</div>
-		 </div>';
+$active_modules=gaz_dbi_dyn_query("name",$gTables['admin_module']." adm LEFT JOIN ".$gTables['module']." mdl ON adm.moduleid=mdl.id", "company_id=".$admin_aziend['company_id']." AND adminid ='".$admin_aziend['user_name']."' AND adm.access >= 3");
+$ctrl_name='';
+while($mods=gaz_dbi_fetch_assoc($active_modules)) {
+  foreach(getDashFiles($mods['name']) as $w){
+    $v=substr($w,0,-4);
+    // controllo se sulla tabella del database ho il relativo rigo ed è attivato (exec_mode=2)
+    $widget_exist=gaz_dbi_get_row($gTables['breadcrumb'], "exec_mode=2 AND adminid ='".$admin_aziend['user_name']."' AND (codice_aziend = 0 OR codice_aziend = ".$admin_aziend['codice'].") AND file", $w);
+    $cked='';
+    if($widget_exist){
+      $cked='checked';
+    }else{
+      $widget_exist['titolo']='';
+    }
+    if ($ctrl_name!=$mods['name']){
+      require("../" . $mods['name'] . "/menu.".$admin_aziend['lang'].".php");
+      echo '<div class="row text-center"> <h3><img src="../'.$mods['name'].'/'.$mods['name'].'.png" height=42 >'.$transl[$mods['name']]['name'].'</h3></div>';
+    }
+    echo '<div class="row">
+        <div class="col-xs-7" title="'.$v.'"><img src="../'.$v.'.png" style="height:116px; width: auto; max-width: 100%;">
+        </div>
+        <div class="col-xs-3">
+        <input type="text"  name="title-'.$v.'" value="'.$widget_exist['titolo'].'"/>
+        </div>
+        <div class="col-xs-2">
+        <input type="checkbox" '.$cked.' class="yn_toggle" name="'.$v.'" data-on-text="YES" data-off-text="NO" />
+        </div>
+       </div><hr/>';
+    $ctrl_name=$mods['name'];
+  }
 }
 ?>
+    </div><!-- chiude container-fluid  -->
   </div><!-- chiude panel  -->
 </form>
 <?php

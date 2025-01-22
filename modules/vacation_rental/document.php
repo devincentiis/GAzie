@@ -435,6 +435,8 @@ class DocContabVars {
               }
             }
             $this->alloggio .= " ".$rigev['codice']. $cin ." -";
+            $this->adult = $rigev['adult'];
+            $this->child = $rigev['child'];
             $this->checkinout = " check-in:".date_format(date_create($rigev['start']),"d-m-Y")." check-out:".date_format(date_create($rigev['end']),"d-m-Y");
           }elseif(is_array($data['vacation_rental'])){// se è un extra
             $extras[] = " ".$rigev['codice']." -";// aggiungo l'extra all'array

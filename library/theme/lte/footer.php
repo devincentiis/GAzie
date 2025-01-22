@@ -172,7 +172,7 @@ $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
     <script src="../../library/theme/lte/plugins/fastclick/fastclick.min.js"></script>
     <script>
         var AdminLTEOptions = {
-            sidebarExpandOnHover: <?php echo $config->getValue('LTE_Onhover'); ?>,
+            sidebarExpandOnHover: <?= $config->getValue('LTE_Onhover')?'true':'false' ?>,
             enableBoxRefresh: true,
             enableBSToppltip: true
         };

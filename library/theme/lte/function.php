@@ -78,12 +78,14 @@ function submenu($array,$index, $sub="") {
     if (count($mnu)>7) { // è un secondo livello con sub (terzo livello)
       if ( $admin_aziend["Abilit"]>=$mnu["m2_ackey"] ) {
         echo "<li>";
-        if (isset($mnu["menu"]) && $mnu["menu"]){
+        if (empty($mnu["link"])) {
+          $sub = '';
+        } elseif (isset($mnu["menu"]) && $mnu["menu"]){
           $sub = '<a href="'. $mnu["link"] .'">'.stripslashes($mnu["menu"]);
         } elseif (str_contains($scriptname,'report')||str_contains($scriptname,'list')) {
           $sub = '<a href="'. $mnu["link"] .'">Lista '.stripslashes($mnu["name"]);
         } else {
-          $sub = '<a href="'. $mnu["link"] .'"'.stripslashes($mnu["name"]);
+          $sub = '<a href="'. $mnu["link"] .'">'.stripslashes($mnu["name"]);
         }
         echo "  <a href=\"#\" hint=\"".stripslashes($mnu["name"])."\">".stripslashes($mnu["name"]);
         echo "      <i class=\"fa fa-angle-left pull-right\"></i>";
@@ -151,12 +153,16 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
             if (isset($chkes->excluded_script) && in_array($nfr3,$chkes->excluded_script)) {
               $row['m3_link'] = '';
               $acc_excluded[] = $nfr3;
+            } else {
+              $m3_link='../'.$row['name'].'/'.$row['m3_link'];
             }
             $path2 = parse_url($row['m2_link'], PHP_URL_PATH);
             $nfr2 = basename($path2,'.php');
             if (isset($chkes->excluded_script) && in_array($nfr2,$chkes->excluded_script)) {
-              $row['m2_link'] = '../../..'.$_SERVER['PHP_SELF'];
+              $m2_link = '';
               $acc_excluded[] = $nfr2;
+            } else {
+              $m2_link='../'.$row['name'].'/'.$row['m2_link'];
             }
             if ($row['access'] == 3) {
                 if ($ctrl_m1 != $row['m1_id']) {
@@ -197,7 +203,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
                             'title' => $transl[$row['name']]['title'],
                             'm1_ackey' => $row['m1_ackey'],
                             'class' => $row['class']);
-                        $menuArray[$row['weight']][$row['m2_weight']] = array('link' => '../' . $row['name'] . '/' . $row['m2_link'],
+                        $menuArray[$row['weight']][$row['m2_weight']] = array('link' => $m2_link,
                             'icon' => '../' . $row['name'] . '/' . $row['m2_icon'],
                             'name' => $transl[$row['name']]['m2'][$row['m2_trkey']][1],
                             'menu' => $next_m3_name,
@@ -205,8 +211,8 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
                             'm2_ackey' => $row["m2_ackey"],
                             'class' => $row['m2_class']);
                             $next_m3_name=false;
-                  } elseif ($ctrl_m2 != $row['m2_id']) { // Ã¨ solo il primo di menu2
-                        $menuArray[$row['weight']][$row['m2_weight']] = array('link' => '../' . $row['name'] . '/' . $row['m2_link'],
+                  } elseif ($ctrl_m2 != $row['m2_id']) { // è solo il primo di menu2
+                        $menuArray[$row['weight']][$row['m2_weight']] = array('link' => $m2_link,
                             'icon' => '../' . $row['name'] . '/' . $row['m2_icon'],
                             'name' => $transl[$row['name']]['m2'][$row['m2_trkey']][1],
                             'menu' => $next_m3_name,
@@ -216,7 +222,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
                             $next_m3_name=false;
                     }
                     if (!empty($row['m3_link'])){
-                      $menuArray[$row['weight']][$row['m2_weight']][$row['m3_weight']] = array('link' => '../' . $row['name'] . '/' . $row['m3_link'],
+                      $menuArray[$row['weight']][$row['m2_weight']][$row['m3_weight']] = array('link' => $m3_link,
                         'icon' => '../' . $row['name'] . '/' . $row['m3_icon'],
                         'name' => $transl[$row['name']]['m3'][$row['m3_trkey']][1],
                         'title' => $transl[$row['name']]['m3'][$row['m3_trkey']][0],
@@ -230,7 +236,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
                         'title' => $transl[$row['name']]['title'],
                         'm1_ackey' => $row['m1_ackey'],
                         'class' => $row['class']);
-                    $menuArray[$row['weight']][$row['m2_weight']] = array('link' => '../' . $row['name'] . '/' . $row['m2_link'],
+                    $menuArray[$row['weight']][$row['m2_weight']] = array('link' => $m2_link,
                         'icon' => '../' . $row['name'] . '/' . $row['m2_icon'],
                         'name' => $transl[$row['name']]['m2'][$row['m2_trkey']][1],
                         'menu' => $next_m3_name,
@@ -239,7 +245,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
                         'class' => $row['m2_class']);
                         $next_m3_name=false;
                 } else { // non è il primo di menu2
-                    $menuArray[$row['weight']][$row['m2_weight']] = array('link' => '../' . $row['name'] . '/' . $row['m2_link'],
+                    $menuArray[$row['weight']][$row['m2_weight']] = array('link' => $m2_link,
                         'icon' => '../' . $row['name'] . '/' . $row['m2_icon'],
                         'name' => $transl[$row['name']]['m2'][$row['m2_trkey']][1],
                         'menu' => $next_m3_name,
@@ -352,7 +358,10 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
               echo '<div><ol class="breadcrumb">';
               $first=true;
               while ($r = gaz_dbi_fetch_array($result4)) {
-                if ($first) echo '<li><b class="FacetFooterTD"><a href="'.$r["lmm"].'">'.$transl[$module]["m2"][$r["tmm"]]["1"].'</a></b></li>';
+                $linkbase_lmm =  pathinfo($r['lmm'], PATHINFO_FILENAME);
+                if ($first && !in_array($linkbase_lmm,$acc_excluded)) {
+                  echo '<li><b class="FacetFooterTD"><a href="'.$r["lmm"].'">'.$transl[$module]["m2"][$r["tmm"]]["1"].'</a></b></li>';
+                }
                 $linkbase =  pathinfo($r['link'], PATHINFO_FILENAME);
                 if ( $admin_aziend["Abilit"]>=$r["accesskey"] && !in_array($linkbase,$acc_excluded)) echo '<li><a href="'.$r["link"].'">'.stripslashes ($transl[$module]["m3"][$r["translate_key"]]["1"]).'</a></li>';
                 $first=false;

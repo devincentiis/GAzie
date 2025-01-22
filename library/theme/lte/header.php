@@ -126,11 +126,11 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover,
             nav.navbar.navbar-static-top.company-color-bright:hover
             {
-              background-color: #<?php echo $admin_aziend['colore']; ?>;
+              background-color: #<?= $admin_aziend['colore'] ?>;
               color: black;
             }
             .adminlte-gazie .main-sidebar {
-              background-color: #<?php echo $admin_aziend['colore']; ?>;
+              background-color: #<?= $admin_aziend['colore'] ?>;
             }
             .company-color-logo:hover {
               filter: brightness(80%);
@@ -153,16 +153,16 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             }
             .sidebar-menu > li:hover > a,
             .sidebar-menu > li.active > a {
-              border-left-color: #<?php echo $admin_aziend['colore']; ?>;
+              border-left-color: #<?= $admin_aziend['colore'] ?>;
             }
             .sidebar a, treeview-menu > li > a {
-              color: #<?php echo $admin_aziend['colore']; ?>;
+              color: #<?= $admin_aziend['colore'] ?>;
             }
             .sidebar-menu .treeview-menu.menu-open > li {
-              border-left: 2px solid #<?php echo $admin_aziend['colore']; ?>;
+              border-left: 2px solid #<?= $admin_aziend['colore'] ?>;
             }
             .content-wrapper {
-              background-image: url("data:image/x-icon;base64,<?php echo $sfondo; ?>");
+              background-image: url("data:image/x-icon;base64,<?= $sfondo; ?>");
             }
             a.logo.company-color-logo span img {
               height: auto;
@@ -170,6 +170,14 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
               max-width: 50px;
               max-height: 50px;
               padding: 1px;
+            }
+            th a, .breadcrumb li a, a i.glyphicon-cog {
+              color: #<?= $admin_aziend['colore'] ?>;
+              filter: brightness(0.5);
+            }
+            .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+              background-color: #<?= $admin_aziend['colore'] ?>;
+              color: #000;
             }
 
         </style>
@@ -518,6 +526,9 @@ if ($rslen < 18) {
                                     <span class="hidden-xs"><?php echo $admin_aziend['user_firstname'] . ' ' . $admin_aziend['user_lastname']; ?></span>
                                 </a>
                                 <ul class="dropdown-menu">
+<?php
+if($admin_aziend['Abilit']>=8) {
+?>
                                     <!-- User image -->
                                     <li class="user-header"><a href="../config/admin_utente.php?user_name=<?php echo $admin_aziend["user_name"]; ?>&Update">
                                         <img src="<?php echo '../root/view.php?table=admin&field=user_name&value=' . $admin_aziend["user_name"]; ?>" class="img-circle" alt="User" height=80></a>
@@ -539,6 +550,10 @@ if ($rslen < 18) {
                                         </div>
                                       </a>
                                     </li>
+<?php
+}
+?>
+
                                     <!-- Menu Footer-->
                                     <li class="user-footer">
                                         <div class="text-center">

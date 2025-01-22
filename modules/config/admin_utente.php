@@ -215,14 +215,18 @@ if (isset($_POST['conferma'])) {
 		if ($_FILES['userfile']['size'] > 0) { //se c'e' una nuova immagine nel buffer
 			$form['image'] = file_get_contents($_FILES['userfile']['tmp_name']);
 		} else {   // altrimenti riprendo la vecchia
-			$form['image'] = $old_data['image'];
+			$form['image'] = $old_data?$old_data['image']:'';
 		}
 		// preparo l'update di custom_field che potrebbe contenere altri dati
 		$magmodule = gaz_dbi_get_row($gTables['module'], "name",'magazz');
-		$thisadmin_module = gaz_dbi_get_row($gTables['admin_module'], "moduleid",$magmodule['id']," AND adminid='{$form['user_name']}' AND company_id=" . $admin_aziend['company_id']);
-		$thiscustom_field=(array)json_decode($thisadmin_module['custom_field']);
-		$thiscustom_field['user_id_warehouse']=$form['id_warehouse'];
-		$form['custom_field']=json_encode($thiscustom_field);
+    $thisadmin_module = gaz_dbi_get_row($gTables['admin_module'], "moduleid",$magmodule['id']," AND adminid='{$form['user_name']}' AND company_id=" . $admin_aziend['company_id']);
+    if ($thisadmin_module  && json_validate($thisadmin_module['custom_field'])) {
+      $thiscustom_field=(array)json_decode($thisadmin_module['custom_field']);
+      $thiscustom_field['user_id_warehouse']=$form['id_warehouse'];
+      $form['custom_field']=json_encode($thiscustom_field);
+    } else {
+      $form['custom_field']='';
+    }
 		// aggiorno il db
 		$query="UPDATE ".$gTables['admin_module']." SET custom_field='".$form['custom_field']."' WHERE moduleid=".$magmodule['id']." AND adminid='{$form['user_name']}' AND company_id=" . $admin_aziend['company_id'];
 		gaz_dbi_query($query);
@@ -329,9 +333,8 @@ if (isset($_POST['conferma'])) {
       // ripreparo la chiave per criptare la chiave contenuta in $_SESSION con la nuova password e metterla aes_key di gaz_admin
       $prepared_key = openssl_pbkdf2($form["user_password_new"].$form["user_name"], AES_KEY_SALT, 16, 1000, "sha256");
       $form["aes_key"] = base64_encode(openssl_encrypt($_SESSION['aes_key'],"AES-128-CBC",$prepared_key,OPENSSL_RAW_DATA, AES_KEY_IV));
-
 			// Antonio Germani - Creo anche una nuova anagrafica nelle anagrafiche comuni
-      if (strlen($form['imap_usr'])>2){// se è stato inserito l'utente nelle impostazioni imap creo i dati imap nel custom_field
+      if ($form['imap_usr'] && strlen($form['imap_usr'])>2){// se è stato inserito l'utente nelle impostazioni imap creo i dati imap nel custom_field
         $data = json_decode($form['custom_field'],true);// aggiungo il custom field di config a quello di user_id_warehouse creato poco sopra
 
         /**** promemoria per decriptare ****
@@ -365,13 +368,15 @@ if (isset($_POST['conferma'])) {
 				$form['var_value'] = $tbt;
 				gaz_dbi_table_insert('admin_config', $form);
 			}
-			// qui aggiungo alla tabella breadcrumb/widget gli stessi che ha l'utente che abilita il nuovo, altrimenti sulla homepage non apparirebbe nulla
-			$get_widgets = gaz_dbi_dyn_query("*", $gTables['breadcrumb'],"adminid='".$admin_aziend['user_name']."' AND exec_mode>=1", 'exec_mode,position_order');
-			while($row=gaz_dbi_fetch_array($get_widgets)){
-				$row['adminid']=$form["user_name"];
-				gaz_dbi_table_insert('breadcrumb',$row);
-			}
-
+			// qui aggiungo alla tabella breadcrumb/widget solo quelli per utente ed azienda
+      gaz_dbi_table_insert('breadcrumb',['adminid'=>$form['user_name'],'file'=>'config/dash_company_widget.php','exec_mode'=>2,'position_order'=>1,'company_id'=>$admin_aziend['company_id']]);
+      gaz_dbi_table_insert('breadcrumb',['adminid'=>$form['user_name'],'file'=>'config/dash_user_widget.php','exec_mode'=>2,'position_order'=>2,'company_id'=>$admin_aziend['company_id']]);
+      // per il tema LTE aggiungo i valori di settaggio modo di visualizzazione di default
+      gaz_dbi_query("INSERT INTO ".$gTables['admin_config']." ( `adminid`, `company_id`, `var_descri`, `var_name`, `var_value`) VALUES ( '".$form['user_name']."', 0, 'Attiva lo stile boxed', 'LTE_Fixed', 'false')");
+      gaz_dbi_query("INSERT INTO ".$gTables['admin_config']." ( `adminid`, `company_id`, `var_descri`, `var_name`, `var_value`) VALUES ( '".$form['user_name']."', 0, 'Attiva lo stile boxed', 'LTE_Boxed', 'false')");
+      gaz_dbi_query("INSERT INTO ".$gTables['admin_config']." ( `adminid`, `company_id`, `var_descri`, `var_name`, `var_value`) VALUES ( '".$form['user_name']."', 0, 'Attiva lo stile boxed', 'LTE_Collapsed', 'false')");
+      gaz_dbi_query("INSERT INTO ".$gTables['admin_config']." ( `adminid`, `company_id`, `var_descri`, `var_name`, `var_value`) VALUES ( '".$form['user_name']."', 0, 'Attiva lo stile boxed', 'LTE_Onhover', 'false')");
+      gaz_dbi_query("INSERT INTO ".$gTables['admin_config']." ( `adminid`, `company_id`, `var_descri`, `var_name`, `var_value`) VALUES ( '".$form['user_name']."', 0, 'Attiva lo stile boxed', 'LTE_SidebarOpen', 'false')");
 		} elseif ($toDo == 'update') {
       $custom_field=gaz_dbi_get_row($gTables['anagra'], "id", $form['id_anagra'])['custom_field']; // carico il json custom_field esistente
       if ($custom_field && $data = json_decode($custom_field,true)){// se c'è un json
@@ -395,7 +400,7 @@ if (isset($_POST['conferma'])) {
           $form['custom_field'] = json_encode($data);
         }
         gaz_dbi_put_row($gTables['anagra'], 'id', $form['id_anagra'], 'custom_field', $form['custom_field']);// aggiorno il DB
-      }elseif (strlen($form['imap_usr'])>2 && strlen($form['imap_pwr'])>4){// se è stato inserito l'utente nelle impostazioni imap creo i dati imap nel custom_field
+      }elseif (strlen($form['imap_usr'].'')>2 && strlen($form['imap_pwr'].'')>4){// se è stato inserito l'utente nelle impostazioni imap creo i dati imap nel custom_field
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-128-cbc'));
         $cripted_pwr=base64_encode(openssl_encrypt($form['imap_pwr'], 'aes-128-cbc', $_SESSION['aes_key'], 0, $iv).'::'.$iv);
         $data['config'][$form['company_id']]= array('imap_usr' => $form['imap_usr'],'imap_pwr' => $cripted_pwr,'imap_sent_folder' => $form['imap_sent_folder']);
