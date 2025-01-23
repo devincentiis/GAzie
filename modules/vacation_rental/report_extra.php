@@ -172,7 +172,7 @@ function getgroup(artico) {
 };
 
 $('#closePdf').on( "click", function() {
-		$('.framePdf').css({'display': 'none'});
+		$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
 	});
 function openframe(url,codice){
 	$(function(){
@@ -186,7 +186,7 @@ function openframe(url,codice){
 	});
 	$('#closePdf').on( "click", function() {
     $("#titolo").empty();
-		$('.framePdf').css({'display': 'none'});
+		$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
 	});
 };
 
@@ -228,7 +228,7 @@ $ts->output_navbar();
 				<h4><div class="col-xs-11" id="titolo" ></div></h4>
 				<div class="col-xs-1"><h4><button type="button" id="closePdf"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
 			</div>
-			<iframe id="framePdf"  style="height: 100%; width: 100%" src=""></iframe>
+			<iframe id="framePdf"  style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
 	</div>
 	<div style="display:none; min-width:150px; " id="dialog_orders" title="">
 		<p class="ui-state-highlight" id="idartico"></p>

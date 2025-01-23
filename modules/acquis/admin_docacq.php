@@ -2078,7 +2078,7 @@ function printPdf(urlPrintDoc){
 		$('#framePdf').css({'height': '100%'});
 		$('.framePdf').css({'display': 'block','width': '90%', 'height': '80%', 'z-index':'2000'});
 		$('#closePdf').on( "click", function() {
-			$('.framePdf').css({'display': 'none'});
+			$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
       window.location.href = "<?php echo $form['ritorno']; ?>";
 		});
 	});
@@ -2128,7 +2128,7 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 			<div class="col-xs-11"><h4><?php echo $script_transl['print'];; ?></h4></div>
         <div class="col-xs-1"><h4><button type="button" id="closePdf"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
       </div>
-      <iframe id="framePdf"  style="height: 100%; width: 100%" src=""></iframe>
+      <iframe id="framePdf"  style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
     </div>
     <div class="text-center">
         <div>

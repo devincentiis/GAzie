@@ -120,7 +120,7 @@ $(function() {
 });
 
 $('#closePdf').on( "click", function() {
-		$('.framePdf').css({'display': 'none'});
+		$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
 	});
 function openframe(url){
 	$(function(){
@@ -132,7 +132,7 @@ function openframe(url){
     });
 	});
 	$('#closePdf').on( "click", function() {
-		$('.framePdf').css({'display': 'none'});
+		$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
 	});
 };
 

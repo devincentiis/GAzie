@@ -1580,7 +1580,7 @@ function prevXML(urlPrintDoc){
 			<div class="col-xs-11"><h4>Anteprima fattura</h4></div>
 			<div class="col-xs-1"><h4><button type="button" id="closeXML"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
 		</div>
-		<iframe id="xmlpreview"  style="height: 100%; width: 100%" src=""></iframe>
+		<iframe id="xmlpreview"  style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
 	</div>
     <input type="hidden" name="fattura_elettronica_original_name" value="<?php echo $form['fattura_elettronica_original_name']; ?>">
     <input type="hidden" name="incrbenamm" value="<?php echo $form['incrbenamm']; ?>">

@@ -521,7 +521,7 @@ function printDoc(urlPrintDoc,nf){
 			<div class="col-xs-11"><h4 id="filen"></h4></div>
 			<div class="col-xs-1"><h4><button type="button" id="closeDoc"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
 		</div>
-		<iframe id="frameDoc" style="height: auto; width: 100%;" src=""></iframe>
+		<iframe id="frameDoc" style="height: auto; width: 100%;" src="../../library/images/wait_spinner.html"></iframe>
 	</div>
   <div id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm">
