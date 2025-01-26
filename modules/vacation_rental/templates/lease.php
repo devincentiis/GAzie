@@ -116,6 +116,12 @@ class Lease extends Template{
                 case "5":
                   $accomodation_type=$script_transl['bandb'];
                   break;
+                case "6":
+                  $accomodation_type=$script_transl['room'];
+                  break;
+                case "7":
+                  $accomodation_type=$script_transl['loc'];
+                  break;
               }
 
               if (intval ($rigo['id_artico_group'])>0){// se l'alloggio fa parte di una struttura

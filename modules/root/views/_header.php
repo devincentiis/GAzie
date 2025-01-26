@@ -48,5 +48,12 @@ if (gaz_dbi_num_rows($rs_az) > 1 || !file_exists(DATA_DIR.'files/'.$az['codice']
   <link rel="stylesheet" type="text/css" href="../..<?php echo $u['var_value'];?>/scheletons/default.css">
   <link rel="stylesheet" type="text/css" href="../..<?php echo $u['var_value'];?>/skins/default.css">
 </head>
-<body style="background-image: url('data:image/x-icon;base64,<?php echo $sfondo; ?>')">
+<?php
+	$fileSfondoPers=dirname(__FILE__) . '/../lang.mydescri.png';
+	if (file_exists($fileSfondoPers)) {
+    echo '<body style="background-image: url(\'lang.mydescri.png\')">';
+	} else {
+    echo '<body style="background-image: url(\'data:image/x-icon;base64,'.$sfondo.'\')">';
+  }
+?>
 

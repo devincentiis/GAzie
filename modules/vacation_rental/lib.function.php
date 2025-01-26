@@ -300,10 +300,9 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
       $on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
     }
     if ($vat==FALSE){// devo restituire l'imponibile
-      $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice OR ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
+      $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codart = ".$tableart.".codice AND ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
       if ($result = mysqli_query($link, $sql)) {
          $row = mysqli_fetch_assoc($result);
-          $where = " WHERE id_tes = '".$tesbro."'";
           $sql = "SELECT speban FROM ".$tabletes.$where." LIMIT 1";
           if ($result = mysqli_query($link, $sql)) {
             $rowtes = mysqli_fetch_assoc($result);
@@ -395,7 +394,13 @@ function get_total_promemo($startprom,$endprom){// STAT
     // prendo tutti gli eventi dell'alloggio che interessano l'arco di tempo richiesto
     $sql = "SELECT * FROM ".$tablerent_ev." LEFT JOIN ".$tabletes." ON  ".$tablerent_ev.".id_tesbro = ".$tabletes.".id_tes WHERE  ".$tablerent_ev.".type = 'ALLOGGIO' AND ".$tablerent_ev.".id_tesbro > 0 AND (custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%') AND house_code='".substr($resh['codice'], 0, 32)."' AND ( start <= '".$endprom."' AND(start >= '".$startprom."' OR start <= '".$endprom."') AND (end >= '".$startprom."' OR end <= '".$endprom."') AND end >= '".$startprom."') ORDER BY id ASC";
     //echo $sql;
-    $result = mysqli_query($link, $sql);
+	
+    if ($result = @mysqli_query($link, $sql)){
+		
+	}else{
+		echo "Error: " . $sql . "<br>" . mysqli_error($link);
+	}
+	
 
     foreach($result as $row){ // per ogni evento dell'alloggio
       //echo "<pre>evento alloggio:",print_r($row),"</pre>";

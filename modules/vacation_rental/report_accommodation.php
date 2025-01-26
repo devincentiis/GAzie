@@ -717,6 +717,12 @@ while ($r = gaz_dbi_fetch_array($result)) {
 				case "5":
 					echo "Bed & breakfast";
 				break;
+        case "6":
+					echo "Camera";
+				break;
+        case "7":
+					echo "Locazione turistica";
+				break;
 			}
 
       if ($r['id_artico_group']>0){

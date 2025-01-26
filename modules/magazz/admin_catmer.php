@@ -97,28 +97,28 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
       }
   }
 } elseif ((!isset($_POST['Update'])) and (isset($_GET['Update']))) { //se e' il primo accesso per UPDATE
-    $catmer = gaz_dbi_get_row($gTables['catmer'],"codice",intval($_GET['codice']));
-    $form['ritorno'] = $_POST['ritorno'];
-    $form['codice'] = $catmer['codice'];
-    $form['descri'] = $catmer['descri'];
-	$form['large_descri'] = $catmer['large_descri'];
-    $form['ref_ecommerce_id_category'] = $catmer['ref_ecommerce_id_category'];
-    $form['web_url'] = $catmer['web_url'];
-    $form['top'] = $catmer['top'];
-    $form['annota'] = $catmer['annota'];
-    $form['ricarico'] = $catmer['ricarico'];
+  $catmer = gaz_dbi_get_row($gTables['catmer'],"codice",intval($_GET['codice']));
+  $form['ritorno'] = $_POST['ritorno'];
+  $form['codice'] = $catmer['codice'];
+  $form['descri'] = $catmer['descri'];
+  $form['large_descri'] = $catmer['large_descri'];
+  $form['ref_ecommerce_id_category'] = $catmer['ref_ecommerce_id_category'];
+  $form['web_url'] = $catmer['web_url'];
+  $form['top'] = $catmer['top'];
+  $form['annota'] = $catmer['annota'];
+  $form['ricarico'] = $catmer['ricarico'];
 } elseif (!isset($_POST['Insert'])) { //se e' il primo accesso per INSERT
-    $form['ritorno'] = $_SERVER['HTTP_REFERER'];
-    $rs_ultimo_codice = gaz_dbi_dyn_query("*", $gTables['catmer'], 1 ,'codice desc',0,1);
-    $ultimo_codice = gaz_dbi_fetch_array($rs_ultimo_codice);
-    $form['codice'] = $ultimo_codice['codice']+1;
-    $form['descri'] = '';
-	$form['large_descri'] = '';
-    $form['ref_ecommerce_id_category'] = '';
-	$form['ricarico'] = 0;
-    $form['web_url']='';
-    $form['top'] = 0;
-    $form['annota'] = '';
+  $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+  $rs_ultimo_codice=gaz_dbi_query("SELECT MIN(T1.codice) + 1 FROM ".$gTables['catmer']." T1 LEFT JOIN ".$gTables['catmer']." T2 ON T2.codice = T1.codice + 1 WHERE T2.codice IS NULL");
+  $ultimo_codice=gaz_dbi_fetch_row($rs_ultimo_codice);
+  $form['codice'] = ($ultimo_codice && $ultimo_codice[0] > 0) ? $ultimo_codice[0] : 1;
+  $form['descri'] = '';
+  $form['large_descri'] = '';
+  $form['ref_ecommerce_id_category'] = '';
+  $form['ricarico'] = 0;
+  $form['web_url']='';
+  $form['top'] = 0;
+  $form['annota'] = '';
 }
 require("../../library/include/header.php");
 $script_transl = HeadMain();
