@@ -29,7 +29,7 @@ Un gestionale completo per le PMI, scritto in PHP e base di dati database MySQL/
 ## TL;DR
 ### Sei un webmaster?
 
-Scarica l'ultima versione di GAzie [qui](https://sourceforge.net/projects/gazie/files/gazie/8.00/gazie8.00.zip/download)
+Scarica l'ultima versione di GAzie [qui](https://sourceforge.net/projects/gazie/files/latest/download)
 
 ### Sei uno sviluppatore?
 Se vuoi contribuire allo sviluppo di GAzie, ti chiediamo lavorare con SVN (devi avere un account su SourceForge.net):
@@ -51,7 +51,7 @@ Recentemente c'è anche un repository su github che viene manutenuto e sincroniz
 ### Requisiti di Sistema
 
 * Webserver Apache 2.4 o superiore, IIS su windows
-* Versione PHP >= 7.4 compilata DSO, non c'è ancora il supporto per PHP-FPM
+* Versione PHP >= 8.3 compilata DSO, non c'è ancora il supporto per PHP-FPM
 * Estensioni PHP richieste: MySQLi, php-intl, php-xml, php-gd, php-xsl, php-calendar
 * Database MariaDB o MySQL (consigliato MariaDB 10.x.x o sup.)
 

@@ -23,11 +23,12 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
+
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 if (!ini_get('safe_mode')) { //se me lo posso permettere...
-    ini_set('memory_limit', '128M');
-    gaz_set_time_limit(0);
+  ini_set('memory_limit', '-1');
+  set_time_limit(0);
 }
 if (!isset($_GET['vr']) ||
         !isset($_GET['vs']) ||
@@ -119,7 +120,7 @@ class vatBook extends Standard_template {
     $this->taxable_liq = 0.00;
     $this->tax_liq = 0.00;
     $ctrl_idtes = 0;
-    while ($mov = gaz_dbi_fetch_array($result)) {
+    while ($mov = gaz_dbi_fetch_assoc($result)) {
       $reg_yes=false;
       $codiva = $mov['codiva'];
       $id_tes = $mov['id_tes'];
@@ -202,7 +203,7 @@ class vatBook extends Standard_template {
           $this->acc_operation_type[$op_typ] += $taxable;
       }
       if ($this->semplificata == 1 && $ctrl_idtes <> $id_tes && $reg_yes==true) { // solo se il movimento fa parte del registro recupero i dati di costo
-        $rs_accounting_rows = gaz_dbi_dyn_query("*", $gTables['rigmoc'] . " LEFT JOIN " . $gTables['clfoco'] . " ON (" . $gTables['rigmoc'] . ".codcon = " . $gTables['clfoco'] . ".codice)", "id_tes = '" . $mov['id_tes'] . "'
+        $rs_accounting_rows = gaz_dbi_dyn_query("rmc.codcon,rmc.import,rmc.darave,clf.descri", $gTables['rigmoc'] . " rmc LEFT JOIN " . $gTables['clfoco'] . " clf ON (rmc.codcon = clf.codice)", "id_tes = '" . $mov['id_tes'] . "'
            AND codcon NOT LIKE '" . $this->azienda['mascli'] . "%'
            AND codcon NOT LIKE '" . $this->azienda['masfor'] . "%'
            AND codcon NOT LIKE '" . substr($this->azienda['cassa_'], 0, 3) . "%'
@@ -210,7 +211,7 @@ class vatBook extends Standard_template {
            AND codcon <> " . $this->azienda['ivaacq'] . "
            AND codcon <> " . $this->azienda['ivaven'] . "
            AND codcon <> " . $this->azienda['ivacor'], "id_rig asc");
-        while ($acc_rows = gaz_dbi_fetch_array($rs_accounting_rows)) {
+        while ($acc_rows = gaz_dbi_fetch_assoc($rs_accounting_rows)) {
           $codcon = $acc_rows['codcon'];
           if (!isset($this->acc_castle[$codcon])) {
               $this->acc_castle[$codcon] = array('value' => 0, 'descri' => '');
