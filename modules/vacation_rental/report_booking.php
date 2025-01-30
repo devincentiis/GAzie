@@ -1024,7 +1024,7 @@ $ts->output_navbar();
           <option value="GENERATO">GENERATO</option>
           <option value="PENDING">In attesa di pagamento</option>
           <option value="CONFIRMED">Confermato</option>
-          <option value="FROZEN">Sospeso</option>
+          <option value="FROZEN">Congelato, date bloccate</option>
           <option value="ISSUE">Incontrate difficoltà</option>
           <option value="CANCELLED">Annullato</option>
       </select>

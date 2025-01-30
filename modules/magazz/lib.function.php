@@ -174,7 +174,7 @@ class magazzForm extends GAzieForm {
 
     function getOperators() {  // Creo l'array associativo degli operatori dei documenti
         return array("VCO" => -1, "VRI" => -1, "DDT" => -1, "FAD" => -1, "FAI" => -1, "FAA" => -1, "FAF" => -1, "FAQ" => -1, "FAP" => -1, "FNC" => 1, "FND" => -1,
-            "DDR" => -1, "DDL" => -1, "DDV" => -1, "RDV" => 1, "DDY" => -1, "DDS" => -1, "AFA" => 1, "AFT" => 1, "ADT" => 1, "AFC" => -1, "AFD" => 1, "VPR" => -1,
+            "DDR" => -1, "DDL" => -1, "DDV" => -1, "RDV" => 1, "DDY" => -1, "DDS" => -1, "AFA" => 1, "AFT" => 1, "ADT" => 1, "AFC" => -1, "AFD" => 1, "ARO" => 1, "VPR" => -1,
             "VOR" => -1, "VOW" => -1, "VOG" => -1, "CMR" => -1, "RPL" => 1,"RDL" => 1, "INV" => 1, "XFA" => 0, "DDX" => -1, "DDZ" => -1, "DDW" => -1, "DDD" => -1, "DDJ" => -1,
             "DDC" => -1, "DDM" => -1, "DDO" => -1, "PRL"=>-1, "VOL"=>0);
     }

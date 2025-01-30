@@ -220,8 +220,9 @@ if (isset($_POST['conferma'])) {
 		// preparo l'update di custom_field che potrebbe contenere altri dati
 		$magmodule = gaz_dbi_get_row($gTables['module'], "name",'magazz');
     $thisadmin_module = gaz_dbi_get_row($gTables['admin_module'], "moduleid",$magmodule['id']," AND adminid='{$form['user_name']}' AND company_id=" . $admin_aziend['company_id']);
-    if ($thisadmin_module  && json_validate($thisadmin_module['custom_field'])) {
-      $thiscustom_field=(array)json_decode($thisadmin_module['custom_field']);
+    $jcf=json_decode($thisadmin_module['custom_field']);
+    if ($thisadmin_module  && json_last_error() === JSON_ERROR_NONE ) {
+      $thiscustom_field=(array)$jcf;
       $thiscustom_field['user_id_warehouse']=$form['id_warehouse'];
       $form['custom_field']=json_encode($thiscustom_field);
     } else {

@@ -23,7 +23,7 @@
   --------------------------------------------------------------------------
  */
 require("../../library/include/datlib.inc.php");
-$admin_aziend = checkAdmin(9);
+$admin_aziend = checkAdmin(8);
 require("../root/lib.function.php");
 $checkUpd = new CheckDbAlign;
 $kb=0;

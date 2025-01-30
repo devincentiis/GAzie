@@ -40,7 +40,7 @@ if (isset ($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'module
 
 if (isset($_GET['type'])) {
 	require("../../library/include/datlib.inc.php");
-  $admin_aziend = checkAdmin(9);
+  $admin_aziend = checkAdmin(8);
 	switch ($_GET['type']) {
 		case "save":
       $gbackup = new gazBackup($link);

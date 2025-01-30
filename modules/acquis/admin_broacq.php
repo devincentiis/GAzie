@@ -561,8 +561,14 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
           $form['rows'][$next_row]['codric'] = 0;
           $form['rows'][$next_row]['delivery_date'] = 0;
           $form['rows'][$next_row]['sconto'] = 0;
-          $form['rows'][$next_row]['pervat'] = 0;
-          $form['rows'][$next_row]['codvat'] = 0;
+          if ($form['in_tiprig'] == 0) { // sui righi normali prendo comunque l'aliquota IVA aziendale
+            $form['rows'][$next_row]['codvat'] = $admin_aziend['preeminent_vat'];
+            $iva_azi = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['preeminent_vat']);
+            $form['rows'][$next_row]['pervat'] = $iva_azi['aliquo'];
+          } else {
+            $form['rows'][$next_row]['pervat'] = 0;
+            $form['rows'][$next_row]['codvat'] = 0;
+          }
           if ($form['in_tiprig'] == 0 && $artico) {  //rigo normale
               $form['rows'][$next_row]['codart'] = $form['in_codart'];
               $form['rows'][$next_row]['annota'] = $artico['annota'];

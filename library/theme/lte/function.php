@@ -322,7 +322,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
 
     if ( gaz_dbi_num_rows($res_pos)>0 ) {
         $row = gaz_dbi_fetch_array($res_pos);
-        echo "<ol class='breadcrumb'>";
+        echo '<ol class="breadcrumb">';
         $yeslink=false;
         while ( $row = gaz_dbi_fetch_array($res_pos) ) {
           echo "<li><a href='".$row['link']."'>".$row['titolo']."</a></li>";
@@ -344,7 +344,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
         $riga = gaz_dbi_fetch_array($result);
         if ($riga && $riga["id"]!="" ) { // siamo su una pagina di 2 livello nel menu principale
           $result2 = gaz_dbi_dyn_query("*", $gTables['menu_script'] , ' id_menu='.$riga["id"].' ','id',0);
-          echo "<div><ol class=\"breadcrumb\">";
+          echo '<div class="hidden-xs hidden-sm"><ol class="breadcrumb">';
           while ($r = gaz_dbi_fetch_array($result2)) {
             $linkbase =  pathinfo($r['link'], PATHINFO_FILENAME);
             if ( $admin_aziend["Abilit"]>=$r["accesskey"] && !in_array($linkbase,$acc_excluded) ) echo '<li><a href="'.$r["link"].'">'.stripslashes ($transl[$module]["m3"][$r["translate_key"]]["1"]).'</a></li>';
@@ -355,7 +355,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
           $result3    = gaz_dbi_dyn_query("*", $gTables['menu_script'] ," link LIKE '".$posizione_php[0].".php%'",'id',0,1);
           if ( $ms = gaz_dbi_fetch_array($result3) ) { // disegno i bottoni di accesso alle funzioni di questa pagina
               $result4    = gaz_dbi_dyn_query($gTables['menu_script'].".*,".$gTables['menu_module'].".link AS lmm,".$gTables['menu_module'].".translate_key AS tmm ", $gTables['menu_script']. " LEFT JOIN ".$gTables['menu_module']." ON ".$gTables['menu_script'].".id_menu = ".$gTables['menu_module'].".id LEFT JOIN ".$gTables['module']." ON ".$gTables['menu_module'].".id_module = ".$gTables['module'].".id", $gTables['menu_script'].".id_menu =".$ms['id_menu']." AND ".$gTables['module'].".name = '".$module."'",'name',0,99);
-              echo '<div><ol class="breadcrumb">';
+              echo '<div class="hidden-xs hidden-sm"><ol class="breadcrumb">';
               $first=true;
               while ($r = gaz_dbi_fetch_array($result4)) {
                 $linkbase_lmm =  pathinfo($r['lmm'], PATHINFO_FILENAME);

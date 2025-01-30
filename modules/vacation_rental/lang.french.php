@@ -563,7 +563,7 @@ $strScript = array(
         'codice' => "Codice",
         'descri' => "Descrizione",
         'accommodation_type' => "Tipologia di alloggio",
-        'accommodation_type_value' => array(3 => 'Apartament', 4 => 'Vacation house', 5=> 'Bed & breakfast', 6=> 'Room'. 7=> 'tourist rental'),
+        'accommodation_type_value' => array(3 => 'Apartament', 4 => 'Vacation house', 5=> 'Bed & breakfast', 6=> 'Room', 7=> 'tourist rental'),
         'body_text' => "Testo descrittivo",
         'lot_or_serial' => 'Lotti o numeri seriali',
         'lot_or_serial_value' => array(0 => 'No', 1 => 'Lotti', 2 => 'Seriale/Matricola'),

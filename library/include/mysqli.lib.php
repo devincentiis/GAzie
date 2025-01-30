@@ -967,16 +967,16 @@ function movmagUpdate($codice, $newValue) {
 
 function bodytextInsert ($newValue)
 {
-    $table = 'body_text';
-    $columns = array('table_name_ref','id_ref','code_ref','body_text','descri','lang_id');
-    tableInsert($table, $columns, $newValue);
+  $table = 'body_text';
+  $columns = ['table_name_ref','id_ref','code_ref','body_text','descri','lang_id'];
+  return tableInsert($table, $columns, $newValue);
 }
 
 function bodytextUpdate ($codice, $newValue)
 {
-    $table = 'body_text';
-    $columns = array('table_name_ref','id_ref','code_ref','body_text','descri','lang_id');
-    tableUpdate($table, $columns, $codice, $newValue);
+  $table = 'body_text';
+  $columns = ['table_name_ref','id_ref','code_ref','body_text','descri','lang_id'];
+  tableUpdate($table, $columns, $codice, $newValue);
 }
 
 //===============================================================

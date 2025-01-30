@@ -530,7 +530,7 @@ if ($rslen < 18) {
 if($admin_aziend['Abilit']>=8) {
 ?>
                                     <!-- User image -->
-                                    <li class="user-header"><a href="../config/admin_utente.php?user_name=<?php echo $admin_aziend["user_name"]; ?>&Update">
+                                    <li class="user-header"><a href="../config/admin_utente.php?user_name=<?= $admin_aziend["user_name"] ?>&Update">
                                         <img src="<?php echo '../root/view.php?table=admin&field=user_name&value=' . $admin_aziend["user_name"]; ?>" class="img-circle" alt="User" height=80></a>
                                         <p><?php echo $admin_aziend['user_firstname'] . ' ' . $admin_aziend['user_lastname']; ?>
                                             <small>
@@ -549,6 +549,12 @@ if($admin_aziend['Abilit']>=8) {
                                           <?php echo $admin_aziend['ragso1'] . " " . $admin_aziend['ragso2']; ?>
                                         </div>
                                       </a>
+                                    </li>
+<?php
+} else {
+?>
+                                    <li class="user-body">
+                                        <a href="../root/login_password_change.php?un=<?= $admin_aziend["user_name"] ?>" class="btn btn-warning"> Cambia  password</a>
                                     </li>
 <?php
 }

@@ -625,6 +625,12 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                   case "5":
                     $accomodation_type="Bed & breakfast";
                     break;
+                  case "6":
+                    $accomodation_type="Camera";
+                    break;
+                  case "7":
+                    $accomodation_type="Locazione turistica";
+                    break;
                 }
                 $form['checked_in_date']=(isset($rental_events['checked_in_date']))?$rental_events['checked_in_date']:NULL;
                 $form['checked_out_date']=(isset($rental_events['checked_out_date']))?$rental_events['checked_out_date']:NULL;

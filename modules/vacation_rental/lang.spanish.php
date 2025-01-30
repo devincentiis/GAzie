@@ -323,7 +323,7 @@ $strScript = array(
         'codice' => "Codice",
         'descri' => "Descrizione",
         'accommodation_type' => "Tipologia di alloggio",
-        'accommodation_type_value' => array(3 => 'Apartament', 4 => 'Vacation house', 5=> 'Bed & breakfast', 6=> 'Room'. 7=> 'tourist rental'),
+        'accommodation_type_value' => array(3 => 'Apartament', 4 => 'Vacation house', 5=> 'Bed & breakfast', 6=> 'Room', 7=> 'tourist rental'),
         'room_type' => "Definizione locali",
         'room_type_value' => array(0 => '---', 1 => 'Monolocale', 2=> 'Bilocale', 3=> 'Trilocale', 4=> 'Quadrilocale'),
         'body_text' => "Testo descrittivo",
