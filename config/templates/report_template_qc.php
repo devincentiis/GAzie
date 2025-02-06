@@ -24,9 +24,10 @@
   --------------------------------------------------------------------------
  */
 
-
-
-class Report_template extends TCPDF {
+use tecnickcom\tcpdf\tcpdf;
+use setasign\Fpdi\Tcpdf\Fpdi;
+#[AllowDynamicProperties]
+class Report_template extends Fpdi {
 
     function setVars($admin_aziend, $altri_dati = '') {
       $this->logo = $admin_aziend['image'];

@@ -384,15 +384,18 @@ class DocContabVars {
         $this->riporto = 0;
         $results = array();
         while ($rigo = gaz_dbi_fetch_array($rs_rig)) {
-            // Antonio Germani - se c'è un lotto ne accodo numero e scadenza alla descrizione
+            // aggiungo i dati dei lotti, false se non presenti
+            $rigo['identifier'] = false;
+            $rigo['expiry'] = false;
             $checklot=gaz_dbi_get_row($this->gTables['movmag'],'id_mov',$rigo['id_mag']);
             if ($checklot && strlen ($checklot['id_lotmag'])>0){
               $getlot=gaz_dbi_get_row($this->gTables['lotmag'],'id',$checklot['id_lotmag']);
               if (isset ($getlot['identifier']) && strlen ($getlot['identifier'])>0){
                 if (intval ($getlot['expiry'])>0){
-                  $rigo['descri']=$rigo['descri']." - lot: ".$getlot['identifier']." ".gaz_format_date($getlot['expiry']);
+                  $rigo['identifier'] = $getlot['identifier'];
+                  $rigo['expiry'] = $getlot['expiry'];
                 } else {
-                  $rigo['descri']=$rigo['descri']." - lot: ".$getlot['identifier'];
+                  $rigo['identifier'] = $getlot['identifier'];
                 }
               }
             }
@@ -448,21 +451,26 @@ class DocContabVars {
           } else {
             $rigo['barcode']="";
           }
-          // Antonio Germani - se c'è un lotto ne accodo numero e scadenza alla descrizione
+          // aggiungo i dati dei lotti, vuoti se non presenti
+          $rigo['identifier'] = '';
+          $rigo['expiry'] = '';
           $checklot=gaz_dbi_get_row($this->gTables['movmag'],'id_mov',$rigo['id_mag']);
           if ($checklot && strlen ($checklot['id_lotmag'])>0){
             $getlot=gaz_dbi_get_row($this->gTables['lotmag'],'id',$checklot['id_lotmag']);
             if (isset ($getlot['identifier']) && strlen ($getlot['identifier'])>0){
               if (intval ($getlot['expiry'])>0){
-                $rigo['descri']=$rigo['descri']." - lot: ".$getlot['identifier']." ".gaz_format_date($getlot['expiry']);
-              } else {
-                $rigo['descri']=$rigo['descri']." - lot: ".$getlot['identifier'];
+                  $rigo['identifier'] = $getlot['identifier'];
+                  $rigo['expiry'] = $getlot['expiry'];
+                } else {
+                  $rigo['identifier'] = $getlot['identifier'];
               }
             }
           }
-          //Antonio Germani
-          if (isset($art['durability_mu']) AND ($art['durability_mu']==">" OR $art['durability_mu']=="<")){ // se impostato accodo la durabilità alla descrizione serve per gli agroalimentari
-            $rigo['descri'] = $rigo['descri']." - Durabilità ".$art['durability_mu']." ".$art['durability']."gg";
+          $rigo['durability_mu'] = '';
+          $rigo['durability'] = '';
+          if (isset($art['durability_mu']) && ($art['durability_mu']==">" || $art['durability_mu']=="<")){ // se impostato accodo la durabilità alla descrizione serve per gli agroalimentari
+            $rigo['durability_mu'] = $art['durability_mu'];
+            $rigo['durability'] = $art['durability'];
           }
           // Antonio de Vincentiis - se l'articolo ha un documento passo la referenza files_id_doc
           $checkdoc=false;

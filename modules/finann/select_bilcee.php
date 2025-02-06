@@ -441,7 +441,7 @@ if (isset($_GET['visualizza']) and $message == "")
           }
         else
           {
-            echo "<tr><td colspan=\"4\" class=\"FacetFooterTD text-center\"><input type=\"submit\" class=\"btn btn-warning\" name=\"stampa\" value=\"STAMPA IL BILANCIO CEE !\"></td></tr>\n";
+            echo "<tr><td colspan=\"4\" class=\"FacetFooterTD text-center\"><input type=\"submit\" class=\"btn btn-warning\" name=\"stampa\" value=\"STAMPA IL BILANCIO CEE\"></td></tr>\n";
           }
         echo "<tr><td colspan=\"4\"><hr></td></tr>\n";
         echo "<tr><td><hr></td><td align=\"center\" class=\"FacetFormHeaderFont\">SITUAZIONE PATRIMONIALE AL ".$_GET['giofin']."-".$_GET['mesfin']."-".$_GET['annfin']."</td><td colspan=\"2\"><hr></td></tr>\n";
@@ -476,7 +476,7 @@ if (isset($_GET['visualizza']) and $message == "")
                     $totrom +=$value;
                     $totlet +=$value;
                     $totale +=$value;
-                    if($key < 100000000)  //controllo per i conti non classificati
+                    if((int)$key < 100000000)  //controllo per i conti non classificati
                       {
                         if($value > 0)
                           {

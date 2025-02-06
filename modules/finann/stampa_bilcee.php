@@ -27,7 +27,7 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend=checkAdmin();
 
 $nromani = array(0=>"",1=>"I",2=>"II",3=>"III",4=>"IV",5=>"V",6=>"VI",7=>"VII",8=>"VIII",9=>"IX",10=>"X",11=>"XI",12=>"XII",13=>"XIII",14=>"XIV",15=>"XV",16=>"XVI",17=>"XVII",18=>"XVIII",19=>"XIX");
-$attdesc = array('A'=>array("Titolo"=>") CREDITI VERSO SOCI:"),'B'=>array("Titolo"=>") IMMOBILIZZAZIONI:",1=>" - Immobilizzazioni immateriali: ",2=>" - Immobilizzazioni materiali:",3=>" - Immobilizzazioni finanziarie: "),'C'=>array("Titolo"=>") ATTIVO CIRCOLANTE:",1=>" - Rimanenze: ",2=>" - Crediti: ",3=>" - Attivit� finanziarie: ",4=>" - Disponibilità liquide: "),'D'=>array("Titolo"=>") RATEI E RISCONTI:"));
+$attdesc = array('A'=>array("Titolo"=>") CREDITI VERSO SOCI:"),'B'=>array("Titolo"=>") IMMOBILIZZAZIONI:",1=>" - Immobilizzazioni immateriali: ",2=>" - Immobilizzazioni materiali:",3=>" - Immobilizzazioni finanziarie: "),'C'=>array("Titolo"=>") ATTIVO CIRCOLANTE:",1=>" - Rimanenze: ",2=>" - Crediti: ",3=>" - Attività finanziarie: ",4=>" - Disponibilità liquide: "),'D'=>array("Titolo"=>") RATEI E RISCONTI:"));
 $pasdesc = array('A'=>array("Titolo"=>") PATRIMONIO NETTO:",1=>" - Capitale:",2=>" - Riserva da sovrapprezzo delle azioni:",3=>" - Riserva di rivalutazione:",4=>" - Riserva legale:",5=>" - Riserva per azioni proprie in portafoglio:",6=>" - Riserve statutarie:",7=>" - Altre riserve distintamente indicate:",8=>" - Utili (perdite) portati a nuovo:",9=>" - Utile (perdita) dell'esercizio:"),'B'=>array("Titolo"=>") FONDI RISCHI E ONERI:"),'C'=>array("Titolo"=>") TRATTAMENTO DI FINE RAPPORTO DI LAVORO SUBORDINATO:"),'D'=>array("Titolo"=>") DEBITI:"),'E'=>array("Titolo"=>") RATEI E RISCONTI:"));
 $ecodesc = array('A'=>array("Titolo"=>") Valore della produzione:"),'B'=>array("Titolo"=>") Costi della produzione:"),'C'=>array("Titolo"=>") Proventi e oneri finanziari:"),'D'=>array("Titolo"=>") Rettifiche di valore di attivit� finanziarie:"),'E'=>array("Titolo"=>") Proventi e oneri straordinari:"),'_'=>array("Titolo"=>") Risultato prima delle imposte:"));
 if (!isset($_GET['bilini']) or !isset($_GET['bilfin'])){
@@ -179,7 +179,7 @@ foreach ($attivo as $keylet => $vallet) {
                         $totlet +=$value;
                         $totale +=$value;
                         $descrizio = trim($descon[$key]);
-                        if ($key < 100000000){//controllo per i conti non classificati
+                        if ((int)$key < 100000000){//controllo per i conti non classificati
                            if ($value > 0) $stampaval = gaz_format_number($value); else $stampaval = "(".gaz_format_number(-$value).")";
                            $pdf->Cell(15,4,'','LR');
                            $pdf->Cell(50,4,'','R');

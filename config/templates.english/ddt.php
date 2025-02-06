@@ -93,6 +93,14 @@ class DDT extends Template_con_scheda
                 $this->newPage();
                 $this->Cell(185,5,'<<< --- FOLLOWS FROM PREVIOUS PAGE --- <<< ',0,1);
             }
+                if (isset ($rigo['identifier']) && strlen ($rigo['identifier'])>0){
+                  if (intval ($rigo['expiry'])>0){
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier']." ".gaz_format_date($rigo['expiry']);
+                  } else {
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier'];
+                  }
+                }
+
                 if ($rigo['tiprig'] < 2) {
                     $this->Cell(30,6,$rigo['codart'],1,0,'L');
                     $this->Cell(82,6,$rigo['descri'],1,0,'L',0,'',1);
@@ -142,7 +150,7 @@ class DDT extends Template_con_scheda
                         $this->Cell(25,6);
                         $this->Cell(10,6,'','R',1);
                     }
-                }               
+                }
        }
     }
 
@@ -179,10 +187,10 @@ class DDT extends Template_con_scheda
         }
 		//Antonio Germani - Se richiesto nella scheda cliente stampo il totale iva compresa
         if ($this->docVars->client['stapre'] == 'T') {
-            $this->Cell(109,5,'Payment bank','LTR',0,'C',1);          
+            $this->Cell(109,5,'Payment bank','LTR',0,'C',1);
             $this->Cell(78,5,'TOTAL TO PAY (invoice follows)','LTR',1,'C',1);
             $this->Cell(109,6,$this->pagame['descri'].' '.$this->banapp['descri'],'LBR',0,'C',0,'',1);
-            
+
             // calcolo il totale che il cliente dovrà pagare per questo documento
             // utile per esempio su consegna merce con pagamento alla consegna o comunque per ricevere il pagamento anticipatamente
             $this->docVars->setTotal();
@@ -197,16 +205,16 @@ class DDT extends Template_con_scheda
             $totriport = $this->docVars->totriport;
             $ritenuta = $this->docVars->tot_ritenute;
             $taxstamp = $this->docVars->taxstamp;
-            $totale = $totimpfat + $totivafat + $impbol + $taxstamp;  
-            
-            $this->SetFont('helvetica', 'B', 12);        
+            $totale = $totimpfat + $totivafat + $impbol + $taxstamp;
+
+            $this->SetFont('helvetica', 'B', 12);
             $this->Cell(78,6, "€ ". gaz_format_number($totale),'LBR',1,'C',0,'',1);
             $this->SetFont('helvetica','',9);
         } else {
-		
+
             $this->Cell(187,5,'Payment bank','LTR',1,'C',1);
             $this->Cell(187,5,$this->pagame['descri'].' '.$this->banapp['descri'],'LBR',1,'C',0,'',1);
-        }		
+        }
         $this->Cell(51,5,'Shipment','LTR',0,'C',1);
         $this->Cell(114,5,'Carrier','LTR',0,'C',1);
         $this->Cell(22,5,'Transport','LTR',1,'C',1);

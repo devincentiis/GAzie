@@ -909,7 +909,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         // in caso di scelta di numerazione continua Fatture-Note Credito/Debito ridefinisco la query comprendendole
         $num_nc_nd = gaz_dbi_get_row($gTables['company_config'], 'var', 'num_note_separate')['val'];
         if ($num_nc_nd==0 && substr($form['tipdoc'],0,1)=='F'){
-          $sql_documento = "YEAR(datemi) = " . substr($datemi,0,4) . " AND  tipdoc LIKE 'F__' AND seziva = $sezione";
+          $sql_documento = "YEAR(datfat) = " . substr($datemi,0,4) . " AND  tipdoc LIKE 'F__' AND seziva = $sezione";
         }
         $rs_ultimo_documento = gaz_dbi_dyn_query("numdoc, numfat*1 AS fattura", $gTables['tesdoc'], $sql_documento, $where, 0, 1);
         $ultimo_documento = gaz_dbi_fetch_array($rs_ultimo_documento);

@@ -209,6 +209,7 @@ if (isset($_POST['preview']) and $msg=='') {
 			$datereg = substr($mv['datreg'],8,2).'-'.substr($mv['datreg'],5,2).'-'.substr($mv['datreg'],0,4);
 			$movQuanti = $mv['quanti']*$mv['operat'];
 			$sum += $movQuanti;
+			$mv['descri']=(isset($mv['descri']))?$mv['descri']:'';
 			echo "<tr><td>".$datereg." &nbsp;</td>";
 			echo "<td align=\"center\">".$mv['caumag'].'-'.substr($mv['descri'],0,20)." &nbsp</td>";
 			echo "<td>".substr($mv['desdoc'].' del '.$datedoc.' - '.$mv['ragsoc'],0,85)." &nbsp;</td>";

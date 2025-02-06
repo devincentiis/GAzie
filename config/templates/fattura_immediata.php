@@ -121,6 +121,13 @@ class FatturaImmediata extends Template_con_scheda
                 $this->newPage();
                 $this->Cell(186,5,'<<< --- SEGUE DA PAGINA PRECEDENTE --- <<< ',0,1);
             }
+                if (isset ($rigo['identifier']) && strlen ($rigo['identifier'])>0){
+                  if (intval ($rigo['expiry'])>0){
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier']." ".gaz_format_date($rigo['expiry']);
+                  } else {
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier'];
+                  }
+                }
 
                 switch($rigo['tiprig']) {
                 case "0":

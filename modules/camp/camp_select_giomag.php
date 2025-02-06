@@ -229,7 +229,7 @@ if (isset($_POST['preview']) and $msg=='') {
 			$colonna="0";
 			$res = gaz_dbi_get_row ($gTables['campi'], 'codice', $mv['campo_impianto'] );
 			echo "<td class=\"FacetDataTD\" align=\"center\">", gaz_format_quantity(($res)?$res['ricarico']:0,1,$admin_aziend['decimal_quantity']), " &nbsp;</td>\n";
-			$res2 = gaz_dbi_get_row($gTables['camp_colture'], 'id_colt', $mv['id_colture']);
+			$res2 = (isset($mv['id_colture']))?gaz_dbi_get_row($gTables['camp_colture'], 'id_colt', $mv['id_colture']):'';
 			echo "<td class=\"FacetDataTD\" align=\"center\">", ($res2)?$res2['nome_colt']:'' ," &nbsp;</td>\n";
 			$colonna="1";
 
@@ -247,7 +247,7 @@ if (isset($_POST['preview']) and $msg=='') {
 			If ($mv['classif_amb']==5) {echo "<td class=\"FacetDataTD\" align=\"center\">". "<img src=\"../camp/media/classe_5.gif\" alt=\"Pericoloso ambiente\" width=\"50 px\">" ." &nbsp;</td>\n";}
 			echo "<td class=\"FacetDataTD\" align=\"center\">".gaz_format_quantity($mv['quanti'],1,$admin_aziend['decimal_quantity'])."</td>\n";
 			echo "<td align=\"right\" class=\"FacetDataTD\">".$mv['unimis']." &nbsp;</td>\n";
-			$res = gaz_dbi_get_row($gTables['camp_avversita'], 'id_avv', $mv['id_avversita']);
+			$res = (isset($mv['id_avversita']))?gaz_dbi_get_row($gTables['camp_avversita'], 'id_avv', $mv['id_avversita']):'';
 			echo "<td class=\"FacetDataTD\" align=\"right\">", ($res)?$res['nome_avv']:'', " </td>\n";
 			if ($mv['clfoco']>0){
 				echo "<td class=\"FacetDataTD\" align=\"right\">".$mv['ragso1']." </td>\n";

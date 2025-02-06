@@ -49,7 +49,7 @@ class FatturaAcquisto extends Template
             $descri='** documento sconosciuto **';
         }
         $this->tipdoc=$descri.$this->tesdoc['numfat'].'/'.$this->tesdoc['seziva'].' del '.$this->giorno.' '.$this->nomemese.' '.$this->anno;
-		
+
     }
 
     function newPage() {
@@ -90,6 +90,14 @@ class FatturaAcquisto extends Template
                 $this->newPage();
                 $this->Cell(186,5,'<<< --- SEGUE DA PAGINA PRECEDENTE --- <<< ',0,1);
             }
+                if (isset ($rigo['identifier']) && strlen ($rigo['identifier'])>0){
+                  if (intval ($rigo['expiry'])>0){
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier']." ".gaz_format_date($rigo['expiry']);
+                  } else {
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier'];
+                  }
+                }
+
                 switch($rigo['tiprig']) {
                 case "0":
                     $this->Cell(25, 6, $rigo['codart'],1,0,'L');

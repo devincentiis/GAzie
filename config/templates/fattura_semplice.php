@@ -157,7 +157,15 @@ class FatturaSemplice extends Template {
           $this->newPage();
           $this->Cell(186, 5, '<<< --- SEGUE DA PAGINA PRECEDENTE --- <<< ', 0, 1);
         }
+        if (isset ($rigo['identifier']) && strlen ($rigo['identifier'])>0){
+            if (intval ($rigo['expiry'])>0){
+              $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier']." ".gaz_format_date($rigo['expiry']);
+            } else {
+              $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier'];
+            }
+          }
         switch ($rigo['tiprig']) {
+
           case "0":
             $this->Cell(25, 5, $rigo['codart'], 1, 0, 'L', 0, '', 1);
             $this->Cell(80, 5, $rigo['descri'], 1, 0, 'L', 0, '', 1);

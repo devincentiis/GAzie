@@ -157,6 +157,13 @@ class DDT extends Template_con_scheda
                 $this->newPage();
                 $this->Cell(185,5,'<<< --- SEGUE DA PAGINA PRECEDENTE --- <<< ',0,1);
             }
+                if (isset ($rigo['identifier']) && strlen ($rigo['identifier'])>0){
+                  if (intval ($rigo['expiry'])>0){
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier']." ".gaz_format_date($rigo['expiry']);
+                  } else {
+                    $rigo['descri']=$rigo['descri']." - lot: ".$rigo['identifier'];
+                  }
+                }
                 if ($rigo['tiprig'] < 2) {
                   $h=6;
                   if (intval($rigo['barcode'])>0){

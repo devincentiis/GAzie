@@ -56,21 +56,21 @@ if (count($lotscad)>0){ // visualizzo scadenzario lotti sono se sono presenti
 ?>
                    <table id="scad" class="table table-bordered table-striped table-responsive dataTable" role="grid" aria-describedby="fornitori_info">
                        <thead>
-                           <tr role="row">
-                               <th  class="sorting" tabindex="0" rowspan="1" colspan="1" style="width:120px;"><?php echo $script_transl['cod']; ?></th>
-                               <th  tabindex="0" rowspan="1" colspan="1" style="width: 310px;"><?php echo $script_transl['des']; ?></th>
-								<th  tabindex="0" rowspan="1" colspan="1" style="width: 120px;" ><?php echo $script_transl['lot']; ?></th>
-                               <th  tabindex="0" rowspan="1" colspan="1" style="width: 120px;" ><?php echo $script_transl['sca_scadenza']; ?></th>
-								<th  tabindex="0" rowspan="1" colspan="1" style="width: 110px;" ><?php echo $script_transl['res']; ?></th>
-                           </tr>
+                        <tr role="row" style="font-size: 1.2vmin;">
+                        <th style="width:15%;"><?php echo $script_transl['cod']; ?></th>
+                        <th style="width: 40%;"><?php echo $script_transl['des']; ?></th>
+                        <th style="width: 15%;" ><?php echo $script_transl['lot']; ?></th>
+                        <th style="width: 15%;" ><?php echo $script_transl['sca_scadenza']; ?></th>
+                        <th style="width: 15%;" ><?php echo $script_transl['res']; ?></th>
+                        </tr>
                        </thead>
                        <tbody>
                            <!-- lotti scaduti -->
                            <?php
 							for ($x=0; $x<count($lotscad); $x++){
-								echo "<tr role='row'>";
+								echo '<tr role="row" style="font-size: 1.2vmin;">';
 								echo "<td align='left'>" . $lotscad[$x]['codice'] . "</td>";
-								echo "<td align='left'>" . substr($lotscad[$x]['descri'],0,21) . "</td>";
+								echo "<td align='left'>" . substr($lotscad[$x]['descri'],0,60) . "</td>";
 								echo "<td align='left'>" . $lotscad[$x]['identifier'] . "</td>";
 								echo "<td align='left'>" . gaz_format_date($lotscad[$x]['expiry']) . "</td>";
 								echo "<td align='left'>" . gaz_format_number($lotscad[$x]['rest']) . "</td>";

@@ -705,61 +705,37 @@ class Login
 	/**
 	* Sends the password-reset-email.
 	*/
-	public function sendPasswordResetMail($user_name, $user_email, $user_password_reset_hash)
-	{
-		$mail = new PHPMailer;
-		// get email send config from GAzie db
-		$var = array('admin_mail', 'admin_smtp_server', 'admin_return_notification', 'admin_mailer', 'admin_smtp_port', 'admin_smtp_secure', 'admin_smtp_user', 'admin_smtp_password');
-		foreach ($var as $v) {
-      $qv=($v=='admin_smtp_password')?"AES_DECRYPT(FROM_BASE64(cvalue),'JnèGCM(ùRp$9ò{-c') AS cvalue":'cvalue';
-      // ATTENZIONE!!! L'AES_KEY di default JnèGCM(ùRp$9ò{-c qui è in chiaro eventualmente cambiarlo con altro valore, molto dipende da come utilizzate il gestionale ed in particolare se presente il modulo school o volete consentire la registrazione da remoto (sconsigliato per azienda in produzione)
-			$query_email_smtp_conf = $this->db_connection->prepare('SELECT '.$qv.' FROM ' . DB_TABLE_PREFIX . '_config WHERE variable=:variable');
-			$query_email_smtp_conf->bindValue(':variable', $v, PDO::PARAM_STR);
-			$query_email_smtp_conf->execute();
-			$r = $query_email_smtp_conf->fetchAll();
-			$this->email_conf[$v] = $r[0]['cvalue'];
-		}
+	public function sendPasswordResetMail($user_name, $user_email, $user_password_reset_hash){
+		// A causa del sistema di criptazione AES CRYPT delle password, senza aver fatto il login l'unico modo facile per spedire una mail � quello di usare la funzione di php mail()
+		$query_email_smtp_conf = $this->db_connection->prepare('SELECT '.'cvalue'.' FROM ' . DB_TABLE_PREFIX . '_config WHERE variable=:variable');
+		$query_email_smtp_conf->bindValue(':variable', 'admin_mail', PDO::PARAM_STR);
+		$query_email_smtp_conf->execute();
+		$r = $query_email_smtp_conf->fetchAll();
+		$admin_mail = $r[0]['cvalue'];
 
-		// please look into the config/config.php for much more info on how to use this!
-		// use SMTP or use mail()
-		if (EMAIL_USE_SMTP) {
-			// Set mailer to use SMTP
-			$mail->IsSMTP();
-			//useful for debugging, shows full SMTP errors
-			//$mail->SMTPDebug = 1; // debugging: 1 = errors and messages, 2 = messages only
-			// Enable SMTP authentication
-			$mail->SMTPAuth = EMAIL_SMTP_AUTH;
-			// Enable encryption, usually SSL/TLS
-			$email_smtp_encr = trim($this->email_conf['admin_smtp_secure']);
-			if (strlen($email_smtp_encr) > 2) {
-				$mail->SMTPSecure = $email_smtp_encr;
-			}
-
-			// Specify host server
-			$mail->Host = $this->email_conf['admin_smtp_server']; // EMAIL_SMTP_HOST;
-			$mail->Username = $this->email_conf['admin_smtp_user']; //EMAIL_SMTP_USERNAME;
-			$mail->Password = $this->email_conf['admin_smtp_password']; //EMAIL_SMTP_PASSWORD;
-			$mail->Port = $this->email_conf['admin_smtp_port']; //EMAIL_SMTP_PORT;
-		} else {
-			$mail->IsMail();
-		}
-		$mail->IsHTML(true);
-		$mail->From = $this->email_conf['admin_mail'];
-		$mail->FromName = EMAIL_PASSWORDRESET_FROM_NAME;
-		$mail->AddAddress($user_email);
-		$mail->Subject = EMAIL_PASSWORDRESET_SUBJECT;
-		$mail->AddEmbeddedImage('../../library/images/gazie.gif', 'gazie');
+		//$mail->AddEmbeddedImage('../../library/images/gazie.gif', 'gazie');
 		$link = EMAIL_PASSWORDRESET_URL . '?user_name=' . urlencode($user_name) . '&verification_code=' . urlencode($user_password_reset_hash);
-		$mail->Body = EMAIL_PASSWORDRESET_CONTENT . '<br><a href="' . $link . '"> <img src="cid:gazie" /> ' . MESSAGE_EMAIL_LINK_FOR_RESET . '</a>';
+		$Body = EMAIL_PASSWORDRESET_CONTENT . '<br><a href="' . $link . '"> ' . MESSAGE_EMAIL_LINK_FOR_RESET . '</a>';
 
-
-		if (!$mail->Send()) {
-			$this->errors[] = MESSAGE_PASSWORD_RESET_MAIL_FAILED . $mail->ErrorInfo;
-			return false;
-		} else {
-			$this->messages[] = MESSAGE_PASSWORD_RESET_MAIL_SUCCESSFULLY_SENT;
-			return true;
+		$headers = "MIME-Version: 1.0" . "\r\n";
+		$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+		$headers .= "From: ".$admin_mail. " : your server mail" . "\r\n";
+		if ( function_exists( 'mail' ) ){
+			if (@mail($user_email,EMAIL_PASSWORDRESET_SUBJECT,$Body,$headers)){
+				$this->messages[] = MESSAGE_PASSWORD_RESET_MAIL_SUCCESSFULLY_SENT;
+				return true;
+			} else {
+        $adderr="";
+        if ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1') {
+          $adderr= ' You are accessing the website from localhost.';
+        }
+				$this->errors[] = MESSAGE_PASSWORD_RESET_MAIL_FAILED . "invio non riuscito.".$adderr." Devi usare l'utility: passhash.php";
+				return false;
+			}
+		}else{
+			echo 'la funzione mail() del tuo Php è disabilitata. Se non riesci in altri modi a modificare la password devi usare l\'utility: passhash.php';
 		}
+
 	}
 
 	/**

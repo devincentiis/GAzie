@@ -417,7 +417,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
     $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_GET['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
     $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
-    $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:$form['body_text'];
+    $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
   }
 
   $form['hidden_req'] = '';
@@ -889,14 +889,14 @@ if ($modal_ok_insert === true) {
                                 if ($form['lang_id']>1) {
                                   ?>
                                   <textarea id="lang_bodytext" name="lang_bodytext<?php echo $form['lang_id']; ?>" class="mceClass"><?php echo $form['lang_bodytext'.$form['lang_id']]; ?></textarea>
-                                  <input type="hidden" value="<?php echo $form['body_text']; ?>" name="body_text" />
+                                  <input type="hidden" value="<?php echo filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="body_text" />
                                   <?php
                                   foreach($langs as $lang){
                                      if ($lang['lang_id']==$form['lang_id']){
                                        continue;
                                      }
                                      ?>
-                                     <input type="hidden" value="<?php echo $form['lang_bodytext'.$lang['lang_id']]; ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
+                                     <input type="hidden" value="<?php echo filter_var($form['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
                                      <?php
                                   }
                                 } else {
@@ -905,7 +905,7 @@ if ($modal_ok_insert === true) {
                                   <?php
                                   foreach($langs as $lang){
                                     ?>
-                                    <input type="hidden" value="<?php echo $form['lang_bodytext'.$lang['lang_id']]; ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
+                                    <input type="hidden" value="<?php echo filter_var($form['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
                                     <?php
                                   }
                                 }
