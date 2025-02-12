@@ -27,7 +27,7 @@ $admin_aziend=checkAdmin();
 ?>
 <div class="panel panel-info">
   <div>
-    <h2>
+    <h3>
       <div class="text-center">
         <img src="../fourzero/fourzero.png"/>
       </div>
@@ -42,6 +42,6 @@ $admin_aziend=checkAdmin();
       <p class="text-warning text-center">Antonio De Vincentiis Montesilvano (PE)</p>
       <p class="text-center"><a href="https://www.devincentiis.it"> https://www.devincentiis.it </a></p>
       <p class="text-center">Telefono +39 <a href="tel:+393383121161">3383121161</a></p>
-    </h2>
+    </h3>
   </div>
 </div>

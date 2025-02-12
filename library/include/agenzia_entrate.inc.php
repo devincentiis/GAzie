@@ -2,9 +2,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -30,7 +30,7 @@
   Affinchè il tutto avvenga correttamente si devono passare alle funzioni specifiche sotto
   elencate  denominate "creaFileXXX" gli array di seguito specificati per singola  funzione.
  * **************************************************************************************** */
-
+#[AllowDynamicProperties] 
 class AgenziaEntrate {
     /*     * **** creaFileIVC - COMUNICAZIONE ANNUALE DATI IVA
       Una AVVERTENZA IMPORTANTE è quella di considerare che siccome questa funzione è predisposta

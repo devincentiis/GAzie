@@ -114,16 +114,10 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   foreach($langs as $lang){
     $form['lang_descri'.$lang['lang_id']]=filter_var(substr($_POST['lang_descri'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $form['lang_bodytext'.$lang['lang_id']]=filter_var($_POST['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_web_url'.$lang['lang_id']]=filter_var(substr($_POST['lang_web_url'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
   }
 	$form['hidden_req'] = $_POST['hidden_req'];
-  if ($form['hidden_req']=='refresh_language') { // se ho cambiato la lingua ricarico dal database i valori di descrizione e descrizione estesa
-    $bodytextol = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '" . $form['codice']."' AND lang_id = '".$form['lang_id']."'");
-    if ($bodytextol && $form['lang_id'] > 1 ) { // riprendo dal db solo se non è italiano ed esiste
-      $form['lang_descri']=$bodytextol['descri'];
-      $form['lang_bodytext']=$bodytextol['body_text'];
-    }
-    $form['hidden_req']='';
-  }
+
 	$form['web_public_init'] = $_POST['web_public_init'];
 	$form['var_id'] = (isset($_POST['var_id']))?$_POST['var_id']:'';
 	$form['var_name'] = (isset($_POST['var_name']))?$_POST['var_name']:'';
@@ -323,9 +317,11 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $position = gaz_dbi_get_row($gTables['artico_position'], 'id_position', $form['id_position']); // prendo i valori magazzino e scaffale dal principale (senza codart)
         gaz_dbi_query("INSERT INTO ".$gTables['artico_position']." (id_warehouse, id_shelf, artico_id_position, codart) VALUES (".$position['id_warehouse'].", ".$position['id_shelf'].", ".$form['id_position'].", '".$form['codice']."')");
       }
-      // in inserimento valorizzo tutte le lingue straniere con quella attiva (eventualmente le modificherò in un secondo tempo)
+      // in inserimento scrivo tutte le lingue straniere
       foreach($langs as $l){
-        bodytextInsert(['table_name_ref'=>'artico','code_ref'=>$form['codice'],'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id']]);
+        $custom_field = array('web_url'=>$form['lang_web_url'.$l['lang_id']]);
+        $custom=json_encode($custom_field);
+        bodytextInsert(['table_name_ref'=>'artico','code_ref'=>$form['codice'],'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id'],'custom_field'=>$custom]);
       }
     } elseif ($toDo == 'update') {
       gaz_dbi_table_update('artico', $form['ref_code'], $form);
@@ -343,11 +339,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 
       foreach($langs as $lang){// in aggiornamento modifico comunque tutte le traduzioni
         //per retrocompatibilità devo controllare sempre se esiste la traduzione
+        $custom_field = array('web_url'=>$form['lang_web_url'.$lang['lang_id']]);
+        $custom=json_encode($custom_field);
         $bodytextol = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '" . $form['codice']."' AND lang_id = '".$lang['lang_id']."'");
         if (!$bodytextol) { // non c'è la traduzione in lingua straniera, la creo
-           bodytextInsert(['table_name_ref'=>'artico','code_ref'=>$form['codice'],'body_text'=>$form['lang_bodytext'.$lang['lang_id']],'descri'=>$form['lang_descri'.$lang['lang_id']],'lang_id'=>$lang['lang_id']]);
+           bodytextInsert(['table_name_ref'=>'artico','code_ref'=>$form['codice'],'body_text'=>$form['lang_bodytext'.$lang['lang_id']],'descri'=>$form['lang_descri'.$lang['lang_id']],'lang_id'=>$lang['lang_id'],'custom_field'=>$custom]);
         }else{// altrimenti la aggiorno
-          gaz_dbi_query("UPDATE ".$gTables['body_text']." SET body_text='".$form['lang_bodytext'.$lang['lang_id']]."', descri='".$form['lang_descri'.$lang['lang_id']]."' WHERE table_name_ref='artico' AND code_ref='".$form['codice']."' AND lang_id = '".$lang['lang_id']."'");
+          gaz_dbi_query("UPDATE ".$gTables['body_text']." SET body_text='".$form['lang_bodytext'.$lang['lang_id']]."', descri='".$form['lang_descri'.$lang['lang_id']]."', custom_field='".$custom."' WHERE table_name_ref='artico' AND code_ref='".$form['codice']."' AND lang_id = '".$lang['lang_id']."'");
         }
       }
     }
@@ -418,6 +416,8 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_GET['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
     $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
     $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $obj = json_decode($bodytextlang['custom_field']);
+    $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
   }
 
   $form['hidden_req'] = '';
@@ -477,6 +477,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   foreach($langs as $lang){
     $form['lang_descri'.$lang['lang_id']] = '';
     $form['lang_bodytext'.$lang['lang_id']] = '';
+    $form['lang_web_url'.$lang['lang_id']] = '';
   }
   $form['hidden_req'] = '';
 	$form['web_public_init'] = 0;
@@ -1177,8 +1178,31 @@ if ($modal === false && $toDo=='update') {
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="web_url" class="col-sm-4 control-label"><?php echo $script_transl['web_url']; ?></label>
-                            <input class="col-sm-8" type="text" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" placeholder="URL o allinemento su sito statico"/>
-                        </div>
+                              <?php
+                              if ($form['lang_id']>1) {
+                                ?>
+                                <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['lang_web_url'.$form['lang_id']]; ?>" name="lang_web_url<?php echo $form['lang_id']; ?>" maxlength="255" id="suggest_descri_artico" />
+                                <input type="hidden" value="<?php echo $form['web_url']; ?>" name="web_url" />
+                                <?php
+                                 foreach($langs as $lang){
+                                   if ($lang['lang_id']==$form['lang_id']){
+                                     continue;
+                                   }
+                                   ?>
+                                  <input type="hidden" value="<?php echo $form['lang_web_url'.$lang['lang_id']]; ?>" name="lang_web_url<?php echo $lang['lang_id']; ?>" />
+                                  <?php
+                                 }
+                              } else {
+                                ?>
+                                <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" id="suggest_web_url" />
+                                <?php
+                                 foreach($langs as $lang){
+                                   ?>
+                                  <input type="hidden" value="<?php echo $form['lang_web_url'.$lang['lang_id']]; ?>" name="lang_web_url<?php echo $lang['lang_id']; ?>" />
+                                  <?php
+                                 }
+                              }
+                            ?>                        </div>
                     </div>
                 </div><!-- chiude row  -->
 				<?php

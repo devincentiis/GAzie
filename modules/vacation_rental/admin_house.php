@@ -117,8 +117,19 @@ while ($r = gaz_dbi_fetch_array($result)) {
 	$shelf .= ", ".$r['id_shelf'].":'".substr(str_replace($invalid_characters, " ", $r['descri']), 0, 25)."'";
 }
 
+//Carico tutte le lingue del gestionale
+$langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
+
 if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo accesso
   $form = gaz_dbi_parse_post('artico');
+  $form['lang_id'] = intval($_POST['lang_id']);
+  foreach($langs as $lang){
+    $form['lang_descri'.$lang['lang_id']]=filter_var(substr($_POST['lang_descri'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_bodytext'.$lang['lang_id']]=filter_var($_POST['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_web_url'.$lang['lang_id']]=filter_var(substr($_POST['lang_web_url'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+  }
+	$form['hidden_req'] = $_POST['hidden_req'];
+
   if (isset ($_GET['codice'])){
 	$query = "SELECT * FROM " . $gTables['rental_ical'] . " WHERE codice_alloggio = '".substr($_GET['codice'],0,32)."' ORDER BY id ASC";
 	$resical = gaz_dbi_query($query);
@@ -321,16 +332,24 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $form['ecomm_option_attribute'] = json_encode ($arrayvar);
     }
     $form['preve1']=$form['web_price'];// al momento imposto il prezzo 1 uguale al webprice
+
     if ($toDo == 'insert') {
       $array= array('vacation_rental'=>array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'pause' => $_POST['pause'],'fixquote' => floatval($_POST['fixquote']),'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'self_checkin' => $_POST['self_checkin'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent']));// creo l'array per il custom field
       $form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
       gaz_dbi_table_insert('artico', $form);
       if (!empty($tbt)) {
-      bodytextInsert(array('table_name_ref' => 'artico_' . $form['codice'], 'body_text' => $form['body_text'], 'lang_id' => $admin_aziend['id_language']));
+        bodytextInsert(array('table_name_ref' => 'artico_' . $form['codice'], 'body_text' => $form['body_text'], 'lang_id' => $admin_aziend['id_language']));
+      }
+      // in inserimento scrivo tutte le lingue straniere
+      foreach($langs as $l){
+        $custom_field_url = array('web_url'=>$form['lang_web_url'.$l['lang_id']]);
+        $custom=json_encode($custom_field_url);
+        bodytextInsert(['table_name_ref'=>'artico','code_ref'=>$form['codice'],'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id'],'custom_field'=>$custom]);
       }
     } elseif ($toDo == 'update') {
       $artico_row=gaz_dbi_get_row($gTables['artico'], "codice", $form['codice']); // carico il vecchio json custom_field
       $custom_field=(isset($artico_row['custom_field']))?$artico_row['custom_field']:'';
+
       if ($custom_field<>'' && $data = json_decode($custom_field,true)){// se c'è un json
         if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
           $data['vacation_rental']['accommodation_type']=$_POST['accommodation_type'];
@@ -365,6 +384,17 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       } elseif (!empty($tbt)) {
         // non c'era lo inserisco
         bodytextInsert(array('table_name_ref' => 'artico_' . $form['codice'], 'body_text' => $form['body_text'], 'lang_id' => $admin_aziend['id_language']));
+      }
+      foreach($langs as $lang){// in aggiornamento modifico comunque tutte le traduzioni
+        //per retrocompatibilità devo controllare sempre se esiste la traduzione
+        $custom_field_url = array('web_url'=>$form['lang_web_url'.$lang['lang_id']]);
+        $custom=json_encode($custom_field_url);
+        $bodytextol = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '" . $form['codice']."' AND lang_id = '".$lang['lang_id']."'");
+        if (!$bodytextol) { // non c'è la traduzione in lingua straniera, la creo
+           bodytextInsert(['table_name_ref'=>'artico','code_ref'=>$form['codice'],'body_text'=>$form['lang_bodytext'.$lang['lang_id']],'descri'=>$form['lang_descri'.$lang['lang_id']],'lang_id'=>$lang['lang_id'],'custom_field'=>$custom]);
+        }else{// altrimenti la aggiorno
+          gaz_dbi_query("UPDATE ".$gTables['body_text']." SET body_text='".$form['lang_bodytext'.$lang['lang_id']]."', descri='".$form['lang_descri'.$lang['lang_id']]."', custom_field='".$custom."' WHERE table_name_ref='artico' AND code_ref='".$form['codice']."' AND lang_id = '".$lang['lang_id']."'");
+        }
       }
     }
     if (!empty($admin_aziend['synccommerce_classname']) && class_exists($admin_aziend['synccommerce_classname']) && intval($form['web_public'])>0){
@@ -427,6 +457,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form['ritorno'] = 'admin_artico.php';
     }
 	$form['hidden_req'] = '';
+
 	$form['web_public_init']=$form['web_public'];
 	if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
 
@@ -519,8 +550,16 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $nimg++;
     }
     // fine immagini e-commerce
+    $form['lang_id'] = $admin_aziend['id_language'];
     $bodytext = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_' . $form['codice']);
     $form['body_text'] = ($bodytext)?$bodytext['body_text']:'';
+    foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
+      $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_GET['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
+      $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
+      $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+      $obj = json_decode($bodytextlang['custom_field']);
+      $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
+    }
 } else { //se e' il primo accesso per INSERT
     $autoincrement_id_ecomm = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoincrement_id_ecomm')['val'];// acquisico impostazione per autoincremento ID ref ecommerce
     $form = gaz_dbi_fields('artico');
@@ -569,13 +608,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     // eventuale descrizione amplia
     $form['body_text'] = '';
     // propongo il primo ID libero per l'ecommerce
-	if ($autoincrement_id_ecomm==1){// se è stato impostato in configurazione avanzata azienda
-		$max_ref_ecommerce_id_product = gaz_dbi_query("select ref_ecommerce_id_product from ".$gTables['artico']." ORDER BY ref_ecommerce_id_product DESC LIMIT 1");
-		$max_id = gaz_dbi_fetch_array($max_ref_ecommerce_id_product);
-		$form['ref_ecommerce_id_product'] = ++$max_id[0];
-	} else {// altrimenti lascio non impostato
-		$form['ref_ecommerce_id_product']="";
-	}
+    if ($autoincrement_id_ecomm==1){// se è stato impostato in configurazione avanzata azienda
+      $max_ref_ecommerce_id_product = gaz_dbi_query("select ref_ecommerce_id_product from ".$gTables['artico']." ORDER BY ref_ecommerce_id_product DESC LIMIT 1");
+      $max_id = gaz_dbi_fetch_array($max_ref_ecommerce_id_product);
+      $form['ref_ecommerce_id_product'] = ++$max_id[0];
+    } else {// altrimenti lascio non impostato
+      $form['ref_ecommerce_id_product']="";
+    }
     // ripropongo le ultime unità di misura più utilizzate
     $rs_unimis = gaz_dbi_query("SELECT unimis, COUNT(unimis) c FROM ".$gTables['artico']." GROUP BY unimis ORDER BY c DESC LIMIT 1");
     $unimis = gaz_dbi_fetch_array($rs_unimis);
@@ -583,6 +622,14 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $rs_uniacq = gaz_dbi_query("SELECT uniacq, COUNT(uniacq) c FROM ".$gTables['artico']." GROUP BY uniacq ORDER BY c DESC LIMIT 1");
     $uniacq = gaz_dbi_fetch_array($rs_uniacq);
     $form['uniacq'] = $uniacq['uniacq'];
+
+     $form['lang_id'] = $admin_aziend['id_language'];
+    // solo se cambio lingua andrò a valorizzare i lang_descri e lang_bodytext (e sul form metterò hidden all'italiano)
+    foreach($langs as $lang){
+      $form['lang_descri'.$lang['lang_id']] = '';
+      $form['lang_bodytext'.$lang['lang_id']] = '';
+      $form['lang_web_url'.$lang['lang_id']] = '';
+    }
 }
 
 /** ENRICO FEDELE */
@@ -864,6 +911,11 @@ if ($modal_ok_insert === true) {
                 <li><a data-toggle="pill" href="#contab">Contabilità</a></li>
                 <li><a data-toggle="pill" href="#chifis">Caratteristiche</a></li>
                 <li style="float: right;"><?php echo '<input name="Submit" type="submit" class="btn btn-warning" value="' . ucfirst($script_transl[$toDo]) . '" />'; ?></li>
+                <li class="">
+                  <?php
+                  $gForm->selectLanguage('lang_id', $form['lang_id'],false,'lang-select','refresh_language');
+                  ?>
+                </li>
             </ul>
             <div class="tab-content">
               <div id="home" class="tab-pane fade in active">
@@ -887,7 +939,35 @@ if ($modal_ok_insert === true) {
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="descri" class="col-sm-4 control-label"><?php echo $script_transl['descri']; ?>&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
-                            <input class="col-sm-8" type="text" value="<?php echo $form['descri']; ?>" name="descri" maxlength="255" id="suggest_descri_artico" />
+
+                            <?php
+                              if ($form['lang_id']>1) {
+                                ?>
+                                <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['lang_descri'.$form['lang_id']]; ?>" name="lang_descri<?php echo $form['lang_id']; ?>" maxlength="255" id="suggest_descri_artico" />
+                                <input type="hidden" value="<?php echo $form['descri']; ?>" name="descri" />
+                                <?php
+                                 foreach($langs as $lang){
+                                   if ($lang['lang_id']==$form['lang_id']){
+                                     continue;
+                                   }
+                                   ?>
+                                  <input type="hidden" value="<?php echo $form['lang_descri'.$lang['lang_id']]; ?>" name="lang_descri<?php echo $lang['lang_id']; ?>" />
+                                  <?php
+                                 }
+                              } else {
+
+                                ?>
+                                <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['descri']; ?>" name="descri" maxlength="255" id="suggest_descri_artico" />
+                                <?php
+                                 foreach($langs as $lang){
+                                   ?>
+                                  <input type="hidden" value="<?php echo $form['lang_descri'.$lang['lang_id']]; ?>" name="lang_descri<?php echo $lang['lang_id']; ?>" />
+                                  <?php
+                                 }
+                              }
+
+                            ?>
+
                         </div>
                     </div>
                 </div><!-- chiude row  -->
@@ -933,7 +1013,31 @@ if ($modal_ok_insert === true) {
                         <div class="form-group">
                             <label for="body_text" class="col-sm-4 control-label"><?php echo $script_transl['body_text']; ?></label>
                             <div class="col-sm-8">
-                                <textarea id="body_text" name="body_text" class="mceClass"><?php echo $form['body_text']; ?></textarea>
+                              <?php
+                                if ($form['lang_id']>1) {
+                                  ?>
+                                  <textarea id="lang_bodytext" name="lang_bodytext<?php echo $form['lang_id']; ?>" class="mceClass"><?php echo $form['lang_bodytext'.$form['lang_id']]; ?></textarea>
+                                  <input type="hidden" value="<?php echo filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="body_text" />
+                                  <?php
+                                  foreach($langs as $lang){
+                                     if ($lang['lang_id']==$form['lang_id']){
+                                       continue;
+                                     }
+                                     ?>
+                                     <input type="hidden" value="<?php echo filter_var($form['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
+                                     <?php
+                                  }
+                                } else {
+                                  ?>
+                                  <textarea id="body_text" name="body_text" class="mceClass"><?php echo $form['body_text']; ?></textarea>
+                                  <?php
+                                  foreach($langs as $lang){
+                                    ?>
+                                    <input type="hidden" value="<?php echo filter_var($form['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
+                                    <?php
+                                  }
+                                }
+                              ?>
                             </div>
                         </div>
                     </div>
@@ -1031,7 +1135,33 @@ if ($modal_ok_insert === true) {
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="web_url" class="col-sm-4 control-label" ><?php echo $script_transl['web_url']; ?>&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
-                            <input class="col-sm-8" type="text" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" />
+
+                            <?php
+                              if ($form['lang_id']>1) {
+                                ?>
+                                <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['lang_web_url'.$form['lang_id']]; ?>" name="lang_web_url<?php echo $form['lang_id']; ?>" maxlength="255" id="suggest_descri_artico" />
+                                <input type="hidden" value="<?php echo $form['web_url']; ?>" name="web_url" />
+                                <?php
+                                 foreach($langs as $lang){
+                                   if ($lang['lang_id']==$form['lang_id']){
+                                     continue;
+                                   }
+                                   ?>
+                                  <input type="hidden" value="<?php echo $form['lang_web_url'.$lang['lang_id']]; ?>" name="lang_web_url<?php echo $lang['lang_id']; ?>" />
+                                  <?php
+                                 }
+                              } else {
+                                ?>
+                                <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" id="suggest_web_url" />
+                                <?php
+                                 foreach($langs as $lang){
+                                   ?>
+                                  <input type="hidden" value="<?php echo $form['lang_web_url'.$lang['lang_id']]; ?>" name="lang_web_url<?php echo $lang['lang_id']; ?>" />
+                                  <?php
+                                 }
+                              }
+                            ?>
+
                         </div>
                     </div>
                 </div><!-- chiude row  -->
@@ -1345,68 +1475,7 @@ if ($modal_ok_insert === true) {
                         </div>
                     </div>
                 </div><!-- chiude row  -->
-                <?php
-                /*
-                if ($toDo == 'update') {
-                ?>
-                    <!--+ DC - 06/02/2019 div class="row" --->
-                    <div id="docCert" class="row IERincludeExcludeRow">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="docCert" class="col-sm-4 control-label"><?php echo $script_transl['document']; ?></label>
-                                  <?php if ($ndoc > 0) { // se ho dei documenti  ?>
-                                    <div>
-                                    <?php foreach ($form['rows'] as $k => $val) { ?>
-                                            <input type="hidden" value="<?php echo $val['id_doc']; ?>" name="rows[<?php echo $k; ?>][id_doc]">
-                                            <input type="hidden" value="<?php echo $val['extension']; ?>" name="rows[<?php echo $k; ?>][extension]">
-                                            <input type="hidden" value="<?php echo $val['title']; ?>" name="rows[<?php echo $k; ?>][title]">
-                                            <?php echo DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/doc/' . $val['id_doc'] . '.' . $val['extension']; ?>
-                                            <a href="../root/retrieve.php?id_doc=<?php echo $val["id_doc"]; ?>" title="<?php echo $script_transl['view']; ?>!" class="btn btn-default btn-sm">
-                                                <i class="glyphicon glyphicon-file"></i>
-                                            </a><?php echo $val['title']; ?>
-                                            <input type="button" value="<?php echo ucfirst($script_transl['update']); ?>" onclick="location.href = 'admin_document.php?id_doc=<?php echo $val['id_doc']; ?>&Update'" />
 
-                                          <?php
-                                          }
-                                          ?>
-                                        <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_document.php?item_ref=<?php echo $form['codice']; ?>&Insert'" />
-                                    </div>
-                                    <?php } else { // non ho documenti  ?>
-                                    <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_document.php?item_ref=<?php echo $form['codice']; ?>&Insert'">
-                                <?php } ?>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Antonio Germani inserimento/modifica immagini di qualità per e-commerce -->
-                    <div id="qualityImgs" class="row IERincludeExcludeRow">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="annotaUpdate" class="col-sm-4 control-label"><?php echo $script_transl['imageweb']; ?></label>
-                                <?php if ($nimg > 0) { // se ho dei documenti  ?>
-                                    <div>
-                                    <?php foreach ($form['imgrows'] as $k => $val) { ?>
-                                            <input type="hidden" value="<?php echo $val['id_doc']; ?>" name="imgrows[<?php echo $k; ?>][id_doc]">
-                                            <input type="hidden" value="<?php echo $val['extension']; ?>" name="imgrows[<?php echo $k; ?>][extension]">
-                                            <input type="hidden" value="<?php echo $val['title']; ?>" name="imgrows[<?php echo $k; ?>][title]">
-                                            <?php echo DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/images/' . $val['id_doc'] . '.' . $val['extension']; ?>
-                                            <a href="../root/retrieve.php?id_doc=<?php echo $val["id_doc"]; ?>" title="<?php echo $script_transl['view']; ?>!" class="btn btn-default btn-sm">
-                                                <i class="glyphicon glyphicon-file"></i>
-                                            </a><?php echo $val['title']; ?>
-                                            <input type="button" value="<?php echo ucfirst($script_transl['update']); ?>" onclick="location.href = 'admin_image.php?id_doc=<?php echo $val['id_doc']; ?>&Update'" />
-
-                                      <?php } ?>
-                                        <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_image.php?item_ref=<?php echo $form['codice']; ?>&Insert'" />
-                                    </div>
-                                    <?php } else { // non ho documenti  ?>
-                                    <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_image.php?item_ref=<?php echo $form['codice']; ?>&Insert'">
-                                <?php } ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php
-                }
-                */
-                ?>
             </div><!-- chiude tab-pane  -->
           </div>
         <div class="col-sm-12">

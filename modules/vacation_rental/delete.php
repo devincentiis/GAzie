@@ -52,6 +52,8 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 				}
 				// Cancello l'eventuale body_text
 				gaz_dbi_del_row($gTables['body_text'], "table_name_ref", "artico_".$i);
+        // e le traduzioni
+        gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'artico' AND code_ref", $i);
 				//Cancello se presenti gli articoli presenti in distinta base
 				$result = gaz_dbi_del_row($gTables['distinta_base'], "codice_composizione", $i );
 				//Cancello l'articolo
@@ -64,6 +66,7 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 			gaz_dbi_query($sql);
 			//Cancello gruppo
 			$result = gaz_dbi_del_row($gTables['artico_group'], "id_artico_group", $i);
+      gaz_dbi_del_row($gTables['body_text'], "table_name_ref", "artico_group' AND code_ref = '".$i);// cancello i bodytext in lingua del gruppo
 		break;
 		case "extra":
 			$i=substr($_POST['ref'],0,32);

@@ -49,17 +49,24 @@ $contact_link=(isset($contact_link))?$contact_link:'';
 
 <!-- questo è contenuto in library/theme/g7/footer.php -->
 <div class="navbar navbar-fixed-bottom main-footer" >
-  <div class="col-lg-4 col-xs-12">
+  <div class="col-lg-3 col-xs-12">
     Version <?php echo GAZIE_VERSION; ?>
   </div>
-  <div class=" text-center col-lg-4 hidden-xs">
+  <div class=" text-center col-lg-3 hidden-xs">
     <?php
     if ( $debug_active == true ){
-      echo '<a class="btn btn-xs btn-danger" href="" style="cursor:default;"> DEBUG ATTIVATO </a> '.$_SESSION['aes_key'].' <a class="btn btn-xs btn-info" href="../../passhash.php" > HASHES UTILITY </a>';
-    } ;
+      echo '<a class="btn btn-xs btn-warning" href="" style="cursor:default;"> DEBUG ATTIVATO </a>  DB:'.gaz_dbi_fetch_array(gaz_dbi_query(" SELECT @@version"))[0].' - PHP:'.phpversion();
+    }
     ?>
   </div>
-  <div class="text-right col-lg-4 hidden-xs">
+  <div class=" text-center col-lg-3 hidden-xs">
+    <?php
+    if ( $debug_active == true ){
+      echo $_SESSION['aes_key'].' <a class="btn btn-xs btn-info" href="../../passhash.php" > HASHES UTILITY </a>';
+    }
+    ?>
+  </div>
+  <div class="text-right col-lg-3 hidden-xs">
     <a  target="_new" href="https://<?php echo $contact_link; ?>">https://<?php echo $contact_link; ?></a>
   </div>
 </div>

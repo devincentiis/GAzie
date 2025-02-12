@@ -2,9 +2,9 @@
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -24,7 +24,7 @@
  */
 require("../../library/include/datlib.inc.php");
 
-require("../../library/include/agenzia_entrate.inc.php");
+//require("../../library/include/agenzia_entrate.inc.php");
 $admin_aziend = checkAdmin();
 $anno = date("Y");
 $msg = "";
@@ -177,6 +177,7 @@ if (isset($_POST['Return'])) {
         } else {
             header('Pragma: no-cache');
         }
+		require("../../library/include/agenzia_entrate.inc.php");
         $agenzia = new AgenziaEntrate;
         $content = $agenzia->creaFileIVC($A, $B);
         print $content;

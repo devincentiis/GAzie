@@ -32,18 +32,25 @@ require("../../modules/root/lang.".$admin_aziend['lang'].".php");
 $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
 ?>
     <footer class="main-footer">
-      <div class="col-lg-4 col-xs-12">
+      <div class="col-lg-2 col-md-12">
         Version <?php echo GAZIE_VERSION; ?>
       </div>
-      <div class=" text-center col-lg-4 hidden-xs">
+      <div class=" text-center col-lg-5 hidden-xs">
         <?php
         if ( $debug_active == true ){
-          echo '<a class="btn btn-xs btn-danger" href="" style="cursor:default;"> DEBUG ATTIVATO </a> '.$_SESSION['aes_key'].' <a class="btn btn-xs btn-info" href="../../passhash.php" > HASHES UTILITY </a>';
-        } ;
+          echo '<a class="btn btn-xs btn-danger" href="" style="cursor:default;"> DEBUG ON </a>  DB:'.gaz_dbi_fetch_array(gaz_dbi_query(" SELECT @@version"))[0].' - PHP:'.phpversion();
+        }
         ?>
       </div>
-      <div class="text-right col-lg-4 hidden-xs">
-        <?php echo $strScript['admin.php']['auth']; ?>:  <a  target="_new" title="<?php echo $strScript['admin.php']['auth']; ?>" href="https://<?php echo $contact_link; ?>">https://<?php echo $contact_link; ?></a>
+      <div class="text-center col-lg-3 hidden-xs">
+        <?php
+        if ( $debug_active == true ){
+          echo $_SESSION['aes_key'].' &nbsp; <a class="btn btn-xs btn-info" href="../../passhash.php" > HASHES UTILITY </a>';
+        }
+        ?>
+      </div>
+      <div class="text-right col-lg-2 hidden-xs">
+        <a  target="_new" title="<?php echo $strScript['admin.php']['auth']; ?>" href="https://<?php echo $contact_link; ?>">https://<?php echo $contact_link; ?></a>
       </div>
     </footer>
 

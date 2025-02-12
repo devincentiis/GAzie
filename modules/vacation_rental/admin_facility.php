@@ -67,9 +67,14 @@ if(isset($_GET['group_delete'])) {
 	gaz_dbi_table_update ("artico", $art['codice'], array("id_artico_group"=>"") );
 	}
 	gaz_dbi_del_row($gTables['artico_group'], "id_artico_group", $_GET['group_delete']);// cancello la struttura
+  gaz_dbi_del_row($gTables['body_text'], "table_name_ref", "artico_group' AND code_ref = '".$_GET['group_delete']);// cancello i bodytext in lingua del gruppo
+
 	header("Location: ../vacation_rental/report_accommodation.php");
 	exit;
 }
+
+//Carico tutte le lingue del gestionale
+$langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
 
 if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo accesso
 	$form = gaz_dbi_parse_post('artico_group');
@@ -97,6 +102,22 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	$form['lat'] = $_POST['lat'];
   $form['long'] = $_POST['long'];
   $form['cin'] = $_POST['cin'];
+  $form['lang_id'] = intval($_POST['lang_id']);
+  foreach($langs as $lang){
+    if (intval($lang['lang_id'])==1){ continue;}
+    $form['lang_descri'.$lang['lang_id']]=filter_var(substr($_POST['lang_descri'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_bodytext'.$lang['lang_id']]=filter_var($_POST['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_web_url'.$lang['lang_id']]=filter_var(substr($_POST['lang_web_url'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+  }
+  $form['hidden_req'] = $_POST['hidden_req'];
+  if ($form['hidden_req']=='refresh_language') { // se ho cambiato la lingua ricarico dal database i valori di descrizione e descrizione estesa
+    $bodytextol = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '" . $form['id_artico_group']."' AND lang_id = '".$form['lang_id']."'");
+    if ($bodytextol && $form['lang_id'] > 1 ) { // riprendo dal db solo se non è italiano ed esiste
+      $form['lang_descri']=$bodytextol['descri'];
+      $form['lang_bodytext']=$bodytextol['body_text'];
+    }
+    $form['hidden_req']='';
+  }
   if ((isset($_GET['tab']) && $_GET['tab']=="variant") || ($_POST['cosear'] <> $_POST['codart']) ){
 		$cl_home="";
 		$cl_home_tab="";
@@ -146,6 +167,10 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
           if($gSync->api_token){
             $gSync->UpsertParent($form,$toDo);
           }
+        }
+        foreach($langs as $l){
+          if ($l['lang_id']==1){ continue;}
+          bodytextInsert(['table_name_ref'=>'artico_group','code_ref'=>strval($form['id_artico_group']),'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id']]);
         }
 				// il redirect deve modificare il form in update perché è stato già inserito
 				header("Location: ../vacation_rental/admin_facility.php?Update&id_artico_group=".$form['id_artico_group']."&tab=variant");
@@ -252,11 +277,20 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 			} else {
 			  $form['image'] = '';
 			}
+      $form['large_descri'] = htmlspecialchars_decode ($form['large_descri']);
+
 			// aggiorno il db
 			if ($toDo == 'insert') {
 				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'week_check_in' => $form['week_check_in'], 'week_check_out' => $form['week_check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long'], 'cin' => $form['cin']));// creo l'array per il custom field
 				$form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
 				gaz_dbi_table_insert('artico_group', $form);
+        // in inserimento scrivo tutte le lingue straniere
+        foreach($langs as $l){
+          if ($l['lang_id']==1){ continue;}
+          $custom_field_url = array('web_url'=>$form['lang_web_url'.$l['lang_id']]);
+          $custom=json_encode($custom_field_url);
+          bodytextInsert(['table_name_ref'=>'artico_group','code_ref'=>$form['id_artico_group'],'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id'],'custom_field'=>$custom]);
+        }
 			} elseif ($toDo == 'update') {
 
 				$custom_field=gaz_dbi_get_row($gTables['artico_group'], "id_artico_group", $form['id_artico_group'])['custom_field']; // carico il vecchio json custom_field
@@ -288,6 +322,18 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
           }
         }
 				gaz_dbi_table_update('artico_group', array( 0 => "id_artico_group", 1 => $form['id_artico_group']), $form);
+        foreach($langs as $lang){// in aggiornamento modifico comunque tutte le traduzioni
+          //per retrocompatibilità devo controllare sempre se esiste la traduzione
+          if ($lang['lang_id']==1){ continue;}
+          $custom_field_url = array('web_url'=>$form['lang_web_url'.$lang['lang_id']]);
+          $custom=json_encode($custom_field_url);
+          $bodytextol = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_group', " AND code_ref = '" . $form['id_artico_group']."' AND lang_id = '".$lang['lang_id']."'");
+          if (!$bodytextol) { // non c'è la traduzione in lingua straniera, la creo
+             bodytextInsert(['table_name_ref'=>'artico_group','code_ref'=>$form['id_artico_group'],'body_text'=>$form['lang_bodytext'.$lang['lang_id']],'descri'=>$form['lang_descri'.$lang['lang_id']],'lang_id'=>$lang['lang_id'],'custom_field'=>$custom]);
+          }else{// altrimenti la aggiorno
+            gaz_dbi_query("UPDATE ".$gTables['body_text']." SET body_text='".$form['lang_bodytext'.$lang['lang_id']]."', descri='".$form['lang_descri'.$lang['lang_id']]."', custom_field='".$custom."' WHERE table_name_ref='artico_group' AND code_ref='".$form['id_artico_group']."' AND lang_id = '".$lang['lang_id']."'");
+          }
+        }
 			}
 
 			if (!empty($admin_aziend['synccommerce_classname']) && class_exists($admin_aziend['synccommerce_classname'])&& intval($_POST['web_public'])>0){
@@ -318,9 +364,19 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 		exit;
 	}
 } elseif (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo accesso per UPDATE
-    $form = gaz_dbi_get_row($gTables['artico_group'], 'id_artico_group', intval($_GET['id_artico_group']));
+  $form = gaz_dbi_get_row($gTables['artico_group'], 'id_artico_group', intval($_GET['id_artico_group']));
 	$form['cosear'] = "";
 	$form['codart'] = "";
+  $form['lang_id'] = 1;
+  foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
+    if (intval($lang['lang_id'])==1){ continue;}
+    $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_group', " AND code_ref = '".substr($_GET['id_artico_group'],0,32)."' AND lang_id = ".$lang['lang_id']);
+    $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
+    $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['large_descri'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $obj = json_decode($bodytextlang['custom_field']);
+    $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
+  }
+  $form['hidden_req'] = '';
   if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
     if (is_array($data['vacation_rental'])){
 				$form['facility_type'] = $data['vacation_rental']['facility_type'];
@@ -410,6 +466,15 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     } else {
         $form['ritorno'] = 'admin_facility.php';
     }
+    $form['lang_id'] = 1;
+    // solo se cambio lingua andrò a valorizzare i lang_descri e lang_bodytext (e sul form metterò hidden all'italiano)
+    foreach($langs as $lang){
+      if (intval($lang['lang_id'])==1){ continue;}
+      $form['lang_descri'.$lang['lang_id']] = '';
+      $form['lang_bodytext'.$lang['lang_id']] = '';
+      $form['lang_web_url'.$lang['lang_id']] = '';
+    }
+    $form['hidden_req'] = '';
     $form['web_public'] = 5;
     $form['depli_public'] = 1;
     // eventuale descrizione ampliata
@@ -551,6 +616,7 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
         <!--- DC - 06/02/2019 -->
 				<?php
 		}
+    echo '<input type="hidden" name="hidden_req" value="' . $form['hidden_req'] . '" />';
 		echo '<input type="hidden" name="' . ucfirst($toDo) . '" value="" />';
 		if (count($msg['err']) > 0) { // ho un errore
 			$gForm->gazHeadMessage($msg['err'], $script_transl['err'], 'err');
@@ -572,6 +638,11 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
 						<li class="<?php echo $cl_home;?>"><a data-toggle="pill" href="#home"><?php echo $script_transl['home']; ?></a></li>
 						<li class="<?php echo $cl_variant;?>"><a data-toggle="pill" href="#variant"><?php echo $script_transl['variant']; ?></a></li>
 						<li style="float: right;"><?php echo '<input name="Submit" type="submit" class="btn btn-warning" value="' . ucfirst($script_transl[$toDo]) . '" />'; ?></li>
+            <li class="">
+              <?php
+              $gForm->selectLanguage('lang_id', $form['lang_id'],false,'lang-select','refresh_language');
+              ?>
+            </li>
 					</ul>
 					<div class="tab-content">
 						<div id="home" class="tab-pane fade <?php echo $cl_home_tab;?>">
@@ -591,7 +662,36 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="descri" class="col-sm-4 control-label"><?php echo $script_transl['descri']; ?></label>
-										<input class="col-sm-8" type="text" value="<?php echo $form['descri']; ?>" name="descri" maxlength="255" id="suggest_descri_artico" />
+
+<?php
+                      if ($form['lang_id']>1) {
+                        ?>
+                        <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['lang_descri'.$form['lang_id']]; ?>" name="lang_descri<?php echo $form['lang_id']; ?>" maxlength="255" id="suggest_descri_artico" />
+                        <input type="hidden" value="<?php echo $form['descri']; ?>" name="descri" />
+                        <?php
+                         foreach($langs as $lang){
+                           if (intval($lang['lang_id'])==1){ continue;}
+                           if ($lang['lang_id']==$form['lang_id']){
+                             continue;
+                           }
+                           ?>
+                          <input type="hidden" value="<?php echo $form['lang_descri'.$lang['lang_id']]; ?>" name="lang_descri<?php echo $lang['lang_id']; ?>" />
+                          <?php
+                         }
+                      } else {
+
+                        ?>
+                        <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['descri']; ?>" name="descri" maxlength="255" id="suggest_descri_artico" />
+                        <?php
+                         foreach($langs as $lang){
+                           if (intval($lang['lang_id'])==1){ continue;}
+                           ?>
+                          <input type="hidden" value="<?php echo $form['lang_descri'.$lang['lang_id']]; ?>" name="lang_descri<?php echo $lang['lang_id']; ?>" />
+                          <?php
+                         }
+                      }
+
+                    ?>
 									</div>
 								</div>
 							</div><!-- chiude row  -->
@@ -612,7 +712,34 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
 									<div class="form-group">
 										<label for="large_descri" class="col-sm-4 control-label"><?php echo $script_transl['body_text']; ?></label>
 										<div class="col-sm-8">
-											<textarea id="large_descri" name="large_descri" class="mceClass"><?php echo $form['large_descri']; ?></textarea>
+
+<?php
+                        if ($form['lang_id']>1) {
+                          ?>
+                          <textarea id="lang_bodytext" name="lang_bodytext<?php echo $form['lang_id']; ?>" class="mceClass"><?php echo $form['lang_bodytext'.$form['lang_id']]; ?></textarea>
+                          <input type="hidden" value="<?php echo filter_var($form['large_descri'], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="large_descri" />
+                          <?php
+                          foreach($langs as $lang){
+                            if (intval($lang['lang_id'])==1){ continue;}
+                             if ($lang['lang_id']==$form['lang_id']){
+                               continue;
+                             }
+                             ?>
+                             <input type="hidden" value="<?php echo filter_var($form['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
+                             <?php
+                          }
+                        } else {
+                          ?>
+                          <textarea id="body_text" name="large_descri" class="mceClass"><?php echo $form['large_descri']; ?></textarea>
+                          <?php
+                          foreach($langs as $lang){
+                            if (intval($lang['lang_id'])==1){ continue;}
+                            ?>
+                            <input type="hidden" value="<?php echo filter_var($form['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS); ?>" name="lang_bodytext<?php echo $lang['lang_id']; ?>" />
+                            <?php
+                          }
+                        }
+                      ?>
 										</div>
 									</div>
 								</div>
@@ -640,7 +767,31 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
 							<div class="col-md-12">
 								<div class="form-group">
 									<label for="web_url" class="col-sm-4 control-label"><?php echo $script_transl['web_url']; ?></label>
-									<input class="col-sm-8" type="text" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" />
+									<?php
+                    if ($form['lang_id']>1) {
+                      ?>
+                      <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['lang_web_url'.$form['lang_id']]; ?>" name="lang_web_url<?php echo $form['lang_id']; ?>" maxlength="255" id="suggest_descri_artico" />
+                      <input type="hidden" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" />
+                      <?php
+                       foreach($langs as $lang){
+                         if ($lang['lang_id']==$form['lang_id']){
+                           continue;
+                         }
+                         ?>
+                        <input type="hidden" value="<?php echo $form['lang_web_url'.$lang['lang_id']]; ?>" name="lang_web_url<?php echo $lang['lang_id']; ?>" />
+                        <?php
+                       }
+                    } else {
+                      ?>
+                      <input class="col-xs-12 col-md-8" type="text" value="<?php echo $form['web_url']; ?>" name="web_url" maxlength="255" id="suggest_web_url" />
+                      <?php
+                       foreach($langs as $lang){
+                         ?>
+                        <input type="hidden" value="<?php echo $form['lang_web_url'.$lang['lang_id']]; ?>" name="lang_web_url<?php echo $lang['lang_id']; ?>" />
+                        <?php
+                       }
+                    }
+                  ?>
 								</div>
 							</div>
 							</div><!-- chiude row  -->
