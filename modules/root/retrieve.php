@@ -29,7 +29,7 @@ if (isset($_GET['filename'])) {
   $doc['title']=$_GET['descriname'];
   $filepath = $admin_aziend['company_id']."/".$doc['basename'];
 } elseif (isset($_GET['id_ref'])) {
-  $doc = gaz_dbi_get_row($gTables['files'],'id_doc',intval($_GET['id_doc']));
+  $doc = gaz_dbi_get_row($gTables['files'],'id_doc',intval($_GET['id_ref']));
 	$filepath=$admin_aziend['company_id']."/images/".$doc['id_doc'].'.'.$doc['extension'];
 } elseif (isset($_GET['filepath'])) {
   $doc = pathinfo($_GET['filepath']);
@@ -39,7 +39,33 @@ if (isset($_GET['filename'])) {
   $doc = gaz_dbi_get_row($gTables['files'],'id_doc',intval($_GET['id_doc']));
 	$filepath=$admin_aziend['company_id']."/doc/".$doc['id_doc'].'.'.$doc['extension'];
 }
-header("Content-Type: application/".$doc['extension']);
+$doc['extension']=(strlen($doc['extension'])<3)?"octet-stream":$doc['extension'];// nell'ipotesi in cui non ci fosse una estensione metto quella di default per il Content-Type
+if (strlen (substr(strrchr($doc['title'], "."), 1))<3){// aggiungo al title l'estensione, se non c'è (per retrocompatibilità)
+  $doc['title'] .= ".".$doc['extension'];
+}
+//switch per content type
+$lowext=strtolower($doc['extension']);
+switch ($lowext) {
+  case 'xml':
+  case 'pdf':
+  case 'zip':
+    $cont="application";
+    break;
+  case 'gif':
+  case 'jpeg':
+  case 'png':
+  case 'svg':
+  case 'icon':
+    $cont="image";
+  break;
+  case 'txt':
+    $cont="text";
+  break;
+  default:
+    $cont="application";
+}
+
+header("Content-Type: ".$cont."/".$lowext);
 header('Content-Disposition: attachment; filename="'.$doc['title'].'"');
 // data retrieved from filesystem
 $doc=file_get_contents(DATA_DIR.'files/'.$filepath);

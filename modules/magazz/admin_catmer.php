@@ -181,7 +181,7 @@ echo "</tr>\n";
 	</td>
 </tr>
 <?php
-echo "<tr><td class=\"FacetFieldCaptionTD\">$script_transl[11]</td><td class=\"FacetDataTD\"><input type=\"text\" name=\"ref_ecommerce_id_category\" value=\"".$form['ref_ecommerce_id_category']."\" maxlength=\"4\"  /></td></tr>\n";
+echo "<tr><td class=\"FacetFieldCaptionTD\">$script_transl[11]</td><td class=\"FacetDataTD\"><input type=\"text\" name=\"ref_ecommerce_id_category\" value=\"".$form['ref_ecommerce_id_category'].'" class="col-xs-12" /></td></tr>';
 echo "<tr>\n";
 echo "<tr><td class=\"FacetFieldCaptionTD\">$script_transl[5]</td><td class=\"FacetDataTD\"><input type=\"text\" name=\"annota\" value=\"".$form['annota']."\" maxlength=\"50\"  />\n";
 echo "</select></td></tr><tr>";

@@ -373,7 +373,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_group', " AND code_ref = '".substr($_GET['id_artico_group'],0,32)."' AND lang_id = ".$lang['lang_id']);
     $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
     $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['large_descri'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $obj = json_decode($bodytextlang['custom_field']);
+    $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
     $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
   }
   $form['hidden_req'] = '';

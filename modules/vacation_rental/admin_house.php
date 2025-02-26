@@ -557,7 +557,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_GET['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
       $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
       $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-      $obj = json_decode($bodytextlang['custom_field']);
+      $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
       $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
     }
 } else { //se e' il primo accesso per INSERT
@@ -1189,6 +1189,33 @@ if ($modal_ok_insert === true) {
                          </div>
                     </div>
                 </div><!-- chiude row  -->
+                 <?php if ($toDo == 'update') { // solo in update posso inserire o modificare le immagini HQ?>
+                	<!-- Antonio Germani inserimento/modifica immagini di qualità per e-commerce -->
+                  <div id="qualityImgs" class="row IERincludeExcludeRow">
+                      <div class="col-md-12">
+                          <div class="form-group">
+                              <label for="annotaUpdate" class="col-sm-4 control-label"><?php echo $script_transl['imageweb']," High Quality"; ?></label>
+                                <?php if ($nimg > 0) { // se ho dei documenti  ?>
+                                  <div>
+                                  <?php foreach ($form['imgrows'] as $k => $val) { ?>
+                                          <input type="hidden" value="<?php echo $val['id_doc']; ?>" name="imgrows[<?php echo $k; ?>][id_doc]">
+                                          <input type="hidden" value="<?php echo $val['extension']; ?>" name="imgrows[<?php echo $k; ?>][extension]">
+                                          <input type="hidden" value="<?php echo $val['title']; ?>" name="imgrows[<?php echo $k; ?>][title]">
+                                          <a href="../root/retrieve.php?id_ref=image&id_doc=<?php echo $val["id_doc"]; ?>" title="<?php echo $script_transl['view']; ?>!" class="btn btn-default btn-sm">
+                                              <i class="glyphicon glyphicon-eye-open"></i>
+                                          </a><?php echo $val['title']; ?>
+                                          <input type="button" value="<?php echo ucfirst($script_transl['update']); ?>" onclick="location.href = 'admin_image.php?id_doc=<?php echo $val['id_doc']; ?>&Update'" />
+
+                                <?php } ?>
+                                      <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_image.php?item_ref=<?php echo $form['codice']; ?>&Insert'" />
+                                  </div>
+                                  <?php } else { // non ho documenti  ?>
+                                  <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_image.php?item_ref=<?php echo $form['codice']; ?>&Insert'">
+                              <?php } ?>
+                          </div>
+                      </div>
+                  </div>
+                <?php } ?>
               </div><!-- chiude tab-pane  -->
               <div id="contab" class="tab-pane fade">
                 <!--+ DC - 06/02/2019 div class="row" --->

@@ -143,6 +143,7 @@ echo "<input type=\"hidden\" name=\"extension\" value=\"".$form['extension']."\"
 echo "<input type=\"hidden\" name=\"item_ref\" value=\"".$form['item_ref']."\">\n";
 echo "<input type=\"hidden\" name=\"id_ref\" value=\"1\">\n";
 echo "<input type=\"hidden\" name=\"".ucfirst($toDo)."\" value=\"\">";
+echo "<input type=\"hidden\" name=\"title\" value=\"".$form['title']."\" maxlength=\"50\"  />";
 echo "<table class=\"Tmiddle table-striped\">\n";
 if (!empty($msg)) {
     echo '<tr><td colspan="3" class="FacetDataTDred">'.$gForm->outputErrors($msg,$script_transl['errors'])."</td></tr>\n";
@@ -155,7 +156,7 @@ echo "<tr>\n";
 
 echo "\t<td class=\"FacetFieldCaptionTD\">File : </td>\n";
 echo "\t<td class=\"FacetDataTD\">
-			<a class=\"btn btn-xs btn-default\" href=\"../root/retrieve.php?id_doc=".$form["id_doc"]."\" title=\"".$script_transl['view']."!\">
+			<a class=\"btn btn-xs btn-default\" href=\"../root/retrieve.php?id_ref=".$form["id_doc"]."\" title=\"".$script_transl['view']."!\">
 				<i class=\"glyphicon glyphicon-eye-open\"></i>&nbsp;".DATA_DIR."files/".$form['id_doc'].".".$form['extension']."
 			</a>
 		</td>\n";
@@ -166,11 +167,6 @@ echo "</tr>\n";
 echo "<tr>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['item']."</td>\n";
 echo "\t<td colspan=\"2\" class=\"FacetDataTD\">".$form['item_ref']."</td>\n";
-echo "</tr>\n";
-echo "<tr>\n";
-echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['note']."</td>\n";
-echo "\t<td colspan=\"2\" class=\"FacetDataTD\">
-      <input type=\"text\" name=\"title\" value=\"".$form['title']."\" maxlength=\"50\"  /></td>\n";
 echo "</tr>\n";
 echo "<tr>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['sqn']."</td>";

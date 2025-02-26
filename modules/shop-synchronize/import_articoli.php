@@ -36,11 +36,24 @@ $admin_aziend = checkAdmin();
 $resserver = gaz_dbi_get_row($gTables['company_config'], "var", "server");
 $ftp_host= $resserver['val'];
 
-$OSaccpass = gaz_dbi_get_row($gTables['company_config'], "var", "accpass")['val'];// vecchio sistema di password non criptata
+$OSaccpass_res = gaz_dbi_get_row($gTables['company_config'], "var", "accpass");// vecchio sistema di password non criptata
+$OSaccpass=(isset($OSaccpass_res['val']))?$OSaccpass_res['val']:'';
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
 $accpass=$rdec?htmlspecialchars_decode($rdec[0]):'';
-$accpass=(strlen($accpass)>0)?$accpass:$OSaccpass; // se la password decriptata non ha dato risultati provo a mettere la password non criptata
+if(strlen($accpass)>0){
+  // ho la password criptata e la uso
+}elseif(strlen($OSaccpass)>0){
+  $accpass=$OSaccpass;// // uso la vecchia password semplice
+}else{
+  // non ho una password, non posso continuare
+  ?>
+  <script>
+  alert("<?php echo "Controllare impostazioni FTP (password)"; ?>");
+  location.replace("./synchronize.php");
+  </script>
+  <?php
+}
 
 $path = gaz_dbi_get_row($gTables['company_config'], 'var', 'path');
 $urlinterf = $path['val']."dwnlArticoli-gazie.php";//nome del file interfaccia presente nella root del sito e-commerce. Per evitare intrusioni indesiderate Il file dovrà gestire anche una password.

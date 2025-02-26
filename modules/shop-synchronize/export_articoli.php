@@ -43,15 +43,33 @@ $resuser = gaz_dbi_get_row($gTables['company_config'], "var", "user");
 $ftp_user = $resuser['val'];
 
 $OSftp_pass = gaz_dbi_get_row($gTables['company_config'], "var", "pass")['val'];// vecchio sistema di password non criptata
-$OSaccpass = gaz_dbi_get_row($gTables['company_config'], "var", "accpass")['val'];// vecchio sistema di password non criptata
+$OSaccpass_res = gaz_dbi_get_row($gTables['company_config'], "var", "accpass");// vecchio sistema di password non criptata
+$OSaccpass=(isset($OSaccpass_res['val']))?$OSaccpass_res['val']:'';
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'pass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
+$rdec[0]=$rdec[0]??'';
 $ftp_pass=$rdec?htmlspecialchars_decode($rdec[0]):'';
 $ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
+$rdec[0]=$rdec[0]??'';
 $accpass=$rdec?htmlspecialchars_decode($rdec[0]):'';
-$accpass=(strlen($accpass)>0)?$accpass:$OSaccpass; // se la password decriptata non ha dato risultati provo a mettere la password non criptata
+if(strlen($accpass)>0){
+  // ho la password criptata e la uso
+}elseif(strlen($OSaccpass)>0){
+  $accpass=$OSaccpass;// // uso la vecchia password semplice
+}else{
+  // non ho una password, non posso continuare
+  ?>
+  <script>
+  alert("<?php echo "Controllare impostazioni FTP (password) export articoli"; ?>");
+  location.replace("./synchronize.php");
+  </script>
+  <?php
+}
+
+//Carico tutte le lingue del gestionale
+$langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
 
 $respath = gaz_dbi_get_row($gTables['company_config'], "var", "path");
 $web_site_path= $respath['val'];
@@ -88,9 +106,27 @@ if (isset($_POST['conferma'])) { // se confermato
 		// SFTP login with private key and password
 		$ftp_port = gaz_dbi_get_row($gTables['company_config'], "var", "port")['val'];
 		$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
+    $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+    $rdec=gaz_dbi_fetch_row($rsdec);
+    $rdec[0]=$rdec[0]??'';
+    $ftp_keypass=$rdec?htmlspecialchars_decode($rdec[0]):'';
 
-		if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-			$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+		if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY    
+			
+      try {
+        $key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key ),$ftp_keypass);
+      }
+      catch(Exception $e) {
+        ?>
+        <script>
+        alert("<?php echo 'SFTP Error Message: ' .$e->getMessage();
+        echo " Controlla percorso e password della chiave pubblica. Se stai usando un server locale, controlla anche che sia installato e abilitato SSH"; ?>");
+        location.replace("./synchronize.php");
+        </script>
+        <?php
+        exit;
+      }
+
 
 			$sftp = new SFTP($ftp_host, $ftp_port);
 			if (!$sftp->login($ftp_user, $key)) {
@@ -142,26 +178,22 @@ if (isset($_POST['conferma'])) { // se confermato
 			<?php
     }
 
-
-		// effettuo login con user e pass
-		$mylogin = ftp_login($conn_id, $ftp_user, $ftp_pass);
-
 		// controllo se la connessione è OK...
 		if ((!$conn_id)){
-			?>
-			<script>
-			alert("<?php echo "Errore: connessione FTP a " . $ftp_host . " non riuscita!"; ?>");
-			location.replace("<?php echo $_POST['ritorno']; ?>");
-			</script>
-			<?php
-		}
+			  // ERRORE chiudo la connessione FTP
+			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=8");
+			exit;
+		}else{// se ho avuto la connessione al server
+
+      // effettuo login con user e pass
+      $mylogin = ftp_login($conn_id, $ftp_user, $ftp_pass);
+    }
+
 		if ((!$mylogin)){
-			?>
-			<script>
-			alert("<?php echo "Errore: accesso a FTP" . $ftp_host . " non riuscita!"; ?>");
-			location.replace("<?php echo $_POST['ritorno']; ?>");
-			</script>
-			<?php
+       // ERRORE chiudo la connessione FTP
+			ftp_quit($conn_id);
+			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=7");
+			exit;
 		}
 		//FTP turn passive mode on
 		ftp_pasv($conn_id, true);
@@ -255,12 +287,38 @@ if (isset($_POST['conferma'])) { // se confermato
 				$xml_output .= "\t<PriceVATincl>".$web_price_vat_incl."</PriceVATincl>\n";
 				$xml_output .= "\t<VAT>".$aliquo."</VAT>\n";
 			}
-			if (($_GET['name']=="updnam" || $_GET['todo']=="insert") AND strlen($_POST['descri'.$ord])>0){
-				$xml_output .= "\t<Name>".$_POST['descri'.$ord]."</Name>\n";
-			}
-			if (($_GET['descri']=="upddes" || $_GET['todo']=="insert") AND (isset($_POST['body_text'.$ord]) && strlen($_POST['body_text'.$ord])>0)){
-				$xml_output .= "\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($_POST['body_text'.$ord]))."</Description>\n";
-			}
+      $xml_output .= "\t<WebUrl>".$artic['web_url']."</WebUrl>\n";
+      if (($_GET['name']=="updnam" || $_GET['todo']=="insert") AND strlen($_POST['descri'.$ord])>0){
+        $xml_output .= "\t<Name>".$_POST['descri'.$ord]."</Name>\n";
+      }
+      if (($_GET['descri']=="upddes" || $_GET['todo']=="insert") AND (isset($_POST['body_text'.$ord]) && strlen($_POST['body_text'.$ord])>0)){
+        $xml_output .= "\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($_POST['body_text'.$ord]))."</Description>\n";
+      }
+
+      $xml_output .= "\t<Languages>\n";
+      foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
+        $xml_output .= "\t\t<Lang>\n";
+        $xml_output .= "\t\t\t<lang_code>".$lang['lang_code']."</lang_code>\n";
+        $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_POST['codice'.$ord],0,32)."' AND lang_id = ".$lang['lang_id']);
+        $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$_POST['descri'.$ord];
+        $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($_POST['body_text'.$ord], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
+        $lang_web_url = (isset($obj->web_url))?$obj->web_url:$artic['web_url'];
+        // invio i testi multilingua
+        if (($_GET['name']=="updnam" || $_GET['todo']=="insert") AND strlen($_POST['descri'.$ord])>0){
+          $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$_POST['descri'.$ord];
+          $xml_output .= "\t\t\t<Name>".$lang_descri."</Name>\n";
+        }
+        if (($_GET['descri']=="upddes" || $_GET['todo']=="insert") AND (isset($_POST['body_text'.$ord]) && strlen($_POST['body_text'.$ord])>0)){
+          $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($_POST['body_text'.$ord], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          $xml_output .= "\t\t\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description>\n";
+        }
+
+        $xml_output .= "\t\t\t<WebUrl>".$lang_web_url."</WebUrl>\n";
+        $xml_output .= "\t\t</Lang>\n";
+      }
+      $xml_output .= "\t</Languages>\n";
+
 			$xml_output .= "\t<WebPublish>".$_POST['web_public'.$ord]."</WebPublish>\n";// 1=attivo su web; 2=attivo e prestabilito; 3=attivo e pubblicato in home; 4=attivo, in home e prestabilito; 5=disattivato su web"
 			if (isset($_POST['imgurl'.$ord]) && ($_GET['img']=="updimg" || $_GET['todo']=="insert") && (strlen($_POST['imgurl'.$ord])>0)){ // se è da aggiornare e c'è un'immagine HQ
 				if (@ftp_put($conn_id, $ftp_path_upload."images/".$_POST['imgname'.$ord], $_POST['imgurl'.$ord],  FTP_BINARY)){
@@ -275,7 +333,8 @@ if (isset($_POST['conferma'])) { // se confermato
 				}
 			}elseif (isset($_POST['imgblob'.$ord]) && ($_GET['img']=="updimg" || $_GET['todo']=="insert") && (strlen($_POST['imgblob'.$ord])>0)){// se è da aggiornare e c'è un'immagine blob
 				file_put_contents("../../data/files/tmp/img.jpg", base64_decode($_POST['imgblob'.$ord])); // salvo immagine nella cartella temporanea
-				if (ftp_put($conn_id, $ftp_path_upload."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg", "../../data/files/tmp/img.jpg",  FTP_BINARY)){
+
+				if (@ftp_put($conn_id, $ftp_path_upload."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg", "../../data/files/tmp/img.jpg",  FTP_BINARY)){
 					// scrivo l'immagine web blob nella cartella images dell'e-commerce
 					ftp_chmod($conn_id, 0664, $ftp_path_upload."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg");// fornisco i permessi necessari all'immagine
 					$xml_output .= "\t<ImgUrl>".$web_site_path."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg</ImgUrl>\n"; // ne scrivo l'url nel file xml
@@ -358,7 +417,7 @@ if (isset($_POST['conferma'])) { // se confermato
 
 	// avvio il file di interfaccia presente nel sito web remoto
 
-	$file = fopen ($urlinterf.'?access='.$access, "r");
+	$file = @fopen ($urlinterf.'?access='.$access, "r");
 	if ( $file ){ // controllo se il file esiste o mi dà accesso
 		while (!feof($file)) { // scorro il file generato dall'interfaccia durante la sua eleborazione
 			$line = fgets($file);
@@ -731,7 +790,22 @@ if (!isset($_GET['success'])){
 		<strong>ERRORE!</strong> Non è riuscita la cancellazione delle vecchie immagini temporanee della cartella images remota!.
 	</div>
 <?php
+}elseif ($_GET['success']==7){
+	?>
+	<div class="alert alert-danger alert-dismissible">
+		<a href="../../modules/shop-synchronize/synchronize.php" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+		<strong>ERRORE!</strong> accesso FTP  non riuscito! (controllare impostazione user e password)!.
+	</div>
+<?php
+}elseif ($_GET['success']==8){
+	?>
+	<div class="alert alert-danger alert-dismissible">
+		<a href="../../modules/shop-synchronize/synchronize.php" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+		<strong>ERRORE!</strong> accesso al server FTP  non riuscito! (controllare nome server o se si ha accesso ad ftp esterno)!.
+	</div>
+<?php
 }
+
 require("../../library/include/footer.php");
 
 if (isset($_GET['img']) && $_GET['img']=='updimg' && intval($img_limit)>0){

@@ -66,35 +66,36 @@ if ($admin_aziend['Abilit'] >= 8) {
 	$expiryFound = "";
 	$id_tesdocrefFound = "";
 	$diffDate = 99999999;
-    $datetime2 = date_create(gaz_format_date($form['datref_cli'],true));
+  $datetime2 = date_create(gaz_format_date($form['datref_cli'],true));
 	$anagrafica = new Anagrafica();
 	while($r=gaz_dbi_fetch_array($rs_rate)) {
 		$paymov->setIdTesdocRef($r['id_tesdoc_ref']);
 		$paymov->getExpiryStatus($r['expiry']);
 		$v=$paymov->ExpiryStatus;
-        switch ($v['status']) {
-            case 1: // pagata
-				$lnk='title="Pagata">
-					<i class="glyphicon glyphicon-trash delete_customer_schedule" title="Elimina partita chiusa, rimangono i movimenti contabili" ref="'.$r['id_tesdoc_ref'].'" nome="'.$r['ragso1'].'"> </i';
-                break;
-            case 2: // esposta
-				$lnk='href="../vendit/customer_payment.php?partner='.$r['codcon'].'" title="In scadenza"';
-                break;
-            case 3: // scaduta
-				$lnk='href="../vendit/customer_payment.php?partner='.$r['codcon'].'" title="Scaduta, non pagata"';
-                break;
-            default: // non ancora scaduta
-				$lnk='href="../vendit/customer_payment.php?partner='.$r['codcon'].'" title="Non scaduta"';
-        }
-        // controlli per calcolo data da visualizzare in prossimit? di oggi
-        $datetime1 = date_create($v['expiry']);
+    $delbtn='';
+    switch ($v['status']) {
+      case 1: // pagata
+        $lnk='title="Pagata"';
+        $delbtn='<a class="btn btn-xs delete_customer_schedule" ref="'.$r['id_tesdoc_ref'].'" nome="'.$r['ragso1'].'" > <i class="glyphicon glyphicon-trash" title="Elimina partita chiusa, rimangono i movimenti contabili"> </i></a>';
+      break;
+      case 2: // esposta
+        $lnk='href="../vendit/customer_payment.php?partner='.$r['codcon'].'" title="In scadenza"';
+      break;
+      case 3: // scaduta
+        $lnk='href="../vendit/customer_payment.php?partner='.$r['codcon'].'" title="Scaduta, non pagata"';
+      break;
+      default: // non ancora scaduta
+        $lnk='href="../vendit/customer_payment.php?partner='.$r['codcon'].'" title="Non scaduta"';
+    }
+    // controlli per calcolo data da visualizzare in prossimit? di oggi
+    $datetime1 = date_create($v['expiry']);
 		$diffDays = $datetime1->diff($datetime2);
 		$nGiorni=$diffDays->format('%R%a');
-        if(abs($nGiorni) <= $diffDate) {
-        	$expiryFound = $r['expiry'];
-        	$id_tesdocrefFound = $r['id_tesdoc_ref'];
-        	$diffDate = $nGiorni;
-        }
+    if(abs($nGiorni) <= $diffDate) {
+      $expiryFound = $r['expiry'];
+      $id_tesdocrefFound = $r['id_tesdoc_ref'];
+      $diffDate = $nGiorni;
+    }
 		// costruzione chiave partita su cui posizionarsi
 		$keyRowCli =  $r['expiry'].'_'.$r['id_tesdoc_ref'];
 		// stampa colonne
@@ -104,7 +105,7 @@ if ($admin_aziend['Abilit'] >= 8) {
 		echo "<td align='right'>". gaz_format_number($v['op_val']) . "</td>";
 		echo "<td align='right'>" . gaz_format_number($v['cl_val']) . "</td>";
 		echo "<td align='right'>" . gaz_format_number($v['op_val']-$v['cl_val'])."</td>";
-		echo '<td align="center"><a class="btn btn-xs btn-'.$v['style'].'" '.$lnk.'><small>' . gaz_format_date($r['expiry']) . '</small></a></td>';
+		echo '<td align="center"><a class="btn btn-xs btn-'.$v['style'].'" '.$lnk.'><small>' . gaz_format_date($r['expiry']) . '</small></a>'.$delbtn.'</td>';
 		echo "</tr>\n";
 	}
 	$keyRowFoundCli=$expiryFound.'_'.$id_tesdocrefFound;

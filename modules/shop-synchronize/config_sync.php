@@ -40,8 +40,8 @@ $admin_aziend = checkAdmin(9);
 $getenable_sync = gaz_dbi_get_row($gTables['aziend'], 'codice', $admin_aziend['codice'])['gazSynchro'];
 $enable_sync = explode(",",$getenable_sync);
 
-  if (count($_POST) > 0) { // ho modificato i valori
 
+  if (count($_POST) > 0) { // ho modificato i valori
     $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
 		if (!empty($_FILES['myfile']['name'])) {
@@ -52,11 +52,10 @@ $enable_sync = explode(",",$getenable_sync);
 			}
 			$exten = strtolower(pathinfo($_FILES['myfile']['name'], PATHINFO_EXTENSION));
 			$file_pattern = $path.$_FILES['myfile']['name'];
-			unlink ( $file_pattern );
+			@unlink ( $file_pattern );// nel caso non esistesse perché è cambiato il nome evito segnalazione errore
 			move_uploaded_file($_FILES['myfile']['tmp_name'], $file_pattern);
 
 		}
-
     foreach ($_POST as $k => $v) {
       if ($k=="chiave" AND !empty($_FILES['myfile']['name'])){
 
@@ -67,32 +66,43 @@ $enable_sync = explode(",",$getenable_sync);
       }
       $value=filter_var($v, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
       $key=filter_var($k, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-      if ( (strpos($key,"pass")===false && strpos($key,"psw")===false) || $key=="keypass" ){
-        gaz_dbi_put_row($gTables['company_config'], 'var', $key, 'val', $value);
-      }else{
+      if ( (strpos($key,"pass")!==false || strpos($key,"psw") !==false ) && $key!=="keypass"){
 
         $tripsw=trim($value);
-        if ( strlen($tripsw)>=8 ) {
-
         gaz_dbi_query("UPDATE ".$gTables['company_config']." SET val = TO_BASE64(AES_ENCRYPT('".addslashes($value)."','".$_SESSION['aes_key']."')) WHERE var = '".$key."'");
-        }
+
+      }else{
+
+        gaz_dbi_put_row($gTables['company_config'], 'var', $key, 'val', $value);
+
       }
 
     }
+
 		$n=0;
 		unset ($value);
 		if (isset ($_POST['addval'])){
 			foreach ($_POST['addval'] as $add) {
-				if ($_POST['addvar'][$n]=="chiave" AND !empty($_FILES['myfile']['name'])){
-					$add=$_FILES['myfile']['name'];
-				}
-				$value['val']=$add;
-				$value['var']=$_POST['addvar'][$n];
-				$value['description']=$_POST['adddes'][$n];
+        if (strlen($add)>0){ // insert solo se valorizzato
 
-				gaz_dbi_table_insert('company_config', $value);
-				$n++;
+          if ($_POST['addvar'][$n]=="chiave" AND !empty($_FILES['myfile']['name'])){
+            $add=$_FILES['myfile']['name'];
+          }
+          $value['var']=$_POST['addvar'][$n];
+          $value['val']=$add;
+
+          $value['description']=$_POST['adddes'][$n];
+          if (strpos($value['var'],"psw") !== false || (strpos($value['var'],"pass") !== false && $value['var']!=="keypass")){// se è una password la cripto
+            gaz_dbi_query("INSERT INTO ".$gTables['company_config']." (description, val, var) VALUES ('".$value['description']."', TO_BASE64(AES_ENCRYPT('".addslashes($value['val'])."','".$_SESSION['aes_key']."')),  '".$value['var']."')");
+
+
+          }else{
+           gaz_dbi_table_insert('company_config', $value);
+          }
+          $n++;
+        }
 			}
+
 		}
     if ($_POST['set_enable_sync']=="SI" && $enable_sync[0] == "shop-synchronize"){// se era già attivato ed è rimasto attivato
       // non faccio nulla
@@ -139,9 +149,13 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
             <div class="alert alert-success text-center" role="alert">
                 <?php echo "Le modifiche sono state salvate correttamente<br/>"; ?>
             </div>
+            <script>
+              var newURL = location.href.split("?")[0];
+              window.history.pushState('object', document.title, newURL);// tolgo l'ok dall'url
+            </script>
         <?php }
 
-        $ph='Invisibile, digita solo se vuoi cambiarla (minimo 8 caratteri)';
+        $ph='Invisibile, digita solo se vuoi cambiarla (minimo 6 caratteri)';
 
         if (gaz_dbi_num_rows($result) > 0) {
             while ($r = gaz_dbi_fetch_array($result)) {
@@ -202,6 +216,13 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
                 $chiave["description"]=$r["description"];
                 $chiave["var"]=$r["var"];
                 $chiave["val"]=$r["val"];
+              }
+
+              if ($r['var']=="psw_chiave"){
+                $psw_chiave["id"]=$r["id"];
+                $psw_chiave["description"]=$r["description"];
+                $psw_chiave["var"]=$r["var"];
+                $psw_chiave["val"]="";
               }
 
               if ($r['var']=="menu_alerts_check"){
@@ -398,7 +419,7 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
 				?>
 				<div class="row">
 				<div class="form-group" >
-				<label for="input<?php echo $chiave["id"]; ?>" class="col-sm-5 control-label"><?php echo $chiave["description"],". <p style='font-size:8px;'> Se impostato sopra, selezionare il file della chiave segreta da caricare. </p>"; ?></label>
+				<label for="input<?php echo $chiave["id"]; ?>" class="col-sm-5 control-label"><?php echo $chiave["description"],". <p style='font-size:8px;'> Se impostato sopra, selezionare il file della chiave privata segreta da caricare. </p>"; ?></label>
 				<div class="col-sm-7">
 				<input type="file" id="myfile" name="myfile">
 				<input type="text" class="form-control input-sm" id="input<?php echo $chiave["id"]; ?>" name="<?php echo $chiave["var"]; ?>" placeholder="<?php echo $chiave["var"]; ?>" value="<?php echo $chiave["val"]; ?>" disabled="disabled">
@@ -411,7 +432,7 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
 				?>
 				<div class="row">
 				<div class="form-group" >
-				<label for="inputport" class="col-sm-5 control-label">Chiave segreta Sftp. Se impostato sopra, caricare il file della chiave segreta.</label>
+				<label for="inputport" class="col-sm-5 control-label">Chiave segreta Sftp/SSH. Se impostato sopra, caricare il file della chiave privata segreta.</label>
 				<div class="col-sm-7">
 				<input type="file" id="myfile" name="myfile">
 				<input type="text" class="form-control input-sm" name="addval[]" disabled="disabled" value="" >
@@ -423,6 +444,32 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
 				</div><!-- chiude row  -->
 				<?php
 			}
+      if (isset($psw_chiave['id']) AND $psw_chiave['id']>0){
+				?>
+				<div class="row">
+				<div class="form-group" >
+				<label for="input<?php echo $psw_chiave["id"]; ?>" class="col-sm-5 control-label"><?php echo $psw_chiave["description"]," "; ?><p style='font-size:8px;'>(lasciare vuoto se non c'è password)</p></label>
+				<div class="col-sm-7">
+					<input type="password" class="form-control input-sm" id="input<?php echo $psw_chiave["id"]; ?>" name="<?php echo $psw_chiave["var"]; ?>" placeholder="<?php echo $ph; ?>" value="<?php echo $psw_chiave["val"]; ?>" minlength="6">
+				</div>
+				</div>
+				</div><!-- chiude row  -->
+				<?php
+			} else {
+				?>
+				<div class="row">
+				<div class="form-group" >
+				<label for="inputport" class="col-sm-5 control-label">Password di accesso alla chiave privata SFTP/SSH (lasciare vuoto se non c'è password)</label>
+				<div class="col-sm-7">
+					<input type="password" class="form-control input-sm" name="addval[]" minlength="6" placeholder="<?php echo $ph; ?>">
+					<input type="hidden" name="addvar[]" value="psw_chiave">
+					<input type="hidden" name="adddes[]" value="Password di accesso alla chiave SFTP/SSH">
+				</div>
+				</div>
+				</div><!-- chiude row  -->
+				<?php
+			}
+
 
 			if (isset($port['id']) AND $port['id']>0){
 				?>

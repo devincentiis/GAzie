@@ -28,13 +28,13 @@ $admin_aziend = checkAdmin();
 
 function getErrors($year) {
     global $gTables, $admin_aziend;
-    $e = array();
+    $e = [];
     $where = "regiva > 0 and YEAR(datreg) = " . $year;
     $orderby = "seziva, regiva, datreg, protoc ";
     $rs = gaz_dbi_dyn_query("*,(seziva*10+regiva) AS ctrl_sr, DATE_FORMAT(datdoc,'%d-%m-%Y') AS dd, DATE_FORMAT(datreg,'%d-%m-%Y') AS dr", $gTables['tesmov'], $where, $orderby);
     $c_sr = 0;
     $c_p = 0;
-    $c_ndoc = array();
+    $c_ndoc = [];
 
     // BEGIN fromthestone: prendo il valore della configurazione per numerazione note credito/debito
     $num_nc_nd = gaz_dbi_get_row($gTables['company_config'], 'var', 'num_note_separate')['val'];
@@ -44,7 +44,7 @@ function getErrors($year) {
         if ($c_sr != ($r['ctrl_sr'])) { // devo azzerare tutto perché è cambiata la sezione o il registro
             $c_sr = 0;
             $c_p = 0;
-            $c_ndoc = array();
+            $c_ndoc = [];
             if ($r['protoc'] <> 1) { // errore: il protocollo non è 1
                 $e[] = array('err' => 'P', 'id' => $r['id_tes'], 'rg' => $r['regiva'], 'pr' => $r['protoc'], 'nd' => $r['numdoc'], 'dd' => $r['dd'], 'sz' => $r['seziva'], 'ty' => $r['caucon'], 'ex' => 1, 'de' => $r['descri'], 'dr' => $r['dr']);
             }
@@ -67,7 +67,7 @@ function getErrors($year) {
             }
 
           if (isset($c_ndoc[$r['caucon']])) { // controllo se il numero precedente è questo-1
-                $ex = $c_ndoc[$r['caucon']] + 1;
+                $ex = (int)$c_ndoc[$r['caucon']] + 1;
                 if ($r['numdoc'] <> $ex) {  // errore: il numero non è consecutivo
                     $e[] = array('err' => 'N', 'id' => $r['id_tes'], 'rg' => $r['regiva'], 'pr' => $r['protoc'], 'nd' => $r['numdoc'], 'dd' => $r['dd'], 'sz' => $r['seziva'], 'ty' => $r['caucon'], 'ex' => $ex, 'de' => $r['descri'], 'dr' => $r['dr']);
                 }

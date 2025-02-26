@@ -121,7 +121,10 @@ class shopsynchronizegazSynchro {
 				$ftp_port = gaz_dbi_get_row($gTables['company_config'], "var", "port")['val'];
 				$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
 				if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+          $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+          $rdec=gaz_dbi_fetch_row($rsdec);
+          $ftp_keypass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
+					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_keypass);
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $key)) {
 						// non si connette: key LOG-IN FALSE
@@ -486,6 +489,8 @@ class shopsynchronizegazSynchro {
 				$this->rawres=$rawres;
 				return;
 			}
+      //Carico tutte le lingue del gestionale
+      $langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
 			$idHome = gaz_dbi_get_row($gTables['company_config'], "var", "home")['val'];
 			// "group-gazie.php" è il nome del file interfaccia presente nella root dell'e-commerce. Per evitare intrusioni indesiderate Il file dovrà gestire anche una password. Per comodità viene usata la stessa FTP.
 			// il percorso per raggiungere questo file va impostato in configurazione avanzata azienda alla voce "Website root directory"
@@ -588,10 +593,23 @@ class shopsynchronizegazSynchro {
 				$xml_output .= "\t<Code>".$p['id_artico_group']."</Code>\n";
 				$xml_output .= "\t<Type>parent</Type>\n";
 				$xml_output .= "\t<ParentId>".$p['id_artico_group']."</ParentId>\n";
-				$xml_output .= "\t<Name>".$p['descri']."</Name>\n";
         $xml_output .= "\t<Price>0</Price>\n";// un parent non può avere il prezzo
 				$xml_output .= "\t<PriceVATincl>0</PriceVATincl>\n";
+        $xml_output .= "\t<Name>".$p['descri']."</Name>\n";
 				$xml_output .= "\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($p['large_descri'], ENT_QUOTES, 'UTF-8'))."</Description>\n";
+        $xml_output .= "\t<Name>".$p['web_url']."</Name>\n";
+        foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
+          $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($p['id_artico_group'],0,32)."' AND lang_id = ".$lang['lang_id']);
+          $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$p['descri'];
+          $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($p['large_descri'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
+          $lang_web_url = (isset($obj->web_url))?$obj->web_url:$p['web_url'];
+          // invio i testi multilingua
+          $xml_output .= "\t<Name-".$lang['lang_id'].">".$lang_descri."</Name-".$lang['lang_id'].">\n";
+          $xml_output .= "\t<Description-".$lang['lang_id'].">".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description-".$lang['lang_id'].">\n";
+          $xml_output .= "\t<WebUrl-".$lang['lang_id'].">".$lang_web_url."</WebUrl-".$lang['lang_id'].">\n";
+        }
+
 				$xml_output .= "\t<AvailableQty>".$totav."</AvailableQty>\n";
 				$xml_output .= "\t<WebPublish>".$p['web_public']."</WebPublish>\n";// 1=attivo su web; 2=attivo e prestabilito; 3=attivo e pubblicato in home; 4=attivo, in home e prestabilito; 5=disattivato su web"
 				$xml_output .= "\t<IdHome>".$idHome."</IdHome>\n";// id per pubblicazione home su web
@@ -605,7 +623,7 @@ class shopsynchronizegazSynchro {
               $xml_output .= "\t<Code>".$var['codice']."</Code>\n";
               $xml_output .= "\t<Type>variant</Type>\n";
               $xml_output .= "\t<ParentId>".$p['id_artico_group']."</ParentId>\n";
-              $xml_output .= "\t<Name>".$var['descri']."</Name>\n";
+
               // Calcolo il prezzo IVA compresa
               $aliquo=gaz_dbi_get_row($gTables['aliiva'], "codice", intval($var['aliiva']))['aliquo'];
               $web_price_vat_incl=$var['web_price']+(($var['web_price']*$aliquo)/100);
@@ -613,11 +631,25 @@ class shopsynchronizegazSynchro {
               $xml_output .= "\t<Price>".$var['web_price']."</Price>\n";
 
               $xml_output .= "\t<PriceVATincl>".$web_price_vat_incl."</PriceVATincl>\n";
-              $body=gaz_dbi_get_row($gTables['body_text'], 'table_name_ref', "artico_'".$var['codice']);
+              $body=gaz_dbi_get_row($gTables['body_text'], 'table_name_ref', "artico_'".$var['codice']);// body text in ligua default
               if(!$body){
                 $body['body_text']="";
               }
+              $xml_output .= "\t<Name>".$var['descri']."</Name>\n";
               $xml_output .= "\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($body['body_text'], ENT_QUOTES, 'UTF-8'))."</Description>\n";
+              $xml_output .= "\t<WebUrl>".$var['web_url']."</WebUrl>\n";
+              foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
+                $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($var['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
+                $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$var['descri'];
+                $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($body['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $obj = json_decode($bodytextlang['custom_field']);
+                $lang_web_url = (isset($obj->web_url))?$obj->web_url:$var['web_url'];
+                // invio i testi multilingua
+                $xml_output .= "\t<Name-".$lang['lang_id'].">".$lang_descri."</Name-".$lang['lang_id'].">\n";
+                $xml_output .= "\t<Description-".$lang['lang_id'].">".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description-".$lang['lang_id'].">\n";
+                $xml_output .= "\t<WebUrl-".$lang['lang_id'].">".$lang_web_url."</WebUrl-".$lang['lang_id'].">\n";
+              }
+
               $xml_output .= "\t<AvailableQty>0</AvailableQty>\n";
               $xml_output .= "\t<WebPublish>".$p['web_public']."</WebPublish>\n";// 1=attivo su web; 2=attivo e prestabilito; 3=attivo e pubblicato in home; 4=attivo, in home e prestabilito; 5=disattivato su web"
               $xml_output .= "\t<IdHome>".$idHome."</IdHome>\n";// id per pubblicazione home su web
@@ -690,17 +722,21 @@ class shopsynchronizegazSynchro {
 		  $this->rawres=$rawres;
 		}
 	}
+
 	function UpsertProduct($d,$toDo="") { // Aggiorna o inserisce articol da GAzie a e-commerce
 
 		if ($d['web_public'] > 0){ // se pubblicato su web aggiorno l'articolo di magazzino (product)
 			@session_start();
 			global $gTables,$admin_aziend;
+      //Carico tutte le lingue del gestionale
+      $langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
 			$rawres=[];
 			$ftp_host = gaz_dbi_get_row($gTables['company_config'], "var", "server")['val'];
 			$ftp_path_upload = gaz_dbi_get_row($gTables['company_config'], "var", "ftp_path")['val'];
 			$ftp_user = gaz_dbi_get_row($gTables['company_config'], "var", "user")['val'];
 			$OSftp_pass = gaz_dbi_get_row($gTables['company_config'], "var", "pass")['val'];// vecchio sistema di password non criptata
-			$OSaccpass = gaz_dbi_get_row($gTables['company_config'], "var", "accpass")['val'];// vecchio sistema di password non criptata
+      $OSaccpass_res = gaz_dbi_get_row($gTables['company_config'], "var", "accpass");// vecchio sistema di password non criptata
+      $OSaccpass=(isset($OSaccpass_res['val']))?$OSaccpass_res['val']:'';
 			$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'pass'");
 			$rdec=gaz_dbi_fetch_row($rsdec);
 			$ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
@@ -711,7 +747,7 @@ class shopsynchronizegazSynchro {
 				$accpass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 				$accpass=(strlen($accpass)>0)?$accpass:$OSaccpass; // se la password decriptata non ha dato risultati provo a mettere la password non criptata
 			}else{
-				$rawres['title'] = "Problemi con le impostazioni FTP: manca il percorso al file interfaccia e/o la sua password di accesso! AGGIORNARE MANUALMENTE il prodotto ".$d." nel sito web ".$toDo;
+				$rawres['title'] = "Problemi con le impostazioni FTP: manca il percorso al file interfaccia e/o la sua password di accesso! AGGIORNARE MANUALMENTE il prodotto ".$d['codice']." nel sito web ".$toDo;
 				$rawres['button'] = 'Avviso eCommerce';
 				$rawres['label'] = "OK fammi controllare le impostazioni";
 				$rawres['link'] = '../shop-synchronize/config_sync.php';
@@ -799,7 +835,7 @@ class shopsynchronizegazSynchro {
         if ($conn_id = @ftp_connect($ftp_host)){
 
           // effettuo login con user e pass
-          $mylogin = ftp_login($conn_id, $ftp_user, $ftp_pass);
+          $mylogin = @ftp_login($conn_id, $ftp_user, $ftp_pass);
 
           // controllo se la connessione è OK...
           if ((!$conn_id) or (!$mylogin)){
@@ -856,6 +892,23 @@ class shopsynchronizegazSynchro {
 				$xml_output .= "\t<Spessmm>".$d['spessore']."</Spessmm>\n";
 				$xml_output .= "\t<Name>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($d['descri'], ENT_QUOTES, 'UTF-8'))."</Name>\n";
 				$xml_output .= "\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($d['body_text'], ENT_QUOTES, 'UTF-8'))."</Description>\n";
+        $xml_output .= "\t<WebUrl>".$d['web_url']."</WebUrl>\n";
+        $xml_output .= "\t<Languages>\n";
+        foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
+          $xml_output .= "\t\t<Lang>\n";
+          $xml_output .= "\t\t\t<lang_code>".$lang['lang_code']."</lang_code>\n";
+          $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($d['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
+          $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$d['descri'];
+          $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($d['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
+          $lang_web_url = (isset($obj->web_url))?$obj->web_url:$d['web_url'];
+          // invio i testi multilingua
+          $xml_output .= "\t\t\t<Name>".$lang_descri."</Name>\n";
+          $xml_output .= "\t\t\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description>\n";
+          $xml_output .= "\t\t\t<WebUrl>".$lang_web_url."</WebUrl>\n";
+          $xml_output .= "\t\t</Lang>\n";
+        }
+        $xml_output .= "\t</Languages>\n";
 				$xml_output .= "\t<Price>".$d['web_price']."</Price>\n";
 				$xml_output .= "\t<PriceVATincl>".$web_price_vat_incl."</PriceVATincl>\n";
 				$xml_output .= "\t<VAT>".$aliquo."</VAT>\n";
@@ -903,7 +956,7 @@ class shopsynchronizegazSynchro {
 			$access=base64_encode($accpass);
 
 			// avvio il file di interfaccia presente nel sito web remoto
-			$file = fopen ($urlinterf.'?access='.$access, "r");
+			$file = @fopen ($urlinterf.'?access='.$access, "r");
 			if ( $file){ // controllo se il file mi ha dato accesso regolare
         while (!feof($file)) { // scorro il file generato dall'interfaccia durante la sua eleborazione
             $line = fgets($file);

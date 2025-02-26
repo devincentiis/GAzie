@@ -150,7 +150,7 @@ $strScript = array(
       ),
     "admin_ragstat.php" =>
       array("raggruppamento statistico ",
-        "Numero ",
+        "Codice ",
         "Descrizione ",
         "Immagine (jpg,png,gif) max 64kb: ",
         "% di ricarico ",

@@ -39,15 +39,30 @@ $resuser = gaz_dbi_get_row($gTables['company_config'], "var", "user");
 $ftp_user = $resuser['val'];
 
 $OSftp_pass = gaz_dbi_get_row($gTables['company_config'], "var", "pass")['val'];// vecchio sistema di password non criptata
-$OSaccpass = gaz_dbi_get_row($gTables['company_config'], "var", "accpass")['val'];// vecchio sistema di password non criptata
+$OSaccpass_res = gaz_dbi_get_row($gTables['company_config'], "var", "accpass");// vecchio sistema di password non criptata
+$OSaccpass=(isset($OSaccpass_res['val']))?$OSaccpass_res['val']:'';
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'pass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
 $ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 $ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
 $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 $rdec=gaz_dbi_fetch_row($rsdec);
+
 $accpass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
-$accpass=(strlen($accpass)>0)?$accpass:$OSaccpass; // se la password decriptata non ha dato risultati provo a mettere la password non criptata
+if(strlen($accpass)>0){
+  // ho la password criptata e la uso
+}elseif(strlen($OSaccpass)>0){
+  $accpass=$OSaccpass;// // uso la vecchia password semplice
+}else{
+  // non ho una password, non posso continuare
+  ?>
+  <script>
+  alert("<?php echo "Controllare impostazioni FTP (password accesso all'interfaccia) "; ?>");
+  location.replace("./synchronize.php");
+  </script>
+  <?php
+}
+
 
 $test = gaz_dbi_query("SHOW COLUMNS FROM `" . $gTables['admin'] . "` LIKE 'enterprise_id'");
 $exists = (gaz_dbi_num_rows($test)) ? TRUE : FALSE;
@@ -73,9 +88,25 @@ if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val']=="SI"){
 	// SFTP login with private key and password
 	$ftp_port = gaz_dbi_get_row($gTables['company_config'], "var", "port")['val'];
 	$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
+  $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+  $rdec=gaz_dbi_fetch_row($rsdec);
+  $ftp_keypass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 
 	if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-		$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+
+    try {
+      $key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key ),$ftp_keypass);
+    }
+    catch(Exception $e) {
+      ?>
+			<script>
+			alert("<?php echo 'SFTP Error Message: ' .$e->getMessage();
+      echo " Controlla percorso e password della chiave pubblica. Se stai usando un server locale, controlla anche che sia installato e abilitato SSH"; ?>");
+			location.replace("./synchronize.php");
+			</script>
+			<?php
+      exit;
+    }
 
 		$sftp = new SFTP($ftp_host, $ftp_port);
 		if (!$sftp->login($ftp_user, $key)) {

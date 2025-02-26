@@ -997,7 +997,7 @@ class selectPartner extends SelectBox {
     function selectDestin($codclfoco,$names,$vals,$strSearch='') {
       $ph=($vals['id_des_same_company'] > 1 || $vals['id_des'] > 1 ) ? 'vedi sotto' : 'idem';
       echo '<textarea rows=1 cols=30 name="destin" placeholder="'.$ph.'">'.$vals['destin'].'</textarea><br>';
-      if ($codclfoco > 100000000) { // la destinazione solo se ho il cliente/fornitore
+      if (preg_replace('/[^0-9]/','',$codclfoco) > 100000000) { // la destinazione solo se ho il cliente/fornitore
         $clfoco = gaz_dbi_get_row($this->gTables['clfoco'],"codice",$codclfoco);
         $anagra = gaz_dbi_get_row($this->gTables['anagra'],"id",$clfoco['id_anagra']);
         $rs_destina = gaz_dbi_dyn_query('*', $this->gTables['destina'],'id_anagra = '.$clfoco['id_anagra']);

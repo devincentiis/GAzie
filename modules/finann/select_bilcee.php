@@ -587,7 +587,7 @@ if (isset($_GET['visualizza']) and $message == "")
                       {
                         $stampaval = "(".number_format(-$value,2,'.','').")";
                       }
-                    if($key < 100000000)  //controllo per i conti non classificati
+                    if((int)$key < 100000000)  //controllo per i conti non classificati
                       {
                         echo "<tr><td align=\"right\">".$conto.substr($key,7,1).") </td><td>".$descon[$key]."</td><td>Euro</td><td align=\"right\">".$stampaval."</td></tr>\n";
                         //
@@ -673,7 +673,7 @@ if (isset($_GET['visualizza']) and $message == "")
                       {
                         $stampaval = "(".number_format(-$value,2,'.','').")";
                       }
-                    if($key < 100000000) //controllo per i conti non classificati
+                    if((int)$key < 100000000) //controllo per i conti non classificati
                       {
                         echo "<tr><td align=\"right\">".$conto.substr($key,7,1).") </td><td>".((!empty($descon[$key])) ? $descon[$key] : $key)."</td><td>Euro</td><td align=\"right\">".$stampaval."</td></tr>\n";
                         //

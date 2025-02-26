@@ -240,7 +240,7 @@ foreach ($passivo as $keylet => $vallet) {
                         $totlet +=$value;
                         $totale +=$value;
                         $descrizio = trim($descon[$key]);
-                        if ($key < 100000000){//controllo per i conti non classificati
+                        if ((int)$key < 100000000){//controllo per i conti non classificati
                            if ($value > 0) $stampaval = gaz_format_number($value); else $stampaval = "(".gaz_format_number(-$value).")";
                            $pdf->Cell(15,4,'','LR');
                            $pdf->Cell(50,4,'','R');
@@ -301,7 +301,7 @@ foreach ($risulta as $keylet => $vallet) {
                         $totlet +=$value;
                         $totale +=$value;
                         $descrizio = trim($descon[$key]);
-                        if ($key < 100000000){//controllo per i conti non classificati
+                        if ((int)$key < 100000000){//controllo per i conti non classificati
                            if ($value > 0) $stampaval = gaz_format_number($value); else $stampaval = "(".gaz_format_number(-$value).")";
                            $pdf->Cell(15,4,'','LR');
                            $pdf->Cell(50,4,'','R');
