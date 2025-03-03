@@ -470,6 +470,15 @@ class DocContabVars {
         require("./lang." . $lang . ".php");
         $script_transl = $strScript["admin_booking.php"];
 
+        $sql = "SELECT * FROM ".$genTables."languages"." WHERE title_native = '".ucfirst($lang)."' LIMIT 1";
+        if ($result = mysqli_query($link, $sql)) {
+          $lang_res = mysqli_fetch_assoc($result);
+        }else{
+          echo "Error: " . $sql . "<br>" . mysqli_error($link);
+        }
+
+        $lang_id=(isset($lang_res['lang_id']))?$lang_res['lang_id']:1;// se trovo la lingua ne prendo l'id, altrimenti default è 1
+
         $sql = "SELECT ".$azTables."rigbro".".*, ".$azTables.'aliiva'.".tipiva, ".$azTables.'artico'.".custom_field, ".$azTables.'artico'.".id_artico_group, ".$azTables.'artico'.".descri AS desart, ".$azTables.'artico'.".annota, ".$azTables.'artico'.".web_url, ".$azTables.'artico_group'.".custom_field AS group_custom_field, ".$azTables."rental_events".".* FROM ".$azTables."rigbro"."
         LEFT JOIN " . $azTables.'aliiva' . " ON codvat=codice
         LEFT JOIN " . $azTables.'artico' . " ON " . $azTables.'artico'.".codice=" . $azTables.'rigbro' . ".codart
@@ -490,7 +499,13 @@ class DocContabVars {
         $this->totiva = 0.00;
         $results = array();
         while ($rigo = gaz_dbi_fetch_array($rs_rig)) {
-          $rigo['descri'] = get_string_lang($rigo['descri'], substr($lang,0,2));// se multilingua seleziono la descrizione nella lingua richiesta
+
+          if($lang_id>1 && $translation=get_lang_translation($rigo['codart'], 'artico', $lang_id)){// se non è la lingua default e ho una traduzione, traduco
+            $rigo['descri'] = $translation['descri'];
+          }else{
+            $rigo['descri'] = get_string_lang($rigo['descri'], substr($lang,0,2));// se multilingua seleziono la descrizione nella lingua richiesta metodo tag
+          }
+
           $rigo['barcode']="";
           if ($rigo['tiprig'] <= 1 || $rigo['tiprig'] == 4 || $rigo['tiprig'] == 50 || $rigo['tiprig'] == 90) {
               $tipodoc = substr($this->tesdoc["tipdoc"], 0, 1);
@@ -776,8 +791,10 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 
     //$config = new Config;
     $configTemplate = new configTemplate;
+
     if ($lang_template) {// se c'è una lingua per il template
-      if (file_exists("template".$lang_template)){// se la lingua esiste la prendo
+      if (file_exists("templates.".$lang_template)){// se la lingua esiste la prendo
+
         $ts=$configTemplate->template;
         $configTemplate->setTemplateLang($lang_template);
         if (empty($ts)){

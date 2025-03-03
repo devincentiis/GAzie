@@ -108,6 +108,8 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['lang_descri'.$lang['lang_id']]=filter_var(substr($_POST['lang_descri'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $form['lang_bodytext'.$lang['lang_id']]=filter_var($_POST['lang_bodytext'.$lang['lang_id']], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $form['lang_web_url'.$lang['lang_id']]=filter_var(substr($_POST['lang_web_url'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_check_in'.$lang['lang_id']]=filter_var(substr($_POST['lang_check_in'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['lang_check_out'.$lang['lang_id']]=filter_var(substr($_POST['lang_check_out'.$lang['lang_id']],0,100), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
   }
   $form['hidden_req'] = $_POST['hidden_req'];
   if ($form['hidden_req']=='refresh_language') { // se ho cambiato la lingua ricarico dal database i valori di descrizione e descrizione estesa
@@ -153,7 +155,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 			$cl_variant_tab="in active";
 		}
 		if (count($msg['err']) == 0) {// nessun errore
-			if (isset($_POST['codart']) && $toDo == 'insert'){
+			if (isset($_POST['codart']) && $toDo == 'insert'){// inserisco l'alloggio nella struttura
 				$array= array('vacation_rental'=>array('facility_type' => ''));// creo l'array per il custom field
 				$form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
 				gaz_dbi_table_insert('artico_group', $form);
@@ -170,7 +172,9 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         }
         foreach($langs as $l){
           if ($l['lang_id']==1){ continue;}
-          bodytextInsert(['table_name_ref'=>'artico_group','code_ref'=>strval($form['id_artico_group']),'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id']]);
+          $custom_field_url = array('web_url'=>$form['lang_web_url'.$l['lang_id']],'check_in'=>$form['lang_check_in'.$l['lang_id']],'check_out'=>$form['lang_check_out'.$l['lang_id']]);
+          $custom=json_encode($custom_field_url);
+          bodytextInsert(['table_name_ref'=>'artico_group','code_ref'=>strval($form['id_artico_group']),'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id'],'custom_field'=>$custom]);
         }
 				// il redirect deve modificare il form in update perché è stato già inserito
 				header("Location: ../vacation_rental/admin_facility.php?Update&id_artico_group=".$form['id_artico_group']."&tab=variant");
@@ -287,7 +291,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         // in inserimento scrivo tutte le lingue straniere
         foreach($langs as $l){
           if ($l['lang_id']==1){ continue;}
-          $custom_field_url = array('web_url'=>$form['lang_web_url'.$l['lang_id']]);
+          $custom_field_url = array('web_url'=>$form['lang_web_url'.$l['lang_id']], 'check_in'=>$form['lang_check_in'.$l['lang_id']], 'check_out'=>$form['lang_check_out'.$l['lang_id']]);
           $custom=json_encode($custom_field_url);
           bodytextInsert(['table_name_ref'=>'artico_group','code_ref'=>$form['id_artico_group'],'body_text'=>$form['lang_bodytext'.$l['lang_id']],'descri'=>$form['lang_descri'.$l['lang_id']],'lang_id'=>$l['lang_id'],'custom_field'=>$custom]);
         }
@@ -326,6 +330,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
           //per retrocompatibilità devo controllare sempre se esiste la traduzione
           if ($lang['lang_id']==1){ continue;}
           $custom_field_url = array('web_url'=>$form['lang_web_url'.$lang['lang_id']]);
+          $custom_field_url = array('web_url'=>$form['lang_web_url'.$lang['lang_id']], 'check_in'=>$form['lang_check_in'.$lang['lang_id']], 'check_out'=>$form['lang_check_out'.$lang['lang_id']]);
           $custom=json_encode($custom_field_url);
           $bodytextol = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_group', " AND code_ref = '" . $form['id_artico_group']."' AND lang_id = '".$lang['lang_id']."'");
           if (!$bodytextol) { // non c'è la traduzione in lingua straniera, la creo
@@ -375,6 +380,8 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['large_descri'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
     $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
+    $form['lang_check_in'.$lang['lang_id']] = (isset($obj->check_in))?$obj->check_in:'';
+    $form['lang_check_out'.$lang['lang_id']] = (isset($obj->check_out))?$obj->check_out:'';
   }
   $form['hidden_req'] = '';
   if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
@@ -473,6 +480,8 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $form['lang_descri'.$lang['lang_id']] = '';
       $form['lang_bodytext'.$lang['lang_id']] = '';
       $form['lang_web_url'.$lang['lang_id']] = '';
+      $form['lang_check_in'.$lang['lang_id']] = '';
+      $form['lang_check_out'.$lang['lang_id']] = '';
     }
     $form['hidden_req'] = '';
     $form['web_public'] = 5;
@@ -831,7 +840,31 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
                 <div class="col-md-12">
                   <div class="form-group">
                     <label for="check-in" class="col-sm-4 control-label">Orario check-in&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
-                    <input class="col-sm-8" type="text" value="<?php echo $form['check_in']; ?>" name="check_in" maxlength="90" />
+                    <?php
+                      if ($form['lang_id']>1) {
+                        ?>
+                        <input class="col-sm-8" type="text" value="<?php echo $form['lang_check_in'.$form['lang_id']]; ?>" name="lang_check_in<?php echo $form['lang_id']; ?>" maxlength="90" id="suggest_descri_artico" />
+                        <input type="hidden" value="<?php echo $form['check_in']; ?>" name="check_in" maxlength="90" />
+                        <?php
+                         foreach($langs as $lang){
+                           if ($lang['lang_id']==$form['lang_id']){
+                             continue;
+                           }
+                           ?>
+                          <input type="hidden" value="<?php echo $form['lang_check_in'.$lang['lang_id']]; ?>" name="lang_check_in<?php echo $lang['lang_id']; ?>" />
+                          <?php
+                         }
+                      } else {
+                        ?>
+                        <input class="col-sm-8" type="text" value="<?php echo $form['check_in']; ?>" name="check_in" maxlength="90" />
+                        <?php
+                         foreach($langs as $lang){
+                           ?>
+                          <input type="hidden" value="<?php echo $form['lang_check_in'.$lang['lang_id']]; ?>" name="lang_check_in<?php echo $lang['lang_id']; ?>" />
+                          <?php
+                         }
+                      }
+                    ?>
                   </div>
                 </div>
 							</div><!-- chiude row  -->
@@ -847,7 +880,32 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
                 <div class="col-md-12">
                   <div class="form-group">
                     <label for="check-out" class="col-sm-4 control-label">Orario check-out&nbsp;<i class="glyphicon glyphicon-flag" title="accetta tag lingue (<it></it>)"></i></label>
-                    <input class="col-sm-8" type="text" value="<?php echo $form['check_out']; ?>" name="check_out" maxlength="90" />
+                    <?php
+                      if ($form['lang_id']>1) {
+                        ?>
+                        <input class="col-sm-8" type="text" value="<?php echo $form['lang_check_out'.$form['lang_id']]; ?>" name="lang_check_out<?php echo $form['lang_id']; ?>" maxlength="90" id="suggest_descri_artico" />
+                        <input type="hidden" value="<?php echo $form['check_out']; ?>" name="check_out" maxlength="90" />
+                        <?php
+                         foreach($langs as $lang){
+                           if ($lang['lang_id']==$form['lang_id']){
+                             continue;
+                           }
+                           ?>
+                          <input type="hidden" value="<?php echo $form['lang_check_out'.$lang['lang_id']]; ?>" name="lang_check_out<?php echo $lang['lang_id']; ?>" />
+                          <?php
+                         }
+                      } else {
+                        ?>
+                        <input class="col-sm-8" type="text" value="<?php echo $form['check_out']; ?>" name="check_out" maxlength="90" />
+                        <?php
+                         foreach($langs as $lang){
+                           ?>
+                          <input type="hidden" value="<?php echo $form['lang_check_out'.$lang['lang_id']]; ?>" name="lang_check_out<?php echo $lang['lang_id']; ?>" />
+                          <?php
+                         }
+                      }
+                    ?>
+
                   </div>
                 </div>
 							</div><!-- chiude row  -->

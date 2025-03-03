@@ -55,6 +55,11 @@ class Lease extends Template{
           } else {
             $this->ip = "";
           }
+          if (array_key_exists('date_ip', $customtes['vacation_rental'])) {// se nel customfield c'è date_ip lo prendo
+            $this->date_ip = $customtes['vacation_rental']['date_ip'];
+          } else {
+            $this->date_ip = "";
+          }
         }
     }
     function newPage() {
@@ -183,8 +188,13 @@ class Lease extends Template{
 
       $html .= "<dl>";
       if (strlen($this->ip)>6){// firme digitali
-		$html .= "<br><p><b>Digitally signed online</b></p><span>The landlord ".$this->intesta1."</span>";
-        $html .= "<br><span style=\" letter-spacing: 70px;\">&nbsp; &nbsp;</span><span> The tenant ".$this->cliente1." ".$this->cliente2." signed online from IP:".$this->ip."</span>";
+        $html .= "<br><p><b>Digitally signed online</b></p>";
+        $html .= "<br><p><span> The tenant ".$this->cliente1." ".$this->cliente2." signed online from IP:".$this->ip;
+        if (strlen($this->date_ip)>7){
+          $html .= " ".$this->date_ip;
+        }
+        $html .="</span></p>";
+        $html .= "<p>The landlord <b>".$this->intesta1."</b><br><br><br><br><br><br><br><br><br><br><br><br><br></p>";
 	  }else{// firme fisiche
         $html .= "<br><p><b>".$script_transl['sign']." </b></p><span>".$script_transl['locatore']." ".$this->intesta1."</span><span style=\" letter-spacing: 30px;\">&nbsp; &nbsp;</span><span> ".$script_transl['conduttore']." ".$this->cliente1." ".$this->cliente2."</span>";
       }

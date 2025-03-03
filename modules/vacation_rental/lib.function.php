@@ -221,6 +221,41 @@ function get_string_lang($string, $lang){
     return $string;
   }
 }
+function get_lang_translation($ref, $table, $lang_id){// nuovo sistema traduzione tramite tabella body-text
+    if ($lang_id>1){// traduco solo se non è la lingua di default
+      global $link, $azTables, $gTables;// posso chiamare la funzione con entrambi i metodi
+      if ($azTables){
+        $table_body= $azTables."body_text";
+      }else{
+        $table_body= $gTables['body_text'];
+      }
+      $where = " WHERE (table_name_ref = '".$table."' AND code_ref = '".substr($ref,0,32)."' AND lang_id = ".$lang_id.")";
+      $sql = "SELECT * FROM ".$table_body.$where." LIMIT 1";
+      if ($result = mysqli_query($link, $sql)) {
+        $bodytextlang = mysqli_fetch_assoc($result);
+      }else{
+        echo "Error: " . $sql . "<br>" . mysqli_error($link);
+      }
+      if (is_array($bodytextlang)){
+      $ret=array();
+      $ret['descri'] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:'';
+      $ret['body_text'] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:'';
+      $obj = $bodytextlang?json_decode($bodytextlang['custom_field']):false;
+      $ret['web_url'] = (isset($obj->web_url))?$obj->web_url:'';
+      if (isset($obj->check_in)){
+        $ret['check_in']=$obj->check_in;
+      }
+      if (isset($obj->check_out)){
+        $ret['check_out']=$obj->check_out;
+      }
+      return $ret;
+      }else{
+        return false;
+      }
+    }else{
+      return false;
+    }
+}
 
 // calcolo dei giorni da pagare per la tassa turistica fra due date specifiche
 function tour_tax_daytopay($night,$start,$end,$tour_tax_from,$tour_tax_to,$tour_tax_day=0){
@@ -302,10 +337,10 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
 	$where .=")";
     if ($vat==FALSE){// devo restituire l'imponibile
       $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codart = ".$tableart.".codice AND ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
-	  
+
       if ($result = mysqli_query($link, $sql)) {
          $row = mysqli_fetch_assoc($result);
-		
+
           $sql = "SELECT speban FROM ".$tabletes.$where." LIMIT 1";
           if ($result = mysqli_query($link, $sql)) {
             $rowtes = mysqli_fetch_assoc($result);
@@ -324,9 +359,9 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
       $totalprice=0;$totalsecdep=0;
 	  //echo "<br> sql:",$sql;
       if ($result = mysqli_query($link, $sql)) {
-		 
+
         foreach ($result as $res){
-			//echo"<pre>",print_r($res),"</pre>";  
+			//echo"<pre>",print_r($res),"</pre>";
           $totalprice += ($res['prelis']*$res['quanti'])+((($res['prelis']*$res['quanti'])*$res['aliquo'])/100);
           if ($security_deposit==TRUE){
             $sql = "SELECT custom_field FROM ".$tableart." WHERE ".$tableart.".codice = '".$res['codice']."'";
@@ -400,13 +435,13 @@ function get_total_promemo($startprom,$endprom){// STAT
     // prendo tutti gli eventi dell'alloggio che interessano l'arco di tempo richiesto
     $sql = "SELECT * FROM ".$tablerent_ev." LEFT JOIN ".$tabletes." ON  ".$tablerent_ev.".id_tesbro = ".$tabletes.".id_tes WHERE  ".$tablerent_ev.".type = 'ALLOGGIO' AND ".$tablerent_ev.".id_tesbro > 0 AND (custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%') AND house_code='".substr($resh['codice'], 0, 32)."' AND ( start <= '".$endprom."' AND(start >= '".$startprom."' OR start <= '".$endprom."') AND (end >= '".$startprom."' OR end <= '".$endprom."') AND end >= '".$startprom."') ORDER BY id ASC";
     //echo $sql;
-	
+
     if ($result = @mysqli_query($link, $sql)){
-		
+
 	}else{
 		echo "Error: " . $sql . "<br>" . mysqli_error($link);
 	}
-	
+
 
     foreach($result as $row){ // per ogni evento dell'alloggio
       //echo "<pre>evento alloggio:",print_r($row),"</pre>";
@@ -651,7 +686,7 @@ function get_user_points_level($id_anagra, $point=false){// determina il livello
       $row = mysqli_fetch_assoc($result);
       $pointenable=$row['val'];
     }
-	
+
     $sql = "SELECT * FROM ". $table ." WHERE var LIKE 'pointlevel%' ORDER BY id ASC";
     if ($result = mysqli_query($link, $sql)) {// prendo i livelli dalle impostazioni generali
       $levname="";
@@ -878,7 +913,7 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
 
     }else{// se non c'è alcun prezzo non posso prenotare e metto non prenotabile
       unset ($accommodations);
-      return;
+      return false;
     }
     $startw = date ("Y-m-d", strtotime("+1 days", strtotime($startw)));// aumento di un giorno il ciclo
   }

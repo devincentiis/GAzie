@@ -1317,8 +1317,11 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 $form['rows'][$next_row]['facility_id'] = $form['in_facility_id'];
                 $form['rows'][$next_row]['annota'] = $artico['annota'];
                 $form['rows'][$next_row]['pesosp'] = $artico['peso_specifico'];
-                $form['rows'][$next_row]['descri'] = (($night>0)?$night." notti - ":"")."check-in ".gaz_format_date($form['start'])." check-out ".gaz_format_date($form['end'])." - ".get_string_lang($artico['descri'], $lang);
-
+                if($cliente['id_language']>1 && $translation=get_lang_translation($form['in_codart'], 'artico', $cliente['id_language'])){// se non è la lingua default, traduco
+                  $form['rows'][$next_row]['descri'] = (($night>0)?$night." notti - ":"")."check-in ".gaz_format_date($form['start'])." check-out ".gaz_format_date($form['end'])." - ".$translation['descri'];
+                }else{
+                  $form['rows'][$next_row]['descri'] = (($night>0)?$night." notti - ":"")."check-in ".gaz_format_date($form['start'])." check-out ".gaz_format_date($form['end'])." - ".get_string_lang($artico['descri'], $lang);
+                }
                 if ($form['in_codart']=="TASSA-TURISTICA"){// se è il rigo della tassa turistica modifico la descrizione
                   $form['rows'][$next_row]['descri'] = (($daytopay>0)?"Tassa per ".$daytopay." notti - ":"")."check-in ".gaz_format_date($form['start'])." check-out ".gaz_format_date($form['end'])." - ".$artico['descri'];
                   $form['rows'][$next_row]['codice_fornitore']=$form['codice_fornitore'];
@@ -1607,7 +1610,10 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 
               $article_text = gaz_dbi_get_row($gTables['company_config'], 'var', 'article_text');
               if ($article_text['val'] < 2){
-                $bodytext = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_' . $form['in_codart']);
+                if ($cliente['id_language']>1 && $bodytext = get_lang_translation($form['in_codart'], 'artico', $cliente['id_language'])){// se non è richiesta la lingua di default, prendo la traduzione
+                }else{
+                  $bodytext = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico_' . $form['in_codart']);
+                }
               } else {
                 $bodytext = '';
               }
