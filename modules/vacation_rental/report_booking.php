@@ -1436,7 +1436,7 @@ $ts->output_navbar();
               $amountvat=get_totalprice_booking($r['id_tes'],TRUE,TRUE,$admin_aziend['preeminent_vat'],TRUE);
               $amountvat_secdep=get_totalprice_booking($r['id_tes'],TRUE,TRUE,$admin_aziend['preeminent_vat'],TRUE,TRUE);
 
-              echo "<td class='text-right' style='white-space:nowrap;'>","imp. € ".gaz_format_quantity($amount,1,2),"";
+              echo "<td class='text-right' style='min-width: 150px;'>","imp. € ".gaz_format_quantity($amount,1,2),"";
               echo "<br>","iva c. € ".gaz_format_quantity($amountvat,1,2),"";
               if (($amountvat_secdep-$amountvat)>0){
                 echo "<br>","Dep.cauz. € ".gaz_format_quantity($amountvat_secdep-$amountvat,1,2),"";
@@ -1456,6 +1456,9 @@ $ts->output_navbar();
                   $addtitle="- ancora da pagare € ".$balance;
                 }
                 echo "><i id=\"test",$r['id_tes'],"\" class=\"glyphicon glyphicon-piggy-bank \" title=\"Pagamenti",$addtitle,"\">",$addtext,"</i></a>";
+               if (file_exists("Stripe/integrated_pos.php")){
+                echo '<a style="padding:10px;" class="glyphicon glyphicon-credit-card" href="Stripe/integrated_pos.php?deposit=',$amountvat-$paid,'&idtes=', $r['id_tes'],'&lang=','it','&house=',$r['house_code'],'&itemName=',$script_transl['booking'],' n.',$r['numdoc'],' ',gaz_format_date($r['datemi']),'" title="virtual-POS"</a>';
+               }
                 if (floatval($secdep_paid)>0){
                   $addtitle="- pagato € ".$secdep_paid;
                   $addtext=($secdep_paid>0)?"&nbsp;Deposito ".gaz_format_quantity($secdep_paid,1,2):"";

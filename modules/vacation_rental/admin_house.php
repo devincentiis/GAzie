@@ -193,6 +193,15 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $form['imgrows'][$nimg]['title'] = substr($value['title'], 0, 255);
       $nimg++;
     }
+  }else{
+	 
+    $nimg = 0;
+    $rs_row = gaz_dbi_dyn_query("*", $gTables['files'], "item_ref = '" . $form['codice'] . "' AND id_ref = '1'", "id_doc DESC");
+    while ($row = gaz_dbi_fetch_array($rs_row)) {
+        $form['imgrows'][$nimg] = $row;
+        $nimg++;
+    }
+   
   }
   // fine inizio immagini e-commerce
   $form['body_text'] = filter_input(INPUT_POST, 'body_text');
@@ -454,43 +463,46 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     if ($modal === false) {
         $form['ritorno'] = $_SERVER['HTTP_REFERER'];
     } else {
-        $form['ritorno'] = 'admin_artico.php';
+        $form['ritorno'] = 'admin_house.php';
     }
+	
 	$form['hidden_req'] = '';
-  $form['tab'] = 'home';
+	
+	$form['tab'] = 'home';
+	
 	$form['web_public_init']=$form['web_public'];
 	if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
 
 		if (is_array($data['vacation_rental'])){
 				$form['accommodation_type'] = $data['vacation_rental']['accommodation_type'];
-        $form['room_type'] = $data['vacation_rental']['room_type'];
+			$form['room_type'] = $data['vacation_rental']['room_type'];
 				$form['adult'] = $data['vacation_rental']['adult'];
 				$form['child'] = $data['vacation_rental']['child'];
-        $form['pause'] = (isset($data['vacation_rental']['pause']))?$data['vacation_rental']['pause']:'';
-        $form['self_checkin'] = (isset($data['vacation_rental']['self_checkin']))?$data['vacation_rental']['self_checkin']:0;
-        $form['fixquote'] = (isset($data['vacation_rental']['fixquote']))?$data['vacation_rental']['fixquote']:'';
+			$form['pause'] = (isset($data['vacation_rental']['pause']))?$data['vacation_rental']['pause']:'';
+			$form['self_checkin'] = (isset($data['vacation_rental']['self_checkin']))?$data['vacation_rental']['self_checkin']:0;
+			$form['fixquote'] = (isset($data['vacation_rental']['fixquote']))?$data['vacation_rental']['fixquote']:'';
 				$form['total_guests'] = $data['vacation_rental']['total_guests'];
 				$form['deposit'] = $data['vacation_rental']['deposit'];
-        $form['security_deposit'] = (isset($data['vacation_rental']['security_deposit']))?$data['vacation_rental']['security_deposit']:0;
+			$form['security_deposit'] = (isset($data['vacation_rental']['security_deposit']))?$data['vacation_rental']['security_deposit']:0;
 				$form['deposit_type'] = $data['vacation_rental']['deposit_type'];
 				$form['tur_tax_mode'] = $data['vacation_rental']['tur_tax_mode'];
 				$form['tur_tax']= $data['vacation_rental']['tur_tax'];
-        $form['agent'] = $data['vacation_rental']['agent'];
+			$form['agent'] = $data['vacation_rental']['agent'];
 
-			} else {
+		} else {
 				$form['accommodation_type'] = "";
-        $form['room_type'] = 0;
+			$form['room_type'] = 0;
 				$form['adult'] = 0;
 				$form['child'] = 0;
-        $form['pause'] = 0;
-        $form['fixquote'] = 0;
+			$form['pause'] = 0;
+			$form['fixquote'] = 0;
 				$form['total_guests'] = 0;
 				$form['deposit'] = 0;
-        $form['security_deposit'] = 0;
+			$form['security_deposit'] = 0;
 				$form['deposit_type'] = 0;
 				$form['tur_tax_mode'] =0;
 				$form['tur_tax']=0;
-        $form['agent']=0;
+			$form['agent']=0;
 			}
 	} else {
 		$form['accommodation_type'] = "";
@@ -1380,7 +1392,7 @@ if ($modal_ok_insert === true) {
                     </div>
                 </div><!-- chiude row  -->
               </div><!-- chiude tab-pane  -->
-              <div id="chifis" class="tab-pane fade <?php echo $form['tab']=='chifiss'?'in active':''; ?>">
+              <div id="chifis" class="tab-pane fade <?php echo $form['tab']=='chifis'?'in active':''; ?>">
 				<div id="icals" class="row IERincludeExcludeRow">
 					<fieldset  style="border:1px solid silver;">
 					<legend style="color:blue; font-size:16px; margin-bottom:4px; text-align: center; border-top: 1px solid silver">Sincronizzazione Icalendar</legend>
@@ -1575,5 +1587,14 @@ $("#aliiva, #webprice").on("keyup",function(){
 
 </script>
 <?php
+if (isset($_GET['tab'])){		
+		?>
+		<script>
+		const stateObj = { foo: "bar" };
+		history.pushState(stateObj, "", "./admin_house.php?Update&codice=<?php echo $form['codice'];?>");
+
+		</script>
+		<?php
+	}
 require("../../library/include/footer.php");
 ?>

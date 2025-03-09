@@ -304,6 +304,9 @@ class shopsynchronizegazSynchro {
 			$rdec=gaz_dbi_fetch_row($rsdec);
 			$ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 			$ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
+			$rsdeckey=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+			$rdeckey=gaz_dbi_fetch_row($rsdeckey);
+			$ftp_keypass=$rdeckey[0]?htmlspecialchars_decode($rdeckey[0]):'';
 			if ($OSaccpass && $urlinterf = gaz_dbi_get_row($gTables['company_config'], 'var', 'path')['val']."upd-category.php"){// se sono state impostate
 				$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 				$rdec=gaz_dbi_fetch_row($rsdec);
@@ -323,7 +326,7 @@ class shopsynchronizegazSynchro {
 				$ftp_port = gaz_dbi_get_row($gTables['company_config'], "var", "port")['val'];
 				$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
 				if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_keypass);
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $key)) {
 						// non si connette: key LOG-IN FALSE
@@ -336,7 +339,7 @@ class shopsynchronizegazSynchro {
 						$this->rawres=$rawres;
 						return;
 					}
-				} else { // SFTP log-in con password
+				} else { // SFTP log-in con password without key
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $ftp_pass)) {
 						// non si connette: password LOG-IN FALSE
@@ -474,6 +477,9 @@ class shopsynchronizegazSynchro {
 			$rdec=gaz_dbi_fetch_row($rsdec);
 			$ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 			$ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
+			$rsdeckey=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+			$rdeckey=gaz_dbi_fetch_row($rsdeckey);
+			$ftp_keypass=$rdeckey[0]?htmlspecialchars_decode($rdeckey[0]):'';
 			if ($OSaccpass && $urlinterf = gaz_dbi_get_row($gTables['company_config'], 'var', 'path')['val']."articoli-gazie.php"){// se sono state impostate
 				$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 				$rdec=gaz_dbi_fetch_row($rsdec);
@@ -489,8 +495,8 @@ class shopsynchronizegazSynchro {
 				$this->rawres=$rawres;
 				return;
 			}
-      //Carico tutte le lingue del gestionale
-      $langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
+			//Carico tutte le lingue del gestionale
+			$langs=gaz_dbi_fetch_all(gaz_dbi_dyn_query("*",$gTables['languages'],'lang_id > 1','lang_id'));
 			$idHome = gaz_dbi_get_row($gTables['company_config'], "var", "home")['val'];
 			// "group-gazie.php" è il nome del file interfaccia presente nella root dell'e-commerce. Per evitare intrusioni indesiderate Il file dovrà gestire anche una password. Per comodità viene usata la stessa FTP.
 			// il percorso per raggiungere questo file va impostato in configurazione avanzata azienda alla voce "Website root directory"
@@ -522,7 +528,7 @@ class shopsynchronizegazSynchro {
 				$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
 
 				if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_keypass);
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $key)) {
 						// non si connette: key LOG-IN FALSE
@@ -600,12 +606,12 @@ class shopsynchronizegazSynchro {
         $xml_output .= "\t<Name>".$p['web_url']."</Name>\n";
         foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
           $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($p['id_artico_group'],0,32)."' AND lang_id = ".$lang['lang_id']);
-          $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$p['descri'];
-          $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($p['large_descri'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          $lang_descri = (isset($bodytextlang['descri']))?html_entity_decode($bodytextlang['descri']):$p['descri'];
+          $lang_bodytext = (isset($bodytextlang['body_text']))?html_entity_decode($bodytextlang['body_text']):$p['large_descri'];
           $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
           $lang_web_url = (isset($obj->web_url))?$obj->web_url:$p['web_url'];
           // invio i testi multilingua
-          $xml_output .= "\t<Name-".$lang['lang_id'].">".$lang_descri."</Name-".$lang['lang_id'].">\n";
+          $xml_output .= "\t<Name-".$lang['lang_id'].">".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_descri, ENT_QUOTES, 'UTF-8'))."</Name-".$lang['lang_id'].">\n";
           $xml_output .= "\t<Description-".$lang['lang_id'].">".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description-".$lang['lang_id'].">\n";
           $xml_output .= "\t<WebUrl-".$lang['lang_id'].">".$lang_web_url."</WebUrl-".$lang['lang_id'].">\n";
         }
@@ -640,12 +646,12 @@ class shopsynchronizegazSynchro {
               $xml_output .= "\t<WebUrl>".$var['web_url']."</WebUrl>\n";
               foreach($langs as $lang){// carico le traduzioni dal DB e le metto nelle rispettive lingue
                 $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($var['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
-                $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$var['descri'];
-                $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($body['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $lang_descri = (isset($bodytextlang['descri']))?html_entity_decode($bodytextlang['descri']):$var['descri'];
+                $lang_bodytext = (isset($bodytextlang['body_text']))?html_entity_decode($bodytextlang['body_text']):$body['body_text'];
                 $obj = json_decode($bodytextlang['custom_field']);
                 $lang_web_url = (isset($obj->web_url))?$obj->web_url:$var['web_url'];
                 // invio i testi multilingua
-                $xml_output .= "\t<Name-".$lang['lang_id'].">".$lang_descri."</Name-".$lang['lang_id'].">\n";
+                $xml_output .= "\t<Name-".$lang['lang_id'].">".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_descri, ENT_QUOTES, 'UTF-8'))."</Name-".$lang['lang_id'].">\n";
                 $xml_output .= "\t<Description-".$lang['lang_id'].">".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description-".$lang['lang_id'].">\n";
                 $xml_output .= "\t<WebUrl-".$lang['lang_id'].">".$lang_web_url."</WebUrl-".$lang['lang_id'].">\n";
               }
@@ -735,12 +741,15 @@ class shopsynchronizegazSynchro {
 			$ftp_path_upload = gaz_dbi_get_row($gTables['company_config'], "var", "ftp_path")['val'];
 			$ftp_user = gaz_dbi_get_row($gTables['company_config'], "var", "user")['val'];
 			$OSftp_pass = gaz_dbi_get_row($gTables['company_config'], "var", "pass")['val'];// vecchio sistema di password non criptata
-      $OSaccpass_res = gaz_dbi_get_row($gTables['company_config'], "var", "accpass");// vecchio sistema di password non criptata
-      $OSaccpass=(isset($OSaccpass_res['val']))?$OSaccpass_res['val']:'';
+			$OSaccpass_res = gaz_dbi_get_row($gTables['company_config'], "var", "accpass");// vecchio sistema di password non criptata
+			$OSaccpass=(isset($OSaccpass_res['val']))?$OSaccpass_res['val']:'';
 			$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'pass'");
 			$rdec=gaz_dbi_fetch_row($rsdec);
 			$ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 			$ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
+			$rsdeckey=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+			$rdeckey=gaz_dbi_fetch_row($rsdeckey);
+			$ftp_keypass=$rdeckey[0]?htmlspecialchars_decode($rdeckey[0]):'';
 			if ($OSaccpass && $urlinterf = gaz_dbi_get_row($gTables['company_config'], 'var', 'path')['val']."articoli-gazie.php"){// se sono state impostate
 				$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 				$rdec=gaz_dbi_fetch_row($rsdec);
@@ -801,7 +810,7 @@ class shopsynchronizegazSynchro {
 				$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
 
 				if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_keypass);
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $key)) {
 						// non si connette: key LOG-IN FALSE
@@ -814,7 +823,7 @@ class shopsynchronizegazSynchro {
 						$this->rawres=$rawres;
 						return;
 					}
-				} else { // SFTP log-in con password
+				} else { // SFTP log-in con password withou key
 
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $ftp_pass)) {
@@ -898,12 +907,12 @@ class shopsynchronizegazSynchro {
           $xml_output .= "\t\t<Lang>\n";
           $xml_output .= "\t\t\t<lang_code>".$lang['lang_code']."</lang_code>\n";
           $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($d['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
-          $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$d['descri'];
-          $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($d['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          $lang_descri = (isset($bodytextlang['descri']))?html_entity_decode($bodytextlang['descri']):$d['descri'];
+          $lang_bodytext = (isset($bodytextlang['body_text']))?html_entity_decode($bodytextlang['body_text']):$d['body_text'];
           $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
           $lang_web_url = (isset($obj->web_url))?$obj->web_url:$d['web_url'];
           // invio i testi multilingua
-          $xml_output .= "\t\t\t<Name>".$lang_descri."</Name>\n";
+          $xml_output .= "\t\t\t<Name>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_descri, ENT_QUOTES, 'UTF-8'))."</Name>\n";
           $xml_output .= "\t\t\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description>\n";
           $xml_output .= "\t\t\t<WebUrl>".$lang_web_url."</WebUrl>\n";
           $xml_output .= "\t\t</Lang>\n";
@@ -997,6 +1006,9 @@ class shopsynchronizegazSynchro {
 			$rdec=gaz_dbi_fetch_row($rsdec);
 			$ftp_pass=$rdec[0]?htmlspecialchars_decode($rdec[0]):'';
 			$ftp_pass=(strlen($ftp_pass)>0)?$ftp_pass:$OSftp_pass; // se la password decriptata non ha dato risultati provo a vedere se c'è ancora una password non criptata
+			$rsdeckey=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+			$rdeckey=gaz_dbi_fetch_row($rsdeckey);
+			$ftp_keypass=$rdeckey[0]?htmlspecialchars_decode($rdeckey[0]):'';
 			if ($OSaccpass && $urlinterf = gaz_dbi_get_row($gTables['company_config'], 'var', 'path')['val']."articoli-gazie.php"){// se sono state impostate
 				$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'accpass'");
 				$rdec=gaz_dbi_fetch_row($rsdec);
@@ -1018,7 +1030,7 @@ class shopsynchronizegazSynchro {
 			$mv = $gForm->getStockValue(false, $d);
 			$magval = array_pop($mv);
 			// creo array fields con ID di riferimento e  disponibilità
-      $magvalq_g=(isset($magval['q_g']))?$magval['q_g']:0;
+			$magvalq_g=(isset($magval['q_g']))?$magval['q_g']:0;
 			$fields = array ('product_id' => $id['ref_ecommerce_id_product'],'quantity'=>intval($magvalq_g));
 			$ordinati = $gForm->get_magazz_ordinati($d, "VOR");
 			$ordinati = $ordinati + $gForm->get_magazz_ordinati($d, "VOW");
@@ -1036,7 +1048,7 @@ class shopsynchronizegazSynchro {
 				$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
 
 				if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
-					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_pass);
+					$key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key .''),$ftp_keypass);
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $key)) {
 						// non si connette: key LOG-IN FALSE
@@ -1049,7 +1061,7 @@ class shopsynchronizegazSynchro {
 						$this->rawres=$rawres;
 						return;
 					}
-				} else { // SFTP log-in con password
+				} else { // SFTP log-in con password without key
 
 					$sftp = new SFTP($ftp_host, $ftp_port);
 					if (!$sftp->login($ftp_user, $ftp_pass)) {

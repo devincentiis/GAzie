@@ -111,8 +111,8 @@ if (isset($_POST['conferma'])) { // se confermato
     $rdec[0]=$rdec[0]??'';
     $ftp_keypass=$rdec?htmlspecialchars_decode($rdec[0]):'';
 
-		if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY    
-			
+		if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
+
       try {
         $key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key ),$ftp_keypass);
       }
@@ -136,14 +136,6 @@ if (isset($_POST['conferma'])) { // se confermato
 				alert("<?php echo "Mancata connessione Sftp con file chiave segreta: impossibile scaricare gli ordini dall\'e-commerce"; ?>");
 				location.replace("<?php echo $_POST['ritorno']; ?>");
 				</script>
-				<?php
-			} else {
-				?>
-				<!--
-				<div class="alert alert-success text-center" >
-				<strong>ok</strong> Connessione SFTP con chiave riuscita.
-				</div>
-				-->
 				<?php
 			}
 		} else { // SFTP log-in con password
@@ -300,17 +292,17 @@ if (isset($_POST['conferma'])) { // se confermato
         $xml_output .= "\t\t<Lang>\n";
         $xml_output .= "\t\t\t<lang_code>".$lang['lang_code']."</lang_code>\n";
         $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_POST['codice'.$ord],0,32)."' AND lang_id = ".$lang['lang_id']);
-        $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$_POST['descri'.$ord];
-        $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($_POST['body_text'.$ord], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $lang_descri = (isset($bodytextlang['descri']))?html_entity_decode($bodytextlang['descri']):html_entity_decode($_POST['descri'.$ord]);
+        $lang_bodytext = (isset($bodytextlang['body_text']))?html_entity_decode($bodytextlang['body_text']):html_entity_decode($_POST['body_text'.$ord]);
         $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
         $lang_web_url = (isset($obj->web_url))?$obj->web_url:$artic['web_url'];
         // invio i testi multilingua
         if (($_GET['name']=="updnam" || $_GET['todo']=="insert") AND strlen($_POST['descri'.$ord])>0){
-          $lang_descri = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$_POST['descri'.$ord];
-          $xml_output .= "\t\t\t<Name>".$lang_descri."</Name>\n";
+          $lang_descri = (isset($bodytextlang['descri']))?html_entity_decode($bodytextlang['descri']):html_entity_decode($_POST['descri'.$ord]);
+          $xml_output .= "\t\t\t<Name>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_descri, ENT_QUOTES, 'UTF-8'))."</Name>\n";
         }
         if (($_GET['descri']=="upddes" || $_GET['todo']=="insert") AND (isset($_POST['body_text'.$ord]) && strlen($_POST['body_text'.$ord])>0)){
-          $lang_bodytext = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($_POST['body_text'.$ord], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+          $lang_bodytext = (isset($bodytextlang['body_text']))?html_entity_decode($bodytextlang['body_text']):html_entity_decode($_POST['body_text'.$ord]);
           $xml_output .= "\t\t\t<Description>".preg_replace('/[\x00-\x1f]/','',htmlspecialchars($lang_bodytext, ENT_QUOTES, 'UTF-8'))."</Description>\n";
         }
 
@@ -383,13 +375,6 @@ if (isset($_POST['conferma'])) { // se confermato
 		if ($sftp->put($ftp_path_upload."prodotti.xml", $xmlFileP, SFTP::SOURCE_LOCAL_FILE)){
 			$sftp->put($ftp_path_upload."categorie.xml", $xmlFileC, SFTP::SOURCE_LOCAL_FILE);
 			$sftp->disconnect();
-			?>
-			<!--
-			<div class="alert alert-success text-center" >
-			<strong>ok</strong> il file xml è stato trasferito al sito web tramite SFTP.
-			</div>
-			-->
-			<?php
 		}else {
 			// chiudo la connessione FTP
 			$sftp->disconnect();
@@ -445,7 +430,9 @@ if (isset($_POST['conferma'])) { // se confermato
 
 	}
 	// chiudo la connessione FTP
-	ftp_quit($conn_id);
+  if (isset($conn_id)){
+    ftp_quit($conn_id);
+  }
 	header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=1");
     exit;
 } else {

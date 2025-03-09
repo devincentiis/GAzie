@@ -113,8 +113,6 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
                  echo "ERRORE dell'upload immagine hq: ",DATA_DIR . "files/".$admin_aziend['company_id']."/images/". $form['id_doc'] . "." . $form['extension'];die;
                }
               }
-
-
           }
         }
 

@@ -68,8 +68,9 @@ $enable_sync = explode(",",$getenable_sync);
       $key=filter_var($k, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
       if ( (strpos($key,"pass")!==false || strpos($key,"psw") !==false ) && $key!=="keypass"){
 
-        $tripsw=trim($value);
-        gaz_dbi_query("UPDATE ".$gTables['company_config']." SET val = TO_BASE64(AES_ENCRYPT('".addslashes($value)."','".$_SESSION['aes_key']."')) WHERE var = '".$key."'");
+        if ( strlen($value)>=6 ) {// aggiorno solo se è stata inserita una password
+          gaz_dbi_query("UPDATE ".$gTables['company_config']." SET val = TO_BASE64(AES_ENCRYPT('".addslashes($value)."','".$_SESSION['aes_key']."')) WHERE var = '".$key."'");
+        }
 
       }else{
 
