@@ -84,7 +84,7 @@ foreach($extreq as $v){
 if (!isset($_POST['hidden_req'])){           // al primo accesso allo script
     $form['hidden_req'] = '';
     $form['lang'] = 'italian';
-    if(connectIsOk() && databaseIsOk()) {    // verifico la presenza della base dati
+    if(connectIsOk() && databaseIsOk() && getDbVersion()!==false) {    // verifico la presenza della base dati
       $form['install_upgrade'] = 'upgrade';
       $form['lang'] = getLang();
       if (databaseIsAlign()) {               // la base dati e' aggiornata!
@@ -162,9 +162,15 @@ function getDbVersion()
 {
     global $table_prefix;
     $query = "SELECT cvalue FROM `".$table_prefix."_config` WHERE variable = 'archive'";
-    $result = gaz_dbi_query ($query);
-    $versione = gaz_dbi_fetch_array($result);
-    return $versione[0];
+	try {
+		$result = gaz_dbi_query ($query);
+		if ($result) {
+			$versione = gaz_dbi_fetch_array($result);
+			return $versione[0];
+		}
+	} catch (Exception $e) {
+	}
+	return false;
 }
 
 function getCompanyNumbers()
@@ -182,14 +188,18 @@ function getCompanyNumbers()
 function getLang()
 {
     global $table_prefix;
-    $query = "SELECT cvalue FROM `".$table_prefix."_config` WHERE variable = 'install_lang'";
-    $result = gaz_dbi_query ($query);
-    $versione = gaz_dbi_fetch_array($result);
-    if ($versione) {
-        return $versione[0];
-    } else {
-        return 'italian';
-    }
+	try {
+		$query = "SELECT cvalue FROM `".$table_prefix."_config` WHERE variable = 'install_lang'";
+		$result = gaz_dbi_query ($query);
+		if ($result) {
+			$versione = gaz_dbi_fetch_array($result);
+			if ($versione) {
+				return $versione[0];
+			}
+		}
+	} catch (Exception $e) {
+	}
+	return 'italian';
 }
 
 function getSqlFileVersion()
@@ -537,11 +547,11 @@ function executeModulesUpdate(){// Antonio Germani 12/07/2022 - funzione per ese
                echo '<input name="'.$form['install_upgrade'].'" type="submit" value="'.strtoupper($msg[$form['install_upgrade']]).'!">';
             } else {
                foreach ($err as $v){
+                  echo $v." <br>";
                   if ($v=='is_align'){
                      echo '<input  onClick="location.href=\'../../modules/root/admin.php\'" name="'.$form['install_upgrade'].'" type="button" value="'.$msg['gi_is_align'].'">';
                      echo "\n <br />".$msg['gi_usr_psw']." <br />";
                   } else {
-                     echo $v." <br />";
                      echo '<span class=\"btn btn-xs btn-default\"><i class=\"glyphicon glyphicon-remove\"></i></span><br /> ';
                  }
                }

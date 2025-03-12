@@ -1105,7 +1105,7 @@ $(document).ready(function(){
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="obligatory" class="col-sm-4 control-label"><?php echo "obbligatorietà"; ?></label>
-                              <input class="col-sm-4" type="text"  value="<?php echo $form['obligatory']; ?>" name="obligatory" maxlength="1" />0=no 1=si
+                              <input class="col-sm-4" type="text"  value="<?php echo $form['obligatory']; ?>" name="obligatory" maxlength="1" />0=no 1=si 2=selezionato
                             <input class="col-sm-4" type="hidden"  value="<?php echo $form['web_multiplier']; ?>" name="web_multiplier" maxlength="15" />
                         </div>
                     </div>
