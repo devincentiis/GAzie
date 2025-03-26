@@ -292,28 +292,27 @@ if (isset($_POST['preview']) and $msg=='') {
         echo "</tr>";
 		$genera="";
 		$nr=0;$message_rem="";
-        foreach($m as $key => $mv){
+     foreach($m as $key => $mv){
 			$er="";
 			if ($mv['id_movmag']>0){ // se è un movimento del SIAN connesso al movimento di magazzino
 			$legenda_cod_op= array('1'=>'Confezionamento con etichettatura','2'=>'Confezionamento senza etichettatura','3'=>'Etichettatura','4'=>'Svuotamento di olio confezionato','5'=>'Movimentazione interna senza cambio di origine','S7'=>'Scarico di olio destinato ad altri usi','10'=>'Carico olio lampante da recupero','8'=>'Reso olio confezionato da clienti','9'=>'Olio ha ottenuto certificazione DOP');
 				if ($form['date_ini_Y'].$form['date_ini_M'].$form['date_ini_D']==str_replace("-", "", $mv['datdoc']) AND strlen($mv['status'])>1) {
 				// escludo i movimenti già inseriti null'ultimo file con stessa data
 				} else if ($mv['id_orderman']>0 AND $mv['operat']==-1 AND $mv['cod_operazione']<>"S7"){
-
 						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
 							if (intval($mv['cod_operazione'])<>3 ){// escludo codice operazione 3
-								$totcont[$mv['recip_stocc']] -= $mv['quanti'];
-								//echo "<br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti'];
+								$totcont[$mv['recip_stocc']] -= floatval($mv['quanti']);
+								//echo "<br><br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti']," totale recipiente:",$totcont[$mv['recip_stocc']]," - datdoc:",$mv['datdoc'];
 
 								if ($totcont[$mv['recip_stocc']]<0){
-									//echo $mv['desdoc'],"ERRORE <",$nr;
+									//echo "<br>",$mv['desdoc'],"ERRORE <",$nr;
 									$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa";
 									$msg .='5+';$er="style='background-color: red';";
 								}
 
-								if (intval($mv['recip_stocc_destin'])>0){// se c'è recipiente stoccaggio destinazione
+								if (strlen($mv['recip_stocc_destin'])>0){// se c'è recipiente stoccaggio destinazione
 									$totcont[$mv['recip_stocc_destin']] += $mv['quanti'];
-									//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti'];
+									//echo "<br>PRODUZIONE carico fusto ",$mv['recip_stocc_destin']," di:",$mv['quanti']," totale recipiente:",$totcont[$mv['recip_stocc_destin']];;
 
 									if ($totcont[$mv['recip_stocc_destin']]>$maxcont[$mv['recip_stocc_destin']]){
 										echo "<br>",$mv['desdoc'],"ERRORE >",$nr," totcont:",$totcont[$mv['recip_stocc_destin']]," - maxcont:",$maxcont[$mv['recip_stocc_destin']];
@@ -367,6 +366,7 @@ if (isset($_POST['preview']) and $msg=='') {
 						$legenda_cod_op['3']='Vendita/cessione olio a ditta extracomunitaria';
 						$legenda_cod_op['4']='Scarico olio trasferimento altro stabilimento/deposito';
 						$legenda_cod_op['6']='Omaggio olio confezionato';
+            $legenda_cod_op['7']='Scarico altri usi';
 						$legenda_cod_op['8']='Scarico olio autoconsumo';
 						$legenda_cod_op['12']='Perdite, cali, campionamento, analisi';
 						$legenda_cod_op['13']='Separazione morchie';
@@ -412,6 +412,7 @@ if (isset($_POST['preview']) and $msg=='') {
 
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['desdoc']." &nbsp;</td>\n";
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$legenda_cod_op[$mv['cod_operazione']]." &nbsp;</td>\n";
+
 					echo "<td class=\"FacetDataTD\" align=\"center\">".$mv['varieta']." &nbsp;</td>\n";
 					echo "</tr>\n";
 					$ctr_mv = $mv['artico'];

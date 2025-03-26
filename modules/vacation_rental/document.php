@@ -726,7 +726,7 @@ class DocContabVars {
 
 }
 
-function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $dest = false, $lang_template=false,$genTables='',$azTables='',$IDaz='',$link='',$id_ag=0,$lang='it',$user_level="") {
+function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $dest = false, $lang_template=false,$genTables='',$azTables='',$IDaz='',$link='',$id_ag=0,$lang='it',$user_level="",$save=false) {
     global $azTables;
 		$azTables=$GLOBALS['azTables'];
 		global $link;
@@ -737,6 +737,32 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
       require("./lang." . $lang_template . ".php");
     }else{// altrimenti carico di default inglese
       require("./lang.english.php");
+    }
+    $datadir = dirname(__DIR__, 2).'/data/';
+
+    if (!file_exists($datadir . 'files/' . $IDaz.'/pdf_'.$templateName.'/') && $templateName=="Lease") {// Solo per contratti
+        mkdir($datadir . 'files/' . $IDaz.'/pdf_'.$templateName.'/', 0777, true);
+    }
+    if (!file_exists('files/' . $IDaz.'/pdf_'.$templateName.'/') && $templateName=="Lease") {// Per contratto con accesso utente
+        mkdir('files/' . $IDaz.'/pdf_'.$templateName.'/', 0777, true);
+    }
+    if ((filter_var($dest, FILTER_VALIDATE_EMAIL)|| $dest=="E" ) && file_exists($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf')){// se devo inviare una mail controllo che ci sia il PDF
+      $PDFurl = ($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf');
+
+    }elseif (!$save && $templateName=="Lease" ){// se non devo salvare il pdf mostro quello salvato. Vale solo per i contratti Lease
+       // The location of the PDF file
+      // on the server
+      $PDFurl = ($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf');
+
+      // Header content type
+      header("Content-type: application/pdf");
+	  if (file_exists($PDFurl)){
+		header("Content-Length: " . filesize($PDFurl));
+
+		// Send the file to the browser.	  
+		readfile($PDFurl);
+	  }
+      return;
     }
     $access=" ";
     $script_transl = $strScript["admin_booking.php"];
@@ -849,6 +875,10 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
     $docVars->azienda['cliente1']=$docVars->cliente1;
     $docVars->azienda['doc_name']=$pdf->tipdoc.'.pdf';
     if ($dest && $dest !== 'H' && $dest !== 'X') { // è stata richiesta una e-mail
+        if ($save && $templateName=="Lease"){
+           $pdf->Output($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');// questo è per GAzie
+           $pdf->Output(dirname(__DIR__).'/vacation_rental/files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');// questo è il pdf per l'utente
+        }
         if ($dest!=='E'){// se ho un indirizzo e-mail
           $docVars->client['e_mail']=$dest;// lo impongo per l'invio
         }
@@ -857,10 +887,18 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
         $content = new StdClass;
         $content->urlfile=false;
         $content->name = $doc_name;
-        $content->string = $pdf->Output($doc_name, $dest);
+
+        if (isset($PDFurl)){// se ho già un pdf salvato devo usare quello
+          echo "INVIO il pdf in archivio";
+          $content->string = file_get_contents($PDFurl);
+        }else{// altrimenti lo creo
+          echo "Ho creato un nuovo pdf";
+          $content->string = $pdf->Output($doc_name, $dest);
+        }
         $content->encoding = "base64";
         $content->mimeType = "application/pdf";
         $mail_message="";
+
         if (strlen($vacation_url_user)>3 && $templates[$templateName]!=="booking_quote" && $templateName!=='Lease' && strlen($access)>5){ // se non ivio un contratto ed è impostata la user url ed c'è una password (prenotazione fatta online), comunico url e codici di accesso
           $mail_message = $script_transl['access1']." <a href = '".$vacation_url_user."'> ".$vacation_url_user."</a> ".$script_transl['access2'].":</p><p>.</p><p><em>Password: <b>".$access."</b></p>ID: <b>".$testata['id_tes']."</b></p><p>".$script_transl['booking_number'].": <b>".$testata['numdoc']."</b></p></em><p>.</p><p>".$script_transl['best_regards']."</p>";
         }
@@ -887,8 +925,16 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
     } elseif ($dest && $dest == 'X') { // è stata richiesta una stringa da allegare
         $dest = 'S';     // Genero l'output pdf come stringa binaria
         $content=$pdf->Output($doc_name, $dest);
+        if ($save){
+           $pdf->Output($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');
+		   $pdf->Output(dirname(__DIR__).'/vacation_rental/files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');// questo è il pdf per l'utente
+        }
         return ($content);
     } else { // va all'interno del browser
+      if ($save){
+         $pdf->Output($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');
+		 $pdf->Output(dirname(__DIR__).'/vacation_rental/files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');// questo è il pdf per l'utente
+      }
       if ($testata['tipdoc']=='AOR'){
         /* in caso di ordine a fornitore che non viene inviato via mail al fornitore ma solo al browser
         cambio la descrizione del file per ricordare a chi è stato fatto*/

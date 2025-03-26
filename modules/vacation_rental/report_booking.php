@@ -115,6 +115,7 @@ if (isset ($_GET['inevasi'])){
 	$form['swStatus']=(isset($_GET['swStatus']))?$_GET['swStatus']:'';
 }
 
+
 $partner_select = !gaz_dbi_get_row($gTables['company_config'], 'var', 'partner_select_mode')['val'];
 $tesbro_e_partners = "{$gTables['tesbro']} LEFT JOIN {$gTables['clfoco']} ON {$gTables['tesbro']}.clfoco = {$gTables['clfoco']}.codice LEFT JOIN {$gTables['anagra']} ON {$gTables['clfoco']}.id_anagra = {$gTables['anagra']}.id";
 $tesbro_e_destina = $tesbro_e_partners . " LEFT JOIN {$gTables['destina']} ON {$gTables['tesbro']}.id_des_same_company = {$gTables['destina']}.codice";
@@ -643,6 +644,82 @@ function point(ref,point,name,idtes,expired,expiry_points_date) {
 }
 
 $(function() {
+  $("#dialog_bookcr").dialog({ autoOpen: false });
+	$('.dialog_bookcr').click(function() {
+		$("p#idcodice").html($(this).attr("ref"));
+		$("p#iddescri").html($(this).attr("nome"));
+    var url = $(this).attr('url');
+		var id = $(this).attr('ref');
+		$( "#dialog_bookcr" ).dialog({
+			minHeight: 1,
+			width: "350",
+			modal: "true",
+			show: "blind",
+			hide: "explode",
+			buttons: {
+				delete:{
+					text:'CREA NUOVO PDF',
+					'class':'btn btn-danger delete-button',
+					click:function (event, ui) {
+					$.ajax({
+						type: 'GET',
+            url: './'+url+'&save=true',
+            dataType: 'text',
+            beforeSend:function(){
+               return confirm("Sei sicuro? Stai modificando senza firma del cliente!");
+            },
+						success: function(output){
+		                    //alert(output);
+                        $("#dialog_bookcr").dialog("close");
+						}
+					});
+				}},
+				"Annulla": function() {
+					$(this).dialog("close");
+				}
+			}
+		});
+		$("#dialog_bookcr" ).dialog( "open" );
+	});
+
+  $("#dialog_leasecr").dialog({ autoOpen: false });
+	$('.dialog_leasecr').click(function() {
+		$("p#idcodice").html($(this).attr("ref"));
+		$("p#iddescri").html($(this).attr("nome"));
+		var id = $(this).attr('ref');
+    var url = $(this).attr('url');
+		$( "#dialog_leasecr" ).dialog({
+			minHeight: 1,
+			width: "350",
+			modal: "true",
+			show: "blind",
+			hide: "explode",
+			buttons: {
+				delete:{
+					text:'CREA NUOVO PDF',
+					'class':'btn btn-danger delete-button',
+					click:function (event, ui) {
+					$.ajax({
+            type: 'GET',
+            url: './'+url+'&save=true',
+            dataType: 'text',
+            beforeSend:function(){
+               return confirm("Sei sicuro di voler generare il contratto? Il cliente ha firmato?");
+            },
+						success: function(output){
+		                    //alert(output);
+                        $("#dialog_leasecr").dialog("close");
+						}
+					});
+				}},
+				"Annulla": function() {
+					$(this).dialog("close");
+				}
+			}
+		});
+		$("#dialog_leasecr" ).dialog( "open" );
+	});
+
 	$("#dialog_delete").dialog({ autoOpen: false });
 	$('.dialog_delete').click(function() {
 		$("p#idcodice").html($(this).attr("ref"));
@@ -1005,6 +1082,20 @@ $ts->output_navbar();
       <p>Cliente:</p>
       <p class="ui-state-highlight" id="iddescri"></p>
 </div>
+<div style="display:none" id="dialog_bookcr" title="Conferma creazione PDF della prenotazione">
+      <p><b>prenotazione:</b></p>
+      <p>Numero ID:</p>
+      <p class="ui-state-highlight" id="idcodice"></p>
+      <p>Cliente:</p>
+      <p class="ui-state-highlight" id="iddescri"></p>
+</div>
+<div style="display:none" id="dialog_leasecr" title="Conferma creazione PDF del contratto">
+      <p><b>prenotazione:</b></p>
+      <p>Numero ID:</p>
+      <p class="ui-state-highlight" id="idcodice"></p>
+      <p>Cliente:</p>
+      <p class="ui-state-highlight" id="iddescri"></p>
+</div>
 <div style="display:none" id="credit_card" title="Pagamento con carta di credito off-line">
       <p><b>Dati parziali della carta di credito:</b></p>
       numeri iniziali:<p class="ui-state-highlight" id="cc1"></p>
@@ -1296,19 +1387,21 @@ $ts->output_navbar();
               if (!empty($r['e_mail'])){
                 $title_booking = 'Invia '.$what.' a: ' . $r['e_mail'];
                 $title_lease = 'Invia contratto a: ' . $r['e_mail'];
+                $em=$r['e_mail'];
               }else{
                 $title_booking = 'Invia '.$what.' a: ' . $r['base_mail'];
                 $title_lease = 'Invia contratto a: ' . $r['base_mail'];
+                $em=$r['base_mail'];
               }
               if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['BookingSummary_email_inviata'])){
                 $r['BookingSummary_email_inviata'] = $data['vacation_rental']['BookingSummary_email_inviata'];
                 $stato_btn_booking = 'btn-success';
-                $title_booking = "Ultimo invio: ". $r['BookingSummary_email_inviata'];
+                $title_booking = "Ultimo invio a ".$em." : ". $r['BookingSummary_email_inviata'];
               }
               if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['Lease_email_inviata'])){
                 $r['Lease_email_inviata'] = $data['vacation_rental']['Lease_email_inviata'];
                 $stato_btn_lease = 'btn-success';
-                $title_lease = "Ultimo invio: ". $r['Lease_email_inviata'];
+                $title_lease = "Ultimo invio a ".$em." : ". $r['Lease_email_inviata'];
               }
               if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['BookingQuote_email_inviata'])){
                 $r['BookingQuote_email_inviata'] = $data['vacation_rental']['BookingQuote_email_inviata'];
@@ -1316,7 +1409,7 @@ $ts->output_navbar();
                 $title_booking = "Ultimo invio: ". $r['BookingQuote_email_inviata'];
               }
               if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['self_checkin_status']) && isset($datahouse['vacation_rental']['self_checkin'])){// status: 0=disabled; 1=processing; 2=enabled; 3=issue
-				$data['vacation_rental']['self_checkin_status_msg']=(isset($data['vacation_rental']['self_checkin_status_msg']))?$data['vacation_rental']['self_checkin_status_msg']:''; // se ancora non ci sono messaggi evito l'undefined
+                $data['vacation_rental']['self_checkin_status_msg']=(isset($data['vacation_rental']['self_checkin_status_msg']))?$data['vacation_rental']['self_checkin_status_msg']:''; // se ancora non ci sono messaggi evito l'undefined
                 if (intval($datahouse['vacation_rental']['self_checkin'])>0){// se è abilitato per l'alloggio
                   if (intval($data['vacation_rental']['self_checkin_status'])==0){
                     $stato_btn_selfcheck = 'btn-light';
@@ -1491,6 +1584,11 @@ $ts->output_navbar();
                       $ultimo_documento = 0;
                       mostra_documenti_associati( $r['id_tes'], $paid );
                   }
+                  ?>
+                  <a style="float:right;" title="Genera pdf contratto" class="btn btn-xs dialog_leasecr" ref="<?php echo $r['id_tes']; ?>" nome="<?php echo $r['ragso1']; ?>" url=<?php echo "stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent']; ?>>
+                    <i class="glyphicon glyphicon-refresh"></i>
+                  </a>
+                  <?php
                  echo "</td>";
               }elseif(isset($datatesbro['vacation_rental']['id_booking']) && intval($datatesbro['vacation_rental']['id_booking'])>0){
                 echo "<td><a class=\"btn btn-xs btn-warning\" href=\"../../modules/vacation_rental/report_booking.php?info=none&auxil=VOR&id_doc=" . intval($datatesbro['vacation_rental']['id_booking']) . "\">Prenotazione effettuata</a></td>";
@@ -1567,14 +1665,14 @@ $ts->output_navbar();
               echo "<td align=\"center\">";
 			  //print_r($r);
               if (!empty($r['e_mail'])){ // ho una mail sulla destinazione
-                  echo '<a class="btn btn-xs btn-email '.$stato_btn_booking.'" onclick="confirMail(this, '. $r['clfoco'] .', '. $r['e_mail'] .');return false;" id="doc' . $r['id_tes'] . '" url="' . $modulo . '" href="#" title="' . $r['email']."-".$title_booking . '"
+                  echo '<a class="btn btn-xs btn-email '.$stato_btn_booking.'" onclick="confirMail(this, '. $r['clfoco'] .', '. $r['e_mail'] .');return false;" id="doc' . $r['id_tes'] . '" url="' . $modulo . '" href="#" title="' .$title_booking . '"
                   mail="' . $r['e_mail'] . '" namedoc="' . $script_transl['type_value'][$r['tipdoc']] . ' n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-envelope"></i></a>';
                   if ( $tipo !== "VPR" ) {
                     echo ' <a class="btn btn-xs btn-emailC '.$stato_btn_lease.'" ',$disabled_email_style,' onclick="confirMailC(this);return false;" id="docC' . $r['id_tes'] . '" urlC="stampa_contratto.php?id_tes='. $r['id_tes']. '&dest=E&id_ag='.$r['id_agent'].'" href="#" title="' . $title_lease . '"
                     mail="' . $r['e_mail'] . '" namedoc="' . $script_transl['type_value'][$r['tipdoc']] . ' n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-send"></i></a>';
                   }
               } elseif (!empty($r['base_mail'])) { // ho una mail sul cliente
-                  echo ' <a class="btn btn-xs btn-email '.$stato_btn_booking.'" onclick="confirMail(this, '. $r['clfoco'] .', \''. $r['base_mail'] .'\');return false;" id="doc' . $r['id_tes'] . '" url="' . $modulo . '" href="#" title="' . $r['email']."-".$title_booking . '"
+                  echo ' <a class="btn btn-xs btn-email '.$stato_btn_booking.'" onclick="confirMail(this, '. $r['clfoco'] .', \''. $r['base_mail'] .'\');return false;" id="doc' . $r['id_tes'] . '" url="' . $modulo . '" href="#" title="' .$title_booking . '"
                   mail="' . $r['base_mail'] . '" namedoc="' . $script_transl['type_value'][$r['tipdoc']] . ' n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-envelope"></i></a>';
                   if ( $tipo !== "VPR" ) {
                     echo ' <a class="btn btn-xs btn-emailC '.$stato_btn_lease.'" ',$disabled_email_style,' onclick="confirMailC(this);return false;" id="docC' . $r['id_tes'] . '" urlC="stampa_contratto.php?id_tes='. $r['id_tes']. '&dest=E&id_ag='.$r['id_agent'].'" href="#" title="' . $title_lease . '"
@@ -1619,7 +1717,19 @@ if (isset($_SESSION['print_queue']['idDoc']) && !empty($_SESSION['print_queue'][
 		}
 ?>
 <script>
-  $(document).ready(function() { fileLoad('<?php echo $target;?>', false); }
+  $(document).ready(function() {
+    fileLoad('<?php echo $target;?>', false);
+
+    $('.button').click(function() {
+      $.ajax({
+        type: "POST",
+        url: "some.php",
+        data: { name: "John" }
+      }).done(function( msg ) {
+        alert( "Data Saved: " + msg );
+      });
+    });
+  }
 </script>
 <?php
   }

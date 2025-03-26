@@ -350,7 +350,7 @@ class invoiceXMLvars {
              LEFT JOIN ' . $this->gTables['movmag'] . ' AS mom ON rs.id_mag=mom.id_mov
              LEFT JOIN ' . $this->gTables['lotmag'] . ' AS ltm ON mom.id_lotmag=ltm.id
 		 ';
-    $rs_rig = gaz_dbi_dyn_query('rs.*,vat.tipiva AS tipiva, vat.fae_natura AS natura, ltm.identifier AS idlotto, ltm.expiry AS scadenzalotto', $from, "rs.id_tes = " . $this->testat, "id_tes DESC, id_rig");
+    $rs_rig = gaz_dbi_dyn_query("rs.*,vat.tipiva AS tipiva, vat.fae_natura AS natura, ltm.identifier AS idlotto, DATE_FORMAT(ltm.expiry,'%d-%m-%Y') AS scadenzalotto", $from, "rs.id_tes = " . $this->testat, "id_tes DESC, id_rig");
     $this->riporto = 0.00;
     $this->ritenuta = 0.00;
     $this->cassa_prev = array();
@@ -991,9 +991,11 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
 						//$el1->appendChild($el2);
 						$el->appendChild($el1);
 					}
-          if ($rigo['idlotto']!='') {
-              // se ho un lotto di magazzino lo accodo alla ddescrizione
-              $rigo['descri'] .= ' LOTTO: '.$rigo['idlotto'].' SCAD.'.$rigo['scadenzalotto']; // ogni $v è lungo al massimo 60 caratteri
+          if ($rigo['idlotto']!='') { // se ho un lotto di magazzino lo accodo alla descrizione
+            $rigo['descri'] .= ' LOTTO: '.$rigo['idlotto'];
+            if ( substr($rigo['scadenzalotto'],-4) > 2000 ){ // se sul lotto ho indicato la scadenza accodo pure essa
+              $rigo['descri'] .= ' SCAD.'.$rigo['scadenzalotto'];
+            }
           }
           $el1 = $domDoc->createElement("Descrizione", substr($rigo['descri'], -1000) );
           $el->appendChild($el1);

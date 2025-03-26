@@ -33,7 +33,7 @@ $admin_aziend=checkAdmin();
 include_once("manual_settings.php");
 $genTables = constant("table_prefix")."_";
 $azTables = constant("table_prefix").$idDB;
-
+$IDaz=preg_replace("/[^1-9]/", "", $azTables );
 require("document.php");
 $tesbro = gaz_dbi_get_row($gTables['tesbro'],"id_tes", intval($_GET['id_tes']));
 $id_ag='';
@@ -62,10 +62,11 @@ if ($tesbro['tipdoc']=='VOR' || $tesbro['tipdoc']=='VOG') {
 	if ($tesbro['template']=='Ticket'){
 		$template='Ticket';
 	}
-    createDocument($tesbro,$template,$gTables,'rigbro',$type,$lang,$genTables,$azTables,'','',$id_ag);
+  $save=(isset($_GET['save']))?true:false;
+  createDocument($tesbro,$template,$gTables,'rigbro',$type,$lang,$genTables,$azTables,$IDaz,'',$id_ag,'it',"",$save);
 } elseif ($tesbro['tipdoc']=='VOW'){
 	$type=false;
-    createDocument($tesbro, 'OrdineWeb',$gTables,'rigbro',$type,$lang);
+  createDocument($tesbro, 'OrdineWeb',$gTables,'rigbro',$type,$lang);
 } else {
     header("Location: report_booking.php");
     exit;

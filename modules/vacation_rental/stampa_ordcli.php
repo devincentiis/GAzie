@@ -33,7 +33,7 @@ $admin_aziend=checkAdmin();
 include_once("manual_settings.php");// deve stare sempre dopo require("../../library/include/datlib.inc.php")
 $genTables = constant("table_prefix")."_";
 $azTables = constant("table_prefix").$idDB;
-
+$IDaz=preg_replace("/[^1-9]/", "", $azTables );
 require("document.php");
 $tesbro = gaz_dbi_get_row($gTables['tesbro'],"id_tes", intval($_GET['id_tes']));
 
@@ -42,8 +42,7 @@ $id_anagra = gaz_dbi_get_row($gTables['clfoco'], 'codice', $tesbro['clfoco']);
 $stato = gaz_dbi_get_row($gTables['anagra'], 'id', $id_anagra['id_anagra']);
 $lang_template = '';$lang="it";
 if (!isset($_GET['dest']) OR ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0)){// se devo stampare dal gestionale, è italiano o non è impostato
-    // lascio il default
-	//echo "LASCIO DEFAULT";
+	//echo "LASCIO DEFAULT LANGUAGE";
 } else{// altrimenti se esite il file lingua, modifico
   $language_row = gaz_dbi_get_row($gTables['languages'], 'lang_id', $stato['id_language']);
   if (isset($language_row['title_native'])){
@@ -69,7 +68,8 @@ if ($tesbro['tipdoc']=='VOR' || $tesbro['tipdoc']=='VOG') {
 	if ($tesbro['template']=='Ticket'){
 		$template='Ticket';
 	}
-    createDocument($tesbro,$template,$gTables,'rigbro',$type,$lang_template,$genTables,$azTables,"","","",$lang,$user_level);
+  $save=(isset($_GET['save']))?true:false;
+  createDocument($tesbro,$template,$gTables,'rigbro',$type,$lang_template,$genTables,$azTables,$IDaz,"","",$lang,$user_level,$save);
 } elseif ($tesbro['tipdoc']=='VOW'){
 	$type=false;
     createDocument($tesbro, 'OrdineWeb',$gTables,'rigbro',$type,$lang_template);

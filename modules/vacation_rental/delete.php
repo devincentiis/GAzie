@@ -128,6 +128,10 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 					$sql = "UPDATE ".$gTables['tesbro']." SET custom_field = '".$custom_field."', datfat = '0000-00-00', numfat = '0' WHERE id_tes = ".intval($prev['id_tes']);
 					$result = gaz_dbi_query($sql);// resetto il preventivo
 				}
+        // Cancello i PDF della prenotazione e del contratto
+        //unlink (DATA_DIR."files/".$admin_aziend['codice']."/pdf_BookingSummary/". $_POST['id_tes'] . ".pdf");
+        @unlink (DATA_DIR."files/".$admin_aziend['codice']."/pdf_Lease/". $_POST['id_tes'] . ".pdf");
+		@unlink (dirname(__DIR__).'/vacation_rental/files/' . $admin_aziend['codice'] .'/pdf_Lease/'.$_POST['id_tes'].'.pdf');
 			}
 		break;
 		case "ical":
