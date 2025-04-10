@@ -341,7 +341,7 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
       if ($result = mysqli_query($link, $sql)) {
          $row = mysqli_fetch_assoc($result);
 
-          $sql = "SELECT speban FROM ".$tabletes.$where." LIMIT 1";
+          $sql = "SELECT speban FROM ".$tabletes." WHERE id_tes = ".intval($tesbro)." LIMIT 1";
           if ($result = mysqli_query($link, $sql)) {
             $rowtes = mysqli_fetch_assoc($result);
             $rowtes['speban']=(isset($rowtes['speban']))?$rowtes['speban']:0;

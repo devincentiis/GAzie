@@ -2019,7 +2019,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
 	// adesso metto uno ma dovrò proporre il magazzino di riferimento dell'utente
 	$magmodule = gaz_dbi_get_row($gTables['module'], "name",'magazz');
 	$magadmin_module = gaz_dbi_get_row($gTables['admin_module'], "moduleid",$magmodule['id']," AND adminid='{$admin_aziend['user_name']}' AND company_id=" . $admin_aziend['company_id']);
-	$magcustom_field=json_decode($magadmin_module['custom_field']);
+	$magcustom_field=(isset($magadmin_module['custom_field']))?json_decode($magadmin_module['custom_field']):(object) [];
 	$form["in_id_warehouse"] = (isset($magcustom_field->user_id_warehouse))?$magcustom_field->user_id_warehouse:0;
   $form["in_id_position"] = 0;
   $form["cosepos"] = 0;

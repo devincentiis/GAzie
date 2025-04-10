@@ -76,24 +76,24 @@ class FatturaAcquisto extends Template
     }
 
     function newPage() {
-        $this->AddPage();
-        $this->SetFont('helvetica','',9);
-        $this->Cell(25,6,'Codice',1,0,'C',1);
-        $this->Cell(80,6,'Descrizione',1,0,'C',1);
-        $this->Cell(7, 6,'U.m.',1,0,'C',1);
-        $this->Cell(16,6,'Quantità',1,0,'C',1);
-        $this->Cell(18,6,'Prezzo',1,0,'C',1);
-        $this->Cell(8, 6,'%Sc.',1,0,'C',1);
-        $this->Cell(20,6,'Importo',1,0,'C',1);
-        $this->Cell(12,6,'%IVA',1,1,'C',1);
-        $this->SetFont('helvetica','B',18);
-        $this->SetTextColor(255,150,150);
-        $this->StartTransform();
-		$this->Rotate(-30);
-		$this->Cell(186,0,$this->tipdoc,0,1,'C');
-		$this->StopTransform();
-        $this->SetFont('helvetica','',9);
-        $this->SetTextColor(0,0,0);
+      $this->AddPage();
+      $this->SetFont('helvetica','',9);
+      $this->Cell(25,6,'Codice',1,0,'C',1);
+      $this->Cell(80,6,'Descrizione',1,0,'C',1);
+      $this->Cell(7, 6,'U.m.',1,0,'C',1);
+      $this->Cell(16,6,'Quantità',1,0,'C',1);
+      $this->Cell(18,6,'Prezzo',1,0,'C',1);
+      $this->Cell(8, 6,'%Sc.',1,0,'C',1);
+      $this->Cell(20,6,'Importo',1,0,'C',1);
+      $this->Cell(12,6,'%IVA',1,1,'C',1);
+      $this->SetFont('helvetica','B',18);
+      $this->SetTextColor(255,150,150);
+      $this->StartTransform();
+      $this->Rotate(-30);
+      $this->Cell(250,0,$this->tipdoc,0,1,'L',0,'',1);
+      $this->StopTransform();
+      $this->SetFont('helvetica','',9);
+      $this->SetTextColor(0,0,0);
     }
 
     function pageHeader() {

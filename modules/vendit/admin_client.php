@@ -135,7 +135,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         }
         $cf_pi = new check_VATno_TAXcode();
         $r_pi = $cf_pi->check_VAT_reg_no($form['pariva'], $form['country']);
-        if (strlen(trim($form['codfis'])) == 11) {
+        if (strlen(trim($form['codfis']))==11 && $form['codfis']!='00000000000') {
             $r_cf = $cf_pi->check_VAT_reg_no($form['codfis'], $form['country']);
             if ($form['sexper'] != 'G') {
                 $r_cf = 'Codice fiscale sbagliato per una persona fisica';

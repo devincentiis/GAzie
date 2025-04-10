@@ -600,6 +600,19 @@ function point(ref,point,name,idtes,expired,expiry_points_date) {
     if(expired==1){
       $("p#point_exp").append("Attenzione: i punti sono scaduti e saranno cancellati");// all'apertura del dialog se scaduti avviso cancellazione
     }
+    $.ajax({// carico i movimenti e li mostro nel dialog
+        data: {term:idtes,opt:'point_mov',ref:ref},
+        type: 'GET',
+        url: '../vacation_rental/ajax_request.php',
+        dataType: 'text',
+        success: function(output){
+          //alert(output);
+          $.each(JSON.parse(output), function(idx, obj) {
+            var point = obj.points * obj.operat;
+            $("#point_mov").append(obj.title+' : punti = '+point+' Attribuiti il '+obj.timestamp+' <br>');
+          });
+        }
+      });
     	$( "#dialog_point" ).dialog({
 			minHeight: 1,
 			width: "auto",
@@ -631,6 +644,7 @@ function point(ref,point,name,idtes,expired,expiry_points_date) {
             });
 				}},
 				"Chiudi": function() {
+          $("#point_mov").html('');
           $("#motive").val('');
           $("#points").val('');
           $("#point_amount").html('');
@@ -1045,6 +1059,7 @@ $ts->output_navbar();
 </div>
 <div style="display:none" id="dialog_point" title="Punti...">
   <p class="ui-state-highlight" id="point_amount"></p>
+  <p class="ui-state-highlight" id="point_mov"></p>
   <p class="ui-state-highlight" style="border-color: red;" id="point_exp"></p>
 
     <p><b>Attribuisci punti manualmente:</b></p>
@@ -1649,15 +1664,18 @@ $ts->output_navbar();
                 echo " style=\"cursor:pointer;\" onclick=\"printPdf('".$modulo."')\"";
               }
               echo "><i class=\"glyphicon glyphicon-print\" title=\"Stampa ".$what." PDF\"></i></a>";
-              if ( $tipo !== "VPR" ) {
-                echo "&nbsp;<a class=\"btn btn-xs btn-default btn-stampa\"";
-                // vedo se è presente un file di template adatto alla stampa su carta già intestata
-                if($enable_lh_print_dialog>0 && withoutLetterHeadTemplate($r['tipdoc'])){
-                  echo ' onclick="choice_template(\''.$modulo.'\');" title="Stampa contratto"';
-                }else{
-                  echo " style=\"cursor:pointer;\" onclick=\"printPdf('stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent'] ."')\"";
-                }
-                echo "><i class=\"glyphicon glyphicon-book\" title=\"Stampa contratto PDF\"></i></a>";
+              $PDFurl = (dirname(__DIR__, 2).'/data/' . 'files/' . $admin_aziend['company_id'] .'/pdf_Lease/'.$r['id_tes'].'.pdf');
+              if ( $tipo !== "VPR" && file_exists($PDFurl)) {
+
+                  echo "&nbsp;<a class=\"btn btn-xs btn-default btn-stampa\"";
+                  // vedo se è presente un file di template adatto alla stampa su carta già intestata
+                  if($enable_lh_print_dialog>0 && withoutLetterHeadTemplate($r['tipdoc'])){
+                    echo ' onclick="choice_template(\''.$modulo.'\');" title="Stampa contratto"';
+                  }else{
+                    echo " style=\"cursor:pointer;\" onclick=\"printPdf('stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent'] ."')\"";
+                  }
+                  echo "><i class=\"glyphicon glyphicon-book\" title=\"Stampa contratto PDF\"></i></a>";
+
               }
               echo "</td>";
 
@@ -1667,14 +1685,14 @@ $ts->output_navbar();
               if (!empty($r['e_mail'])){ // ho una mail sulla destinazione
                   echo '<a class="btn btn-xs btn-email '.$stato_btn_booking.'" onclick="confirMail(this, '. $r['clfoco'] .', '. $r['e_mail'] .');return false;" id="doc' . $r['id_tes'] . '" url="' . $modulo . '" href="#" title="' .$title_booking . '"
                   mail="' . $r['e_mail'] . '" namedoc="' . $script_transl['type_value'][$r['tipdoc']] . ' n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-envelope"></i></a>';
-                  if ( $tipo !== "VPR" ) {
+                  if ( $tipo !== "VPR" && file_exists($PDFurl) ) {
                     echo ' <a class="btn btn-xs btn-emailC '.$stato_btn_lease.'" ',$disabled_email_style,' onclick="confirMailC(this);return false;" id="docC' . $r['id_tes'] . '" urlC="stampa_contratto.php?id_tes='. $r['id_tes']. '&dest=E&id_ag='.$r['id_agent'].'" href="#" title="' . $title_lease . '"
                     mail="' . $r['e_mail'] . '" namedoc="' . $script_transl['type_value'][$r['tipdoc']] . ' n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-send"></i></a>';
                   }
               } elseif (!empty($r['base_mail'])) { // ho una mail sul cliente
                   echo ' <a class="btn btn-xs btn-email '.$stato_btn_booking.'" onclick="confirMail(this, '. $r['clfoco'] .', \''. $r['base_mail'] .'\');return false;" id="doc' . $r['id_tes'] . '" url="' . $modulo . '" href="#" title="' .$title_booking . '"
                   mail="' . $r['base_mail'] . '" namedoc="' . $script_transl['type_value'][$r['tipdoc']] . ' n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-envelope"></i></a>';
-                  if ( $tipo !== "VPR" ) {
+                  if ( $tipo !== "VPR" && file_exists($PDFurl)) {
                     echo ' <a class="btn btn-xs btn-emailC '.$stato_btn_lease.'" ',$disabled_email_style,' onclick="confirMailC(this);return false;" id="docC' . $r['id_tes'] . '" urlC="stampa_contratto.php?id_tes='. $r['id_tes']. '&dest=E&id_ag='.$r['id_agent'].'" href="#" title="' . $title_lease . '"
                     mail="' . $r['base_mail'] . '" namedoc="Contratto n.' . $r['numdoc'] . ' del ' . gaz_format_date($r['datemi']) . '"><i class="glyphicon glyphicon-send"></i></a>';
                   }

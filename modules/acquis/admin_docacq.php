@@ -1408,7 +1408,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
                 $form['rows'][$i]['unimis'] = "";
                 $form['rows'][$i]['quanti'] = 0;
                 $form['rows'][$i]['prelis'] = 0;
-                $form['rows'][$i]['provvigione'] = $form['in_provvigione'];
+                $form['rows'][$i]['provvigione'] = $admin_aziend['payroll_tax'];
                 $form['rows'][$i]['codric'] = $admin_aziend['c_payroll_tax'];
                 $form['rows'][$i]['sconto'] = 0;
                 $form['rows'][$i]['codvat'] = $admin_aziend['preeminent_vat'];

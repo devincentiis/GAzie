@@ -311,9 +311,10 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
               }
               $tot=$tot + $form['lot_quanti'][$nc][$l];
 
-              $checklot = gaz_dbi_get_row($gTables['lotmag']." LEFT JOIN ".$gTables['movmag']." ON ".$gTables['movmag'].".id_mov = id_movmag", 'id', $form['id_lot_comp'][$nc][$l]);
+              $checklot = gaz_dbi_get_row($gTables['lotmag']." LEFT JOIN ".$gTables['movmag']." ON ".$gTables['movmag'].".id_mov = id_movmag", 'id', $form['id_lot_comp'][$nc][$l]," AND operat>0 ");
               if (strtotime($form['datreg']) < strtotime($checklot['datdoc']) ){// non può uscire un lotto prima della data della sua creazione
                 $msg .= "45+";// Il lotto non può uscire in tale data in quanto ancora inesistente
+
               }
               //controllo se l'ID lotto è presente nel silos selezionato
               if (strlen($form['recip_stocc_comp'][$nc])>0){
@@ -1253,7 +1254,7 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
                         <input type="hidden" name="id_lot_comp<?php echo $nc, $l; ?>" value="<?php echo $idlot; ?>">
                         <input type="hidden" name="q_lot_comp<?php echo $nc; ?>" value=1>
                         <input type="text" class="FacetSelect" name="lot_quanti<?php echo $nc, $l; ?>" value="<?php echo floatval(preg_replace('/[^\d.]/', '', number_format((($qta*$perc_util)/100),8))); ?>" readonly="readonly" style="cursor: not-allowed;" title="Valore non modificabile in quanto il componente viene prelevato da un recipiente">
-                        <span>su <?php echo gaz_format_number($qta),$row['unimis'];?> disponibili, lotto n: <?php echo $codartlot['identifier'],(intval($codartlot['expiry'])>0)?" scadenza: ".$codartlot['expiry']:''," id: ",$idlot;?></span>
+                        <span>su <?php echo number_format($qta,8),$row['unimis'];?> disponibili, lotto n: <?php echo $codartlot['identifier'],(intval($codartlot['expiry'])>0)?" scadenza: ".$codartlot['expiry']:''," id: ",$idlot;?></span>
                       </div>
                       <?php
                       if ($nc>$nmix){// se è un componente mix successivo al primo
@@ -1644,7 +1645,7 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
           $excluded_movmag=$form['id_mov_sian_rif'];// faccio escludere il movimento dal calcolo disponibilità recipiente di origine
 		  $excluded_movmag_dest=$form['id_movmag'];// faccio escludere il movimento dal calcolo disponibilità recipiente di destinazione
         }else{
-          $excluded_movmag=0;          
+          $excluded_movmag=0;
 		  $excluded_movmag_dest=0;
         }
 

@@ -31,8 +31,8 @@ define('debug_active', FALSE);
 define('error_reporting_level', 0); // consigliato per ambienti di produzione
 //define('error_reporting_level', E_ALL & ~E_NOTICE); // consigliato per ambienti di sviluppo
 
-// attiva la modalità manutenzione non è consentito l'accesso e l'uso dei moduli (FALSE oppure 'email amministratore')
-define('maintenance', FALSE);
+// Nome della base di dati a cui ci si connette.
+define('Database', 'gazie');
 
 /*
 --------=======oooooooooooo!!!!!  ATTENZIONE !!!!!ooooooooooo========-------------
@@ -45,6 +45,9 @@ DI SVILUPPO (root senza password) E CONTEMPORANEAMENTE NON VERRA' SOVRASCRITTO
 AD OGNI AGGIORNAMENTO DI GAZIE CHE CONSISTE, APPUNTO, NELLA SOVRASCRITTURA DI TUTTI I
 FILES, COMPRESO IL CITATO "gconfig.php"
 */
+
+// attiva la modalità manutenzione non è consentito l'accesso e l'uso dei moduli (FALSE oppure 'email amministratore')
+define('maintenance', FALSE);
 
 if (isset($_SERVER['SCRIPT_FILENAME']) && (str_replace('\\', '/', __FILE__) == $_SERVER['SCRIPT_FILENAME'])) {
     exit('Accesso diretto non consentito');
@@ -66,10 +69,6 @@ define('NomeDB', 'mysqli');
 //
 define('Host', 'localhost');
 
-//
-// Nome della base di dati a cui ci si connette.
-//
-define('Database', 'gazie');
 
 //
 // Utente della base di dati che ha il permesso di accedervi con tutti

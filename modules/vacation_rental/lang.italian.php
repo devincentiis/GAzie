@@ -496,6 +496,7 @@ $strScript = array(
             'ok' => 'ok riempitura array',
             'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
 		),
+		'print'=>'Stampa',
 		'guest'=>'Ospiti',
 		'rules_label'=>'Leggere il contratto di locazione',
 		'privacy_label'=>'Leggere il regolamento sulla privacy',
@@ -506,7 +507,7 @@ $strScript = array(
 		'submit'=>'Vai avanti al riepilogo',
 		'return'=>'Indietro',
 		'tur_tax' => 'Tassa turistica',
-		'submitpay'=>'Firma e procedi con il pagamento',
+		'submitpay'=>'Firma e vai al pagamento',
 		'check_submit' => 'Sì, confermo di aver letto il contratto, di aver avuto la possibilità di stamparlo e di accettarne, senza riserva, tutte le clausole. Il contratto diventerà effettivo solo dopo la conferma del proprietario.',
 		'check_submit2' => 'Sì, confermo di aver preso consapevole visione e di accettare integralmente le seguenti clausole: 1,2,3,4,5,6,7.',
 		'contractor' => 'Il contraente',

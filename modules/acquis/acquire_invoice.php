@@ -1421,7 +1421,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 
 					// inserisco il rigo rigdoc
 					$id_rif=rigdocInsert($form['rows'][$i]);
-					if ($form['rows'][$i]['good_or_service']==0 && strlen($form['rows'][$i]['codart'])>0 && $form['tipdoc']!=="AFC"){ // se l'articolo prevede di movimentare il magazzino e non è una nota credito
+					if (isset($form['rows'][$i]['good_or_service']) && $form['rows'][$i]['good_or_service']==0 && strlen($form['rows'][$i]['codart'])>0 && $form['tipdoc']!=="AFC"){ // se l'articolo prevede di movimentare il magazzino e non è una nota credito
 						// Antonio Germani - creo movimento di magazzino sempre perché, se c'erano, sono stati cancellati
 						if (isset($v['NumeroDDT']) && $v['NumeroDDT']>0){ // se c'è un ddt
               $idlotmag='';$n=0;$rif_sian_movmag='';$break=0;

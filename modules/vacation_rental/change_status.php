@@ -174,10 +174,10 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
       $lang = strtolower($langarr[0]);
       if (file_exists("lang.".$lang.".php")){// se esiste la lingua richiesta
         include "lang.".$lang.".php";// carico il file traduzione lingua
-		$lan=$language['sef'];
+        $lan=$language['sef'];
       }else{// altrimenti carico di default la lingua inglese
         include "lang.english.php";
-		$lan="en";
+        $lan="en";
       }
       $script_transl=$strScript['booking_form.php'];
       $res=gaz_dbi_get_row($gTables['company_config'], "var", 'vacation_url_user');
@@ -213,7 +213,7 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         if ((!isset($old_checked_out_date) || intval($old_checked_out_date)==0) && $_POST['new_status']=="OUT" && floatval($pointeuro)>0){// se è abilitato attribuisco i punti al checkout
           $amount=get_totalprice_booking($i,FALSE,FALSE,"",TRUE);
           $points=intval($amount/$pointeuro);
-          if ($data = json_decode($anagra['custom_field'],true)){// se c'è un json in anagra
+          if (isset($anagra['custom_field']) && $data = json_decode($anagra['custom_field'],true)){// se c'è un json in anagra
             if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" nel custom field lo aggiorno
               if (isset($data['vacation_rental']['points'])){// se ci sono già punti accumulati
                 if (intval($points_expiry)>0){// se i punti hanno una scadenza
@@ -233,6 +233,13 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
               $data['vacation_rental']['points_date']=date("Y-m-d");
               $custom_json = json_encode($data);
               gaz_dbi_put_row($gTables['anagra'], 'id', $anagra['id'], 'custom_field', $custom_json);
+
+              $pointarr['operat']="+1";
+              $pointarr['id_anagra']=$anagra['id'];
+              $pointarr['points']=$points;
+              $pointarr['id_tesbro']=$i;
+              gaz_dbi_table_insert('rental_points_mov', $pointarr);
+
               $level=get_user_points_level($anagra['id']);
               if(intval($level)>0){
                 $sql = "SELECT val FROM ".$gTables['company_config']." WHERE var = 'pointlevel".$level."name' LIMIT 1";
@@ -244,8 +251,8 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
                 $level_name="nessun livello raggiunto";
               }
               $mail->Body    = "<p>".$script_transl['give_point']." ".$points." punti per un totale di ".$data['vacation_rental']['points']." ".$script_transl['give_point1']." ".$level_name."</p>";
-			  $mail->Body    .="<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma punti <b>Fidelity Mon Amour</b></a></p>";
-				$mail->Body    .= "<p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
+              $mail->Body    .="<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma punti <b>Fidelity Mon Amour</b></a></p>";
+              $mail->Body    .= "<p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
               if($mail->send()) {
                 if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata
                   if($imap = @imap_open("{".$imap_server.":".$imap_port."/".$imap_secure."}".$imap_sent_folder, $imap_usr, $imap_pwr)){
@@ -276,6 +283,13 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
               $data['vacation_rental']['points_date']=date("Y-m-d");
               $custom_json = json_encode($data);
               gaz_dbi_put_row($gTables['anagra'], 'id', $anagra['id'], 'custom_field', $custom_json);
+
+              $pointarr['operat']="+1";
+              $pointarr['id_anagra']=$anagra['id'];
+              $pointarr['points']=$points;
+              $pointarr['id_tesbro']=$i;
+              gaz_dbi_table_insert('rental_points_mov', $pointarr);
+
               $level=get_user_points_level($anagra['id']);
               if(intval($level)>0){
               $sql = "SELECT val FROM ".$gTables['company_config']." WHERE var = 'pointlevel".$level."name' LIMIT 1";
@@ -287,8 +301,8 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
                 $level_name="nessun livello raggiunto";
               }
               $mail->Body    = "<p>".$script_transl['give_point']." ".$data['vacation_rental']['points']." ".$script_transl['give_point1']." ".$level_name."</p>";
-			  $mail->Body    .="<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma punti <b>Fidelity Mon Amour</b></a></p>";
-			  $mail->Body    .= "<p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
+              $mail->Body    .="<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma punti <b>Fidelity Mon Amour</b></a></p>";
+              $mail->Body    .= "<p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
               if($mail->send()) {
                 if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata
                   if($imap = @imap_open("{".$imap_server.":".$imap_port."/".$imap_secure."}".$imap_sent_folder, $imap_usr, $imap_pwr)){
@@ -320,6 +334,13 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
             $data['vacation_rental']['points_date']=date("Y-m-d");
             $custom_json = json_encode($data);
             gaz_dbi_put_row($gTables['anagra'], 'id', $anagra['id'], 'custom_field', $custom_json);
+
+            $pointarr['operat']="+1";
+            $pointarr['id_anagra']=$anagra['id'];
+            $pointarr['points']=$points;
+            $pointarr['id_tesbro']=$i;
+            gaz_dbi_table_insert('rental_points_mov', $pointarr);
+
             $level=get_user_points_level($anagra['id']);
             if(intval($level)>0){
             $sql = "SELECT val FROM ".$gTables['company_config']." WHERE var = 'pointlevel".$level."name' LIMIT 1";
@@ -331,8 +352,8 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
               $level_name="nessun livello raggiunto";
             }
             $mail->Body = "<p>".$script_transl['give_point']." ".$data['vacation_rental']['points']." ".$script_transl['give_point1']." ".$level_name."</p>";
-			$mail->Body .= "<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma punti <b>Fidelity Mon Amour</b></a></p>";
-			$mail->Body .= "<p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
+            $mail->Body .= "<p><a href='https://www.gmonamour.it/".$lan."/service/fidelity-mon-amour'>Scopri i vantaggi del programma punti <b>Fidelity Mon Amour</b></a></p>";
+            $mail->Body .= "<p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
             if($mail->send()) {
               if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata
                 if($imap = @imap_open("{".$imap_server.":".$imap_port."/".$imap_secure."}".$imap_sent_folder, $imap_usr, $imap_pwr)){
@@ -373,6 +394,13 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
               }
               $custom_json = json_encode($data);
               gaz_dbi_put_row($gTables['anagra'], 'id', $anagra['id'], 'custom_field', $custom_json);
+
+              $pointarr['operat']="-1";
+              $pointarr['id_anagra']=$anagra['id'];
+              $pointarr['points']=$points;
+              $pointarr['id_tesbro']=$i;
+              gaz_dbi_table_insert('rental_points_mov', $pointarr);
+
               $level=get_user_points_level($anagra['id']);
               if(intval($level)>0){
                 $sql = "SELECT val FROM ".$gTables['company_config']." WHERE var = 'pointlevel".$level."name' LIMIT 1";
@@ -384,6 +412,7 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
                 $level_name="nessun livello raggiunto";
               }
               $mail->Body    = "<p>".$script_transl['delete_point']." ".$points." ".$script_transl['give_point1']." ".$level_name."</p><p>".$script_transl['regards']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
+
               if($mail->send()) {
                 if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata
                   if($imap = @imap_open("{".$imap_server.":".$imap_port."/".$imap_secure."}".$imap_sent_folder, $imap_usr, $imap_pwr)){

@@ -165,11 +165,12 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 			$datdoc=$xpath->query("//FatturaElettronicaBody/DatiGenerali/DatiGeneraliDocumento/Data")->item(0)->nodeValue;
 			$numdoc=$xpath->query("//FatturaElettronicaBody/DatiGenerali/DatiGeneraliDocumento/Numero")->item(0)->nodeValue;
 			if ($xpath->query("//FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice")->length >= 1) {
+				$country=$xpath->query("//FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdPaese")->item(0)->nodeValue;
                 $codiva=$xpath->query("//FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice")->item(0)->nodeValue;
 			} else { // NON esiste il nodo <IdCodice> ovvero la partita IVA (è un privato)
                 $codiva=0;
             }
-            $r_invoice=gaz_dbi_dyn_query("*", $gTables['tesdoc']. " LEFT JOIN " . $gTables['clfoco'] . " ON " . $gTables['tesdoc'] . ".clfoco = " . $gTables['clfoco'] . ".codice LEFT JOIN " . $gTables['anagra'] . " ON " . $gTables['clfoco'] . ".id_anagra = " . $gTables['anagra'] . ".id", "tipdoc='".$tipdoc."' AND pariva='".$codiva."' AND datfat='".$datdoc."' AND numfat='".$numdoc."'", "id_tes", 0, 1);
+            $r_invoice=gaz_dbi_dyn_query("*", $gTables['tesdoc']. " LEFT JOIN " . $gTables['clfoco'] . " ON " . $gTables['tesdoc'] . ".clfoco = " . $gTables['clfoco'] . ".codice LEFT JOIN " . $gTables['anagra'] . " ON " . $gTables['clfoco'] . ".id_anagra = " . $gTables['anagra'] . ".id", "tipdoc='".$tipdoc."' AND pariva='".$codiva."' AND country='".$country."' AND datfat='".$datdoc."' AND numfat='".$numdoc."'", "id_tes", 0, 1);
 			$exist_invoice=gaz_dbi_fetch_array($r_invoice);
 			if ($exist_invoice) { // esiste un file che pur avendo un nome diverso è già stato acquisito ed ha lo stesso numero e data
 				$msg['err'][] = 'same_content';
@@ -210,7 +211,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
                     }
 				} else { // ho la partita IVA
 					$form['pariva'] = $xpath->query("//FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice")->item(0)->nodeValue;
-					$partner_with_same_pi = $anagrafica->queryPartners('*', "codice BETWEEN " . $admin_aziend['mascli'] . "000000 AND " . $admin_aziend['mascli'] . "999999 AND pariva = '" . $form['pariva']. "'", "pariva DESC", 0, 1);
+					$partner_with_same_pi = $anagrafica->queryPartners('*', "codice BETWEEN " . $admin_aziend['mascli'] . "000000 AND " . $admin_aziend['mascli'] . "999999 AND pariva='" . $form['pariva']. "' AND country='" . $country. "'", "pariva DESC", 0, 1);
                     if ($partner_with_same_pi) { // ho già il cliente sul piano dei conti
 						$form['clfoco'] = $partner_with_same_pi[0]['codice'];
 						if ($partner_with_same_pi[0]['cosric']>100000000) { // ho un costo legato al cliente
@@ -221,7 +222,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 							$form['partner_vat'] = $partner_with_same_pi[0]['aliiva'];
 						}
                     } else { // se non ho già un cliente sul piano dei conti provo a vedere nelle anagrafiche
-                        $rs_anagra_with_same_pi = gaz_dbi_query_anagra(array("*"), $gTables['anagra'], array("pariva" => "='" . $form['pariva'] . "'"), array("pariva" => "DESC"), 0, 1);
+                        $rs_anagra_with_same_pi = gaz_dbi_query_anagra(array("*"), $gTables['anagra'], array("pariva" => "='" . $form['pariva'] . "'", "country" => "='" . $country . "'"), array("pariva" => "DESC"), 0, 1);
                         $anagra_with_same_pi = gaz_dbi_fetch_array($rs_anagra_with_same_pi);
                         if ($anagra_with_same_pi) { // c'è già un'anagrafica con la stessa PI non serve reinserirlo ma dovrò metterlo sul piano dei conti
 							$msg['war'][] = 'no_suppl';

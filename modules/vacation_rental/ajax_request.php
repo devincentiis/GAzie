@@ -109,12 +109,33 @@ if (isset($_GET['term'])) {
         }
         echo "\nRegistrazione terminata";
       break;
+      case 'point_mov':
+        $ret=array();
+        if (isset($_GET['ref'])){
+          $id_anagra= $_GET['ref'];
+          $query = "SELECT * FROM " . $gTables['rental_points_mov'] . " WHERE id_anagra ='". intval($id_anagra) ."' ORDER BY timestamp ASC";
+          $result = gaz_dbi_query($query);// prendo tutti i movimenti punti
+          while ($r = gaz_dbi_fetch_array($result)){// li ciclo e, da rental events prendo il title
+            $r['timestamp']=date( 'd-m-Y', strtotime( $r['timestamp'] ) );
+            $query = "SELECT * FROM " . $gTables['rental_events'] . " WHERE id_tesbro ='". intval($r['id_tesbro']) ."' AND type = 'ALLOGGIO' ORDER BY end ASC";
+            $res_ev = gaz_dbi_query($query);// prendo tutti gli alloggi con lo stesso id_tesbro
+            $r['title']="";
+            while ($rev = gaz_dbi_fetch_array($res_ev)){// li ciclo e creo un title unico
+              $r['title'].=$rev['title']." ";
+            }
+
+            $ret[]=$r;
+          }
+        }
+        echo json_encode($ret);
+
+        break;
 
       case 'point':
         // Antonio Germani prendo i dati IMAP utente, se ci sono
         $custom_field = gaz_dbi_get_row($gTables['anagra'], 'id', $admin_aziend['id_anagra'])['custom_field'];
         $imap_usr='';
-        if ($data = json_decode($custom_field,true)){// se c'è un json
+        if (isset($custom_field) && $data = json_decode($custom_field,true)){// se c'è un json
           if (isset($data['config'][$admin_aziend['company_id']]) && is_array($data['config'])){ // se c'è il modulo "config" e c'è l'azienda attuale posso procedere
             list($encrypted_data, $iv) = explode('::', base64_decode($data['config'][$admin_aziend['company_id']]['imap_pwr']), 2);
             $imap_pwr=openssl_decrypt($encrypted_data, 'aes-128-cbc', $_SESSION['aes_key'], 0, $iv);
