@@ -1892,9 +1892,10 @@ class GAzieForm {
       }
     }
 
-    function selectFromDB($table, $name, $key, $val, $order = false, $empty = false, $bridge = '', $key2 = '', $val_hiddenReq = '', $class = 'FacetSelect', $addOption = null, $style = '', $where = false, $echo=false, $bridge2 = '', $key3 = '', $sort='') {
+    function selectFromDB($table, $name, $key, $val, $order = false, $empty = false, $bridge = '', $key2 = '', $val_hiddenReq = '', $class = 'FacetSelect', $addOption = null, $style = '', $where = false, $echo=false, $bridge2 = '', $key3 = '', $sort='',$id='', $required='') {
         global $gTables;
-		$acc='';
+        $acc='';
+        $id=($id=='')?$name:$id;
         $refresh = '';
         if (!$order) {
             $order = $key;
@@ -1907,9 +1908,9 @@ class GAzieForm {
         if (!empty($val_hiddenReq)) {
             $refresh = "onchange=\"this.form.hidden_req.value='$val_hiddenReq'; this.form.submit();\"";
         }
-        $acc .= "\t <select id=\"$name\" name=\"$name\" class=\"$class\" $refresh $style>\n";
+        $acc .= "\t <select id=\"$id\" name=\"$name\" class=\"$class\" $refresh $style $required>\n";
         if ($empty) {
-            $acc .= "\t\t <option value=\"\"></option>\n";
+            $acc .= "\t\t <option value=\"\" ></option>\n";
         }
         $result = gaz_dbi_query($query);
         while ($r = gaz_dbi_fetch_array($result)) {
@@ -2670,15 +2671,28 @@ function changeEnterprise($new_co = 1) {
 }
 
 function encodeSendingNumber($data, $b = 62) {
-    /* questa funzione mi serve per convertire un numero decimale in uno a base 36
-      ------------------------- SCHEMA DEI DATI PER INVIO  ------------------------
+    /* questa funzione converte un numero decimale in uno a base 36 al fine di aver il
+       Progressivo univoco del file XML della fattura eletronica
+       ad oggi (13-04-2025) sono rese disponibili due modalità, la prima è quella che a breve dovrà essere sostituita
+       in quanto causerà conflitti dopo 10 anni di utilizzo si basa su questo specchietto:
+      ------------ SCHEMA DEI DATI PER INVIO VECCHIO MODO  ------------------------
       |   SEZIONE IVA   |  ANNO DOCUMENTO  | N.REINVII |    NUMERO PROTOCOLLO     |
       |     INT (1)     |      INT(1)      |   INT(1)  |        INT(5)            |
       |        3        |        9         |     9     |        99999             |
       | $data[sezione]  |   $data[anno] $data[fae_reinvii]  $data[protocollo]     |
-      ------------------------------------------------------------------------------
+      -----------------------------------------------------------------------------
+
+      il nuovo si baserà su id_tes della tabella gaz_NNNtesdoc proprio per evitare i citati conflitti:
+      -------- SCHEMA DEI DATI PER INVIO NUOVO MODO --------
+      |        INT (1)         |        INT(7)             |
+      |      N.REINVII         |  ID_TES DI gaz_NNNtesdoc  |
+      | 5 --> (MAX 4 reinvii)  |       9999999             |   --- CONVERT TO BASE36 ---> ZQ0AN
+      |   $data[fae_reinvii]   |     $data[id_tes]         |
+      ------------------------------------------------------
+
      */
-    $num = $data['sezione'] . substr($data['anno'], 3, 1).$data['fae_reinvii']. substr(str_pad($data['protocollo'], 5, '0', STR_PAD_LEFT), -5);
+
+    $num = (count($data)==2)?(($data['fae_reinvii']+1)*10000000+$data['id_tes']):$data['sezione'] . substr($data['anno'], 3, 1).$data['fae_reinvii']. substr(str_pad($data['protocollo'], 5, '0', STR_PAD_LEFT), -5);
     $num = intval($num);
     $base = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     $r = $num % $b;

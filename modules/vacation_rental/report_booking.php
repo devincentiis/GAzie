@@ -1439,6 +1439,8 @@ $ts->output_navbar();
                     $stato_btn_selfcheck = 'btn-danger';
                     $title_selfcheck = "self check-in rifiutato";
                   }
+                }else{
+                  $stato_btn_selfcheck="";
                 }
               }else{
                 $stato_btn_selfcheck="";

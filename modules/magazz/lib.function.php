@@ -748,7 +748,6 @@ class magazzForm extends GAzieForm {
                         }
                     }
                 }
-
                 break;
             default:
         }
@@ -789,6 +788,9 @@ class magazzForm extends GAzieForm {
     } elseif ($tipdoc == 'PRL') {
       $rigtable='rigbro';
       $desdoc = 'Utilizzato in lavorazione';
+    } elseif (substr($tipdoc,0,1) == 'P') { // tutte le altre produzioni dovrò passare la referenza in $data_from_admin_mov
+      $rigtable='rigbro';
+      $desdoc = 'Produzione';
     } else {//documento di vendita
       require("../../modules/vendit/lang." . $admin_aziend['lang'] . ".php");
       $desdoc = $strScript['admin_docven.php']['doc_name'][$tipdoc];

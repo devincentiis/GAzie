@@ -658,7 +658,11 @@ $strScript = array(
 	'in_data'=>' w dniu  ',
 	'alle_ore'=>' o godzinie ',
 	'cancell_payment' => 'Anuluj płatność',
-	'refund' => 'Zwrot'
+	'refund' => 'Zwrot',
+  'points' => 'Punkty',
+  'missing' => 'Brakuje',
+  'next_level' => 'do następnego poziomu',
+  'detail_points' => 'Szczegóły punktów'
     ),
 
   "admin_extra.php" =>
@@ -823,80 +827,76 @@ $strScript = array(
     'next' => ' Successiva '
     ),
     "self_checkin.php" =>
-    array('title' => 'Gestione dei self check-in',
-        'text1' => 'Perfetto, i documenti sono stati caricati correttamente!',
-        'text2' => 'Adesso, controlla di aver pagato il deposito cauzionale e il saldo della locazione. Se il pagamento non viene effettuato, il self check-in non potrà essere abilitato.',
-        'text3' => 'Risulterebbero ancora da pagare € ',
-        'text4' => 'I pagamenti possono essere effettuati sempre dalla tua pagina di prenotazione utente.',
-        'text5' => '<p>Un ammistratore visionerà quanto inviato. Se è tutto completato riceverai il codice e le istruzioni per il self check-in.</p>
-            <p><br>Per ogni necessità non esitare a contattare la struttura.</p>',
-        'instr1' =>'Identificazione del capo gruppo per il check-in del ',
-        'instr2' => 'Scattare un selfie con un documento di identità in mano e l\'indicazione del check-in.',
-        'instr3' => 'La persona di questo selfie deve essere: ',
-        'instr4' => '<p>Devi scattare una tua foto (selfie) con in mano, sia il tuo documento d\'identità, sia un pezzo di carta con le parole " Check-in \'<i>data del check-in</i>\' " scritte a mano su di esso.  La data del check-in deve essere la data di arrivo all\'alloggio (es: 13/06/2023).
-              </p>
-              <p>
-              Rivolgiti verso la fotocamera e inquadrati solo dalle spalle alla sommità della testa, in modo simile a una fototessera; Usa una parete semplice come sfondo, se possibile.
-              </p>
-              <p>
-              Assicurati che la luce provenga da davanti a te, non da dietro di te, assicurandoti che il tuo viso sia chiaramente visibile senza retroilluminazione; SI CONSIGLIA LA LUCE DEL GIORNO.
-              </p>
-              <p>
-              Non indossare occhiali da sole, cappelli o qualsiasi cosa che copra il viso. Se indossi gli occhiali nella tua fototessera, indossali anche nella foto del selfie. Se non indossi gli occhiali nella tua fototessera, rimuovili quando scatti il selfie;
-              </p>
-              <p>
-              Il documento d\'identità deve inoltre essere completamente e chiaramente visibile sul selfie: FAI ATTENZIONE AI RIFLESSI.
-              </p>',
-        'instr5' => '<p>Devi scattare una tua foto (selfie) con in mano, sia il tuo documento d\'identità, sia un pezzo di carta con le parole \" Check-in \'<i>data del check-in</i>\' \" scritte a mano su di esso.  La data del check-in deve essere la data di arrivo all\'alloggio (es: 13/06/2023).
-				</p>
-				<p>
-				Rivolgiti verso la fotocamera e inquadrati solo dalle spalle alla sommità della testa, in modo simile a una fototessera; Usa una parete semplice come sfondo, se possibile.
-				</p>
-				<p>
-				Assicurati che la luce provenga da davanti a te, non da dietro di te, assicurandoti che il tuo viso sia chiaramente visibile senza retroilluminazione; SI CONSIGLIA LA LUCE DEL GIORNO.
-				</p>
-				<p>
-				Non indossare occhiali da sole, cappelli o qualsiasi cosa che copra il viso. Se indossi gli occhiali nella tua fototessera, indossali anche nella foto del selfie. Se non indossi gli occhiali nella tua fototessera, rimuovili quando scatti il selfie;
-				</p>
-				<p>
-				Il documento d\'identità deve inoltre essere completamente e chiaramente visibile sul selfie: FAI ATTENZIONE AI RIFLESSI.
-				</p>
-				<p>
-				Usa la telecamera da selfie (utilizza meno memoria).
-				</p>',
-        'webcam_start' => 'Avvia la webcam',
-        'take_photo' => 'Scatta la foto',
-        'go' => 'Vai avanti',
-        'submit' => 'Conferma',
-        'selfie_success' =>'Invio selfie avvenuto con successo, grazie!',
-        'text6' => 'Carica i documenti di identità',
-        'instr6' => '<h2>Quando carichi il tuo documento d\'identità con foto, fai attenzione a:</h2>
-          <ul>
-          <li>Assicurati che il tuo documento sia valido e non scaduto;</li>
-          <li>Assicurati che non abbia fori o altre modifiche che ne impediscano la lettura;</li>
-          <li>Devi caricare entrambi i lati del tuo documento (fronte e retro);</li>
-          <li>Fotografando il documento evita di tagliare angoli o lati;</li>
-          <li>Assicurati che tutto il documento sia completamente visibile e a fuoco;</li>
-          <li>Sono accettati solo i formati jpg, jpeg e png.</li>
-          </ul>',
-        'text7' => '<b>capogruppo/capofamiglia</b>',
-        'text8' => 'l\'ospite',
-        'text9' => 'inserisci nome e documento del',
-        'name' => 'Nome',
-        'surname' => 'Cognome',
-        'load_doc' => 'Carica il documento di identità FRONTE',
-        'load_doc_back' => 'Carica il documento di identità RETRO',
-        'text10' => 'inserisci nome e documento del minore',
-        'no_doc' => 'Non ha documento',
-        'b_place' => 'Luogo di nascita',
-        'b_date' => 'Data di nascita',
-        'r_place' => 'Luogo di residenza',
-        'send' => 'Invia',
-        'text11' => 'Perfetto, i documenti sono stati caricati correttamente!',
-        'text12' => '<p>Adesso, controlla di aver pagato il deposito cauzionale e il saldo della locazione. Se il pagamento non viene effettuato, il self check-in non potrà essere abilitato.</p>',
-        'text13' => 'Risulterebbero ancora da pagare € ',
-        'text14' => 'I pagamenti possono essere effettuati sempre dalla tua pagina di prenotazione utente.',
-        'text15' => '<p>Un ammistratore visionerà quanto inviato. Se è tutto a posto riceverai il codice e le istruzioni per il self check-in.</p><p><br>Per ogni necessità non esitare a contattare la struttura.</p>'
+    array('title' => 'Zarządzanie self check-in',
+        'text1' => 'Świetnie, dokumenty zostały poprawnie załadowane!',
+        'text2' => 'Teraz sprawdź, czy wpłacono kaucję i uregulowano należność za wynajem. W przeciwnym razie self check-in nie będzie możliwy.',
+        'text3' => 'Pozostała kwota do zapłaty: € ',
+        'text4' => 'Płatności można dokonywać zawsze ze swojej strony rezerwacyjnej.',
+        'text5' => '<p>Administrator sprawdzi przesłane dane. Jeśli wszystko jest w porządku, otrzymasz kod i instrukcje dotyczące self check-in.</p><p><br>W razie potrzeby skontaktuj się z obiektem.</p>',
+        'instr1' => 'Identyfikacja lidera grupy dla check-in w dniu ',
+        'instr2' => 'Zrób selfie z dokumentem tożsamości i notatką z datą check-in.',
+        'instr3' => 'Osoba na tym selfie musi być: ',
+        'instr4' => '<p>Musisz zrobić zdjęcie (selfie) z dokumentem tożsamości i kartką z napisem " Check-in \'<i>data check-in</i>\' " napisanym odręcznie. Data musi odpowiadać dacie przyjazdu (np.: 13/06/2023).</p><p>Ustaw się przodem do aparatu, kadr od ramion do czubka głowy, jak zdjęcie paszportowe; użyj jednolitego tła, jeśli to możliwe.</p><p>Upewnij się, że światło pada z przodu, nie z tyłu – twarz powinna być wyraźnie widoczna bez podświetlenia; ZALECANE JEST ŚWIATŁO DZIENNE.</p><p>Nie zakładaj okularów przeciwsłonecznych, czapek ani niczego, co zakrywa twarz. Jeśli nosisz okulary na zdjęciu paszportowym, załóż je też do selfie; w przeciwnym razie je zdejmij.</p><p>Dokument tożsamości musi być całkowicie i wyraźnie widoczny na selfie: UWAGA NA ODBLASKI.</p>',
+        'instr5' => '<p>Musisz zrobić zdjęcie (selfie) z dokumentem tożsamości i kartką z napisem " Check-in \'<i>data check-in</i>\' " napisanym odręcznie. Data musi odpowiadać dacie przyjazdu (np.: 13/06/2023).</p><p>Ustaw się przodem do aparatu, kadr od ramion do czubka głowy, jak zdjęcie paszportowe; użyj jednolitego tła, jeśli to możliwe.</p><p>Upewnij się, że światło pada z przodu, nie z tyłu – twarz powinna być wyraźnie widoczna bez podświetlenia; ZALECANE JEST ŚWIATŁO DZIENNE.</p><p>Nie zakładaj okularów przeciwsłonecznych, czapek ani niczego, co zakrywa twarz. Jeśli nosisz okulary na zdjęciu paszportowym, załóż je też do selfie; w przeciwnym razie je zdejmij.</p><p>Dokument tożsamości musi być całkowicie i wyraźnie widoczny na selfie: UWAGA NA ODBLASKI.</p><p>Użyj przedniej kamery (zużywa mniej pamięci).</p>',
+        'webcam_start' => 'Uruchom kamerę',
+        'take_photo' => 'Zrób zdjęcie',
+        'go' => 'Dalej',
+        'submit' => 'Zatwierdź',
+        'selfie_success' => 'Selfie zostało pomyślnie przesłane, dziękujemy!',
+        'text6' => 'Załaduj dokumenty tożsamości',
+        'instr6' => '<h4>Podczas przesyłania dokumentu tożsamości ze zdjęciem, zwróć uwagę na następujące kwestie:</h4>
+        <li>Upewnij się, że dokument jest ważny i nie wygasł;</li>
+        <li>Sprawdź, czy nie ma dziur ani innych modyfikacji, które utrudniają jego odczytanie;</li>
+        <li>Musisz przesłać obie strony dokumentu (przód i tył);</li>
+        <li>Podczas robienia zdjęcia dokumentu unikaj obcinania rogów lub krawędzi;</li>
+        <li>Upewnij się, że cały dokument jest w pełni widoczny i wyraźny;</li>
+        <li>Akceptowane są tylko formaty jpg, jpeg, pdf i png.</li>
+        ',
+        'text7' => '<b>lider grupy/głowa rodziny</b>',
+        'text8' => 'gość',
+        'text9' => 'wprowadź imię i dokument',
+        'name' => 'Imię',
+        'surname' => 'Nazwisko',
+        'load_doc' => 'Załaduj DOWÓD TOŻSAMOŚCI – PRZÓD',
+        'load_doc_back' => 'Załaduj DOWÓD TOŻSAMOŚCI – TYŁ',
+        'text10' => 'wprowadź imię i dokument nieletniego',
+        'no_doc' => 'Nie posiada dokumentu',
+        'b_place' => 'Miejsce urodzenia',
+        'b_date' => 'Data urodzenia',
+        'r_place' => 'Miejsce zamieszkania',
+        'country' => 'Narodowość',
+        'indspe' => 'Adres',
+        'pronas' => 'Prowincja urodzenia',
+        'counas' => 'Kraj urodzenia',
+        'tip_doc' => 'Rodzaj dokumentu',
+        'num_doc' => 'Numer dokumentu',
+        'tip_doc_instr' => 'Wprowadzony dokument musi być tym samym, który zabierzesz ze sobą podczas pobytu.',
+        'sex' => 'Płeć',
+        'male' => 'Mężczyzna',
+        'female' => 'Kobieta',
+        'like_boss' => 'Jak lider grupy',
+        'parent_question' => 'Czy ten gość jest niepełnoletni? Czy obecny jest przynajmniej jeden rodzic?',
+        'parent_option' => 'Nie wybrano opcji: zaznacz, czy obecny jest przynajmniej jeden rodzic',
+        'born_missing' => 'Uzupełnij wszystkie pola: data urodzenia',
+        'citizenship' => 'Obywatelstwo',
+        'coucard' => 'Kraj wydania dokumentu',
+        'loccard' => 'Miejsce wydania',
+        'no_parent' => 'Brak obecności rodzica',
+        'load_aut' => 'Załaduj zgodę rodzica',
+        'id_card' => 'Dokument tożsamości',
+        'id_card_instr' => 'Wprowadź dane dokładnie tak, jak zapisano w dokumencie.',
+        'provincia' => 'Prowincja',
+        'send' => 'Wyślij',
+        'text11' => 'Świetnie, dokumenty zostały poprawnie załadowane!',
+        'text12' => '<p>Teraz sprawdź, czy został opłacony depozyt i saldo najmu. Jeśli płatność nie zostanie dokonana, self check-in nie będzie możliwy.</p>',
+        'text13' => 'Pozostało do zapłaty € ',
+        'text14' => 'Płatności można dokonywać zawsze ze swojej strony rezerwacyjnej.',
+        'text15' => '<p>Administrator sprawdzi przesłane dane. Jeśli wszystko będzie w porządku, otrzymasz kod i instrukcje do self check-in.</p><p><br>W razie potrzeby skontaktuj się z obiektem.</p>',
+        'text16' => 'Wstępny check-in został wykonany. <br>Administrator przeanalizuje dane i przekaże wynik za pomocą powiadomienia.',
+        'text17' => '<p>Teraz, jeśli chcesz, możesz dokonać płatności końcowej, lub zrobić to po przybyciu do obiektu.</p>',
+        'text18' => '<p>Aby dokonać płatności, dodać ewentualne dodatki i zarządzać kontem, wystarczy zalogować się do strefy użytkownika na stronie i otworzyć rezerwację.</p>',
+        'stay_from' => 'Pobyt od',
+        'to' => 'do'
     )
 );
 ?>

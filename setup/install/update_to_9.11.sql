@@ -1,4 +1,5 @@
 UPDATE `gaz_config` SET `cvalue` = '160' WHERE `id` =2;
+INSERT INTO `gaz_currencies` (`curr_name`, `symbol`, `html_symbol`, `decimal_place`, `decimal_symbol`, `thousands_symbol`) VALUES ('US dollar', '$', '&#0036', '2', '.', '');
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
 ALTER TABLE `gaz_XXXbody_text`	ADD COLUMN `custom_field` TEXT NULL COMMENT 'Riferimenti generici utilizzabili sui moduli. Normalmente in formato json: {"nome_modulo":{"nome_variabile":{"valore_variabile": {}}}}' AFTER `descri`;
 ALTER TABLE `gaz_XXXrigdoc`	ADD COLUMN `custom_field` TEXT NULL COMMENT 'Riferimenti generici utilizzabili sui moduli. Normalmente in formato json: {"nome_modulo":{"nome_variabile":{"valore_variabile": {}}}}' AFTER `id_orderman`;

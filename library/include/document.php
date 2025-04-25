@@ -116,6 +116,7 @@ class DocContabVars {
   public $totivafat;
   public $tipdoc;
   public $cast;
+  public $currency;
 
     function setData($gTables, $tesdoc, $testat, $tableName, $ecr = false) {
       global $gazie_locale;
@@ -171,8 +172,10 @@ class DocContabVars {
       $this->iva_bollo = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['taxstamp_vat']);
       $this->client = $anagrafica->getPartner($tesdoc['clfoco']);
       if(!$this->client){
-        $this->client=['ragso1'=>': ','ragso2'=>'','pec_email'=>'','fe_cod_univoco'=>'','fe_cod_univoco'=>'','indspe'=>'','citspe'=>'','country'=>'IT','capspe'=>'','prospe'=>'','pariva'=>'','pariva'=>'','codfis'=>'','sedleg'=>'','fiscal_rapresentative_id'=>'','stapre'=>''];
+        $this->client=['ragso1'=>': ','ragso2'=>'','pec_email'=>'','fe_cod_univoco'=>'','fe_cod_univoco'=>'','indspe'=>'','citspe'=>'','country'=>'IT','capspe'=>'','prospe'=>'','pariva'=>'','pariva'=>'','codfis'=>'','sedleg'=>'','fiscal_rapresentative_id'=>'','stapre'=>'','id_currency'=>$admin_aziend['id_currency']];
       }
+      if ($this->client['id_currency'] < 1 ) { $this->client['id_currency'] = 1; }
+      $this->currency = gaz_dbi_get_row($gTables['currencies'], "id", $this->client['id_currency']);
       $this->descri_partner =($this->client['country']=="IT")?'Cliente':'Customer';
       if (substr($tesdoc['clfoco'], 0, 3) == $admin_aziend['masfor']) {
           $this->descri_partner =  ($this->client['country']=="IT")?'Fornitore':'Supplier';

@@ -151,6 +151,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['rows'] = array();
   $form['accommodation_type'] = $_POST['accommodation_type'];
   $form['room_type'] = $_POST['room_type'];
+  $form['room_qta'] = $_POST['room_qta'];
   $form['adult'] = $_POST['adult'];
   $form['child'] = $_POST['child'];
   $form['pause'] = $_POST['pause'];
@@ -194,14 +195,14 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $nimg++;
     }
   }else{
-	 
+
     $nimg = 0;
     $rs_row = gaz_dbi_dyn_query("*", $gTables['files'], "item_ref = '" . $form['codice'] . "' AND id_ref = '1'", "id_doc DESC");
     while ($row = gaz_dbi_fetch_array($rs_row)) {
         $form['imgrows'][$nimg] = $row;
         $nimg++;
     }
-   
+
   }
   // fine inizio immagini e-commerce
   $form['body_text'] = filter_input(INPUT_POST, 'body_text');
@@ -343,7 +344,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['preve1']=$form['web_price'];// al momento imposto il prezzo 1 uguale al webprice
 
     if ($toDo == 'insert') {
-      $array= array('vacation_rental'=>array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'pause' => $_POST['pause'],'fixquote' => floatval($_POST['fixquote']),'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'self_checkin' => $_POST['self_checkin'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent']));// creo l'array per il custom field
+      $array= array('vacation_rental'=>array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'room_qta' => $_POST['room_qta'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'pause' => $_POST['pause'],'fixquote' => floatval($_POST['fixquote']),'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'self_checkin' => $_POST['self_checkin'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent']));// creo l'array per il custom field
       $form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
       gaz_dbi_table_insert('artico', $form);
       if (!empty($tbt)) {
@@ -363,6 +364,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
           $data['vacation_rental']['accommodation_type']=$_POST['accommodation_type'];
           $data['vacation_rental']['room_type']=$_POST['room_type'];
+          $data['vacation_rental']['room_qta']=$_POST['room_qta'];
           $data['vacation_rental']['total_guests']=$_POST['total_guests'];
           $data['vacation_rental']['adult']=$_POST['adult'];
           $data['vacation_rental']['child']=$_POST['child'];
@@ -465,48 +467,51 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     } else {
         $form['ritorno'] = 'admin_house.php';
     }
-	
+
 	$form['hidden_req'] = '';
-	
+
 	$form['tab'] = 'home';
-	
+
 	$form['web_public_init']=$form['web_public'];
 	if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
 
 		if (is_array($data['vacation_rental'])){
-				$form['accommodation_type'] = $data['vacation_rental']['accommodation_type'];
+      $form['accommodation_type'] = $data['vacation_rental']['accommodation_type'];
 			$form['room_type'] = $data['vacation_rental']['room_type'];
-				$form['adult'] = $data['vacation_rental']['adult'];
-				$form['child'] = $data['vacation_rental']['child'];
+      $form['room_qta'] = isset($data['vacation_rental']['room_qta'])?$data['vacation_rental']['room_qta']:1;// almeno una camera ci deve sempre essere
+      $form['adult'] = $data['vacation_rental']['adult'];
+      $form['child'] = $data['vacation_rental']['child'];
 			$form['pause'] = (isset($data['vacation_rental']['pause']))?$data['vacation_rental']['pause']:'';
 			$form['self_checkin'] = (isset($data['vacation_rental']['self_checkin']))?$data['vacation_rental']['self_checkin']:0;
 			$form['fixquote'] = (isset($data['vacation_rental']['fixquote']))?$data['vacation_rental']['fixquote']:'';
-				$form['total_guests'] = $data['vacation_rental']['total_guests'];
-				$form['deposit'] = $data['vacation_rental']['deposit'];
+      $form['total_guests'] = $data['vacation_rental']['total_guests'];
+      $form['deposit'] = $data['vacation_rental']['deposit'];
 			$form['security_deposit'] = (isset($data['vacation_rental']['security_deposit']))?$data['vacation_rental']['security_deposit']:0;
-				$form['deposit_type'] = $data['vacation_rental']['deposit_type'];
-				$form['tur_tax_mode'] = $data['vacation_rental']['tur_tax_mode'];
-				$form['tur_tax']= $data['vacation_rental']['tur_tax'];
+      $form['deposit_type'] = $data['vacation_rental']['deposit_type'];
+      $form['tur_tax_mode'] = $data['vacation_rental']['tur_tax_mode'];
+      $form['tur_tax']= $data['vacation_rental']['tur_tax'];
 			$form['agent'] = $data['vacation_rental']['agent'];
 
 		} else {
-				$form['accommodation_type'] = "";
+      $form['accommodation_type'] = "";
 			$form['room_type'] = 0;
-				$form['adult'] = 0;
-				$form['child'] = 0;
+      $form['room_qta'] = 0;
+      $form['adult'] = 0;
+      $form['child'] = 0;
 			$form['pause'] = 0;
 			$form['fixquote'] = 0;
-				$form['total_guests'] = 0;
-				$form['deposit'] = 0;
+      $form['total_guests'] = 0;
+      $form['deposit'] = 0;
 			$form['security_deposit'] = 0;
-				$form['deposit_type'] = 0;
-				$form['tur_tax_mode'] =0;
-				$form['tur_tax']=0;
+      $form['deposit_type'] = 0;
+      $form['tur_tax_mode'] =0;
+      $form['tur_tax']=0;
 			$form['agent']=0;
-			}
+    }
 	} else {
 		$form['accommodation_type'] = "";
     $form['room_type'] = 0;
+    $form['room_qta'] = 0;
 		$form['adult'] = 0;
 		$form['child'] = 0;
     $form['pause'] = 0;
@@ -585,6 +590,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['hidden_req'] = '';
     $form['accommodation_type'] = '';
     $form['room_type'] = 0;
+    $form['room_qta'] = 1;
     $form['adult'] = 1;
     $form['child'] = 0;
     $form['pause'] = 0;
@@ -1497,7 +1503,16 @@ if ($modal_ok_insert === true) {
                             <?php
                             $gForm->variousSelect('room_type', $script_transl['room_type_value'], $form['room_type'], "col-sm-8", true, '', false, 'style="max-width: 200px;"');
                             ?>
-							<input type="hidden" name="good_or_service" value="1" /><!-- un alloggio è sempre servizio, quindi '1'  -->
+                            <input type="hidden" name="good_or_service" value="1" /><!-- un alloggio è sempre servizio, quindi '1'  -->
+                        </div>
+                    </div>
+                </div><!-- chiude row  -->
+                </div><!-- chiude row  -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="room_qta" class="col-sm-4 control-label">Numero di camere</label>
+                            <input type="number" name="room_qta" min="1" value="<?php echo $form['room_qta']; ?>" /><!-- Almeno una camera ci sempre essere  -->
                         </div>
                     </div>
                 </div><!-- chiude row  -->
@@ -1587,7 +1602,7 @@ $("#aliiva, #webprice").on("keyup",function(){
 
 </script>
 <?php
-if (isset($_GET['tab'])){		
+if (isset($_GET['tab'])){
 		?>
 		<script>
 		const stateObj = { foo: "bar" };

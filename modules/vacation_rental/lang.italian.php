@@ -660,7 +660,11 @@ $strScript = array(
 		'in_data'=>'in data',
 		'alle_ore'=>'alle ore',
 		'cancell_payment' => 'Annulla pagamento',
-		'refund' => 'Rimborso'
+		'refund' => 'Rimborso',
+    'points' => 'Punti',
+    'missing' => 'Mancano',
+    'next_level' => 'per il livello successivo',
+    'detail_points' => 'Dettaglio punti'
     ),
 
   "admin_extra.php" =>
@@ -872,15 +876,13 @@ $strScript = array(
         'submit' => 'Conferma',
         'selfie_success' =>'Invio selfie avvenuto con successo, grazie!',
         'text6' => 'Carica i documenti di identità',
-        'instr6' => '<h2>Quando carichi il tuo documento d\'identità con foto, fai attenzione a:</h2>
-          <ul>
+        'instr6' => '<h4>Quando carichi il documento d\'identità con foto, presta le seguenti attenzioni:</h4>
           <li>Assicurati che il tuo documento sia valido e non scaduto;</li>
           <li>Assicurati che non abbia fori o altre modifiche che ne impediscano la lettura;</li>
           <li>Devi caricare entrambi i lati del tuo documento (fronte e retro);</li>
           <li>Fotografando il documento evita di tagliare angoli o lati;</li>
           <li>Assicurati che tutto il documento sia completamente visibile e a fuoco;</li>
-          <li>Sono accettati solo i formati jpg, jpeg e png.</li>
-          </ul>',
+          <li>Sono accettati solo i formati jpg, jpeg, pdf e png.</li>',
         'text7' => '<b>capogruppo/capofamiglia</b>',
         'text8' => 'l\'ospite',
         'text9' => 'inserisci nome e documento del',
@@ -892,13 +894,40 @@ $strScript = array(
         'no_doc' => 'Non ha documento',
         'b_place' => 'Luogo di nascita',
         'b_date' => 'Data di nascita',
-        'r_place' => 'Luogo di residenza',
+        'r_place' => 'Località di residenza',
+        'country' => 'Nazionalità',
+        'indspe' => 'Indirizzo',
+        'pronas' => 'Provincia di nascita',
+        'counas' => 'Stato di nascita',
+        'tip_doc' => 'Tipo di documento',
+        'num_doc' => 'Numero del documento',
+        'tip_doc_instr' => 'Il documento che inserisci deve essere lo stesso che porterai con te durante il soggiorno.',
+        'sex' => 'Sesso',
+        'male' => 'Maschio',
+        'female' => 'Femmina',
+        'like_boss' => 'Come il capogruppo',
+        'parent_question' =>'Questo ospite è minorenne. E\' presente almeno un genitore?',
+        'parent_option' => 'Nessuna opzione selezionata: selezionare se è presente almeno un genitore',
+        'born_missing' => 'Compilare tutti campi: data di nascita',
+        'citizenship' => 'Cittadinanza',
+        'coucard' => 'Stato di rilascio documento',
+        'loccard' => 'Località di rilascio',
+        'no_parent' => 'Non è presente nessun genitore',
+        'load_aut' => 'Carica l\'autorizzazione del genitore',
+        'id_card' => 'Documento di identità del',
+        'id_card_instr' => 'Inserisci i dati così come sono scritti nel documento.',
+        'provincia' => 'Provincia',
         'send' => 'Invia',
         'text11' => 'Perfetto, i documenti sono stati caricati correttamente!',
         'text12' => '<p>Adesso, controlla di aver pagato il deposito cauzionale e il saldo della locazione. Se il pagamento non viene effettuato, il self check-in non potrà essere abilitato.</p>',
         'text13' => 'Risulterebbero ancora da pagare € ',
         'text14' => 'I pagamenti possono essere effettuati sempre dalla tua pagina di prenotazione utente.',
-        'text15' => '<p>Un ammistratore visionerà quanto inviato. Se è tutto a posto riceverai il codice e le istruzioni per il self check-in.</p><p><br>Per ogni necessità non esitare a contattare la struttura.</p>'
+        'text15' => '<p>Un ammistratore visionerà quanto inviato. Se è tutto a posto riceverai il codice e le istruzioni per il self check-in.</p><p><br>Per ogni necessità non esitare a contattare la struttura.</p>',
+        'text16' => 'Il pre check-in è stato effettuato. <br>Un amministratore lo esaminerà fornendo poi l\'esito tramite notifica.',
+        'text17' => '<p>Adesso, se lo desideri puoi anche effettuare subito il pagamento del saldo, oppure lo potrai fare al tuo arrivo alla struttura.</p>',
+        'text18' => '<p>Per il pagamento, l\'aggiunta di eventuali extra, e tutto quello che riguarda il tuo account è sufficiente accedere all\'area utente del sito internet e aprire la locazione.</p>',
+        'stay_from' => 'Soggiorno dal',
+        'to' => 'al'
     )
 );
 ?>

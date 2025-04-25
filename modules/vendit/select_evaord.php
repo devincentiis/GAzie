@@ -1302,7 +1302,8 @@ function choice_ddt_type() {
     <input type="hidden" name="volume" value="<?php echo $form['volume']; ?>">
     <input type="hidden" name="id_agente" value="<?php echo $form['id_agente']; ?>">
     <input type="hidden" name="caumag" value="<?php echo $form['caumag']; ?>">
-    <input type="hidden" name="indspe" value="<?php echo $form['indspe']; ?>'">
+    <input type="hidden" name="indspe" value="<?php echo $form['indspe']; ?>">
+    <input type="hidden" name="tipdoc" value="<?= $form['tipdoc']; ?>">
 
     <div align="center" class="FacetFormHeaderFont"><?php echo $script_transl['title']; ?>
         <?php
@@ -1424,12 +1425,7 @@ function choice_ddt_type() {
 			<td class=\"FacetFieldCaptionTD\">$script_transl[2]</td>
 			<td class=\"FacetDataTD\">
 				<input type=\"text\" value=\"" . $form['units'] . "\" name=\"units\" maxlength=\"6\"  />
-			</td></tr>\n";
-
-        $tidoc_selectable = array("DDT" => "D.d.T. di Vendita", "DDY" => "D.d.T. da non fatturare automaticamente","DDS" => "Notula Servizio (no fat.15 mese succ.)");
-        echo "<tr><td class=\"FacetFieldCaptionTD\">" . "Tipo documento" . "</td><td class=\"FacetDataTD\">";
-        $gForm->variousSelect('tipdoc', $tidoc_selectable, $form['tipdoc'], 'FacetFormHeaderFont', true, 'tipdoc');
-        echo"</td></tr></table>";
+			</td></tr></table>";
         if (!empty($form['righi'])) {
             echo '<div align="center"><b>' . $script_transl['preview_title'] . '</b></div>';
             echo "<table class=\"Tlarge table table-striped table-bordered table-condensed table-responsive\">";
