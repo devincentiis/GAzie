@@ -160,6 +160,13 @@ $(function() {
                 ?>
             </tr>
             <?php
+// creo la matrice con il numero di presenze del collaboratore
+$accmov=[];
+$rs=gaz_dbi_query("SELECT id_staff , COUNT(*) FROM ".$gTables['staff_worked_hours']." GROUP BY id_staff");
+while ($r=gaz_dbi_fetch_row($rs)) {
+  $accmov[$r[0]]=isset($accmov[$r[0]])?($accmov[$r[0]]+$r[1]):(int)$r[1];
+};
+
             while ($r = gaz_dbi_fetch_array($result)) {
                 echo "<tr>";
                 // Colonna codice staffe
@@ -211,9 +218,11 @@ $(function() {
                 echo "<td align=\"center\">";
 				if (intval($r['codcon']) > 0){
 					?>
-					<button title="Collaboratore non cancellabile perch� ha movimenti contabili" class="btn btn-xs   disabled"><i class="glyphicon glyphicon-trash"></i></button>
+					<button title="Collaboratore non cancellabile, ha movimenti contabili associati" class="btn btn-xs   disabled"><i class="glyphicon glyphicon-trash"></i></button>
 					<?php
-				} else {
+				} else if (isset($accmov[$r['id_staff']])){
+          echo '<button class="btn btn-xs  btn-default" disabled title="Il collaboratore non è eliminabile perché è presente su '. $accmov[$r['id_staff']].' registrazioni"><i class="glyphicon glyphicon-trash"></i></button>';
+        }  else {
 				?>
 				<a class="btn btn-xs  btn-elimina dialog_delete" ref="<?php echo $r['id_clfoco'];?>" staffdes="<?php echo $r['ragso1']; ?>">
 					<i class="glyphicon glyphicon-trash"></i>

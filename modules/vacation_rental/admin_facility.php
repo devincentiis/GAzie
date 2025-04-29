@@ -102,6 +102,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 	$form['lat'] = $_POST['lat'];
   $form['long'] = $_POST['long'];
   $form['cin'] = $_POST['cin'];
+  $form['csmt'] = $_POST['csmt'];
   $form['lang_id'] = intval($_POST['lang_id']);
   foreach($langs as $lang){
     if (intval($lang['lang_id'])==1){ continue;}
@@ -285,7 +286,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 
 			// aggiorno il db
 			if ($toDo == 'insert') {
-				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'week_check_in' => $form['week_check_in'], 'week_check_out' => $form['week_check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long'], 'cin' => $form['cin']));// creo l'array per il custom field
+				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'week_check_in' => $form['week_check_in'], 'week_check_out' => $form['week_check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long'], 'cin' => $form['cin'], 'csmt' => $form['csmt']));// creo l'array per il custom field
 				$form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
 				gaz_dbi_table_insert('artico_group', $form);
         // in inserimento scrivo tutte le lingue straniere
@@ -319,9 +320,10 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
             $data['vacation_rental']['latitude']=$_POST['lat'];
             $data['vacation_rental']['longitude']=$_POST['long'];
             $data['vacation_rental']['cin']=$_POST['cin'];
+            $data['vacation_rental']['csmt']=$_POST['csmt'];
             $form['custom_field'] = json_encode($data);
           } else { //se non c'è il modulo "vacation_rental" lo aggiungo
-            $data['vacation_rental']= array('facility_type' => '', 'paypal_email' => $_POST['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $_POST['stripe_pub_key'], 'stripe_sec_key' => $_POST['stripe_sec_key'], 'check_in' => $_POST['check_in'], 'check_out' => $_POST['check_out'], 'week_check_in' => $_POST['week_check_in'], 'week_check_out' => $_POST['week_check_out'], 'minor' => $_POST['minor'], 'tour_tax_from' => $_POST['tour_tax_from'], 'tour_tax_to' => $_POST['tour_tax_to'], 'open_from' => $_POST['open_from'], 'open_to' => $_POST['open_to'], 'tour_tax_day' => $_POST['tour_tax_day'], 'max_booking_days' => $_POST['max_booking_days'], 'latitude' => $_POST['lat'], 'longitude' => $_POST['long'], 'cin' => $_POST['cin']);
+            $data['vacation_rental']= array('facility_type' => '', 'paypal_email' => $_POST['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $_POST['stripe_pub_key'], 'stripe_sec_key' => $_POST['stripe_sec_key'], 'check_in' => $_POST['check_in'], 'check_out' => $_POST['check_out'], 'week_check_in' => $_POST['week_check_in'], 'week_check_out' => $_POST['week_check_out'], 'minor' => $_POST['minor'], 'tour_tax_from' => $_POST['tour_tax_from'], 'tour_tax_to' => $_POST['tour_tax_to'], 'open_from' => $_POST['open_from'], 'open_to' => $_POST['open_to'], 'tour_tax_day' => $_POST['tour_tax_day'], 'max_booking_days' => $_POST['max_booking_days'], 'latitude' => $_POST['lat'], 'longitude' => $_POST['long'], 'cin' => $_POST['cin'], 'csmt' => $_POST['csmt']);
             $form['custom_field'] = json_encode($data);
           }
         }
@@ -405,6 +407,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form['lat'] = (isset($data['vacation_rental']['latitude']))?$data['vacation_rental']['latitude']:'';
         $form['long'] = (isset($data['vacation_rental']['longitude']))?$data['vacation_rental']['longitude']:'';
         $form['cin'] = (isset($data['vacation_rental']['cin']))?$data['vacation_rental']['cin']:'';
+        $form['csmt'] = (isset($data['vacation_rental']['csmt']))?$data['vacation_rental']['csmt']:'';
     } else {
 				$form['facility_type'] = '';
 				$form['paypal_email'] ='';
@@ -425,6 +428,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form['lat'] = "";
         $form['long'] = "";
         $form['cin'] = "";
+        $form['csmt'] = "";
     }
 	} else {
     $form['facility_type'] = '';
@@ -508,6 +512,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['lat'] = "";
     $form['long'] = "";
     $form['cin'] = "";
+    $form['csmt'] = "";
     $cl_home="active";
     $cl_home_tab="in active";
     $cl_variant="";
@@ -1022,6 +1027,14 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
                   <div class="form-group">
                     <label for="cin" class="col-sm-4 control-label">CIN(Codice Identificativo Nazionale)</label>
                     <input class="col-sm-8" type="text" value="<?php echo $form['cin']; ?>" name="cin" maxlength="18" min="0" max="19"  />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="csmt" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="csmt" class="col-sm-4 control-label">Codice struttura per movimentazione turistica</label>
+                    <input class="col-sm-8" type="text" value="<?php echo $form['csmt']; ?>" name="csmt" maxlength="18" min="0" max="19"  />
                   </div>
                 </div>
 							</div><!-- chiude row  -->
