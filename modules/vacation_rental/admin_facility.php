@@ -2,7 +2,7 @@
 /*
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
+  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
   (https://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
@@ -103,6 +103,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['long'] = $_POST['long'];
   $form['cin'] = $_POST['cin'];
   $form['csmt'] = $_POST['csmt'];
+  $form['userIstat'] = $_POST['userIstat'];
+  $form['pwIstat'] = $_POST['pwIstat'];
+  $form['userPol'] = $_POST['userPol'];
+  $form['wskey'] = $_POST['wskey'];
+  $form['pwPol'] = $_POST['pwPol'];
+  $form['endpointIstat'] = $_POST['endpointIstat'];
+  $form['endpointPol'] = $_POST['endpointPol'];
   $form['lang_id'] = intval($_POST['lang_id']);
   foreach($langs as $lang){
     if (intval($lang['lang_id'])==1){ continue;}
@@ -286,7 +293,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 
 			// aggiorno il db
 			if ($toDo == 'insert') {
-				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'week_check_in' => $form['week_check_in'], 'week_check_out' => $form['week_check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long'], 'cin' => $form['cin'], 'csmt' => $form['csmt']));// creo l'array per il custom field
+				$array= array('vacation_rental'=>array('facility_type' => '', 'paypal_email' => $form['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $form['stripe_pub_key'], 'stripe_sec_key' => $form['stripe_sec_key'], 'check_in' => $form['check_in'], 'check_out' => $form['check_out'], 'week_check_in' => $form['week_check_in'], 'week_check_out' => $form['week_check_out'], 'minor' => $form['minor'], 'tour_tax_from' => $form['tour_tax_from'], 'tour_tax_to' => $form['tour_tax_to'], 'open_from' => $form['open_from'], 'open_to' => $form['open_to'], 'tour_tax_day' => $form['tour_tax_day'], 'max_booking_days' => $form['max_booking_days'], 'latitude' => $form['lat'], 'longitude' => $form['long'], 'cin' => $form['cin'], 'csmt' => $form['csmt'], 'userIstat' => $form['userIstat'], 'pwIstat' => $form['pwIstat'], 'userPol' => $form['userPol'], 'wskey' => $form['wskey'], 'pwPol' => $form['pwPol'], 'endpointIstat' => $form['endpointIstat'], 'endpointPol' => $form['endpointPol']));// creo l'array per il custom field
 				$form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
 				gaz_dbi_table_insert('artico_group', $form);
         // in inserimento scrivo tutte le lingue straniere
@@ -321,9 +328,16 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
             $data['vacation_rental']['longitude']=$_POST['long'];
             $data['vacation_rental']['cin']=$_POST['cin'];
             $data['vacation_rental']['csmt']=$_POST['csmt'];
+            $data['vacation_rental']['userIstat']=$_POST['userIstat'];
+            $data['vacation_rental']['pwIstat']=$_POST['pwIstat'];
+            $data['vacation_rental']['userPol']=$_POST['userPol'];
+            $data['vacation_rental']['wskey']=$_POST['wskey'];
+            $data['vacation_rental']['pwPol']=$_POST['pwPol'];
+            $data['vacation_rental']['endpointIstat']=$_POST['endpointIstat'];
+            $data['vacation_rental']['endpointPol']=$_POST['endpointPol'];
             $form['custom_field'] = json_encode($data);
           } else { //se non c'è il modulo "vacation_rental" lo aggiungo
-            $data['vacation_rental']= array('facility_type' => '', 'paypal_email' => $_POST['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $_POST['stripe_pub_key'], 'stripe_sec_key' => $_POST['stripe_sec_key'], 'check_in' => $_POST['check_in'], 'check_out' => $_POST['check_out'], 'week_check_in' => $_POST['week_check_in'], 'week_check_out' => $_POST['week_check_out'], 'minor' => $_POST['minor'], 'tour_tax_from' => $_POST['tour_tax_from'], 'tour_tax_to' => $_POST['tour_tax_to'], 'open_from' => $_POST['open_from'], 'open_to' => $_POST['open_to'], 'tour_tax_day' => $_POST['tour_tax_day'], 'max_booking_days' => $_POST['max_booking_days'], 'latitude' => $_POST['lat'], 'longitude' => $_POST['long'], 'cin' => $_POST['cin'], 'csmt' => $_POST['csmt']);
+            $data['vacation_rental']= array('facility_type' => '', 'paypal_email' => $_POST['paypal_email'], 'hype_transf' => $form['hype_transf'], 'stripe_pub_key' => $_POST['stripe_pub_key'], 'stripe_sec_key' => $_POST['stripe_sec_key'], 'check_in' => $_POST['check_in'], 'check_out' => $_POST['check_out'], 'week_check_in' => $_POST['week_check_in'], 'week_check_out' => $_POST['week_check_out'], 'minor' => $_POST['minor'], 'tour_tax_from' => $_POST['tour_tax_from'], 'tour_tax_to' => $_POST['tour_tax_to'], 'open_from' => $_POST['open_from'], 'open_to' => $_POST['open_to'], 'tour_tax_day' => $_POST['tour_tax_day'], 'max_booking_days' => $_POST['max_booking_days'], 'latitude' => $_POST['lat'], 'longitude' => $_POST['long'], 'cin' => $_POST['cin'], 'csmt' => $_POST['csmt'], 'userIstat' => $_POST['userIstat'], 'pwIstat' => $_POST['pwIstat'], 'userPol' => $_POST['uesrPol'], 'wskey' => $_POST['wskey'], 'pwPol' => $_POST['pwPol'], 'endpointIstat' => $form['endpointIstat'], 'endpointPol' => $form['endpointPol']);
             $form['custom_field'] = json_encode($data);
           }
         }
@@ -408,6 +422,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form['long'] = (isset($data['vacation_rental']['longitude']))?$data['vacation_rental']['longitude']:'';
         $form['cin'] = (isset($data['vacation_rental']['cin']))?$data['vacation_rental']['cin']:'';
         $form['csmt'] = (isset($data['vacation_rental']['csmt']))?$data['vacation_rental']['csmt']:'';
+        $form['userIstat'] = (isset($data['vacation_rental']['userIstat']))?$data['vacation_rental']['userIstat']:'';
+        $form['pwIstat'] = (isset($data['vacation_rental']['pwIstat']))?$data['vacation_rental']['pwIstat']:'';
+        $form['userPol'] = (isset($data['vacation_rental']['userPol']))?$data['vacation_rental']['userPol']:'';
+        $form['wskey'] = (isset($data['vacation_rental']['wskey']))?$data['vacation_rental']['wskey']:'';
+        $form['pwPol'] = (isset($data['vacation_rental']['pwPol']))?$data['vacation_rental']['pwPol']:'';
+        $form['endpointIstat'] = (isset($data['vacation_rental']['endpointIstat']))?$data['vacation_rental']['endpointIstat']:'';
+        $form['endpointPol'] = (isset($data['vacation_rental']['endpointPol']))?$data['vacation_rental']['endpointPol']:'';
     } else {
 				$form['facility_type'] = '';
 				$form['paypal_email'] ='';
@@ -429,6 +450,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form['long'] = "";
         $form['cin'] = "";
         $form['csmt'] = "";
+        $form['userIstat'] = "";
+        $form['pwIstat'] = "";
+        $form['userPol'] = "";
+        $form['wskey'] = "";
+        $form['pwPol'] = "";
+        $form['endpointIstat'] = "";
+        $form['endpointPol'] = "";
     }
 	} else {
     $form['facility_type'] = '';
@@ -513,6 +541,13 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['long'] = "";
     $form['cin'] = "";
     $form['csmt'] = "";
+    $form['userIstat'] = "";
+    $form['pwIstat'] = "";
+    $form['userPol'] = "";
+    $form['wskey'] = "";
+    $form['pwPol'] = "";
+    $form['endpointIstat'] = "";
+    $form['endpointPol'] = "";
     $cl_home="active";
     $cl_home_tab="in active";
     $cl_variant="";
@@ -1033,8 +1068,64 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
               <div id="csmt" class="row IERincludeExcludeRow">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <label for="csmt" class="col-sm-4 control-label">Codice struttura per movimentazione turistica</label>
-                    <input class="col-sm-8" type="text" value="<?php echo $form['csmt']; ?>" name="csmt" maxlength="18" min="0" max="19"  />
+                    <label for="csmt" class="col-sm-4 control-label">Codice struttura per file movimentazione ISTAT</label>
+                    <input class="col-sm-8" type="text" value="<?php echo $form['csmt']; ?>" name="csmt"   />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="userIstat" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="userIstat" class="col-sm-4 control-label">Nome utente ISTAT Ross1000</label>
+                    <input class="col-sm-8" type="text" value="<?php echo $form['userIstat']; ?>" name="userIstat"   />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="pwIstat" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="pwIstat" class="col-sm-4 control-label">Password ISTAT Ross1000</label>
+                    <input class="col-sm-8" type="password" value="<?php echo $form['pwIstat']; ?>" name="pwIstat"   />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="endpointIstat" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="endpointIstat" class="col-sm-4 control-label">Endpoint ISTAT Ross1000</label>
+                    <input class="col-sm-8" type="text" value="<?php echo $form['endpointIstat']; ?>" name="endpointIstat"   />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="userPol" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="csmt" class="col-sm-4 control-label">Nome utente alloggiati Polizia</label>
+                    <input class="col-sm-8" type="text" value="<?php echo $form['userPol']; ?>" name="userPol"  />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="wskey" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="wskey" class="col-sm-4 control-label">WSKEY alloggiati Polizia</label>
+                    <input class="col-sm-8" type="password" value="<?php echo $form['wskey']; ?>" name="wskey"  />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="pwPol" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="pwPol" class="col-sm-4 control-label">Password alloggiati Polizia</label>
+                    <input class="col-sm-8" type="password" value="<?php echo $form['pwPol']; ?>" name="pwPol"   />
+                  </div>
+                </div>
+							</div><!-- chiude row  -->
+              <div id="endpointPol" class="row IERincludeExcludeRow">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="endpointPol" class="col-sm-4 control-label">Endpoint alloggiati Polizia</label>
+                    <input class="col-sm-8" type="text" value="<?php echo $form['endpointPol']; ?>" name="endpointPol"   />
                   </div>
                 </div>
 							</div><!-- chiude row  -->

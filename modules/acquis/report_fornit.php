@@ -220,16 +220,16 @@ while ($a_row = gaz_dbi_fetch_array($result)) {
        $title = " nessun contatto telefonico memorizzato ";
     }
     echo "<td title=\"$title\" align=\"center\">".gaz_html_call_tel($telefono)." &nbsp;</td>";
-    if ($a_row['pariva'] > 0 and empty($a_row['codfis'])){
+    if ($a_row['pariva'] > 0 && empty($a_row['codfis'])){
         echo "<td align=\"center\">".$a_row['pariva']."</td>";
-    } elseif($a_row['pariva'] == 0 and !empty($a_row['codfis'])) {
+    } elseif((int)$a_row['pariva'] == 0 && !empty($a_row['codfis'])) {
         echo "<td align=\"center\">".$a_row['codfis']."</td>";
-    } elseif($a_row['pariva'] > 0 and !empty($a_row['codfis'])) {
-		if ( $a_row['pariva'] == $a_row['codfis'] ) {
-			echo "<td align=\"center\">".$a_row['pariva']."</td>";
-		} else {
-			echo "<td align=\"center\">".$a_row['pariva']."<br>".$a_row['codfis']."</td>";
-		}
+    } elseif($a_row['pariva'] > 0 && !empty($a_row['codfis'])) {
+      if ( $a_row['pariva'] == $a_row['codfis'] ) {
+        echo "<td align=\"center\">".$a_row['pariva']."</td>";
+      } else {
+        echo "<td align=\"center\">".$a_row['pariva']."<br>".$a_row['codfis']."</td>";
+      }
     } else {
         echo "<td class=\"FacetDataTDred\" align=\"center\"> * NO * </td>";
     }

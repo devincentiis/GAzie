@@ -1296,6 +1296,11 @@ $ts->output_navbar();
                 <a class="class1" href="stat.php">Statistiche</a>
               </button>
             </td>
+             <td class="FacetFieldCaptionTD">
+              <a href="tour_mov.php" class="class1">
+                  <button type="button">File alloggiati</button>
+              </a>
+            </td>
         </tr>
         <tr>
             <?php $ts->output_headers(); ?>
@@ -1615,7 +1620,11 @@ $ts->output_navbar();
               // colonna stato prenotazione
               // Se la prenotazione e' da evadere , verifica lo status ed eventualmente lo aggiorna.
               echo "<td style='text-align: left;'>";
-
+                if(isset($datatesbro['vacation_rental']['man_checkin_status']) && intval($datatesbro['vacation_rental']['man_checkin_status'])==1){
+                  $class_man="btn btn-success";$title_man="title = 'Accettazione effettuata'";
+                }else{
+                  $class_man="";$title_man="title = 'Accettazione NON effettuata'";
+                }
                   if ( $tipo == "VOG" ) {
                       echo "<a class=\"btn btn-xs btn-warning\" href=\"select_evaord_gio.php?weekday=".$r['weekday_repeat']."\">evadi</a>";
                   } elseif ( $tipo == "VPR" ) {
@@ -1635,6 +1644,9 @@ $ts->output_navbar();
                           <br><a style="white-space:nowrap;" title="Accettazione: <?php echo $title; ?>" class="btn btn-xs <?php echo $stato_check_btn; ?> dialog_check_inout" refcheck="<?php echo $r['id_tes']; ?>" prodes="<?php echo $r['ragso1']," ",$r['ragso2']; ?>" prostacheck="<?php echo $check_inout; ?>" cust_mail="<?php echo $r['base_mail']; ?>" cust_mail2="<?php echo $r['base_mail2']; ?>" ckdate="<?php echo $ckdate; ?>">
                             <i class="glyphicon glyphicon-<?php echo $check_icon; ?>">&nbsp;</i><?php echo "CHECK ",$check_inout; ?>
                           </a>
+                          <button type = "button">
+                            <a class="class1 <?php echo $class_man; ?>" href="MANUAL_checkin.php?tes=<?php echo $r['id_tes']; ?>" <?php echo $title_man; ?> onclick="checkFileExistence(event); return false;">accettazione</a>
+                          </button>
                           <?php
                         }
                         if ($stato_btn_selfcheck!==""){// se c'è il self checkin inserisco icona
@@ -1738,6 +1750,7 @@ if (isset($_SESSION['print_queue']['idDoc']) && !empty($_SESSION['print_queue'][
 ?>
 <script>
   $(document).ready(function() {
+
     fileLoad('<?php echo $target;?>', false);
 
     $('.button').click(function() {
@@ -1749,7 +1762,9 @@ if (isset($_SESSION['print_queue']['idDoc']) && !empty($_SESSION['print_queue'][
         alert( "Data Saved: " + msg );
       });
     });
-  }
+
+
+  });
 </script>
 <?php
   }
@@ -1779,3 +1794,26 @@ function withoutLetterHeadTemplate($tipdoc='VPR')
 	return $withoutLetterHeadTemplate;
 }
 ?>
+<script>
+function checkFileExistence(event) {// avviso della necessità della versione pro
+    event.preventDefault();  // Prevenire il comportamento di default (navigazione del link)
+    var link = event.target;
+    var fileUrl = link.href; // L'URL del link che include i parametri
+    // Verifica se il file esiste con una richiesta HEAD
+    fetch(fileUrl, { method: 'HEAD' })
+    .then(response => {
+        if (response.ok) {
+            // Se il file esiste, reindirizza l'utente al file mantenendo i parametri
+            console.log('File trovato, reindirizzo...');
+            window.location.href = fileUrl;  // Reindirizza al file mantenendo i parametri
+        } else {
+            // Se il file non esiste, mostra un messaggio
+            alert('ATTENZIONE: questa funzione è presente solo nella versione PRO. Contatta lo sviluppatore.');
+        }
+    })
+    .catch(() => {
+        // In caso di errore nella richiesta
+        alert('Errore nella verifica del file.');
+    });
+}
+</script>

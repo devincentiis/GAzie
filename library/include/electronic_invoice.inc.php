@@ -1001,8 +1001,10 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
           $el->appendChild($el1);
           $el1 = $domDoc->createElement("Quantita", number_format($rigo['quanti'], 3, '.', ''));
           $el->appendChild($el1);
-          $el1 = $domDoc->createElement("UnitaMisura", $rigo['unimis']);
-          $el->appendChild($el1);
+          if (!empty(trim($rigo['unimis']))) {
+            $el1 = $domDoc->createElement("UnitaMisura", $rigo['unimis']);
+            $el->appendChild($el1);
+          }
           $el1 = $domDoc->createElement("PrezzoUnitario", number_format($rigo['prelis'], $XMLvars->decimal_price, '.', ''));
           $el->appendChild($el1);
 					// qualora questo rigo preveda uno sconto

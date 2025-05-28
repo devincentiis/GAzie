@@ -162,6 +162,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['deposit_type'] = $_POST['deposit_type'];
   $form['self_checkin'] = $_POST['self_checkin'];
   $form['agent'] = $_POST['agent'];
+  $form['id_polstat'] = $_POST['id_polstat'];
   $form['tur_tax_mode'] = $_POST['tur_tax_mode'];
   $form['tur_tax']= $_POST['tur_tax'];
   /** inizio modifica FP 03/12/2015
@@ -344,7 +345,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['preve1']=$form['web_price'];// al momento imposto il prezzo 1 uguale al webprice
 
     if ($toDo == 'insert') {
-      $array= array('vacation_rental'=>array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'room_qta' => $_POST['room_qta'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'pause' => $_POST['pause'],'fixquote' => floatval($_POST['fixquote']),'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'self_checkin' => $_POST['self_checkin'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent']));// creo l'array per il custom field
+      $array= array('vacation_rental'=>array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'room_qta' => $_POST['room_qta'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'pause' => $_POST['pause'],'fixquote' => floatval($_POST['fixquote']),'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'self_checkin' => $_POST['self_checkin'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent'],'id_polstat' => $_POST['id_polstat']));// creo l'array per il custom field
       $form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
       gaz_dbi_table_insert('artico', $form);
       if (!empty($tbt)) {
@@ -377,9 +378,10 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
           $data['vacation_rental']['tur_tax_mode'] = $_POST['tur_tax_mode'];
           $data['vacation_rental']['tur_tax']= $_POST['tur_tax'];
           $data['vacation_rental']['agent']= $_POST['agent'];
+          $data['vacation_rental']['id_polstat']= $_POST['id_polstat'];
           $form['custom_field'] = json_encode($data);
         } else { //se non c'è il modulo "vacation_rental" lo aggiungo
-          $data['vacation_rental']= array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent']);
+          $data['vacation_rental']= array('accommodation_type' => $_POST['accommodation_type'],'room_type' => $_POST['room_type'],'total_guests' => $_POST['total_guests'],'adult' => $_POST['adult'],'child' => $_POST['child'],'deposit' => $_POST['deposit'],'security_deposit' => $_POST['security_deposit'],'deposit_type' => $_POST['deposit_type'],'tur_tax_mode' => $_POST['tur_tax_mode'],'tur_tax' => $_POST['tur_tax'],'agent' => $_POST['agent'],'id_polstat' => $_POST['is_polstat']);
           $form['custom_field'] = json_encode($data);
         }
       }
@@ -491,7 +493,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $form['tur_tax_mode'] = $data['vacation_rental']['tur_tax_mode'];
       $form['tur_tax']= $data['vacation_rental']['tur_tax'];
 			$form['agent'] = $data['vacation_rental']['agent'];
-
+      $form['id_polstat'] = (isset($data['vacation_rental']['id_polstat']))?$data['vacation_rental']['id_polstat']:'';
 		} else {
       $form['accommodation_type'] = "";
 			$form['room_type'] = 0;
@@ -507,6 +509,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $form['tur_tax_mode'] =0;
       $form['tur_tax']=0;
 			$form['agent']=0;
+      $form['id_polstat']='';
     }
 	} else {
 		$form['accommodation_type'] = "";
@@ -523,6 +526,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 		$form['tur_tax_mode'] =0;
 		$form['tur_tax']=0;
     $form['agent']=0;
+    $form['id_polstat']='';
 	}
 
 	if (json_decode($form['ecomm_option_attribute']) != null){ // se esiste un json per attributo della variante dell'e-commerce
@@ -604,6 +608,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['deposit_type'] = 0;
     $form['self_checkin'] = 0;
     $form['agent'] = 0;
+    $form['id_polstat']='';
     $form['tur_tax_mode'] =0;
     $form['tur_tax']=0;
     /** ENRICO FEDELE */
@@ -635,6 +640,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
       $form['ref_ecommerce_id_product']="";
     }
     // ripropongo le ultime unità di misura più utilizzate
+
     $rs_unimis = gaz_dbi_query("SELECT unimis, COUNT(unimis) c FROM ".$gTables['artico']." GROUP BY unimis ORDER BY c DESC LIMIT 1");
     $unimis = gaz_dbi_fetch_array($rs_unimis);
     $form['unimis'] = $unimis['unimis'];
@@ -1532,6 +1538,14 @@ if ($modal_ok_insert === true) {
                         <div class="form-group">
                             <label for="annota" class="col-sm-4 control-label"><?php echo $script_transl['annota']; ?></label>
                             <input class="col-sm-8" type="text" value="<?php echo $form['annota']; ?>" name="annota" maxlength="50" />
+                        </div>
+                    </div>
+                </div><!-- chiude row  -->
+                <div id="id_polstat" class="row IERincludeExcludeRow">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="id_polstat" class="col-sm-4 control-label">Identificativo Polizia di Stato (Lasciare vuoto per strutture sprovviste)</label>
+                            <input class="col-sm-8" type="text" value="<?php echo $form['id_polstat']; ?>" name="id_polstat" maxlength="6" />
                         </div>
                     </div>
                 </div><!-- chiude row  -->

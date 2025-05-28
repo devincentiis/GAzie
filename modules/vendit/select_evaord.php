@@ -482,7 +482,7 @@ if (isset($_POST['ddt']) || isset($_POST['ddo']) ||isset($_POST['ddm']) || isset
             $form['tipdoc'] = 'DDO';
         } else {
             $form['ddt_type'] = 'T';
-            $form['tipdoc'] = $_POST['tipdoc'];  // RIMESSO perchè NON lo prende dall'elenco a discesa e poi deve essere valorizzato con il $_POST e non con $form
+            $form['tipdoc'] = 'DDT';  // RIMESSO perchè NON lo prende dall'elenco a discesa e poi deve essere valorizzato con il $_POST e non con $form
         }
         $form['template'] = "";
         $form['id_con'] = '';
@@ -496,7 +496,7 @@ if (isset($_POST['ddt']) || isset($_POST['ddo']) ||isset($_POST['ddm']) || isset
         foreach ($form['righi'] as $k => $v) {
             if ($v['id_tes'] != $ctrl_tes) {  //se fa parte di un'ordine diverso dal precedente
                 //inserisco un rigo descrittivo per il riferimento all'ordine sul DdT
-                $row_descri['descri'] = " da " . $script_transl['doc_name'][$v['tipdoc']] . " n." . $v['numdoc'] . " del " . substr($v['datemi'], 8, 2) . "-" . substr($v['datemi'], 5, 2) . "-" . substr($v['datemi'], 0, 4);
+                $row_descri['descri'] = " da " . $script_transl['doc_name'][$_POST['tipdoc']] . " n." . $v['numdoc'] . " del " . substr($v['datemi'], 8, 2) . "-" . substr($v['datemi'], 5, 2) . "-" . substr($v['datemi'], 0, 4);
                 $row_descri['id_tes'] = $last_id;
                 $row_descri['id_order'] = $v['id_tes'];
                 $row_descri['tiprig'] = 2;

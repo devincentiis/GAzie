@@ -71,7 +71,7 @@ function getDocumentsAccounts($type = '___', $vat_section = 1, $date = false, $p
   $where = "id_con = 0 AND seziva = $vat_section AND tipdoc LIKE '$type" . "_' $d $p";
   $orderby = "datreg ASC, protoc ASC";
   $result = gaz_dbi_dyn_query('tesdoc.*,
-                      pay.tippag,pay.numrat,pay.incaut,pay.tipdec,pay.giodec,pay.tiprat,pay.mesesc,pay.giosuc,pay.id_bank,
+                      pay.tippag,pay.numrat,pay.pagaut,pay.tipdec,pay.giodec,pay.tiprat,pay.mesesc,pay.giosuc,pay.id_bank,
                       supplier.codice, supplier.speban AS addebitospese, supplier.operation_type,
 					CONCAT(anagraf.ragso1,\' \',anagraf.ragso2) AS ragsoc,CONCAT(anagraf.citspe,\' (\',anagraf.prospe,\')\') AS citta, anagraf.country, anagraf.fiscal_reg,
 					country.istat_area', $from, $where, $orderby);
@@ -246,8 +246,8 @@ function getDocumentsAccounts($type = '___', $vat_section = 1, $date = false, $p
       $doc[$tes['protoc']]['pay'][] = $r;
       $dtex = new DateTime($r['DataScadenzaPagamento']);
       if ($r['ModalitaPagamento'] == 'MP01' && $dtex <= $dtfa ) { // se ho una ModalitaPagamento contanti (MP01) e la scadenza coincide con la data della fattura non apro la partita e faccio la chiusura automatica per cassa
-        $contanti = gaz_dbi_get_row($gTables['pagame'], 'fae_mode', 'MP01','AND incaut > 100000000');
-        $tes['incaut']=($contanti)?$contanti['incaut']:0;
+        $contanti = gaz_dbi_get_row($gTables['pagame'], 'fae_mode', 'MP01','AND pagaut > 100000000');
+        $tes['pagaut']=($contanti)?$contanti['pagaut']:0;
       }
     }
     $doc[$tes['protoc']]['docrows'] = $docrows;
@@ -549,9 +549,9 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
             if ($v['rit'] > 0) {  // se ho una ritenuta d'acconto
                 rigmocInsert(array('id_tes' => $tes_id, 'darave' => $da_p, 'codcon' => $krit, 'import' => $v['rit']));
             }
-            if ($v['tes']['incaut'] > 100000000 ) {  // se il pagamento prevede l'incasso automatico o sul tracciato XML avevo ModalitaPagamento=MP01
+            if ($v['tes']['pagaut'] > 100000000 ) {  // se il pagamento prevede l'incasso automatico o sul tracciato XML avevo ModalitaPagamento=MP01
                 rigmocInsert(array('id_tes' => $tes_id, 'darave' => $da_c, 'codcon' => $v['tes']['clfoco'], 'import' => ($tot['tot'] - $v['rit'] - $iva_reverse_charge)));
-                rigmocInsert(array('id_tes' => $tes_id, 'darave' => $da_p, 'codcon' => $v['tes']['incaut'], 'import' => ($tot['tot'] - $v['rit'] - $iva_reverse_charge)));
+                rigmocInsert(array('id_tes' => $tes_id, 'darave' => $da_p, 'codcon' => $v['tes']['pagaut'], 'import' => ($tot['tot'] - $v['rit'] - $iva_reverse_charge)));
             } else { // altrimenti inserisco le partite aperte
               if (isset($v['pay'])&&count($v['pay'])>0){ // se ho i dati provenienti dal XML li uso
                 foreach ($v['pay'] as $v_pay) {

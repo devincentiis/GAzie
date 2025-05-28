@@ -416,7 +416,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_GET['codice'],0,32)."' AND lang_id = ".$lang['lang_id']);
     $form['lang_descri'.$lang['lang_id']] = (isset($bodytextlang['descri']))?$bodytextlang['descri']:$form['descri'];
     $form['lang_bodytext'.$lang['lang_id']] = (isset($bodytextlang['body_text']))?$bodytextlang['body_text']:filter_var($form['body_text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $obj = $bodytextlang?json_decode($bodytextlang['custom_field']):false;
+    $obj = $bodytextlang && !empty($bodytextlang['custom_field']) ? json_decode($bodytextlang['custom_field']):false;
     $form['lang_web_url'.$lang['lang_id']] = (isset($obj->web_url))?$obj->web_url:$form['web_url'];
   }
   $form['hidden_req'] = '';
@@ -929,7 +929,7 @@ if ($modal_ok_insert === true) {
                         <div class="form-group">
                             <label for="good_or_service" class="col-sm-4 control-label"><?php echo $script_transl['good_or_service']; ?>*</label>
     <?php
-    $gForm->variousSelect('good_or_service', $script_transl['good_or_service_value'], $form['good_or_service'], "col-sm-8", true, '', false, 'style="max-width: 200px;"');
+    $gForm->variousSelect('good_or_service', $script_transl['good_or_service_value'], $form['good_or_service'], "col-sm-8", true, 'good_or_service', false, 'style="max-width: 200px;"');
     ?>
                         </div>
                     </div>
@@ -1377,7 +1377,8 @@ if ($modal === false && $toDo=='update') {
                         <div class="form-group">
                             <label for="codcon" class="col-sm-4 control-label"><?php echo $script_transl['codcon']; ?></label>
     <?php
-    $gForm->selectAccount('codcon', $form['codcon'], 4, '', false, "col-sm-8");
+    $mascodcon = $form['good_or_service'] == 1 ? ['sub',2,4] : 4;
+    $gForm->selectAccount('codcon', $form['codcon'],$mascodcon, '', false, "col-sm-8");
     ?>
                         </div>
                     </div>
