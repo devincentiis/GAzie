@@ -830,6 +830,7 @@ $strScript = array(
     ),
     "self_checkin.php" =>
     array('title' => 'Gestione dei self check-in',
+        'choose_sex' => 'Selezionare il sesso',
         'text1' => 'Perfetto, i documenti sono stati caricati correttamente!',
         'text2' => 'Adesso, controlla di aver pagato il deposito cauzionale e il saldo della locazione. Se il pagamento non viene effettuato, il self check-in non potrà essere abilitato.',
         'text3' => 'Risulterebbero ancora da pagare € ',

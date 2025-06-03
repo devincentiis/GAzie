@@ -115,7 +115,6 @@ if (isset ($_GET['inevasi'])){
 	$form['swStatus']=(isset($_GET['swStatus']))?$_GET['swStatus']:'';
 }
 
-
 $partner_select = !gaz_dbi_get_row($gTables['company_config'], 'var', 'partner_select_mode')['val'];
 $tesbro_e_partners = "{$gTables['tesbro']} LEFT JOIN {$gTables['clfoco']} ON {$gTables['tesbro']}.clfoco = {$gTables['clfoco']}.codice LEFT JOIN {$gTables['anagra']} ON {$gTables['clfoco']}.id_anagra = {$gTables['anagra']}.id";
 $tesbro_e_destina = $tesbro_e_partners . " LEFT JOIN {$gTables['destina']} ON {$gTables['tesbro']}.id_des_same_company = {$gTables['destina']}.codice";
@@ -148,7 +147,7 @@ $vacation_url_user=$res['val'];// carico l'url per la pagina front-end utente
 $script_transl = HeadMain(0, array('custom/modal_form'));
 
 // creo l'array (header => campi) per l'ordinamento dei record
-$terzo = (isset($_GET['auxil']) && $_GET['auxil'] == 'VOG') ? ['weekday_repeat' => 'weekday_repeat'] : ['date' => 'datemi'];
+$terzo = (isset($_GET['auxil']) && $_GET['auxil'] == 'VOG') ? ['weekday_repeat' => 'weekday_repeat'] : ['date' => 'start'];
 $sortable_headers = array(
     "ID" => "id_tes",
     $script_transl['number'] => "numdoc",
@@ -173,13 +172,18 @@ unset($terzo);
 if (isset($form['swStatus']) AND $form['swStatus']=="Inevasi"){
 	$passo=1000;
 }
+if (!isset($_GET['auxil'])){
+	$auxil='VOR';
+}else{
+	$auxil=$_GET['auxil'];
+}
 if (count($_GET)<=1){
 	// ultimo documento
 	$rs_last = gaz_dbi_dyn_query('seziva, YEAR(datemi) AS yearde', $gTables['tesbro'], "tipdoc LIKE '".substr($auxil,0,3)."'", 'datemi DESC, id_tes DESC', 0, 1);
 	$last = gaz_dbi_fetch_array($rs_last);
 	if ($last) {
 		$default_where=['sezione' => $last['seziva'], 'tipo' => 'F%', 'anno'=>$last['yearde']];
-        $_GET['anno']=$last['yearde'];
+        $_GET['anno']=$last['yearde'];		
 	} else {
 		$default_where= ['auxil' => 'VOR'];
 	}
@@ -191,7 +195,7 @@ $ts = new TableSorter(
     isset($_GET["destinaz"]) ? $tesbro_e_destina :
 	(!$partner_select && isset($_GET["cliente"]) ? $tesbro_e_partners : $gTables['tesbro']),
     $passo,
-    ['datemi' => 'desc', 'numdoc' => 'desc'],
+    ['start' => 'asc', 'numdoc' => 'desc'],
     $default_where
 );
 $tipo = $auxil;
@@ -1584,33 +1588,37 @@ $ts->output_navbar();
 
 
               // colonna fiscale
-              if ( $tipo !== "VPR" ) {// la visualizzo se non è preventivo
+              if ( $tipo !== "VPR" ){//  se non è preventivo
                 echo "<td style='text-align: left;'>";
-                if ($remains_atleastone && !$processed_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
-                    // L'ordine e'  da evadere.
-                  if ( $tipo !== "VOG" && $tipo !== "VPR") {
-                    echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">Emetti documento fiscale</a>&nbsp;";
-                  }
-                }elseif ($remains_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
-                      // l'a prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
-                      $ultimo_documento = 0;
-                      mostra_documenti_associati( $r['id_tes'], $paid );
-                      if ( $tipo == "VOG" ) {
-                          echo "<a class=\"btn btn-xs btn-default\" href=\"../../modules/vendit/select_evaord_gio.php\">evadi il rimanente</a>";
-                      } else {
-                          echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">evadi il rimanente</a>&nbsp;";
-                          echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?clfoco=" . $r['clfoco'] . "\">evadi cliente</a>";
-                      }
-                  } else {
-                      // la prenotazione è completamente evasa, mostro i riferimenti ai documenti che l'hanno evasa
-                      $ultimo_documento = 0;
-                      mostra_documenti_associati( $r['id_tes'], $paid );
-                  }
-                  ?>
-                  <a style="float:right;" title="Genera pdf contratto" class="btn btn-xs dialog_leasecr" ref="<?php echo $r['id_tes']; ?>" nome="<?php echo $r['ragso1']; ?>" url=<?php echo "stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent']; ?>>
-                    <i class="glyphicon glyphicon-refresh"></i>
-                  </a>
-                  <?php
+				if ( intval($agent)==0){// se non c'è un proprietario/agente 
+					if ($remains_atleastone && !$processed_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
+						// L'ordine e'  da evadere.
+					  if ( $tipo !== "VOG" && $tipo !== "VPR") {
+						echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">Emetti documento fiscale</a>&nbsp;";
+					  }
+					}elseif ($remains_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
+						  // l'a prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
+						  $ultimo_documento = 0;
+						  mostra_documenti_associati( $r['id_tes'], $paid );
+						  if ( $tipo == "VOG" ) {
+							  echo "<a class=\"btn btn-xs btn-default\" href=\"../../modules/vendit/select_evaord_gio.php\">evadi il rimanente</a>";
+						  } else {
+							  echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">evadi il rimanente</a>&nbsp;";
+							  echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?clfoco=" . $r['clfoco'] . "\">evadi cliente</a>";
+						  }
+					} else {
+					  // la prenotazione è completamente evasa, mostro i riferimenti ai documenti che l'hanno evasa
+					  $ultimo_documento = 0;
+					  mostra_documenti_associati( $r['id_tes'], $paid );
+					}
+				}
+                  if ($r['status']=='CONFIRMED'){                         
+					  ?>
+					  <a style="float:right;" title="Genera pdf contratto" class="btn btn-xs dialog_leasecr" ref="<?php echo $r['id_tes']; ?>" nome="<?php echo $r['ragso1']; ?>" url=<?php echo "stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent']; ?>>
+						<i class="glyphicon glyphicon-refresh"></i>
+					  </a>
+					  <?php
+				  }
                  echo "</td>";
               }elseif(isset($datatesbro['vacation_rental']['id_booking']) && intval($datatesbro['vacation_rental']['id_booking'])>0){
                 echo "<td><a class=\"btn btn-xs btn-warning\" href=\"../../modules/vacation_rental/report_booking.php?info=none&auxil=VOR&id_doc=" . intval($datatesbro['vacation_rental']['id_booking']) . "\">Prenotazione effettuata</a></td>";

@@ -38,7 +38,7 @@ function camere_occupate($day) {// Calcolo le camere occupate per un dato giorno
   global $gTables;
   $day = substr($day, 0, 10); // Assicura formato YYYY-MM-DD
 
-  $select = "SUM(JSON_EXTRACT(".$gTables['artico'].".custom_field, '$.vacation_rental.room_qta')) AS camere_occupate_struttura";
+  $select = $gTables['rental_events'].".id, SUM(JSON_EXTRACT(".$gTables['artico'].".custom_field, '$.vacation_rental.room_qta')) AS camere_occupate_struttura";
 
   $tabella = $gTables['rental_events']."
       LEFT JOIN ".$gTables['artico']."
@@ -46,12 +46,13 @@ function camere_occupate($day) {// Calcolo le camere occupate per un dato giorno
 
   $where =
       "'".$day."' >= DATE(".$gTables['rental_events'].".checked_in_date)
+	  AND ".$gTables['rental_events'].".checked_in_date IS NOT NULL AND ".$gTables['rental_events'].".checked_in_date != '0000-00-00 00:00:00'
       AND '".$day."' < ".$gTables['rental_events'].".end
       AND ".$gTables['rental_events'].".type = 'ALLOGGIO'
       AND ".$gTables['artico'].".id_artico_group = ".intval($_GET['XML'])."
       AND JSON_EXTRACT(".$gTables['artico'].".custom_field, '$.vacation_rental.room_qta') IS NOT NULL";
-
-  $res_sum = gaz_dbi_dyn_query($select, $tabella, $where);
+  $res_sum = gaz_dbi_dyn_query($select, $tabella, $where); 
+  
   $sum = gaz_dbi_fetch_assoc($res_sum) ?: [];
   $sum['camere_occupate_struttura'] = isset($sum['camere_occupate_struttura']) && $sum['camere_occupate_struttura'] !== null ? $sum['camere_occupate_struttura']  : 0;
 
@@ -144,7 +145,7 @@ echo "</table>\n";
 
 if (isset($_GET['anteprima']) and $msg == "") {
 
-    $select = $gTables['rental_events'].".*,".$gTables['artico'].".custom_field AS art_custom,".$gTables['artico'].".id_artico_group , ".$gTables['artico_group'].".descri, JSON_EXTRACT(".$gTables['artico_group'].".custom_field, '$.vacation_rental.csmt') AS csmt, ".$gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, JSON_EXTRACT(".$gTables['tesbro'].".custom_field, '$.vacation_rental.self_checkin_status') AS self_checkin_status, JSON_EXTRACT(".$gTables['tesbro'].".custom_field, '$.vacation_rental.pre_checkin_status') AS pre_checkin_status";
+    $select = $gTables['rental_events'].".*,".$gTables['artico'].".custom_field AS art_custom,".$gTables['artico'].".id_artico_group , ".$gTables['artico_group'].".descri, JSON_EXTRACT(".$gTables['artico_group'].".custom_field, '$.vacation_rental.csmt') AS csmt, ".$gTables['anagra'].".ragso1, ".$gTables['anagra'].".ragso2, JSON_EXTRACT(".$gTables['tesbro'].".custom_field, '$.vacation_rental.self_checkin_status') AS self_checkin_status, JSON_EXTRACT(".$gTables['tesbro'].".custom_field, '$.vacation_rental.pre_checkin_status') AS pre_checkin_status, JSON_EXTRACT(".$gTables['tesbro'].".custom_field, '$.vacation_rental.man_checkin_status') AS man_checkin_status";
     $tabella = $gTables['rental_events']." LEFT JOIN ".$gTables['artico']." ON ".$gTables['rental_events'].".house_code = ".$gTables['artico'].".codice LEFT JOIN ".$gTables['artico_group']." ON ".$gTables['artico_group'].".id_artico_group = ".$gTables['artico'].".id_artico_group LEFT JOIN ".$gTables['tesbro']." ON ".$gTables['tesbro'].".id_tes = ".$gTables['rental_events'].".id_tesbro LEFT JOIN ".$gTables['clfoco']." ON ".$gTables['clfoco'].".codice = ".$gTables['tesbro'].".clfoco LEFT JOIN ".$gTables['anagra']." ON ".$gTables['anagra'].".id = ".$gTables['clfoco'].".id_anagra ";
     $where = $gTables['rental_events'].".type = 'ALLOGGIO' AND DATE(".$gTables['rental_events'].".checked_in_date) = '".$datainizio."'";
 
@@ -206,11 +207,12 @@ if (isset($_GET['anteprima']) and $msg == "") {
                   <div class="row" style="font-weight: bold; border-bottom: 2px solid #333; padding: 8px 0;">
                     <div class="col-xs-3 text-center">Nome capogruppo</div>
                     <div class="col-xs-2 text-center">Accettazione</div>
-                    <div class="col-xs-2 text-center">Persone (adulti+minori)</div>
+                    <div class="col-xs-1 text-center">Persone (adulti+minori)</div>
                     <div class="col-xs-2 text-center">Alloggio</div>
                     <div class="col-xs-1 text-center">Camere</div>
                     <div class="col-xs-1 text-center">SELF-checked in</div>
                     <div class="col-xs-1 text-center">PRE-checked in</div>
+					<div class="col-xs-1 text-center">Admin-checked in</div>
                   </div>
 
                     <?php
@@ -222,19 +224,24 @@ if (isset($_GET['anteprima']) and $msg == "") {
                       }else{
                         echo "ERRORE: manca il custom field";exit;
                       }
+					 
                       if (intval($alloggio['self_checkin_status'])==0 && intval($alloggio['pre_checkin_status'])==0 ){// NON posso creare il file, manca il check-in
                         $disable_xml=1;
+                      }
+					  if ($alloggio['man_checkin_status'] == 1 ){// Correggo, posso, perché è stato fatto dal lato admin di GAzie
+                        $disable_xml=0;
                       }
                     ?>
                     <!-- Righe di dati -->
                     <div class="row" style="padding: 8px 0; border-bottom: 1px solid #ccc;">
                       <div class="col-xs-3 text-left"><?php echo $alloggio['ragso1']," ",$alloggio['ragso2']; ?></div>
                       <div class="col-xs-2 text-left"><?php echo $alloggio['checked_in_date']; ?></div>
-                      <div class="col-xs-2 text-left"><?php echo $alloggio['adult'],"+",$alloggio['child']; ?></div>
+                      <div class="col-xs-1 text-left"><?php echo $alloggio['adult'],"+",$alloggio['child']; ?></div>
                       <div class="col-xs-2 text-center"><?php echo $type[$data['vacation_rental']['accommodation_type']]," ",$alloggio['house_code']; ?></div>
                       <div class="col-xs-1 text-center"><?php echo $data['vacation_rental']['room_qta']; ?></div>
-                      <div class="col-xs-1 text-left"><?php echo $alloggio['self_checkin_status']; ?></div>
-                      <div class="col-xs-1 text-left"><?php echo $alloggio['pre_checkin_status']; ?></div>
+                      <div class="col-xs-1 text-left"><?php echo $alloggio['self_checkin_status']?? '-'; ?></div>
+                      <div class="col-xs-1 text-left"><?php echo $alloggio['pre_checkin_status']?? '-'; ?></div>
+					  <div class="col-xs-1 text-left"><?php echo $alloggio['man_checkin_status']?? '-'; ?></div>
                     </div>
                     <?php
                   }
@@ -324,7 +331,7 @@ if (isset($_GET['XML']) and $msg == "") {
     foreach($dati as $guest){// per ogni ospite presente nel file del pre checkin
 
       $file_polstat[$n]='';
-      $sex=($guest['sex']='F')?2:1;
+      $sex=($guest['sex']=='F')?2:1;
       $idswh=(string)(intval($row['id_tesbro'])).$n;
       $xml_output .= "\t\t\t<arrivo>\n";
       $xml_output .= "\t\t\t\t<idswh>".$idswh."</idswh>\n";
@@ -470,7 +477,6 @@ foreach ($periodo as $date) {
   }
   //DEVO RICALCOLARE LE CAMERE OCCUPATE GIORNO PER GIORNO
   $camere_occupate_struttura = camere_occupate($date->format('Y-m-d'))['camere_occupate_struttura'];
-
   $xml_output .= "\t<movimento>\n";
   $xml_output .= "\t\t<data>". $date->format('Ymd') ."</data>\n";// data dell'effettivo check-in
   $xml_output .= "\t\t<struttura>\n";

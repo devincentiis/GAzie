@@ -1019,6 +1019,7 @@ $strScript = array(
     ),
     "self_checkin.php" =>
     array('title' => 'Self Check-in Management',
+        'choose_sex' => 'choose gender',
         'text1' => 'Perfect, the documents have been successfully uploaded!',
         'text2' => 'Now, make sure you have paid the security deposit and the rental balance. If payment is not made, self check-in cannot be enabled.',
         'text3' => 'There is still an outstanding payment of € ',

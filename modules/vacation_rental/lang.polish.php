@@ -828,6 +828,7 @@ $strScript = array(
     ),
     "self_checkin.php" =>
     array('title' => 'Zarządzanie self check-in',
+        'choose_sex' => 'Wybierz płeć',
         'text1' => 'Świetnie, dokumenty zostały poprawnie załadowane!',
         'text2' => 'Teraz sprawdź, czy wpłacono kaucję i uregulowano należność za wynajem. W przeciwnym razie self check-in nie będzie możliwy.',
         'text3' => 'Pozostała kwota do zapłaty: € ',

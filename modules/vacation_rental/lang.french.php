@@ -1019,6 +1019,7 @@ $strScript = array(
     ),
     "self_checkin.php" =>
     array('title' => 'Gestion des self check-in',
+        'choose_sex' => 'Sélectionner le sexe',
         'text1' => 'Parfait, les documents ont été téléchargés avec succès !',
         'text2' => 'Vérifie maintenant que tu as payé la caution et le solde de la location. Si le paiement n’est pas effectué, le self check-in ne pourra pas être activé.',
         'text3' => 'Il reste encore à payer € ',
