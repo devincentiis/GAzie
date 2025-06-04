@@ -1455,7 +1455,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $anagrafica = new Anagrafica();
     $cliente = $anagrafica->getPartner($tesbro['clfoco']);
     $form['indspe'] = $cliente['indspe'];
-    $rs_rig = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes = " . intval($_GET['id_tes']), "id_rig asc");
+    $rs_rig = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes = " . intval($_GET['id_tes']), "id_rig ASC");
     $id_des = $anagrafica->getPartner($tesbro['id_des']);
     $form['id_tes'] = intval($_GET['id_tes']);
     $form['hidden_req'] = '';
@@ -1570,8 +1570,49 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $form['shortdescri'] = "";
     }
 
+    // INIZIO rinumerazione per retrocompatibilità e bypass possibili errori introdotti da bug passati
+    $prev_nrow=0;
+    $prev_nrow_linked=0;
+    $linked_with_next=false;
+    $rows=[];
+    $nr=0;
+    while ($r = gaz_dbi_fetch_array($rs_rig)) {
+      $nr++;
+      $rows[$nr] = $r;
+      if ($linked_with_next && $r['tiprig'] == 6 ) { // il precedente dovrebbe essere linkato con questo, lo accetto solo se di tipo 6 testo
+        $rows[$nr]['nrow']=$nr;
+        $rows[$nr]['nrow_linked']=intval($nr-1);
+        $linked_with_next=false;
+      } elseif ($r['nrow'] == $prev_nrow ) { // ha lo stesso nrow del precedente, è una anomalia di per se, lo svincolo
+        $rows[$nr]['nrow']=$nr;
+        $rows[$nr]['nrow_linked']=$nr;
+        $linked_with_next=false;
+      } elseif ($r['nrow_linked'] == $prev_nrow ) { // è linkato con il precedente
+        if ($linked_with_next) { // ed anche il precedente era linkato, tutto ok
+          $rows[$nr]['nrow']=$nr;
+          $rows[$nr]['nrow_linked']=intval($nr-1);
+          $linked_with_next=false;
+        } else { // ... altrimenti li svincolo entrambi non sapendo a chi riferirli
+          $rows[$nr]['nrow']=$nr;
+          $rows[$nr]['nrow_linked']=$nr;
+          $rows[intval($nr-1)]['nrow']=intval($nr-1);
+          $rows[intval($nr-1)]['nrow_linked']=intval($nr-1);
+          $linked_with_next=false;
+        }
+      } elseif ($r['nrow_linked'] == intval($r['nrow']+1) ) { // è linkato con il successivo
+        $rows[$nr]['nrow']=$nr;
+        $rows[$nr]['nrow_linked']= intval($nr+1);
+        $linked_with_next =true; // tengo traccia per controllare il prossimo
+      } else  {
+        $rows[$nr]['nrow']=$nr;
+        $rows[$nr]['nrow_linked']=$nr;
+        $linked_with_next=false;
+      }
+      $prev_nrow = $r['nrow'];
+    }
+    // FINE rinumerazione
     $next_row = 0;
-    while ($rigo = gaz_dbi_fetch_array($rs_rig)) {
+    foreach ($rows as $rigo ) {
         $articolo = gaz_dbi_get_row($gTables['artico'], "codice", $rigo['codart']);
 
         if ($rigo['id_body_text'] > 0) { //se ho un rigo testo
@@ -1596,8 +1637,8 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $form['rows'][$next_row]['provvigione'] = $rigo['provvigione'];
         $form['rows'][$next_row]['id_mag'] = $rigo['id_mag'];
         $form['rows'][$next_row]['id_rig'] = $rigo['id_rig'];
-        $form['rows'][$next_row]['nrow'] = ($rigo['nrow'] >=1 ) ? $rigo['nrow'] : ($next_row+1); // retrocompatibilità
-        $form['rows'][$next_row]['nrow_linked'] = ($rigo['nrow_linked'] >=1 ) ? $rigo['nrow_linked'] : ($next_row+1); // retrocompatibilità
+        $form['rows'][$next_row]['nrow'] = $rigo['nrow'];
+        $form['rows'][$next_row]['nrow_linked'] = $rigo['nrow_linked'];
         $form['rows'][$next_row]['annota'] = (isset($articolo['annota'])) ? $articolo['annota']:'';
         $mv = $upd_mm->getStockValue(false, $rigo['codart'], "", $admin_aziend['stock_eval_method']);
         $magval = array_pop($mv);
