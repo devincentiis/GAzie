@@ -137,6 +137,9 @@ class opencarttregazSynchro {
 		} else { // giacenza = 0
 			$stock_status = '3';
 		}
+    // visibilità sull'ecommerce
+    $view_status=( $d['web_public'] > 1 && $d['web_public'] < 5)?1:0;
+
 		if ($d['web_price']>=0.00001){// in archivio ho valorizzato il prezzo web altrimenti uso quello normale listino 1
 			$d['preve1']=round($d['web_price']*$d['web_multiplier'],4);
 		}
@@ -152,7 +155,7 @@ class opencarttregazSynchro {
     }
 		$fields = array ('product_id' => intval($d['ref_ecommerce_id_product']),
 								'data'=>array(	'name'=>$d['descri'],'model'=>$d['codice'],'quantity'=>$d['quantity'],'description'=>$d['body_text'].' ',
-								'image'=>$d['heximage'],'price'=>floatval($d['preve1']),'category_id'=>intval($d['catmer']),'weight'=>floatval($d['peso_specifico']),'length'=>floatval($d['lunghezza']),'width'=>floatval($d['larghezza']),'height'=>floatval($d['spessore']),'tax_class_id'=>intval($d['aliiva']),'manufacturer_id'=>intval($d['clfoco']),'meta_keyword'=>$d['annota'].' ',	'stock_status_id'=>$stock_status,'status'=>$d['web_public']));
+								'image'=>$d['heximage'],'price'=>floatval($d['preve1']),'category_id'=>intval($d['catmer']),'weight'=>floatval($d['peso_specifico']),'length'=>floatval($d['lunghezza']),'width'=>floatval($d['larghezza']),'height'=>floatval($d['spessore']),'tax_class_id'=>intval($d['aliiva']),'manufacturer_id'=>intval($d['clfoco']),'meta_keyword'=>$d['annota'].' ',	'stock_status_id'=>$stock_status,'status'=>$view_status));
 		$post = http_build_query($fields);
 		curl_setopt_array($curl,[ CURLOPT_RETURNTRANSFER => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_COOKIE => 'OCSESSID='.$this->api_token]);
 		$raw_response = curl_exec($curl);

@@ -84,8 +84,9 @@ if (isset($_POST['Submit'])) { // conferma tutto
       'manufacturer_id'=>intval($r['clfoco']),
       'meta_keyword'=>$r['annota'].' ',
       'stock_status_id'=>$stock_status,
-      'status'=>intval($r['web_public']))
-			);
+      'status'=>(( $r['web_public'] > 1 && $r['web_public'] < 5)?1:0)
+      )
+    );
 		$post = http_build_query($fields);
 		curl_setopt_array( $curl,[ CURLOPT_RETURNTRANSFER => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_COOKIE => 'OCSESSID='.$gSync->api_token]);
 		$raw_response = curl_exec( $curl );

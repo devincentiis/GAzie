@@ -366,8 +366,12 @@ if (isset($_GET['XML']) and $msg == "") {
       }else{
         $cittadinanza="100000100";// Italia
         $municip=gaz_dbi_get_row($gTables['municipalities'], 'name', $guest['loccard']);
-        $provin=gaz_dbi_get_row($gTables['provinces'], 'id', $municip['id_province']);
-        $luogorilascidoc="4".str_pad($provin['id_region'], 2, "0", STR_PAD_LEFT).$municip['stat_code'];
+		if (isset($municip['id_province'])){
+			$provin=gaz_dbi_get_row($gTables['provinces'], 'id', $municip['id_province']);
+			$luogorilascidoc="4".str_pad($provin['id_region'], 2, "0", STR_PAD_LEFT).$municip['stat_code'];
+		}else{
+			$luogorilascidoc="";
+		}
       }
       if ($guest['country']<>"IT"){
         $statoresidenza="100000".gaz_dbi_get_row($gTables['country'], 'iso', $guest['country'])['istat_country'];
@@ -530,7 +534,7 @@ foreach ($periodo as $date) {
 
             <!-- Pulsanti per aprire l'iframe -->
             <button class="openIframeBtn" data-url="API_istat.php?ref=<?php echo $xmlFileP ; ?>&id=<?php echo $id_artico_group; ?>" type="button">Invio a servizio ISTAT</button>
-            <button class="openIframeBtn" data-url="API_Polizia.php?ref=<?php echo $path; ?>&id=<?php echo $id_artico_group; ?>&type=<?php echo $fileUnico; ?>" type="button">Invio a Alloggiati Polizia</button>
+            <button class="openIframeBtn" data-url="API_Polizia.php?ref=<?php echo $path; ?>&id=<?php echo $id_artico_group; ?>&type=<?php echo $fileUnico; ?>&checkin=<?php echo date("Ymd",strtotime($datainizio)); ?>" type="button">Invio a Alloggiati Polizia</button>
 
             <!-- Contenitore iframe -->
             <div id="iframeContainer" style="display: none; position: fixed; top: 10%; left: 5%; width: 90%; height: 80%; background: #fff; z-index: 2000; border: 2px solid #28a745; box-shadow: 0 0 10px rgba(0,0,0,0.3);">

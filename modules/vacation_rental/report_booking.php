@@ -1630,7 +1630,9 @@ $ts->output_navbar();
               echo "<td style='text-align: left;'>";
                 if(isset($datatesbro['vacation_rental']['man_checkin_status']) && intval($datatesbro['vacation_rental']['man_checkin_status'])==1){
                   $class_man="btn btn-success";$title_man="title = 'Accettazione effettuata'";
-                }else{
+                }elseif(isset($datatesbro['vacation_rental']['pre_checkin_status']) && intval($datatesbro['vacation_rental']['pre_checkin_status'])==1){
+					$class_man="btn btn-warning";$title_man="title = 'PRE-checkin effettuato'";
+				}else{
                   $class_man="";$title_man="title = 'Accettazione NON effettuata'";
                 }
                   if ( $tipo == "VOG" ) {

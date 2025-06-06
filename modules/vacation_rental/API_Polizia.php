@@ -63,9 +63,14 @@ if (!filter_var($wsdl, FILTER_VALIDATE_URL) && !file_exists($wsdl)) {
     die("❌ WSDL-end point non valido o mancante: $wsdl");
 }
 echo "<h1>📋 Invio schedine alloggiati alla Polizia di Stato\n</h1><br>";
+
 function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorniIndietro = 30) {
     echo "<br>📥 Inizio download ricevute (ultimi $giorniIndietro giorni)...<br>";
-
+	// Crea sottocartella ricezione ricevute
+	$savePath = rtrim(dirname($savePath), "/") . "/ricevute_alloggiati/" . $utente;
+	if (!is_dir($savePath)) {
+		mkdir($savePath, 0775, true);
+	}
     $logCsv = $savePath . "/log_ricevute.csv";
     $righeCsv = [];
 
@@ -89,9 +94,7 @@ function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorni
         $nomeFile = $savePath . "/ricevuta_alloggiati_" . $data->format('Ymd') . ".pdf";
         $dataDisplay = $data->format('d/m/Y');
 
-        // ❗ Se già loggata, salta
         if (isset($dateLoggate[$dataIso])) {
-            //echo "🟡 Già loggata: $dataDisplay<br>";
             continue;
         }
 
@@ -103,14 +106,33 @@ function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorni
             ]]);
 
             $pdfBase64 = $ricevutaResponse->PDF ?? null;
+
             if ($pdfBase64) {
-                file_put_contents($nomeFile, base64_decode($pdfBase64));
-                echo "📄 Ricevuta salvata per $dataDisplay<br>";
-                $righeCsv[] = [$dataIso, 'Scaricata', basename($nomeFile), 'OK'];
+                // Pulizia base64 da newline/spazi (prevenzione difetti SOAP)
+                $pdfBase64Clean = preg_replace('/\s+/', '', $pdfBase64);
+
+                $decoded = base64_decode($pdfBase64Clean);
+                $header = substr($decoded, 0, 5); // %PDF-
+                $isPdfValid = (strncmp($header, "%PDF-", 5) === 0);
+
+                if ($isPdfValid) {
+                    file_put_contents($nomeFile, $decoded);
+                    echo "📄 Ricevuta salvata per $dataDisplay<br>";
+                    $righeCsv[] = [$dataIso, 'Scaricata', basename($nomeFile), 'OK'];
+                } else {
+                    // Salva i file sospetti per analisi
+                    $corruptPath = $savePath . "/_corrupt_ricevuta_" . $data->format('Ymd');
+                    file_put_contents($corruptPath . ".b64.txt", $pdfBase64);
+                    file_put_contents($corruptPath . ".bin", $decoded);
+
+                    echo "❗ Ricevuta per $dataDisplay NON valida (PDF corrotto)<br>";
+                    $righeCsv[] = [$dataIso, 'Corrotta', '-', 'PDF non valido. Base64 salvato'];
+                }
             } else {
                 echo "ℹ️ Nessuna ricevuta disponibile per $dataDisplay<br>";
                 $righeCsv[] = [$dataIso, 'Non trovata', '-', 'Nessuna ricevuta disponibile'];
             }
+
         } catch (SoapFault $e) {
             echo "❗ Errore SOAP per $dataDisplay: " . $e->getMessage() . "<br>";
             $righeCsv[] = [$dataIso, 'Errore SOAP', '-', $e->getMessage()];
@@ -136,16 +158,10 @@ function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorni
     echo "✅ Download ricevute completato.<br>";
 }
 
+
 // === CARICA LE RIGHE DAL FILE TXT ===
 $txtFileFlagged = $path . "/polstat_flagged.txt";
 
-// Controlla se esiste già un file con un timestamp nel nome (file già inviato)
-$files = glob($path . "/polstat_*_flagged.txt");
-
-if (!empty($files)) {
-    // Se ci sono file con timestamp, significa che è già stato inviato
-    die("✅ Il file è già stato inviato in precedenza. Nessuna azione necessaria.\n");
-}
 
 // Se il file normale non esiste, errore
 if (!file_exists($txtFile)) {
@@ -156,6 +172,42 @@ $schedine = file($txtFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 if (!$schedine) {
     die("❌ Il file è vuoto o non leggibile.\n");
 }
+
+// === CONTROLLO E LOG SCHEDINE INVIATE (con auto-pulizia vecchi hash) ===
+$logHashFile = $path . "/schedine_inviate_log.csv";
+$hashInviate = [];
+
+// Carica e filtra hash validi (ultimi 30 giorni)
+if (file_exists($logHashFile)) {
+    $lines = file($logHashFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $nuoveRighe = [];
+    $oggi = new DateTime();
+
+    foreach ($lines as $line) {
+        [$dataStr, $hash] = explode(',', $line);
+        $data = DateTime::createFromFormat('Y-m-d', trim($dataStr));
+        if ($data !== false && $oggi->diff($data)->days <= 30) {
+            $hashInviate[] = $hash;
+            $nuoveRighe[] = trim($dataStr) . "," . trim($hash);
+        }
+    }
+
+    // Sovrascrive il file con solo hash validi
+    file_put_contents($logHashFile, implode("\n", $nuoveRighe) . "\n");
+}
+
+// Calcola hash delle schedine attuali
+$schedine = file($txtFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+if (!$schedine) {
+    die("❌ Il file è vuoto o non leggibile.\n");
+}
+$hashCorrente = md5(implode("\n", $schedine));
+
+// Se hash già presente → non inviare
+if (in_array($hashCorrente, $hashInviate)) {
+    die("✅ Le schedine sono già state inviate in precedenza (entro 30 giorni).\n");
+}
+
 
 // === CREA SOAP CLIENT ===
 $client = new SoapClient($wsdl, ['trace' => true, 'exceptions' => true]);
@@ -256,17 +308,24 @@ if (!empty($dettaglio)) {
     echo "<br>\n📨 Invio effettuato.\nEsito: " . ($sendResult->esito ? "✅ OK" : "❌ ERRORE") . "\n";
 
     if ($sendResult->esito) {
-    // ✅ Rinomina il file con il timestamp
-    $timestamp = date('Ymd_His');  // Ad esempio: 20230523_143500
-    $txtFileFlagged = $path . "/polstat_{$timestamp}_flagged.txt";
+		// ✅ Rinomina il file con timestamp + progressivo (es. polstat_20250603_flagged_1.txt)
+		$timestamp = date('Ymd');
+		$index = 1;
+		do {
+			$txtFileFlagged = $path . "/polstat_{$timestamp}_flagged_{$index}.txt";
+			$index++;
+		} while (file_exists($txtFileFlagged));
 
-    $renamed = rename($txtFile, $txtFileFlagged);
-    if ($renamed) {
-        echo "<br>🏁 File rinominato a: $txtFileFlagged (inviato con successo)\n";
-    } else {
-        echo "<br>⚠️ ATTENZIONE: invio riuscito, ma non è stato possibile rinominare il file.\n";
-    }
-}
+		$renamed = rename($txtFile, $txtFileFlagged);
+		if ($renamed) {
+			echo "<br>🏁 File rinominato a: $txtFileFlagged (inviato con successo)\n";
+		} else {
+			echo "<br>⚠️ ATTENZIONE: invio riuscito, ma non è stato possibile rinominare il file.\n";
+		}
+
+		// Salva hash invio nel log
+		file_put_contents($logHashFile, date('Y-m-d') . "," . $hashCorrente . "\n", FILE_APPEND);
+	}
 
 
     // === 4. RICHIESTA RICEVUTA ===
