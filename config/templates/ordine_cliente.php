@@ -212,6 +212,12 @@ class OrdineCliente extends Template
           $this->Cell(80,6,$rigo['descri'],'LR',0,'L',0,'',1);
           $this->Cell(81,6,'','R',1);
         break;
+        case "910":
+          $cf = json_decode($rigo['custom_field']);
+          $this->SetTextColor(205,0,0);
+          $this->writeHtmlCell(186,6,10,$this->GetY(),"ANNULLATO:<br>il ".$cf->cancellation->date." per ".$cf->cancellation->reason."<br>".$rigo['descri']." ".$rigo['unimis']." ".floatval($rigo['quanti'])." x ".floatval($rigo['prelis']),1,1);
+          $this->SetTextColor(0,0,0);
+        break;
       }
     }
   }

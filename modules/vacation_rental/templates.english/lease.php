@@ -127,8 +127,11 @@ class Lease extends Template{
               $child=$rigo['child'];
               $start=$rigo['start'];
               $end=$rigo['end'];
-              $secdep = $custom['vacation_rental']['security_deposit'];
-          }
+              if ($this->docVars->tesdoc['security_deposit']==-1){
+                $secdep = $custom['vacation_rental']['security_deposit'];
+              }else{
+                $secdep = $this->docVars->tesdoc['security_deposit'];
+              }          }
           if (array_key_exists('extra', $custom['vacation_rental'])) { // è un extra
               $html .= "<li>".intval($rigo['quanti'])."Extra ".get_string_lang($rigo['desart'], $lang)." ".$rigo['annota'];
               if (strlen($rigo['web_url'])>5){

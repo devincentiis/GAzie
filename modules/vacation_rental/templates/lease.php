@@ -141,7 +141,7 @@ class Lease extends Template{
 
               $html .= "<li>".$accomodation_type." ".$rigo['codart'].', '.get_string_lang($rigo['desart'], $lang).", ".$rigo['annota'];
               $rigo['web_url']=get_string_lang($rigo['web_url'], $lang);
-			  if (strlen($rigo['web_url'])>5){
+              if (strlen($rigo['web_url'])>5){
                 $html .= "<br>".$script_transl['body3'].": ".$rigo['web_url'].". ".$script_transl['body4'];
               }
               $html .= "</li>";
@@ -150,7 +150,12 @@ class Lease extends Template{
               $child=$rigo['child'];
               $start=$rigo['start'];
               $end=$rigo['end'];
-              $secdep = $custom['vacation_rental']['security_deposit'];
+
+              if ($this->docVars->tesdoc['security_deposit']==-1){
+                $secdep = $custom['vacation_rental']['security_deposit'];
+              }else{
+                $secdep = $this->docVars->tesdoc['security_deposit'];
+              }
           }
           if (array_key_exists('extra', $custom['vacation_rental'])) { // è un extra
               $html .= "<li>Q.tà. ".intval($rigo['quanti'])." Extra ".get_string_lang($rigo['desart'], $lang)." ".$rigo['annota'];

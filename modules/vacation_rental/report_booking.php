@@ -183,7 +183,7 @@ if (count($_GET)<=1){
 	$last = gaz_dbi_fetch_array($rs_last);
 	if ($last) {
 		$default_where=['sezione' => $last['seziva'], 'tipo' => 'F%', 'anno'=>$last['yearde']];
-        $_GET['anno']=$last['yearde'];		
+        $_GET['anno']=$last['yearde'];
 	} else {
 		$default_where= ['auxil' => 'VOR'];
 	}
@@ -1317,7 +1317,7 @@ $ts->output_navbar();
         cols_from($gTables['anagra'],
             "ragso1","ragso2","citspe","custom_field AS anagra_custom_field",
             "e_mail AS base_mail","id","e_mail2 AS base_mail2") . ", " .
-        cols_from($gTables["destina"], "unita_locale1").", ".cols_from($gTables["rental_events"], "adult", "child", "start","end","house_code","checked_in_date","checked_out_date","id_tesbro"),
+        cols_from($gTables["destina"], "unita_locale1").", ".cols_from($gTables["rental_events"], "adult", "child", "start","end","house_code","checked_in_date","checked_out_date","id_tesbro","status_webservice"),
         $tesbro_e_destina." LEFT JOIN ".$gTables['rental_events']." ON  ".$gTables['rental_events'].".id_tesbro = ".$gTables['tesbro'].".id_tes AND ".$gTables['rental_events'].".type = 'ALLOGGIO' LEFT JOIN ".$gTables['rental_feedbacks']." ON  ".$gTables['rental_feedbacks'].".reservation_id = ".$gTables['rental_events'].".id_tesbro" ,
         $ts->where." AND template = 'booking' ", $ts->orderby,
         $ts->getOffset(), $ts->getLimit(),$gTables['rental_events'].".id_tesbro");
@@ -1327,7 +1327,8 @@ $ts->output_navbar();
 
             }
             $r['id_agent']=0;
-            $row_artico=gaz_dbi_get_row($gTables['artico'], 'codice', $r['house_code']);
+            $row_artico = gaz_dbi_get_row($gTables['artico'], 'codice', $r['house_code']);
+            $art_group_custom = gaz_dbi_get_row($gTables['artico_group'], 'id_artico_group', $row_artico['id_artico_group'])['custom_field'];
             $artico_custom_field=$row_artico['custom_field'];
             if ($datahouse = json_decode($artico_custom_field, TRUE)) { // se esiste un json nel custom field dell'alloggio
               if (is_array($datahouse['vacation_rental']) && isset($datahouse['vacation_rental']['agent'])){
@@ -1337,6 +1338,12 @@ $ts->output_navbar();
                   $res_agent=gaz_dbi_get_row($gTables['clfoco'], 'codice', $clfoco_agent);
                   $r['id_agent']=$res_agent['id_anagra'];
                 }
+              }
+            }
+            $polservice = 0;
+            if ($facility = json_decode($art_group_custom, TRUE)) { // se esiste un json nel custom field della struttura
+              if (is_array($facility['vacation_rental']) && isset($facility['vacation_rental']['endpointPol']) && filter_var($facility['vacation_rental']['endpointPol'], FILTER_VALIDATE_URL)){
+                $polservice = 1;
               }
             }
             if (intval($r['id_agente'])>0){// se c'è un tour operator
@@ -1590,7 +1597,7 @@ $ts->output_navbar();
               // colonna fiscale
               if ( $tipo !== "VPR" ){//  se non è preventivo
                 echo "<td style='text-align: left;'>";
-				if ( intval($agent)==0){// se non c'è un proprietario/agente 
+				if ( intval($agent)==0){// se non c'è un proprietario/agente
 					if ($remains_atleastone && !$processed_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
 						// L'ordine e'  da evadere.
 					  if ( $tipo !== "VOG" && $tipo !== "VPR") {
@@ -1612,7 +1619,7 @@ $ts->output_navbar();
 					  mostra_documenti_associati( $r['id_tes'], $paid );
 					}
 				}
-                  if ($r['status']=='CONFIRMED'){                         
+                  if ($r['status']=='CONFIRMED'){
 					  ?>
 					  <a style="float:right;" title="Genera pdf contratto" class="btn btn-xs dialog_leasecr" ref="<?php echo $r['id_tes']; ?>" nome="<?php echo $r['ragso1']; ?>" url=<?php echo "stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent']; ?>>
 						<i class="glyphicon glyphicon-refresh"></i>
@@ -1631,8 +1638,8 @@ $ts->output_navbar();
                 if(isset($datatesbro['vacation_rental']['man_checkin_status']) && intval($datatesbro['vacation_rental']['man_checkin_status'])==1){
                   $class_man="btn btn-success";$title_man="title = 'Accettazione effettuata'";
                 }elseif(isset($datatesbro['vacation_rental']['pre_checkin_status']) && intval($datatesbro['vacation_rental']['pre_checkin_status'])==1){
-					$class_man="btn btn-warning";$title_man="title = 'PRE-checkin effettuato'";
-				}else{
+                  $class_man="btn btn-warning";$title_man="title = 'PRE-checkin effettuato'";
+                }else{
                   $class_man="";$title_man="title = 'Accettazione NON effettuata'";
                 }
                   if ( $tipo == "VOG" ) {
@@ -1658,21 +1665,29 @@ $ts->output_navbar();
                             <a class="class1 <?php echo $class_man; ?>" href="MANUAL_checkin.php?tes=<?php echo $r['id_tes']; ?>" <?php echo $title_man; ?> onclick="checkFileExistence(event); return false;">accettazione</a>
                           </button>
                           <?php
-                        }
-                        if ($stato_btn_selfcheck!==""){// se c'è il self checkin inserisco icona
-                         ?>
-                        <a title="<?php echo $title_selfcheck; ?>" class="btn btn-xs <?php echo $stato_btn_selfcheck; ?> dialog_selfcheck" ref="<?php echo $r['id_tes']; ?>" status_now="<?php echo $title_selfcheck; ?>" proself="<?php echo $data['vacation_rental']['self_checkin_status']; ?>" cust_mail="<?php echo $r['base_mail']; ?>" numdoc="<?php echo $r['numdoc']; ?>" id_anagra="<?php echo $r['id']; ?>" msgself="<?php echo $data['vacation_rental']['self_checkin_status_msg']; ?>">
-                          <i class="glyphicon glyphicon-ok-circle"></i>
-                        </a>
-                        <?php
-                        }
 
-                        if (isset($r['text'])){// se c'è una recensione inserisco icona
-                         ?>
-                        <a title="Recensione" class="btn btn-xs <?php echo $feed_stato_btn; ?> dialog_feedback" ref="<?php echo $r['id_feedback']; ?>" feed_text="<?php echo $r['text']; ?>" feed_status="<?php echo $r['feed_status']; ?>">
-                          <i class="glyphicon glyphicon-comment"></i>
-                        </a>
-                        <?php
+                          if ($stato_btn_selfcheck!==""){// se c'è il self checkin inserisco icona
+                           ?>
+                          <a title="<?php echo $title_selfcheck; ?>" class="btn btn-xs <?php echo $stato_btn_selfcheck; ?> dialog_selfcheck" ref="<?php echo $r['id_tes']; ?>" status_now="<?php echo $title_selfcheck; ?>" proself="<?php echo $data['vacation_rental']['self_checkin_status']; ?>" cust_mail="<?php echo $r['base_mail']; ?>" numdoc="<?php echo $r['numdoc']; ?>" id_anagra="<?php echo $r['id']; ?>" msgself="<?php echo $data['vacation_rental']['self_checkin_status_msg']; ?>">
+                            <i class="glyphicon glyphicon-ok-circle"></i>
+                          </a>
+                          <?php
+                          }
+
+                          if (isset($r['text'])){// se c'è una recensione inserisco icona
+                           ?>
+                          <a title="Recensione" class="btn btn-xs <?php echo $feed_stato_btn; ?> dialog_feedback" ref="<?php echo $r['id_feedback']; ?>" feed_text="<?php echo $r['text']; ?>" feed_status="<?php echo $r['feed_status']; ?>">
+                            <i class="glyphicon glyphicon-comment"></i>
+                          </a>
+                          <?php
+                          }
+
+                          if ($polservice && isset($r['status_webservice']) && intval($r['status_webservice'])<2 && $check_inout=="IN"){// se il check-in è fatto, il webservice attivato ma non è stato ancora inviato il file alla Polizia di Stato
+                           ?>
+                           <div title="ATTENZIONE: non sono ancora state inviate le schedine alloggiati alla Polizia di Stato" class="sirena" style="font-size: 4rem; opacity: 1;">🚨</div>
+                          <?php
+                          }
+
                         }
                   }
 
@@ -1772,8 +1787,6 @@ if (isset($_SESSION['print_queue']['idDoc']) && !empty($_SESSION['print_queue'][
         alert( "Data Saved: " + msg );
       });
     });
-
-
   });
 </script>
 <?php
@@ -1826,4 +1839,15 @@ function checkFileExistence(event) {// avviso della necessità della versione pr
         alert('Errore nella verifica del file.');
     });
 }
+$(document).ready(function() {
+
+    $('.sirena').tooltip();// Inizializza il tooltip di Bootstrap
+    const sirene = $('.sirena');
+    let visibile = true;// faccio lampeggiare le sirene
+    setInterval(() => {
+      visibile = !visibile;
+      sirene.css('opacity', visibile ? '1' : '0.05');
+    }, 800);
+
+  });
 </script>

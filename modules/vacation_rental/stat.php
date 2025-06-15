@@ -144,9 +144,8 @@ if (isset($_GET['anteprima']) and $msg == "") {
 
     $result = gaz_dbi_dyn_query($select, $tabella, $where , 'start');
     $numrow = gaz_dbi_num_rows($result);
-
+	
     while($rows[] = mysqli_fetch_assoc($result));array_pop($rows);// creo un array con tutte le prenotazioni
-
     $currentDate = strtotime($datainizio);
     $count=array();
     $fmt = new \IntlDateFormatter('it_IT', IntlDateFormatter::FULL, IntlDateFormatter::FULL);
@@ -154,15 +153,17 @@ if (isset($_GET['anteprima']) and $msg == "") {
 
     echo "<table class=\"Tlarge table table-striped table-bordered table-condensed table-responsive\">";
     if ($numrow > 0) {// se ci sono state prenotazioni avvio i calcoli statistici
-
-      while ($currentDate <= strtotime($datafine)){ // ciclo un giorno alla volta tutto l'intervallo richiesto
+		$dataend = date('Y-m-d', strtotime($datafine. ' - 1 days'));// il giorno del check-out non conta per una notte
+      while ($currentDate <= strtotime($dataend)){ // ciclo un giorno alla volta tutto l'intervallo richiesto
 
         $month = $fmt->format(new \DateTime(date("Y-m-d",$currentDate)));
         $n=0;
 
         foreach ($rows as $row) {// per ogni locazione
-          //echo "<pre>",print_r($row);
-          if (($currentDate > strtotime($row['start'])) && ($currentDate <= strtotime($row['end']))){// se il giorno che sto analizzando è dentro la locazione
+		
+			//echo "<br>currentdate:",$currentDate," - > start:",strtotime($row['start'])," - <= end:",strtotime($row['end']);
+          if (($currentDate >= strtotime($row['start'])) && ($currentDate <= strtotime($row['end']))){// se il giorno che sto analizzando è dentro la locazione
+		  
             (isset($rows[$n]['dayStat']))?$rows[$n]['dayStat']++:$rows[$n]['dayStat']=1;// contatore giorni di ogni locazione ($n) che sono dentro al periodo selezionato
 
             $facil=$row['id_artico_group'];// Chiave struttura turistica per raggruppamento statistiche
@@ -276,13 +277,16 @@ if (isset($_GET['anteprima']) and $msg == "") {
                 //tariffa applicata a notte
                 $tabella = $gTables['rigbro'];
                 $select = "quanti, prelis";
-                $where = "codice_fornitore = '".$val_row['codice']."' AND codart NOT LIKE 'TASSA-TURISTICA'";
+                $where = "codice_fornitore = '".$val_row['codice']."' AND id_tes = ".$val_row['id_tes']." AND codart NOT LIKE 'TASSA-TURISTICA'";
                 $resdis = gaz_dbi_dyn_query($select, $tabella, $where);// prendo eventuali righi sconto riferiti all'alloggio
                 $discount=0;
                 while ($dis = gaz_dbi_fetch_array($resdis)){ // per ogni eventuale rigo sconto
+					//echo "<pre>Righi sconto:",print_r($dis),"</pre>";
                   $discount+=$dis['prelis']*$dis['quanti'];
                 }
+				//echo "<br>prezzo totale:",($val_row['prelis']*$val_row['quanti'])," - sconto in percentuale:",((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100)," - sconto a valore:",$discount;
                 $tarif_night= ((($val_row['prelis']*$val_row['quanti'])-((($val_row['prelis']*$val_row['quanti'])*$val_row['sconto'])/100))+$discount)/$nights;
+				//echo "<br> tariffa per una notte:",$tarif_night;
                 if( !array_key_exists('tot_tarif_periodo', $count[$facil])){
                   $count[$facil]['tot_tarif_periodo'] =  $tarif_night*$row['dayStat'];// totale vendite per la struttura imponibile
                   $count[$facil]['tot_tarif_periodo_ivac'] =  ($tarif_night*$row['dayStat'])+((($tarif_night*$row['dayStat'])*$val_row['aliquo'])/100);// per B12 andrà diviso per pernottamenti totali

@@ -32,7 +32,11 @@
 
 $path = isset($_GET['ref']) ? urldecode($_GET['ref']) : '';
 $txtFile = $path . "/polstat.txt";
-
+$filepath = 'files/temp_ids.json';
+if (file_exists($filepath)) {
+    $testate = json_decode(file_get_contents($filepath), true);
+    unlink($filepath);
+}
 $id_polstat = 0; // 0 = invio normale; > 0 = file unico con IdAppartamento
 
 // LO PRENDO DALLE IMPOSTAZIONI $wsdl = "https://alloggiatiweb.poliziadistato.it/service/service.asmx?wsdl";
@@ -308,24 +312,43 @@ if (!empty($dettaglio)) {
     echo "<br>\n📨 Invio effettuato.\nEsito: " . ($sendResult->esito ? "✅ OK" : "❌ ERRORE") . "\n";
 
     if ($sendResult->esito) {
-		// ✅ Rinomina il file con timestamp + progressivo (es. polstat_20250603_flagged_1.txt)
-		$timestamp = date('Ymd');
-		$index = 1;
-		do {
-			$txtFileFlagged = $path . "/polstat_{$timestamp}_flagged_{$index}.txt";
-			$index++;
-		} while (file_exists($txtFileFlagged));
+      // ✅ Rinomina il file con timestamp + progressivo (es. polstat_20250603_flagged_1.txt)
+      $timestamp = date('Ymd');
+      $index = 1;
+      do {
+        $txtFileFlagged = $path . "/polstat_{$timestamp}_flagged_{$index}.txt";
+        $index++;
+      } while (file_exists($txtFileFlagged));
 
-		$renamed = rename($txtFile, $txtFileFlagged);
-		if ($renamed) {
-			echo "<br>🏁 File rinominato a: $txtFileFlagged (inviato con successo)\n";
-		} else {
-			echo "<br>⚠️ ATTENZIONE: invio riuscito, ma non è stato possibile rinominare il file.\n";
-		}
+      $renamed = rename($txtFile, $txtFileFlagged);
+      if ($renamed) {
+        echo "<br>🏁 File rinominato a: $txtFileFlagged (inviato con successo)\n";
+      } else {
+        echo "<br>⚠️ ATTENZIONE: invio riuscito, ma non è stato possibile rinominare il file.\n";
+      }
 
-		// Salva hash invio nel log
-		file_put_contents($logHashFile, date('Y-m-d') . "," . $hashCorrente . "\n", FILE_APPEND);
-	}
+      // Salva hash invio nel log
+      file_put_contents($logHashFile, date('Y-m-d') . "," . $hashCorrente . "\n", FILE_APPEND);
+
+      // visto che è tutto ok memorizzo il corretto invio in rental events
+      foreach ($testate as $tes){
+        $test_row = gaz_dbi_get_row($gTables['rental_events'], 'id_tesbro', intval($tes), " AND `type` = 'ALLOGGIO'" );
+        $valore=$test_row['status_webservice'];
+        if ($test_row['status_webservice']==0){// nessuno
+          $valore=2; // solo polizia
+        }elseif ($test_row['status_webservice']==1){// era già solo istat
+          $valore=3; // entrambi
+        }elseif ($test_row['status_webservice']==2){// era solo polizia
+
+        }
+
+        $query = "UPDATE `".$gTables['rental_events']."` SET `status_webservice` = '$valore' WHERE `id_tesbro` = ".intval($tes)." AND `type` = 'ALLOGGIO'";
+        if (gaz_dbi_query($query, true)){
+        }else{
+          echo "<br>❌ C'è stato un errore nell'aggiornare la tabella rental_events:<br>";
+        }
+      }
+    }
 
 
     // === 4. RICHIESTA RICEVUTA ===

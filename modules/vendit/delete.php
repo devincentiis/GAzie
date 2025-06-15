@@ -291,6 +291,16 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) || (isset($_POST['type']) && i
     $i=intval($_POST['ref']);
     gaz_dbi_del_row($gTables['files'], 'id_doc', $i);
     break;
+    case "cancel_order_rows":
+    // non cancello i righi annullati ma li valorizzo con tiprig=910 e l'eventuale data e motivo dell'annullamento, in ref ho gli id_rig
+    foreach($_POST['ref']['rows_ref'] as $v){
+      $codice= ["id_rig",$v];
+      $columns = ['tiprig','custom_field'];
+      $cf = json_encode(['cancellation'=>['reason'=>$_POST['reason'],'date'=>$_POST['dateca']]]);
+      $newValue = ['tiprig'=>910,'custom_field'=>$cf];
+      tableUpdate('rigbro',$columns,$codice,$newValue);
+    }
+    break;
 	}
 }
 ?>

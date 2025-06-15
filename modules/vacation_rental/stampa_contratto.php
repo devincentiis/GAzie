@@ -36,6 +36,11 @@ $azTables = constant("table_prefix").$idDB;
 $IDaz=preg_replace("/[^1-9]/", "", $azTables );
 require("document.php");
 $tesbro = gaz_dbi_get_row($gTables['tesbro'],"id_tes", intval($_GET['id_tes']));
+if ($tesbro_data = json_decode($tesbro['custom_field'], TRUE)){// se la testata ha un custom field
+  if (is_array($tesbro_data['vacation_rental']) && isset($tesbro_data['vacation_rental']['security_deposit'])){
+    $tesbro['security_deposit']=$tesbro_data['vacation_rental']['security_deposit'];
+  }
+}
 $id_ag='';
 if (isset($_GET['id_ag']) && $_GET['id_ag']>0){// se è stato passato un proprietario/agente
 	$id_ag=intval($_GET['id_ag']);

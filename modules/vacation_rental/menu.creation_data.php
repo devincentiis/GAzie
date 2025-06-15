@@ -99,4 +99,5 @@ $update_db[]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `v
 $update_db[]="INSERT INTO ".$table_prefix."_XXXcompany_config (`description`, `var`, `val`) VALUES ('Conto DEPOSITO CAUZIONALE DA CLIENTI (dare: Restituzione Depositi cauzionali incassati)', 'vacation_cauzione_dare', '0'),('Conto DEPOSITO CAUZIONALE CLIENTI (avere: Incasso depositi cauzionali) ', 'vacation_cauzione_avere', '0');";
 $update_db[]="CREATE TABLE `".$table_prefix."_XXXrental_points_mov` (`id` INT(11) NOT NULL AUTO_INCREMENT , `id_anagra` INT(11) NOT NULL , `operat` TINYINT(4) NOT NULL , `points` INT(11) NOT NULL DEFAULT '0' , `id_tesbro` INT(11) NOT NULL , `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP(), PRIMARY KEY (`id`), INDEX (`id_anagra`), INDEX (`operat`), INDEX (`id_tesbro`)) ENGINE = MyISAM;";
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_events` ADD INDEX(`checked_in_date`);";
+$update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_events` ADD `status_webservice` INT(1) NOT NULL DEFAULT '0' COMMENT 'Stato dell\'invio file ai webservice 0=nessun invio' AFTER `type`;";
 ?>

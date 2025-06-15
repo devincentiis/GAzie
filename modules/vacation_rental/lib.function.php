@@ -309,13 +309,26 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
       $tabletes = $azTables."tesbro";
       $tableiva = $azTables."aliiva";
       $tableaz = $azTables."aziend";
-	  $tableart = $azTables."artico";
+      $tableart = $azTables."artico";
     }else{
       $tablerig = $gTables['rigbro'];
       $tabletes = $gTables['tesbro'];
       $tableiva = $gTables['aliiva'];
       $tableaz = $gTables['aziend'];
-	  $tableart = $gTables['artico'];
+      $tableart = $gTables['artico'];
+    }
+    $sql = "SELECT custom_field FROM ".$tabletes." WHERE id_tes = ".intval($tesbro)." LIMIT 1";
+    if ($result = mysqli_query($link, $sql)) {
+      $rowtesbf = mysqli_fetch_assoc($result);
+      if (isset($rowtesbf['custom_field']) && ($data_tesbro = json_decode($rowtesbf['custom_field'],true))){// prendo custom field tesbro
+        if (isset($data_tesbro['vacation_rental']['security_deposit'])){// se è stato impostato il deposito in tesbro (retrocompatibilità) lo prendo
+          $security_deposit_val=$data_tesbro['vacation_rental']['security_deposit'];
+        }else{
+          $security_deposit_val=-1;
+        }
+      }else{
+        $security_deposit_val=-1;
+      }
     }
     $where = " WHERE (id_tes = '".$tesbro."'";
     if ($tourist_tax == TRUE && $add_extra==FALSE){// se richiesta la tassa turistica ma esclusi gli extra
@@ -361,16 +374,24 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
       if ($result = mysqli_query($link, $sql)) {
 
         foreach ($result as $res){
-			//echo"<pre>",print_r($res),"</pre>";
+          //echo"<pre>",print_r($res),"</pre>";
           $totalprice += ($res['prelis']*$res['quanti'])+((($res['prelis']*$res['quanti'])*$res['aliquo'])/100);
+
           if ($security_deposit==TRUE){
+            // controllo se il rigo è un alloggio
             $sql = "SELECT custom_field FROM ".$tableart." WHERE ".$tableart.".codice = '".$res['codice']."'";
             if ($result = mysqli_query($link, $sql)) {
               $row = mysqli_fetch_assoc($result);
               if (isset($row['custom_field']) && ($data = json_decode($row['custom_field'],true))){// se c'è un json in codart
-                if (isset($data['vacation_rental']['security_deposit']) && floatval($data['vacation_rental']['security_deposit'])>0){
-                  $totalsecdep += floatval($data['vacation_rental']['security_deposit']);
-                }
+                if (isset($data['vacation_rental']['accommodation_type'])){   // è un alloggio
+                  if($security_deposit_val==-1){// il deposito cauzionale non è mai stato registrato in tesbro (retrocompatibilità)
+                      if (isset($data['vacation_rental']['security_deposit']) && floatval($data['vacation_rental']['security_deposit'])>0){// prendo il deposito di default in artico
+                        $totalsecdep += floatval($data['vacation_rental']['security_deposit']);
+                      }
+                  }else{// altrimenti prendo quello memorizzato in tesbro
+                    $totalsecdep += floatval($security_deposit_val);
+                  }
+               }
               }
             }else{
               echo "Error: " . $sql . "<br>" . mysqli_error($link);

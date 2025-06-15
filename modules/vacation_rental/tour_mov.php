@@ -32,6 +32,7 @@ require("../../library/include/datlib.inc.php");
 require_once("lib.function.php");
 $admin_aziend=checkAdmin();
 $msg = "";
+$xmlFileP ="";
 $path = "files/".$admin_aziend['company_id']."/mov_turistiche";
 
 function camere_occupate($day) {// Calcolo le camere occupate per un dato giorno
@@ -51,8 +52,8 @@ function camere_occupate($day) {// Calcolo le camere occupate per un dato giorno
       AND ".$gTables['rental_events'].".type = 'ALLOGGIO'
       AND ".$gTables['artico'].".id_artico_group = ".intval($_GET['XML'])."
       AND JSON_EXTRACT(".$gTables['artico'].".custom_field, '$.vacation_rental.room_qta') IS NOT NULL";
-  $res_sum = gaz_dbi_dyn_query($select, $tabella, $where); 
-  
+  $res_sum = gaz_dbi_dyn_query($select, $tabella, $where);
+
   $sum = gaz_dbi_fetch_assoc($res_sum) ?: [];
   $sum['camere_occupate_struttura'] = isset($sum['camere_occupate_struttura']) && $sum['camere_occupate_struttura'] !== null ? $sum['camere_occupate_struttura']  : 0;
 
@@ -142,6 +143,12 @@ if ($msg == "") {
          <input type=\"submit\" name=\"Return\" value=\"".$script_transl['return']."\">&nbsp;<input type=\"submit\" name=\"anteprima\" value=\"".$script_transl['view']."!\">&nbsp;</td></tr>\n";
 }
 echo "</table>\n";
+?>
+<div class="text-center my-4">
+  <button class="openIframeBtn" data-url="consultazione_schedine.php?path=<?php echo $path; ?>" type="button">Consultazione ricevute alloggiati Polizia</button>
+</div>
+
+<?php
 
 if (isset($_GET['anteprima']) and $msg == "") {
 
@@ -218,13 +225,26 @@ if (isset($_GET['anteprima']) and $msg == "") {
                     <?php
                     $disable_xml=0;
                   foreach ($raggruppato[$key] as $alloggio) { // per ogni check-in giornaliero della struttura
+
+					// carico il json del pre-checkin
+					$DownloadDir = __DIR__.DIRECTORY_SEPARATOR.'self_checkin'.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.$alloggio['id_tesbro'].'/data.json';
+					if ($json_string = @file_get_contents($DownloadDir)){
+						$dati = json_decode($json_string, true); // true = converte in array associativo
+						//echo "<pre>",print_r($dati),"</pre>";
+					}else{
+					  echo "<br>ERRORE: manca il file del checkin";exit;
+					}
                       $data = json_decode($alloggio['art_custom'],true);
                       if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" nel custom field
+						if (isset($data['vacation_rental']['accommodation_type']) && isset ($data['vacation_rental']['room_qta'])){
                            $type= array(3 => 'Appartamento', 4 => 'Casa vacanze', 5=> 'Bed & breakfast', 6=> 'Camera', 7=> 'Locazione turistica');
+						}else{
+							echo "ERRORE: Alcuni dati della struttura non sono stati impostati (tipo o numero camere)";exit;
+						}
                       }else{
                         echo "ERRORE: manca il custom field";exit;
                       }
-					 
+
                       if (intval($alloggio['self_checkin_status'])==0 && intval($alloggio['pre_checkin_status'])==0 ){// NON posso creare il file, manca il check-in
                         $disable_xml=1;
                       }
@@ -234,7 +254,7 @@ if (isset($_GET['anteprima']) and $msg == "") {
                     ?>
                     <!-- Righe di dati -->
                     <div class="row" style="padding: 8px 0; border-bottom: 1px solid #ccc;">
-                      <div class="col-xs-3 text-left"><?php echo $alloggio['ragso1']," ",$alloggio['ragso2']; ?></div>
+                      <div class="col-xs-3 text-left"><?php echo $dati[0]['nome']," ",$dati[0]['cognome']; ?></div>
                       <div class="col-xs-2 text-left"><?php echo $alloggio['checked_in_date']; ?></div>
                       <div class="col-xs-1 text-left"><?php echo $alloggio['adult'],"+",$alloggio['child']; ?></div>
                       <div class="col-xs-2 text-center"><?php echo $type[$data['vacation_rental']['accommodation_type']]," ",$alloggio['house_code']; ?></div>
@@ -327,7 +347,7 @@ if (isset($_GET['XML']) and $msg == "") {
       echo "<br>ERRORE: manca il file del checkin";exit;
     }
     $n=0;
-
+    $testate[]=$row['id_tesbro'];
     foreach($dati as $guest){// per ogni ospite presente nel file del pre checkin
 
       $file_polstat[$n]='';
@@ -523,7 +543,10 @@ foreach ($periodo as $date) {
         </div>
     </div>
     <?php
-  }else{
+  }else{// nessun errore nella creazione e salvataggio dei file
+    // creo un file temporaneo per passare tutte le testate interessate
+    $filepath = 'files/temp_ids.json';
+    file_put_contents($filepath, json_encode($testate));
     ?>
     <div class="panel panel-default gaz-table-form div-bordered" style="max-width:80%;">
         <div class="container-fluid">
@@ -535,16 +558,7 @@ foreach ($periodo as $date) {
             <!-- Pulsanti per aprire l'iframe -->
             <button class="openIframeBtn" data-url="API_istat.php?ref=<?php echo $xmlFileP ; ?>&id=<?php echo $id_artico_group; ?>" type="button">Invio a servizio ISTAT</button>
             <button class="openIframeBtn" data-url="API_Polizia.php?ref=<?php echo $path; ?>&id=<?php echo $id_artico_group; ?>&type=<?php echo $fileUnico; ?>&checkin=<?php echo date("Ymd",strtotime($datainizio)); ?>" type="button">Invio a Alloggiati Polizia</button>
-
-            <!-- Contenitore iframe -->
-            <div id="iframeContainer" style="display: none; position: fixed; top: 10%; left: 5%; width: 90%; height: 80%; background: #fff; z-index: 2000; border: 2px solid #28a745; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
-              <div style="text-align: right; padding: 10px;">
-                <button id="closeIframeBtn" type="button" style="font-size: 18px;">&times;</button>
-              </div>
-              <iframe id="myIframe" src="" style="width: 100%; height: calc(100% - 40px); border: none;"></iframe>
-            </div>
-
-            <script>
+             <script>
               // Percorsi dei file da scaricare
               const xmlFilePath = '<?php echo $xmlFileP; ?>';
               const txtFilePath = '<?php echo $path,"/polstat.txt"; ?>';
@@ -571,6 +585,28 @@ foreach ($periodo as $date) {
                 document.body.removeChild(txtLink); // Rimuovi il link dopo il clic
               });
 
+            </script>
+
+          </div>
+
+        </div>
+    </div>
+    <?php
+  }
+
+  fclose($xmlHandle);
+}
+?>
+<!-- Contenitore iframe -->
+            <div id="iframeContainer" style="display: none; position: fixed; top: 10%; left: 5%; width: 90%; height: 80%; background: #fff; z-index: 2000; border: 2px solid #28a745; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+              <div style="text-align: right; padding: 10px;">
+                <button id="closeIframeBtn" type="button" style="font-size: 18px;">&times;</button>
+              </div>
+              <iframe id="myIframe" src="" style="width: 100%; height: calc(100% - 40px); border: none;"></iframe>
+            </div>
+
+            <script>
+
               // Gestione pulsanti con data-url dinamico
             document.querySelectorAll('.openIframeBtn').forEach(button => {
               button.addEventListener('click', function (event) {
@@ -589,16 +625,6 @@ foreach ($periodo as $date) {
             });
 
             </script>
-          </div>
-
-        </div>
-    </div>
-    <?php
-  }
-
-  fclose($xmlHandle);
-}
-?>
 </form>
 <?php
 require("../../library/include/footer.php");

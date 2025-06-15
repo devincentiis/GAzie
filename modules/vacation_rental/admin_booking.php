@@ -98,6 +98,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     if ($_POST['in_codart']!==$_POST['cosear']){// è appena stato selezionato un inserimento articolo alloggio
       $artico = gaz_dbi_get_row($gTables['artico'], "codice", $_POST['cosear']);
       if (isset($artico) && $artico['id_artico_group']>0 && ($data = json_decode($artico['custom_field'], TRUE))) { // se l'alloggio fa parte di una struttura e se esiste un json nel custom field dell'articolo
+
         if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['accommodation_type'])){// se è un alloggio
           $facility = gaz_dbi_get_row($gTables['artico_group'], "id_artico_group", $artico['id_artico_group']);// leggo la struttura
           if ($data = json_decode($facility['custom_field'], TRUE)) { // se esiste un json nel custom field della struttura
@@ -117,13 +118,19 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $form['tour_tax_day']=(intval($_POST['tour_tax_day'])>0)?$_POST['tour_tax_day']:'';
         $form['max_booking_days']=(intval($_POST['max_booking_days'])>0)?$_POST['max_booking_days']:'';
       }
+      $form['security_deposit']=0;
+      if ($artico_data = json_decode($artico['custom_field'], TRUE)){// se è un alloggio con custom field
+        if (is_array($artico_data['vacation_rental']) && isset($artico_data['vacation_rental']['security_deposit'])){
+          $form['security_deposit']=$artico_data['vacation_rental']['security_deposit'];
+        }
+      }
     }else{
       $form['minor']=(intval($_POST['minor'])>0)?$_POST['minor']:'';
       $form['tour_tax_from']=(intval($_POST['tour_tax_from'])>0)?$_POST['tour_tax_from']:'';
       $form['tour_tax_to']=(intval($_POST['tour_tax_to'])>0)?$_POST['tour_tax_to']:'';
       $form['tour_tax_day']=(intval($_POST['tour_tax_day'])>0)?$_POST['tour_tax_day']:'';
       $form['max_booking_days']=(intval($_POST['max_booking_days'])>0)?$_POST['max_booking_days']:'';
-
+      $form['security_deposit'] = (isset($_POST['security_deposit']))?$_POST['security_deposit']:0;
     }
 
     $form['id_tes'] = $_POST['id_tes'];
@@ -514,8 +521,8 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             if ($toDo == 'update') { // e' una modifica
 
               // CANCELLO TUTTO
-              $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($form['id_tes'])); // prima di cancellare prendo il vecchio custom field
-              $form['custom_field']=$tesbro['custom_field']; // riprendo il custom_field esistente
+              $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($form['id_tes'])); // prima di cancellare prendo il vecchio custom field perché nel form non ce l'ho
+              $form['custom_field']=$tesbro['custom_field']; // riprendo il custom_field tesbro esistente
 
               gaz_dbi_del_row($gTables['tesbro'], "id_tes", $form['id_tes']);
 
@@ -526,7 +533,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 
               }
 
-              $rental_events = gaz_dbi_get_row($gTables['rental_events'], "id_tesbro", intval($form['id_tes']), " AND type = 'ALLOGGIO'"); // prima di cancellare prendo il vecchio rental_events custom field
+              $rental_events = gaz_dbi_get_row($gTables['rental_events'], "id_tesbro", intval($form['id_tes']), " AND type = 'ALLOGGIO'"); // prima di cancellare prendo il vecchio rental_events
               $access = (strlen($rental_events['access_code']>0))?$rental_events['access_code']:bin2hex(openssl_random_pseudo_bytes(5));// se non c'è un codice accesso lo creo e inserisco;
               gaz_dbi_del_row($gTables['rental_events'], "id_tesbro", $form['id_tes']);
               // dovrò aggiornare tesbro negli eventuali pagamenti effettuati su rental payment ma posso farlo solo dopo aver creato il nuovo tesbro
@@ -562,8 +569,14 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             $form['initra'] = $initra;
             $form['datemi'] = $datemi;
             $form['id_agente'] = $form['id_tourOp'];// scambio perché l'agente è il tour operator mentre in id_agente ho il proprietario
-
+            if ($tesbro_data = json_decode($form['custom_field'], TRUE)){// se la testata ha un custom field
+              if (is_array($tesbro_data['vacation_rental']) ){
+                $tesbro_data['vacation_rental']['security_deposit']=$form['security_deposit'];// aggiorno il sec dep nel caso fosse stato modificato
+                $form['custom_field'] = json_encode($tesbro_data);// ricreo il json custom field
+              }
+            }
             if ($toDo == 'update') { // e' una modifica riscrivo tesbro con lo stesso vecchio id
+
               $table = 'tesbro';
               $columns = array('id_tes','seziva', 'tipdoc','ref_ecommerce_id_order', 'template', 'email', 'print_total', 'delivery_time', 'day_of_validity', 'datemi', 'protoc', 'numdoc', 'numfat', 'datfat', 'clfoco', 'pagame', 'banapp', 'vettor', 'weekday_repeat', 'listin', 'destin', 'id_des', 'id_des_same_company', 'spediz', 'portos', 'imball', 'traspo', 'speban', 'spevar', 'round_stamp', 'cauven', 'caucon', 'caumag', 'id_agente', 'id_parent_doc', 'sconto', 'expense_vat', 'stamp', 'net_weight', 'gross_weight', 'taxstamp', 'virtual_taxstamp', 'units', 'volume', 'initra', 'geneff', 'id_contract', 'id_con', 'id_orderman', 'status', 'custom_field', 'adminid');
               tableInsert($table, $columns, $form);
@@ -581,6 +594,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 $id_tes=intval(openssl_decrypt($encrypted_data, 'aes-128-CBC', $token, 0, $iv));
                 $data['vacation_rental']['acc_prev']=$cripted_pwr;
                 $form['custom_field'] = json_encode($data);
+                $data['vacation_rental']['security_deposit']=$form['security_deposit'];
                 gaz_dbi_put_row($gTables['tesbro'], 'id_tes', $ultimo_id, 'custom_field', $form['custom_field']);
               }else{
                 if (isset($form['custom_field'])){
@@ -588,6 +602,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 }else{
                   $data=array();
                 }
+                $data['vacation_rental']['security_deposit']=$form['security_deposit'];
                 $data['vacation_rental']['status']=(isset($data['vacation_rental']['status']))?$data['vacation_rental']['status']:'CONFIRMED';
                 $data['vacation_rental']['ip']=(isset($data['vacation_rental']['ip']))?$data['vacation_rental']['ip']:'diretto';
                 $form['custom_field'] = json_encode($data);
@@ -635,12 +650,14 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 $form['checked_in_date']=(isset($rental_events['checked_in_date']))?$rental_events['checked_in_date']:NULL;
                 $form['checked_out_date']=(isset($rental_events['checked_out_date']))?$rental_events['checked_out_date']:NULL;
                 $form['voucher_id']=(isset($rental_events['voucher_id']))?$rental_events['voucher_id']:NULL;
+				$form['status_webservice']=(isset($rental_events['status_webservice']))?$rental_events['status_webservice']:0;
                 $form['type']="ALLOGGIO";
                 $form['access_code'] = $access;
                 $form['title']= "Soggiorno ".$accomodation_type." ".$form['rows'][$i]['codart']." - ".$form['search']['clfoco'];
                 $form['house_code']=$form['rows'][$i]['codart'];
-                $columns = array('id', 'title', 'start', 'end', 'house_code', 'id_tesbro', 'id_rigbro', 'voucher_id', 'checked_in_date', 'checked_out_date', 'adult', 'child', 'type', 'access_code');
-                tableInsert($table, $columns, $form);
+                $columns = array('id', 'title', 'start', 'end', 'house_code', 'id_tesbro', 'id_rigbro', 'voucher_id', 'checked_in_date', 'checked_out_date', 'adult', 'child', 'type', 'access_code', 'status_webservice');
+                tableInsert($table, $columns, $form);// inserisco il nuovo rental events
+				
                 $artico = gaz_dbi_get_row($gTables['artico'], "codice", $form['rows'][$i]['codart']);
                 $data = json_decode($artico['custom_field'], TRUE);
                 $data['vacation_rental']['pause']=(isset($data['vacation_rental']['pause']))?$data['vacation_rental']['pause']:0;
@@ -700,6 +717,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 }
               }
             }
+
             if ($after_newdoc_back_to_doclist==1 && $pdf_to_modal==0) {
               $_SESSION['print_queue'] = array();
               $_SESSION['print_queue']['tpDoc'] =  $form['tipdoc'];
@@ -1730,6 +1748,8 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     }
 } elseif ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo accesso per UPDATE
     $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($_GET['id_tes']));
+    $form['security_deposit']=0;
+   
     $anagrafica = new Anagrafica();
     $cliente = $anagrafica->getPartner($tesbro['clfoco']);
     $form['indspe'] = $cliente['indspe'];
@@ -1892,6 +1912,15 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
               $form['id_agente'] = $data['vacation_rental']['agent'];// questo è il proprietario
               $gen_iva_perc = $iva_row['aliquo'];
               $gen_iva_code = $rigo['codvat'];
+				if ($tesbro_data = json_decode($tesbro['custom_field'], TRUE)){// se la testata ha un custom field
+				  if (is_array($tesbro_data['vacation_rental']) && isset($tesbro_data['vacation_rental']['security_deposit'])){
+					$form['security_deposit']=$tesbro_data['vacation_rental']['security_deposit'];
+				  }else{
+					 $form['security_deposit']= $data['vacation_rental']['security_deposit'];
+				  }
+				}else{
+					 $form['security_deposit']= $data['vacation_rental']['security_deposit'];
+				  }
 
               if (intval ($articolo['id_artico_group'])>0){// se l'alloggio fa parte di una struttura
                 $facility = gaz_dbi_get_row($gTables['artico_group'], "id_artico_group", $articolo['id_artico_group']);// leggo la struttura
@@ -1987,7 +2016,8 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $form['tipdoc'] = $_GET['tipdoc'];
     }
     $gen_iva_perc = 0;
-	$gen_iva_code = 0;
+    $gen_iva_code = 0;
+    $form['security_deposit']=0;
     $form['id_tes'] = "";
     $form['start'] = "";
     $form['end'] = "";
@@ -3018,20 +3048,38 @@ echo '<div class="fissa" ><div class="FacetSeparatorTD" align="center">Inserimen
 	</div>
 	<div class="column"	>
 	<table class="Tlarge table table-striped table-bordered table-condensed">
-		<tr>
-			<td class="FacetFieldCaptionTD text-right">Numero adulti</td>
-			<td class="FacetDataTD">
-				<input type="number" name="adult" value="<?php echo $form['adult']; ?>" min="1" max="5" class="FacetInput">
-			</td>
-		</tr>
-		<tr>
-			<td class="FacetFieldCaptionTD text-right">Numero minori di anni <?php echo $form['minor']; ?></td>
-			<td class="FacetDataTD">
-				<input type="number" name="child" value="<?php echo $form['child']; ?>" min="0" max="5" class="FacetInput">
+    <tr>
+      <!-- Deposito cauzionale -->
+      <td class="FacetFieldCaptionTD" colspan="2" style="width: 50%; background-color: #f7f7f7; text-align: left;">
+        Deposito cauzionale
+      </td>
+
+      <!-- Colonna "Numero adulti" con bordo di divisione -->
+      <td class="FacetFieldCaptionTD text-right" style="border-left: 2px solid #000; background-color: #f7f7f7; width: 25%;">
+        Numero adulti
+      </td>
+      <td class="FacetDataTD" style="width: 25%;">
+        <input type="number" name="adult" value="<?php echo $form['adult']; ?>" min="1" max="5" class="FacetInput">
+      </td>
+    </tr>
+
+    <tr>
+      <!-- Deposito cauzionale -->
+      <td class="FacetFieldCaptionTD" colspan="2" style="width: 50%; background-color: #f7f7f7; text-align: left;">
+        <input type="text" name="security_deposit" value="<?php echo $form['security_deposit']; ?>" class="FacetInput"
+  oninput="this.value = this.value.replace(/[^0-9,\.]/g, '');">
+      </td>
+
+      <!-- Colonna "Numero minori" con bordo di divisione -->
+      <td class="FacetFieldCaptionTD text-right" style="border-left: 2px solid #000; background-color: #f7f7f7; width: 25%;">
+        Numero minori di anni <?php echo $form['minor']; ?>
+      </td>
+      <td class="FacetDataTD" style="width: 25%;">
+        <input type="number" name="child" value="<?php echo $form['child']; ?>" min="0" max="5" class="FacetInput">
         <input type="hidden" name="access_code" value="<?php echo $form['access_code']; ?>">
-			</td>
-		</tr>
-		</table>
+      </td>
+    </tr>
+  </table>
 		</div>
 
 		<?php

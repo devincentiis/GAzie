@@ -62,6 +62,18 @@ $xmlContent = trim($xmlContent);
 $xmlContent = preg_replace('/^<movimenti>/i', '<movimentazione>', $xmlContent);
 $xmlContent = preg_replace('/<\/movimenti>$/i', '</movimentazione>', $xmlContent);
 
+// memorizzo tutte le testate interessate a questa registrazione
+$testate = [];
+if (preg_match_all('/<arrivo>(.*?)<\/arrivo>/is', $xmlContent, $arrivi)) {
+    foreach ($arrivi[1] as $arrivoBlock) {
+        if (preg_match('/<idswh>\s*(\d+0)\s*<\/idswh>/i', $arrivoBlock, $match)) {
+            // Prendo il valore che termina con zero ( che è quello di ogni capogruppo), tolgo l'ultimo zero e aggiungo all'array
+            $val = $match[1];
+            $testate[] = substr($val, 0, -1);
+        }
+    }
+}
+
 // === SOAP Envelope conforme al manuale ===
 $soapEnvelope = <<<XML
 <?xml version="1.0"?>
@@ -171,6 +183,24 @@ if ($http_code >= 200 && $http_code < 300) {
             echo "• $errorMessage<br>";
         }
     } else {
+        // visto che è tutto ok memorizzo il corretto invio in rental events
+        foreach ($testate as $tes){
+          $test_row = gaz_dbi_get_row($gTables['rental_events'], 'id_tesbro', intval($tes), " AND `type` = 'ALLOGGIO'" );
+          $valore=$test_row['status_webservice'];
+          if ($test_row['status_webservice']==0){// nessuno
+            $valore=1;
+          }elseif ($test_row['status_webservice']==1){// era già solo istat
+
+          }elseif ($test_row['status_webservice']==2){// era polizia
+            $valore=3;// entrambi
+          }
+
+          $query = "UPDATE `".$gTables['rental_events']."` SET `status_webservice` = '$valore' WHERE `id_tesbro` = ".intval($tes)." AND `type` = 'ALLOGGIO'";
+          if (gaz_dbi_query($query, true)){
+          }else{
+            echo "<br>❌ C'è stato un errore nell'aggiornare la tabella rental_events:<br>";
+          }
+        }
         echo "<br>✅ Tutti i movimenti sono stati processati con successo!<br>";
     }
 

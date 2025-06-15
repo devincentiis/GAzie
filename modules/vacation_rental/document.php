@@ -64,6 +64,7 @@ class DocContabVars {
 
         if ($data_tesbro = json_decode($tesdoc['custom_field'], TRUE)){
          $this->status = $data_tesbro['vacation_rental']['status'];
+         $this->security_deposit = (isset($data_tesbro['vacation_rental']['security_deposit']))?$data_tesbro['vacation_rental']['security_deposit']:-1;
         }
 
         $this->layout_pos_logo_on_doc = $company['val'];
@@ -117,7 +118,6 @@ class DocContabVars {
         $banapp = $resban;
         $this->banapp =($banapp)?$banapp:array('descri'=>'');
        // $anagrafica = new Anagrafica();
-
         //commentato perché nel frontend mi da errore in quanto la classe Anagrafica sta in function.inc e getPartner usa l'sql di gazie
 
         //$this->banacc =($this->pagame)?$anagrafica->getPartner($this->pagame['id_bank']):'';
@@ -439,7 +439,7 @@ class DocContabVars {
             $this->child = $rigev['child'];
             $this->checkinout = " check-in:".date_format(date_create($rigev['start']),"d-m-Y")." check-out:".date_format(date_create($rigev['end']),"d-m-Y");
           }elseif(is_array($data['vacation_rental'])){// se è un extra
-            $extras[] = " ".$rigev['codice']." -";// aggiungo l'extra all'array
+            $extras[] = " ".intval($rigev['quanti'])." ".$rigev['codice']." -";// aggiungo l'extra all'array
           }
         }
       }
@@ -533,7 +533,11 @@ class DocContabVars {
               $this->totiva += ($rigo['importo']*$rigo['pervat'])/100;
               if (isset ($rigo['custom_field']) && $data = json_decode($rigo['custom_field'], TRUE)) { // se esiste un json nel custom field
                 if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['accommodation_type'])){ // se è un alloggio
-                  $security_deposit = $data['vacation_rental']['security_deposit']; //prendo il deposito cauzionale
+                  if ($this->security_deposit==-1){
+                    $security_deposit = $data['vacation_rental']['security_deposit']; //prendo il deposito cauzionale
+                  }else{
+                    $security_deposit = $this->security_deposit;
+                  }
                   $agent = $data['vacation_rental']['agent']; //prendo l'ID del proprietatio
                 }
               }
@@ -759,7 +763,7 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 	  if (file_exists($PDFurl)){
 		header("Content-Length: " . filesize($PDFurl));
 
-		// Send the file to the browser.	  
+		// Send the file to the browser.
 		readfile($PDFurl);
 	  }
       return;
@@ -850,6 +854,7 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 		$docVars->intesta2=$ag_anagra['indspe']." ".$ag_anagra['capspe']." ".$ag_anagra['citspe']." ".$ag_anagra['prospe'];
 		$docVars->intesta3= "tel.: ".$ag_anagra['telefo']." ";
 		$docVars->intesta4= "e-mail: ".$ag_anagra['e_mail'];
+    $docVars->security_deposit= $testata['security_deposit'];
 	}
     $pdf->setVars($docVars, $templateName);
     $pdf->setTesDoc();

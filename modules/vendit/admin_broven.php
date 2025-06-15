@@ -2561,6 +2561,23 @@ foreach ($form['rows'] as $k => $v) {
                     <input type=\"hidden\" name=\"rows[$k][provvigione]\" value=\"\" />";
             }
             break;
+        case "910": // annullato
+          $cf = json_decode(gaz_dbi_get_row($gTables['rigbro'], 'id_rig', $v['id_rig'])['custom_field']);
+          echo '<td><a nrow="'.$nr.'" id="row_'.$k.'" class="btn btn-default btn-xs dialog_moverow" title="'.$btntit.'" descr="<b>'. $script_transl['typerow'][$v['tiprig']].'</b>  '.$v['descri'].'"><i class="glyphicon glyphicon-'.$btngly.'"></i></a> '.$nr.'</td>';
+          echo "<td title=\"" . $script_transl['update'] . $script_transl['thisrow'] . "!\">
+                                <input class=\"FacetDataTDsmall\" type=\"submit\" name=\"upd_row[$k]\" value=\"" . $script_transl['typerow'][$v['tiprig']] . "\" />
+			</td>
+			<td colspan=8><span style=\"text-decoration:line-through;\">".$descrizione." ".$v['unimis']." ".floatval($v['quanti'])." x ".floatval($v['prelis'])."</span>
+			<span class=\"text-danger\"> il ".$cf->cancellation->date." per ".$cf->cancellation->reason."</span></td>\n";
+            echo '<td><input type="hidden" name="rows['.$k.'][descri]" value="'.$v['descri'].'" />
+            <input type="hidden" name="rows['.$k.'][unimis]" value="'.$v['unimis'].'" />
+            <input type="hidden" name="rows['.$k.'][quanti]" value="'.$v['quanti'].'" />
+            <input type="hidden" name="rows['.$k.'][prelis]" value="'.$v['prelis'].'" />
+            <input type="hidden" name="rows['.$k.'][sconto]" value="'.$v['sconto'].'" />
+            </td>';
+            $last_row[] = array_unshift($last_row, $script_transl['typerow'][$v['tiprig']].' ( digitare il testo)');
+            break;
+
     }
     if ( $v['tiprig']!="210") {
       if ($v['nrow_linked'] < $v['nrow']) {
