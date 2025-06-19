@@ -1530,7 +1530,7 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
 			$el2->appendChild($el3);
 			$el1->appendChild($el2);
 			$el2 = $domDoc->createElement("Anagrafica", '');
-			$el3 = $domDoc->createElement("Denominazione",$XMLvars->vettore['ragione_sociale']);
+			$el3 = $domDoc->createElement("Denominazione",substr(htmlspecialchars(str_replace(chr(0xE2).chr(0x82).chr(0xAC),"",trim($XMLvars->vettore['ragione_sociale'])), ENT_XML1 | ENT_QUOTES, 'UTF-8', true), 0, 80));
 			$el2->appendChild($el3);
 			$el1->appendChild($el2);
 			$el->appendChild($el1);

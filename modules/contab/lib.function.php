@@ -274,8 +274,6 @@ class contabForm extends GAzieForm {
                     }
                     if (is_numeric($strSearch)) {                      //ricerca per partita iva
                         $partner = $this->queryAnagra(" pariva = " . intval($strSearch));
-                    } elseif (is_numeric(substr($strSearch, 6, 2))) {   //ricerca per codice fiscale
-                        $partner = $this->queryAnagra(" a.codfis LIKE '%" . addslashes($strSearch) . "%'");
                     } else {                                      //ricerca per ragione sociale
                         $partner = $this->queryAnagra(" a.ragso1 LIKE '" . addslashes($strSearch) . "%'");
                     }

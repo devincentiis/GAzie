@@ -385,13 +385,20 @@ if (isset($_GET['XML']) and $msg == "") {
         $luogorilascidoc=$cittadinanza;
       }else{
         $cittadinanza="100000100";// Italia
-        $municip=gaz_dbi_get_row($gTables['municipalities'], 'name', $guest['loccard']);
-		if (isset($municip['id_province'])){
-			$provin=gaz_dbi_get_row($gTables['provinces'], 'id', $municip['id_province']);
-			$luogorilascidoc="4".str_pad($provin['id_region'], 2, "0", STR_PAD_LEFT).$municip['stat_code'];
-		}else{
-			$luogorilascidoc="";
-		}
+
+        $name = strtoupper($guest['loccard']);
+        $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
+        $res = gaz_dbi_query($query);
+        // Se c'è un risultato
+        if ($row = gaz_dbi_fetch_assoc($res)) {
+            $luogorilascidoc=$row['stat_code'];
+            if(strlen($luogorilascidoc)<>9){
+               echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
+            }
+        } else {
+            echo "Il comune non esiste nella tabella municipalities:",$name;die;
+        }
+
       }
       if ($guest['country']<>"IT"){
         $statoresidenza="100000".gaz_dbi_get_row($gTables['country'], 'iso', $guest['country'])['istat_country'];
@@ -399,18 +406,39 @@ if (isset($_GET['XML']) and $msg == "") {
       }else{
         $statoresidenza="100000100";// Italia
 
-        $municip=gaz_dbi_get_row($gTables['municipalities'], 'name', $guest['citspe']);
-        $provin=gaz_dbi_get_row($gTables['provinces'], 'id', $municip['id_province']);
-        $luogoresidenza="4".str_pad($provin['id_region'], 2, "0", STR_PAD_LEFT).$municip['stat_code'];
+        $name = strtoupper($guest['citspe']);
+        $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
+        $res = gaz_dbi_query($query);
+        // Se c'è un risultato
+        if ($row = gaz_dbi_fetch_assoc($res)) {
+            $luogoresidenza=$row['stat_code'];
+            if(strlen($luogoresidenza)<>9){
+               echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
+            }
+        } else {
+            echo "Il comune non esiste nella tabella municipalities:",$name;die;
+        }
+
       }
       if ($guest['counas']<>"IT"){
         $statonascita="100000".gaz_dbi_get_row($gTables['country'], 'iso', $guest['counas'])['istat_country'];
         $comunenascita="";
       }else{
         $statonascita="100000100";// Italia
-        $municip=gaz_dbi_get_row($gTables['municipalities'], 'name', $guest['luonas']);
-        $provin=gaz_dbi_get_row($gTables['provinces'], 'id', $municip['id_province']);
-        $comunenascita="4".str_pad($provin['id_region'], 2, "0", STR_PAD_LEFT).$municip['stat_code'];
+
+        $name = strtoupper($guest['luonas']);
+        $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
+        $res = gaz_dbi_query($query);
+        // Se c'è un risultato
+        if ($row = gaz_dbi_fetch_assoc($res)) {
+            $comunenascita=$row['stat_code'];
+            if(strlen($comunenascita)<>9){
+               echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
+            }
+        } else {
+            echo "Il comune non esiste nella tabella municipalities:",$name;die;
+        }
+
       }
 
       $file_polstat[$n].=str_pad($comunenascita, 9);
