@@ -328,6 +328,7 @@ if (isset($_GET['XML']) and $msg == "") {
   $nguest=0;
   $maxend=0;
   while ($row = gaz_dbi_fetch_array($result)){// CICLO LE PRENOTAZIONI:  per ogni prenotazione
+
     $dataart = json_decode($row['art_custom'], true);
     $room_house = (isset($dataart['vacation_rental']['room_qta']))?$dataart['vacation_rental']['room_qta']:'';
     if (strtotime($row['end']) > strtotime($maxend)){
@@ -349,7 +350,6 @@ if (isset($_GET['XML']) and $msg == "") {
     $n=0;
     $testate[]=$row['id_tesbro'];
     foreach($dati as $guest){// per ogni ospite presente nel file del pre checkin
-
       $file_polstat[$n]='';
       $sex=($guest['sex']=='F')?2:1;
       $idswh=(string)(intval($row['id_tesbro'])).$n;
@@ -385,19 +385,23 @@ if (isset($_GET['XML']) and $msg == "") {
         $luogorilascidoc=$cittadinanza;
       }else{
         $cittadinanza="100000100";// Italia
-
+		
+		if($n==0){// è il capogruppo
         $name = strtoupper($guest['loccard']);
         $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
         $res = gaz_dbi_query($query);
         // Se c'è un risultato
-        if ($row = gaz_dbi_fetch_assoc($res)) {
-            $luogorilascidoc=$row['stat_code'];
+        if ($rowluodoc = gaz_dbi_fetch_assoc($res)) {
+            $luogorilascidoc=$rowluodoc['stat_code'];
             if(strlen($luogorilascidoc)<>9){
                echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
             }
         } else {
             echo "Il comune non esiste nella tabella municipalities:",$name;die;
         }
+		}else{
+			$luogorilascidoc="";
+		}			
 
       }
       if ($guest['country']<>"IT"){
@@ -410,8 +414,8 @@ if (isset($_GET['XML']) and $msg == "") {
         $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
         $res = gaz_dbi_query($query);
         // Se c'è un risultato
-        if ($row = gaz_dbi_fetch_assoc($res)) {
-            $luogoresidenza=$row['stat_code'];
+        if ($rowluores = gaz_dbi_fetch_assoc($res)) {
+            $luogoresidenza=$rowluores['stat_code'];
             if(strlen($luogoresidenza)<>9){
                echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
             }
@@ -430,8 +434,8 @@ if (isset($_GET['XML']) and $msg == "") {
         $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
         $res = gaz_dbi_query($query);
         // Se c'è un risultato
-        if ($row = gaz_dbi_fetch_assoc($res)) {
-            $comunenascita=$row['stat_code'];
+        if ($rowluonas = gaz_dbi_fetch_assoc($res)) {
+            $comunenascita=$rowluonas['stat_code'];
             if(strlen($comunenascita)<>9){
                echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
             }

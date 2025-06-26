@@ -533,8 +533,8 @@ class DocContabVars {
               $this->totiva += ($rigo['importo']*$rigo['pervat'])/100;
               if (isset ($rigo['custom_field']) && $data = json_decode($rigo['custom_field'], TRUE)) { // se esiste un json nel custom field
                 if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['accommodation_type'])){ // se è un alloggio
-                  if ($this->security_deposit==-1){
-                    $security_deposit = $data['vacation_rental']['security_deposit']; //prendo il deposito cauzionale
+                  if ($this->security_deposit==-1){// se non c'è uno specifico 
+                    $security_deposit = $data['vacation_rental']['security_deposit']; //prendo il deposito cauzionale default
                   }else{
                     $security_deposit = $this->security_deposit;
                   }
@@ -854,7 +854,7 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 		$docVars->intesta2=$ag_anagra['indspe']." ".$ag_anagra['capspe']." ".$ag_anagra['citspe']." ".$ag_anagra['prospe'];
 		$docVars->intesta3= "tel.: ".$ag_anagra['telefo']." ";
 		$docVars->intesta4= "e-mail: ".$ag_anagra['e_mail'];
-    $docVars->security_deposit= $testata['security_deposit'];
+		$docVars->security_deposit= (isset($testata['security_deposit']))?$testata['security_deposit']:-1;
 	}
     $pdf->setVars($docVars, $templateName);
     $pdf->setTesDoc();

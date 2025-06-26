@@ -50,8 +50,7 @@ function cols_from($table_name, ...$col_names) {
 function mostra_documenti_associati($ordine, $paid) {
     global $gTables;
     $admin_aziend = checkAdmin();
-    include_once("manual_settings.php");
-
+    include("./manual_settings.php");
     // seleziono i documenti evasi che contengono gli articoli di questo ordine
     $rigdoc_result = gaz_dbi_dyn_query('DISTINCT id_tes', $gTables['rigdoc'], "id_order = " . $ordine, 'id_tes ASC');
     while ( $rigdoc = gaz_dbi_fetch_array($rigdoc_result) ) {
@@ -1684,7 +1683,9 @@ $ts->output_navbar();
 
                           if ($polservice && isset($r['status_webservice']) && intval($r['status_webservice'])<2 && $check_inout=="IN"){// se il check-in è fatto, il webservice attivato ma non è stato ancora inviato il file alla Polizia di Stato
                            ?>
+						   <a href="tour_mov.php" style="text-decoration: none;">
                            <div title="ATTENZIONE: non sono ancora state inviate le schedine alloggiati alla Polizia di Stato" class="sirena" style="font-size: 4rem; opacity: 1;">🚨</div>
+						   </a>
                           <?php
                           }
 

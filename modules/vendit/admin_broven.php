@@ -368,7 +368,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         // --- fine controllo coerenza date-numeri
         if (!checkdate($form['mesemi'], $form['gioemi'], $form['annemi']))
             $msg .= "46+";
-        if (empty($form['clfoco'])&& $toDo == 'insert')
+        if (empty($form['clfoco']))
             $msg .= "47+";
         if (empty($form['pagame']))
             $msg .= "48+";
@@ -1454,7 +1454,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     }
     $anagrafica = new Anagrafica();
     $cliente = $anagrafica->getPartner($tesbro['clfoco']);
-    $form['indspe'] = $cliente['indspe'];
+    $form['indspe'] = $cliente?$cliente['indspe']:'';
     $rs_rig = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes = " . intval($_GET['id_tes']), "id_rig ASC");
     $id_des = $anagrafica->getPartner($tesbro['id_des']);
     $form['id_tes'] = intval($_GET['id_tes']);
@@ -1478,7 +1478,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['in_sconto'] = '#';
     /* fine modifica FP */
     $form['in_quanti'] = 0;
-    $form['in_codvat'] = $cliente['aliiva'];
+    $form['in_codvat'] = $cliente?$cliente['aliiva']:'';
     $form['in_codric'] = substr($admin_aziend['impven'], 0, 3);
     $form['in_id_mag'] = 0;
     $form['in_id_rig'] = 0;
@@ -1495,7 +1495,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     // fine rigo input
     $form['rows'] = array();
     // ...e della testata
-    $form['search']['clfoco'] = substr($cliente['ragso1'], 0, 10);
+    $form['search']['clfoco'] = $cliente?substr($cliente['ragso1'], 0, 10):'';
     $form['print_total'] = $tesbro['print_total'];
     $form['delivery_time'] = $tesbro['delivery_time'];
     $form['day_of_validity'] = $tesbro['day_of_validity'];

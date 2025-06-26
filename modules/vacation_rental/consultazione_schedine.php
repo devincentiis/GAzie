@@ -126,13 +126,21 @@ $righePagina = array_slice($righe, $offset, $perPagina);
             <?php foreach ($righePagina as $riga): ?>
                 <?php
                 list($data, $tipo, $nomeFile, $note) = $riga;
-                $percorsoCompleto = realpath("$cartellaRicevute/$nomeFile");
-                if ($nomeFile !== '-' && $percorsoCompleto && strpos($percorsoCompleto, $documentRoot) === 0) {
-                    $webPath = str_replace('\\', '/', substr($percorsoCompleto, strlen($documentRoot)));
-                    $link = "<a href='" . htmlspecialchars($webPath) . "' class='btn btn-sm btn-outline-primary' target='_blank' download>$nomeFile</a>";
-                } else {
-                    $link = htmlspecialchars($nomeFile);
-                }
+               $percorsoCompleto = realpath("$cartellaRicevute/$nomeFile");
+				if ($nomeFile !== '-' && $percorsoCompleto && strpos($percorsoCompleto, realpath($cartellaRicevute)) === 0) {
+					$webPath = str_replace('\\', '/', substr($percorsoCompleto, strlen($documentRoot)));
+					$ext = pathinfo($nomeFile, PATHINFO_EXTENSION);
+					
+					$classeBtn = $ext === 'pdf' ? 'btn-outline-primary' : 'btn-outline-secondary';
+					$target = '_blank';
+					
+					// ✅ Rimuovi "download" per txt per visualizzazione inline
+					$downloadAttr = ($ext === 'pdf') ? 'download' : '';
+					
+					$link = "<a href='" . htmlspecialchars($webPath) . "' class='btn btn-sm $classeBtn' target='$target' $downloadAttr>$nomeFile</a>";
+				} else {
+					$link = htmlspecialchars($nomeFile);
+				}
                 ?>
                 <tr>
                     <td><?php echo htmlspecialchars($data); ?></td>

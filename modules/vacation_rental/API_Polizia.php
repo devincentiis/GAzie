@@ -70,35 +70,43 @@ echo "<h1>📋 Invio schedine alloggiati alla Polizia di Stato\n</h1><br>";
 
 function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorniIndietro = 30) {
     echo "<br>📥 Inizio download ricevute (ultimi $giorniIndietro giorni)...<br>";
-	// Crea sottocartella ricezione ricevute
-	$savePath = rtrim(dirname($savePath), "/") . "/ricevute_alloggiati/" . $utente;
-	if (!is_dir($savePath)) {
-		mkdir($savePath, 0775, true);
-	}
+
+    // Crea cartella ricevute
+    $savePath = rtrim(dirname($savePath), "/") . "/ricevute_alloggiati/" . $utente;
+    if (!is_dir($savePath)) {
+        mkdir($savePath, 0775, true);
+    }
+
     $logCsv = $savePath . "/log_ricevute.csv";
     $righeCsv = [];
 
-    // === CARICA DATE GIÀ LOGGATE ===
-    $dateLoggate = [];
+    // === CARICA DATE GIÀ LOGGATE (PDF o TXT) ===
+    $dateLoggate = []; // formato: ['YYYY-MM-DD' => 'PDF' o 'TXT']
     if (file_exists($logCsv)) {
         $fp = fopen($logCsv, 'r');
-        fgetcsv($fp); // salta intestazione
-        while (($row = fgetcsv($fp)) !== false) {
-            if (!empty($row[0])) {
-                $dateLoggate[$row[0]] = true;
+        if ($fp) {
+            fgetcsv($fp); // salta intestazione
+            while (($row = fgetcsv($fp)) !== false) {
+                if (!empty($row[0]) && in_array($row[1], ['PDF', 'TXT'])) {
+                    $dateLoggate[$row[0]] = $row[1];
+                }
             }
+            fclose($fp);
         }
-        fclose($fp);
     }
 
+    // === RICHIESTA RICEVUTE PER OGNI GIORNO ===
     for ($i = 0; $i < $giorniIndietro; $i++) {
         $data = (new DateTime())->modify("-$i days");
         $dataIso = $data->format('Y-m-d');
         $dataFormattata = $dataIso . "T00:00:00";
-        $nomeFile = $savePath . "/ricevuta_alloggiati_" . $data->format('Ymd') . ".pdf";
         $dataDisplay = $data->format('d/m/Y');
+        $nomeFilePdf = $savePath . "/ricevuta_alloggiati_" . $data->format('Ymd') . ".pdf";
+        $nomeFileTxt = $savePath . "/ricevuta_alloggiati_" . $data->format('Ymd') . ".txt";
 
-        if (isset($dateLoggate[$dataIso])) {
+        // === Salta se abbiamo già un PDF
+        if (($dateLoggate[$dataIso] ?? '') === 'PDF' || file_exists($nomeFilePdf)) {
+            echo "🟢 Ricevuta PDF già acquisita per $dataDisplay — skip<br>";
             continue;
         }
 
@@ -112,25 +120,40 @@ function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorni
             $pdfBase64 = $ricevutaResponse->PDF ?? null;
 
             if ($pdfBase64) {
-                // Pulizia base64 da newline/spazi (prevenzione difetti SOAP)
-                $pdfBase64Clean = preg_replace('/\s+/', '', $pdfBase64);
-
-                $decoded = base64_decode($pdfBase64Clean);
-                $header = substr($decoded, 0, 5); // %PDF-
-                $isPdfValid = (strncmp($header, "%PDF-", 5) === 0);
-
-                if ($isPdfValid) {
-                    file_put_contents($nomeFile, $decoded);
-                    echo "📄 Ricevuta salvata per $dataDisplay<br>";
-                    $righeCsv[] = [$dataIso, 'Scaricata', basename($nomeFile), 'OK'];
+                $pdfBase64Clean = preg_replace('/\s+/', '', $pdfBase64); // Rimuove spazi bianchi e linee
+                
+				$decoded = base64_decode($pdfBase64Clean, true);
+				if ($decoded !== false) {
+					// È una stringa Base64 valida
+					//echo "Decodificato: " . $decoded;
+				} else {
+					// Non è una stringa Base64 valida
+					//echo "Non è Base64 valido NON decodifico";
+					$decoded=$pdfBase64;
+				}
+                if (strpos($decoded, '%PDF-') !== false) {
+                    // Salva PDF, rimuovi eventuale TXT precedente
+                    file_put_contents($nomeFilePdf, $decoded);
+                    if (file_exists($nomeFileTxt)) {
+                        unlink($nomeFileTxt);
+                    }
+                    echo "📄 Ricevuta PDF salvata per $dataDisplay<br>";
+                    $righeCsv[] = [$dataIso, 'PDF', basename($nomeFilePdf), 'OK'];
+                } elseif (mb_detect_encoding($decoded, ['UTF-8', 'ISO-8859-1', 'ASCII'], true) !== false && preg_match('//u', $decoded)) {
+                    // Salva TXT solo se non esiste già
+                    if (!file_exists($nomeFileTxt)) {
+                        file_put_contents($nomeFileTxt, $decoded);
+                        echo "📝 Ricevuta in chiaro (TXT) salvata per $dataDisplay<br>";
+                        $righeCsv[] = [$dataIso, 'TXT', basename($nomeFileTxt), 'Ricevuta testuale non firmata'];
+                    } else {
+                        echo "🟡 TXT già presente per $dataDisplay — skip<br>";
+                    }
                 } else {
-                    // Salva i file sospetti per analisi
                     $corruptPath = $savePath . "/_corrupt_ricevuta_" . $data->format('Ymd');
                     file_put_contents($corruptPath . ".b64.txt", $pdfBase64);
                     file_put_contents($corruptPath . ".bin", $decoded);
-
-                    echo "❗ Ricevuta per $dataDisplay NON valida (PDF corrotto)<br>";
-                    $righeCsv[] = [$dataIso, 'Corrotta', '-', 'PDF non valido. Base64 salvato'];
+                    echo "❗ Ricevuta per $dataDisplay NON valida (formato ignoto)<br>";
+                    $righeCsv[] = [$dataIso, 'Corrotta', '-', 'Formato sconosciuto. Base64 salvato'];
                 }
             } else {
                 echo "ℹ️ Nessuna ricevuta disponibile per $dataDisplay<br>";
@@ -143,18 +166,53 @@ function scaricaRicevuteDisponibili($client, $utente, $token, $savePath, $giorni
         }
     }
 
-    // === APPENDE SOLO NUOVE RIGHE AL LOG ===
+    // === LOG FINALE: DEDUPLICATO E ORDINATO ===
     if (!empty($righeCsv)) {
-        $fileEsiste = file_exists($logCsv);
-        $fp = fopen($logCsv, 'a');
-        if (!$fileEsiste) {
-            fputcsv($fp, ['Data', 'Esito', 'File', 'Note']); // intestazione solo se nuovo
+        $tutteRighe = [];
+
+        // Leggi righe esistenti
+        $header = ['Data', 'Esito', 'File', 'Note'];
+        if (file_exists($logCsv) && is_readable($logCsv)) {
+            $fpOld = fopen($logCsv, 'r');
+            if ($fpOld !== false) {
+                $readHeader = fgetcsv($fpOld); // intestazione
+                if ($readHeader) {
+                    $header = $readHeader;
+                }
+                while (($row = fgetcsv($fpOld)) !== false) {
+                    $tutteRighe[] = $row;
+                }
+                fclose($fpOld);
+            }
         }
-        foreach ($righeCsv as $riga) {
+
+        // Aggiungi nuove righe
+        $tutteRighe = array_merge($tutteRighe, $righeCsv);
+
+        // Deduplica per data → tiene l'ultima (PDF > TXT > altro)
+        $deduplicato = [];
+        foreach ($tutteRighe as $riga) {
+            $dataKey = $riga[0];
+            $deduplicato[$dataKey] = $riga;
+        }
+
+        // Ordina per data desc
+        uksort($deduplicato, function($a, $b) {
+            return strcmp($b, $a);
+        });
+
+        // Scrivi log nuovo
+        $fp = fopen($logCsv, 'w');
+        if ($fp === false) {
+            die("❌ Impossibile scrivere il log: $logCsv");
+        }
+        fputcsv($fp, $header);
+        foreach ($deduplicato as $riga) {
             fputcsv($fp, $riga);
         }
         fclose($fp);
-        echo "<br>📝 Log aggiornato in: $logCsv<br>";
+
+        echo "<br>📝 Log aggiornato e ripulito in: $logCsv<br>";
     } else {
         echo "<br>✅ Nessuna nuova ricevuta da loggare.<br>";
     }
@@ -208,8 +266,10 @@ if (!$schedine) {
 $hashCorrente = md5(implode("\n", $schedine));
 
 // Se hash già presente → non inviare
+$nessun_invio=0; ///NOTA BENE questo deve essere 0 altrimenti non invierà mai le schedine mettere uno solo per saltare l'invio(test)
 if (in_array($hashCorrente, $hashInviate)) {
     die("✅ Le schedine sono già state inviate in precedenza (entro 30 giorni).\n");
+	$nessun_invio=1;
 }
 
 
@@ -228,6 +288,8 @@ try {
         throw new Exception("Token non ricevuto.");
     }
     echo "<br>✅ Token ottenuto\n\n";
+	
+if ($nessun_invio==0){// le schedine sono da inviare
 
     // === 2. TEST SCHEDINE ===
     $testMethod = $id_polstat > 0 ? "GestioneAppartamenti_FileUnico_Test" : "Test";
@@ -349,7 +411,7 @@ if (!empty($dettaglio)) {
         }
       }
     }
-
+}
 
     // === 4. RICHIESTA RICEVUTA ===
     scaricaRicevuteDisponibili($client, $utente, $token, $path);

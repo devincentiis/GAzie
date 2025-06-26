@@ -151,10 +151,10 @@ class Lease extends Template{
               $start=$rigo['start'];
               $end=$rigo['end'];
 
-              if ($this->docVars->tesdoc['security_deposit']==-1){
-                $secdep = $custom['vacation_rental']['security_deposit'];
+              if (!isset($this->docVars->security_deposit) || (isset($this->docVars->security_deposit) && $this->docVars->security_deposit==-1)){
+                $secdep = $custom['vacation_rental']['security_deposit'];// quello di default dell'alloggio
               }else{
-                $secdep = $this->docVars->tesdoc['security_deposit'];
+                $secdep = $this->docVars->security_deposit;
               }
           }
           if (array_key_exists('extra', $custom['vacation_rental'])) { // è un extra
