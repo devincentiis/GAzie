@@ -302,6 +302,7 @@ if (isset($_GET['XML']) and $msg == "") {
   $total_guests=$room_qta=0;
   while ($rowcustom = gaz_dbi_fetch_array($resstr)){ // questo è il totale per struttura
     $datastr = json_decode($rowcustom['custom_field'], true);
+	//echo "<br>Dati struttura:<pre>",print_r($datastr['vacation_rental']);
     $total_guests += intval($datastr['vacation_rental']['total_guests']);
     $room_qta += intval($datastr['vacation_rental']['room_qta']);// totale camere struttura
     $id_polstat = (isset($datastr['vacation_rental']['id_polstat']))?$datastr['vacation_rental']['id_polstat']:'';
@@ -327,8 +328,9 @@ if (isset($_GET['XML']) and $msg == "") {
   $check_outs=array();
   $nguest=0;
   $maxend=0;
+  $n=0;// progressivo questura ospiti in struttura
   while ($row = gaz_dbi_fetch_array($result)){// CICLO LE PRENOTAZIONI:  per ogni prenotazione
-
+	//echo"<br><br>Prenotazione:<pre>",print_r($row);
     $dataart = json_decode($row['art_custom'], true);
     $room_house = (isset($dataart['vacation_rental']['room_qta']))?$dataart['vacation_rental']['room_qta']:'';
     if (strtotime($row['end']) > strtotime($maxend)){
@@ -343,12 +345,12 @@ if (isset($_GET['XML']) and $msg == "") {
     $DownloadDir = __DIR__.DIRECTORY_SEPARATOR.'self_checkin'.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.$row['id_tesbro'].'/data.json';
     if ($json_string = @file_get_contents($DownloadDir)){
     $dati = json_decode($json_string, true); // true = converte in array associativo
-    //echo "<pre>",print_r($dati);
+    //echo "<br><br>Ospiti:<pre>",print_r($dati);
     }else{
       echo "<br>ERRORE: manca il file del checkin";exit;
-    }
-    $n=0;
+    }    
     $testate[]=$row['id_tesbro'];
+	$nall=0; // progressivo questura ospiti in alloggio
     foreach($dati as $guest){// per ogni ospite presente nel file del pre checkin
       $file_polstat[$n]='';
       $sex=($guest['sex']=='F')?2:1;
@@ -356,7 +358,7 @@ if (isset($_GET['XML']) and $msg == "") {
       $xml_output .= "\t\t\t<arrivo>\n";
       $xml_output .= "\t\t\t\t<idswh>".$idswh."</idswh>\n";
       if(intval($row['adult'])+intval($row['child']) > 1){// più di una persona
-        if ($n==0){// se è il capogruppo
+        if ($nall==0){// se è il capogruppo
           $tipoalloggiato='18';
         }else{
           $tipoalloggiato='20';// membro gruppo
@@ -371,7 +373,6 @@ if (isset($_GET['XML']) and $msg == "") {
 
       $guest['cognome'] = preg_replace('/[^A-Za-z\'\-\s]/', '', $guest['cognome']);
       $guest['nome'] = preg_replace('/[^A-Za-z\'\-\s]/', '', $guest['nome']);
-
       $file_polstat[$n].=str_pad($tipoalloggiato, 2);
       $file_polstat[$n].=str_pad(date("d/m/Y",$utsini), 10);
       $file_polstat[$n].=str_pad($nights, 2);
@@ -386,7 +387,7 @@ if (isset($_GET['XML']) and $msg == "") {
       }else{
         $cittadinanza="100000100";// Italia
 		
-		if($n==0){// è il capogruppo
+		if($nall==0){// è il capogruppo
         $name = strtoupper($guest['loccard']);
         $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
         $res = gaz_dbi_query($query);
@@ -451,7 +452,7 @@ if (isset($_GET['XML']) and $msg == "") {
       $file_polstat[$n].=str_pad($cittadinanza, 9);// stato cittadinanza
 
       $xml_output .= "\t\t\t\t<tipoalloggiato>".$tipoalloggiato."</tipoalloggiato>\n";
-      if ($n==0){// è il capogruppo
+      if ($nall==0){// è il capogruppo
         $idcapo=$idswh;
         $xml_output .= "\t\t\t\t<idcapo></idcapo>\n";
         // $xml_output .= "\t\t\t\t<camere>".$room_house."</camere>\n"; // NON ammesso. Strano perché l'insermiento manuale lo richiede ...
@@ -479,10 +480,10 @@ if (isset($_GET['XML']) and $msg == "") {
       $xml_output .= "\t\t\t</arrivo>\n";
       $fileUnico=0;
       if (strlen($id_polstat)>0){// FILE UNICO: se l'alloggio dispone di identificativo polstat lo aggiungo
-        $file_polstat[$n].=str_pad($id_polstat, 6);// id appartamento polstat
+        $file_polstat[$n].=str_pad($id_polstat, 6);// id appartamento polstat		
         $fileUnico=1;
       }
-
+	 $nall++;
      $n++;
      $nguest++;
     }

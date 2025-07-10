@@ -190,16 +190,23 @@ class Lease extends Template{
       $html .= "<dd>- ".$script_transl['accettazione2']."</dd>";
 
       $html .= "<dl>";
-      if (strlen($this->ip)>6){// firme digitali
-        $html .= "<br><p><b>Digitally signed online</b></p>";
-        $html .= "<br><p><span> The tenant ".$this->cliente1." ".$this->cliente2." signed online from IP:".$this->ip;
+      if (strlen($this->ip)>7){// firme digitali
+        $html .= "<br><p><b>".$script_transl['sign-online']."</b></p>";
+        $html .= "<br><p><span>Il conduttore <b>".$this->cliente1." ".$this->cliente2."</b> - firma registrata con IP:".$this->ip;
+        if (strlen($this->date_ip)>7){
+          $html .= " ".$this->date_ip;
+        }
+        $html .= "<br><p><b>".$script_transl['sign-clauses']."</b></p>";
+        $html .= "<br><p><span>Il conduttore <b>".$this->cliente1." ".$this->cliente2."</b> - firma registrata con IP:".$this->ip;
         if (strlen($this->date_ip)>7){
           $html .= " ".$this->date_ip;
         }
         $html .="</span></p>";
-        $html .= "<p>The landlord <b>".$this->intesta1."</b><br><br><br><br><br><br><br><br><br><br><br><br><br></p>";
-	  }else{// firme fisiche
-        $html .= "<br><p><b>".$script_transl['sign']." </b></p><span>".$script_transl['locatore']." ".$this->intesta1."</span><span style=\" letter-spacing: 30px;\">&nbsp; &nbsp;</span><span> ".$script_transl['conduttore']." ".$this->cliente1." ".$this->cliente2."</span>";
+        $html .= "<p>Il locatore <b>".$this->intesta1."</b><br><br><br><br><br><br><br><br><br><br><br><br><br></p>";
+
+      }else{// firme fisiche
+        $html .= "<br><p><b>Letto, Firmato e Sottoscritto </b></p><span>Il locatore ".$this->intesta1."</span><span style=\" letter-spacing: 30px;\">&nbsp; &nbsp;</span><span> Il conduttore ".$this->cliente1." ".$this->cliente2."</span><br>";
+        $html .= "<br><p><b>Ai sensi e per gli effetti degli articoli 1341 e 1342 del Codice Civile, il conduttore dichiara di aver preso visione e di approvare specificamente le seguenti clausole: 1,2,3,4,5,6,7.</b></p><span> Il conduttore ".$this->cliente1." ".$this->cliente2."</span><br><br><br><br><br><br><br><br><br><br><br><br><br>";
       }
 	  $html .= "<br><br><br><br><br><br><br><br><br><b>CHECK-IN</b> The tenant declares to have checked the apartment, to have found it in a good state of maintenance and cleanliness with all the agreed facilities and extras and to receive the keys. <br><span style=\" letter-spacing: 270px;\">&nbsp; &nbsp;</span>___________________________________________________";
 	 $html .= "<br><br><br><br><b>CHECK-IN</b> The landlord declares to receive the security deposit referred to in the point 3. ________________________________________";

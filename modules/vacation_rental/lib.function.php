@@ -331,29 +331,33 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
       }
     }
     $where = " WHERE (id_tes = '".$tesbro."'";
+	$on="";
     if ($tourist_tax == TRUE && $add_extra==FALSE){// se richiesta la tassa turistica ma esclusi gli extra
       $where .= " AND (codart LIKE 'TASSA-TURISTICA%' OR (".$tableart.".custom_field REGEXP 'accommodation_type'))";
-      $on="";
+      
     }
     if ($add_extra==FALSE && $tourist_tax == FALSE){// escludo gli extra ma anche la tassa turistica
-      $where .= " AND (".$tableart.".custom_field REGEXP 'accommodation_type')";
-      $on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
+      $where .= " AND (".$tableart.".custom_field REGEXP 'accommodation_type') AND codart NOT LIKE 'TASSA-TURISTICA%'";
+      //$on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
     }
     if ($tourist_tax == TRUE && $add_extra==TRUE){// se richiesta la tassa turistica e gli extra
       $where .= "";
-      $on="";
+      
     }
      if ($tourist_tax == FALSE && $add_extra==TRUE){// se richiesti solo gli extra
       $where .= " AND codart NOT LIKE 'TASSA-TURISTICA%'";
-      $on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
+      //$on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
     }
 	$where .=")";
+	
     if ($vat==FALSE){// devo restituire l'imponibile
-      $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codart = ".$tableart.".codice AND ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
-
+	
+     // 3/7/25 corretta perché non prendeva lo sconto // $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codart = ".$tableart.".codice AND ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
+	 $sql = "SELECT SUM(".$tablerig.".quanti * ".$tablerig.".prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
+	  //echo $sql;
       if ($result = mysqli_query($link, $sql)) {
          $row = mysqli_fetch_assoc($result);
-
+			//echo "<br> devo rest imponibile per rows:<pre>",print_r($row),"</pre>";die;
           $sql = "SELECT speban FROM ".$tabletes." WHERE id_tes = ".intval($tesbro)." LIMIT 1";
           if ($result = mysqli_query($link, $sql)) {
             $rowtes = mysqli_fetch_assoc($result);
@@ -379,6 +383,7 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
 
           if ($security_deposit==TRUE){
             // controllo se il rigo è un alloggio
+            //echo "<br>Aggiungo deposito cauzionale";
             $sql = "SELECT custom_field FROM ".$tableart." WHERE ".$tableart.".codice = '".$res['codice']."'";
             if ($result = mysqli_query($link, $sql)) {
               $row = mysqli_fetch_assoc($result);
@@ -396,6 +401,8 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
             }else{
               echo "Error: " . $sql . "<br>" . mysqli_error($link);
             }
+          }else{
+            //echo "<br>NON aggiungo deposito cauzionale";
           }
         }
         if (intval($preeminent_vat)>0){
@@ -488,7 +495,7 @@ function get_total_promemo($startprom,$endprom){// STAT
         }
         $start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
       }
-      $ret['totalprice_booking'] += ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event)*$tot_n_event_in_promemo;// aggiungo il costo medio della locazione(evento) calcolata sui giorni che rientrano nell'arco di tempo richiesto
+      $ret['totalprice_booking'] += ((get_totalprice_booking($row['id_tesbro'],false,false,"",false,false))/$nights_event)*$tot_n_event_in_promemo;// aggiungo il costo medio della locazione(evento) calcolata sui giorni che rientrano nell'arco di tempo richiesto
 	  //il prezzo è imponibile e senza tassa turistica
 	}
   }
@@ -527,51 +534,54 @@ function get_datasets($startprom,$endprom){// STAT graph
     $sql = "SELECT * FROM ".$tablerent_ev." LEFT JOIN ".$tabletes." ON  ".$tablerent_ev.".id_tesbro = ".$tabletes.".id_tes WHERE  ".$tablerent_ev.".type = 'ALLOGGIO' AND ".$tablerent_ev.".id_tesbro > 0 AND (custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%') AND house_code='".substr($resh['codice'], 0, 32)."' AND ( start <= '".$endprom."' AND(start >= '".$startprom."' OR start <= '".$endprom."') AND (end >= '".$startprom."' OR end <= '".$endprom."') AND end >= '".$startprom."') ORDER BY id ASC";
     //echo $sql;
     $result = mysqli_query($link, $sql);
+	if ($result->num_rows>0){
+		
+		foreach($result as $row){ // per ogni evento dell'alloggio
+		  //echo "<pre>evento alloggio:",print_r($row),"</pre>";
+		  $datediff = strtotime($row['end'])-strtotime($row['start']);
+		  $nights_event = round($datediff / (60 * 60 * 24));// numero notti totali della prenotazione(evento)
+		  $tot_n_event_in_promemo=0;
+		  $start=$row['start'];
+		  $end=$row['end'];
+		  // ciclo i giorni dell'evento
+		  while (strtotime($start) < strtotime($end)) {// per ogni giorno dell'evento
+			$month=date("m",strtotime($start));
+			$year=date("Y",strtotime($start));
+			if ($start >= $startprom AND $start <= date ("Y-m-d", strtotime("-1 days", strtotime($endprom)))) {// se il giorno è dentro l'arco di tempo richiesto (tolgo una giorno a endprom perché devo conteggiare le notti)
+			  //echo "<br>",$start," è dentro";
+			  if (!isset($retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month])){
+				$retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month]=0;
+			  }
+			  if (!isset($retsumdat['IMPORTI'][$year]['TUTTI'][$month])){
+				$retsumdat['IMPORTI'][$year]['TUTTI'][$month]=0;
+			  }
+			  $retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month]+= ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event);// aggiungo il costo della notte nel mese
+			  $retsumdat['IMPORTI'][$year]['TUTTI'][$month]+= ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event);// aggiungo il costo della notte nel mese di tutti
+			  if (!isset($data[$start])){
+				$data[$start]=array();
+			  }
+				if (!in_array($row['house_code'],$data[$start])){// escludendo i giorni che hanno già quell'alloggio
+				  array_push($data[$start],$row['house_code']);// conteggio il giorno per questo alloggio
+				  if (!isset($retsumdat['OCCUPAZIONE'][$year][substr($resh['codice'], 0, 32).'-occupazione'][$month])){
+					$retsumdat['OCCUPAZIONE'][$year][substr($resh['codice'], 0, 32).'-occupazione'][$month]=0;
+				  }
+				  $retsumdat['OCCUPAZIONE'][$year][(substr($resh['codice'], 0, 32)).'-occupazione'][$month] ++;
+				  if (!isset($retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month])){
 
-    foreach($result as $row){ // per ogni evento dell'alloggio
-      //echo "<pre>evento alloggio:",print_r($row),"</pre>";
-      $datediff = strtotime($row['end'])-strtotime($row['start']);
-      $nights_event = round($datediff / (60 * 60 * 24));// numero notti totali della prenotazione(evento)
-      $tot_n_event_in_promemo=0;
-      $start=$row['start'];
-      $end=$row['end'];
-      // ciclo i giorni dell'evento
-      while (strtotime($start) < strtotime($end)) {// per ogni giorno dell'evento
-        $month=date("m",strtotime($start));
-        $year=date("Y",strtotime($start));
-        if ($start >= $startprom AND $start <= date ("Y-m-d", strtotime("-1 days", strtotime($endprom)))) {// se il giorno è dentro l'arco di tempo richiesto (tolgo una giorno a endprom perché devo conteggiare le notti)
-		  //echo "<br>",$start," è dentro";
-          if (!isset($retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month])){
-            $retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month]=0;
-          }
-          if (!isset($retsumdat['IMPORTI'][$year]['TUTTI'][$month])){
-            $retsumdat['IMPORTI'][$year]['TUTTI'][$month]=0;
-          }
-          $retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month]+= ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event);// aggiungo il costo della notte nel mese
-          $retsumdat['IMPORTI'][$year]['TUTTI'][$month]+= ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event);// aggiungo il costo della notte nel mese di tutti
-          if (!isset($data[$start])){
-            $data[$start]=array();
-          }
-            if (!in_array($row['house_code'],$data[$start])){// escludendo i giorni che hanno già quell'alloggio
-              array_push($data[$start],$row['house_code']);// conteggio il giorno per questo alloggio
-              if (!isset($retsumdat['OCCUPAZIONE'][$year][substr($resh['codice'], 0, 32).'-occupazione'][$month])){
-                $retsumdat['OCCUPAZIONE'][$year][substr($resh['codice'], 0, 32).'-occupazione'][$month]=0;
-              }
-              $retsumdat['OCCUPAZIONE'][$year][(substr($resh['codice'], 0, 32)).'-occupazione'][$month] ++;
-              if (!isset($retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month])){
+					$retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month]=0;
+				  }
+				  $retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month] ++;
+				  $tot_nights_booked  ++;
+				  $tot_n_event_in_promemo ++;
+			  }
 
-                $retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month]=0;
-              }
-              $retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month] ++;
-              $tot_nights_booked  ++;
-              $tot_n_event_in_promemo ++;
-          }
-
-        }
-        $start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
-      }
-      $ret['totalprice_booking'] += ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event)*$tot_n_event_in_promemo;// aggiungo il costo medio della locazione(evento) calcolata sui giorni che rientrano nell'arco di tempo richiesto
-	  //il prezzo è imponibile e senza tassa turistica
+			}
+			$start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
+		  }
+		  $ret['totalprice_booking'] += ((get_totalprice_booking($row['id_tesbro'],false,false,"",false,false))/$nights_event)*$tot_n_event_in_promemo;// aggiungo il costo medio della locazione(evento) calcolata sui giorni che rientrano nell'arco di tempo richiesto
+		  //il prezzo è imponibile e senza tassa turistica
+		}
+		//echo "<br><b>tot book:",$ret['totalprice_booking']," - night prenotaz:",$nights_event," - total preno:",get_totalprice_booking($row['id_tesbro'],false,false,"",false,false),"</b>";
 	}
   }
   $ret['tot_nights_bookable']= $num_all * $night_promemo;

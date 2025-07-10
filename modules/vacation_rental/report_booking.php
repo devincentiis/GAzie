@@ -46,6 +46,32 @@ function cols_from($table_name, ...$col_names) {
     return implode(", ", $full_names);
 }
 
+// visualizza il bottone degli addendum
+function mostra_addendum($id_tes,$IDaz) {
+    $log_pdf_dir = __DIR__ . "/files/".$IDaz."/addendum_pdf/".$id_tes;
+    // Controlla se la cartella esiste
+    if (!is_dir($log_pdf_dir)) {
+        return NULL; // La cartella non esiste
+    }
+
+    // Scansione della cartella
+    $files = scandir($log_pdf_dir);
+
+    // Rimuovi "." e ".." dalla lista dei file
+    $files = array_diff($files, array('.', '..'));
+
+    // Se non ci sono file, restituisci NULL
+    if (count($files) === 0) {
+        return NULL;
+    }
+    // Se ci sono file, restituisci un pulsante con icona e link
+    ?>
+    <a onclick="printPdf('stampa_addendum.php?id_tes=<?php echo $id_tes; ?>')" class="btn btn-default" role="button" title="Addendum">
+        <span style="font-size: 1em; color: #007bff;">📝</span>
+    </a>
+    <?php
+}
+
 // visualizza i bottoni dei documenti di evasione associati all'ordine
 function mostra_documenti_associati($ordine, $paid) {
     global $gTables;
@@ -1596,35 +1622,35 @@ $ts->output_navbar();
               // colonna fiscale
               if ( $tipo !== "VPR" ){//  se non è preventivo
                 echo "<td style='text-align: left;'>";
-				if ( intval($agent)==0){// se non c'è un proprietario/agente
-					if ($remains_atleastone && !$processed_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
-						// L'ordine e'  da evadere.
-					  if ( $tipo !== "VOG" && $tipo !== "VPR") {
-						echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">Emetti documento fiscale</a>&nbsp;";
-					  }
-					}elseif ($remains_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
-						  // l'a prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
-						  $ultimo_documento = 0;
-						  mostra_documenti_associati( $r['id_tes'], $paid );
-						  if ( $tipo == "VOG" ) {
-							  echo "<a class=\"btn btn-xs btn-default\" href=\"../../modules/vendit/select_evaord_gio.php\">evadi il rimanente</a>";
-						  } else {
-							  echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">evadi il rimanente</a>&nbsp;";
-							  echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?clfoco=" . $r['clfoco'] . "\">evadi cliente</a>";
-						  }
-					} else {
-					  // la prenotazione è completamente evasa, mostro i riferimenti ai documenti che l'hanno evasa
-					  $ultimo_documento = 0;
-					  mostra_documenti_associati( $r['id_tes'], $paid );
-					}
-				}
-                  if ($r['status']=='CONFIRMED'){
-					  ?>
-					  <a style="float:right;" title="Genera pdf contratto" class="btn btn-xs dialog_leasecr" ref="<?php echo $r['id_tes']; ?>" nome="<?php echo $r['ragso1']; ?>" url=<?php echo "stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent']; ?>>
-						<i class="glyphicon glyphicon-refresh"></i>
-					  </a>
-					  <?php
-				  }
+                if ( intval($agent)==0){// se non c'è un proprietario/agente
+                  if ($remains_atleastone && !$processed_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
+                    // L'ordine e'  da evadere.
+                    if ( $tipo !== "VOG" && $tipo !== "VPR") {
+                    echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">Emetti documento fiscale</a>&nbsp;";
+                    }
+                  }elseif ($remains_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
+                      // l'a prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
+                      $ultimo_documento = 0;
+                      mostra_documenti_associati( $r['id_tes'], $paid );
+                      if ( $tipo == "VOG" ) {
+                        echo "<a class=\"btn btn-xs btn-default\" href=\"../../modules/vendit/select_evaord_gio.php\">evadi il rimanente</a>";
+                      } else {
+                        echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">evadi il rimanente</a>&nbsp;";
+                        echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?clfoco=" . $r['clfoco'] . "\">evadi cliente</a>";
+                      }
+                  } else {
+                    // la prenotazione è completamente evasa, mostro i riferimenti ai documenti che l'hanno evasa
+                    $ultimo_documento = 0;
+                    mostra_documenti_associati( $r['id_tes'], $paid );
+                  }
+                }
+                if ($r['status']=='CONFIRMED'){
+                  ?>
+                  <a style="float:right;" title="Genera pdf contratto" class="btn btn-xs dialog_leasecr" ref="<?php echo $r['id_tes']; ?>" nome="<?php echo $r['ragso1']; ?>" url=<?php echo "stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent']; ?>>
+                  <i class="glyphicon glyphicon-refresh"></i>
+                  </a>
+                  <?php
+                }
                  echo "</td>";
               }elseif(isset($datatesbro['vacation_rental']['id_booking']) && intval($datatesbro['vacation_rental']['id_booking'])>0){
                 echo "<td><a class=\"btn btn-xs btn-warning\" href=\"../../modules/vacation_rental/report_booking.php?info=none&auxil=VOR&id_doc=" . intval($datatesbro['vacation_rental']['id_booking']) . "\">Prenotazione effettuata</a></td>";
@@ -1715,6 +1741,10 @@ $ts->output_navbar();
                     echo " style=\"cursor:pointer;\" onclick=\"printPdf('stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent'] ."')\"";
                   }
                   echo "><i class=\"glyphicon glyphicon-book\" title=\"Stampa contratto PDF\"></i></a>";
+
+                  mostra_addendum($r['id_tes'],$admin_aziend['company_id']);// se è il caso mostro addendum
+
+
 
               }
               echo "</td>";

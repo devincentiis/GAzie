@@ -533,7 +533,7 @@ class DocContabVars {
               $this->totiva += ($rigo['importo']*$rigo['pervat'])/100;
               if (isset ($rigo['custom_field']) && $data = json_decode($rigo['custom_field'], TRUE)) { // se esiste un json nel custom field
                 if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['accommodation_type'])){ // se è un alloggio
-                  if ($this->security_deposit==-1){// se non c'è uno specifico 
+                  if ($this->security_deposit==-1){// se non c'è uno specifico
                     $security_deposit = $data['vacation_rental']['security_deposit']; //prendo il deposito cauzionale default
                   }else{
                     $security_deposit = $this->security_deposit;
@@ -905,7 +905,7 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
         $mail_message="";
 
         if (strlen($vacation_url_user)>3 && $templates[$templateName]!=="booking_quote" && $templateName!=='Lease' && strlen($access)>5){ // se non ivio un contratto ed è impostata la user url ed c'è una password (prenotazione fatta online), comunico url e codici di accesso
-          $mail_message = $script_transl['access1']." <a href = '".$vacation_url_user."'> ".$vacation_url_user."</a> ".$script_transl['access2'].":</p><p>.</p><p><em>Password: <b>".$access."</b></p>ID: <b>".$testata['id_tes']."</b></p><p>".$script_transl['booking_number'].": <b>".$testata['numdoc']."</b></p></em><p>.</p><p>".$script_transl['best_regards']."</p>";
+          $mail_message = $script_transl['access1']."</p><p>".$script_transl['booking_number'].": <b>".$testata['numdoc']."</b></p><p>".$script_transl['best_regards']."</p>";
         }
 
         if (strlen($vacation_url_user)>3 && $templates[$templateName]=="booking_quote"){// se è un preventivo

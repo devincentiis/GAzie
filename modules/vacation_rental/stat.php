@@ -140,8 +140,11 @@ if (isset($_GET['anteprima']) and $msg == "") {
 
     $select = $gTables['rental_events'].".*,".$gTables['tesbro'].".*,".$gTables['artico'].".id_artico_group";
     $tabella = $gTables['rental_events']." LEFT JOIN ".$gTables['tesbro']." ON ".$gTables['rental_events'].".id_tesbro = ".$gTables['tesbro'].".id_tes LEFT JOIN ".$gTables['artico']." ON ".$gTables['rental_events'].".house_code = ".$gTables['artico'].".codice";
-    $where = $gTables['rental_events'].".type = 'ALLOGGIO' AND ((".$gTables['rental_events'].".start BETWEEN '$datainizio' AND '$datafine') OR (".$gTables['rental_events'].".end BETWEEN '$datainizio' AND '$datafine') ) AND ".$gTables['tesbro'].".custom_field REGEXP 'CONFIRMED'";
-
+    //$where = $gTables['rental_events'].".type = 'ALLOGGIO' AND ((".$gTables['rental_events'].".start BETWEEN '$datainizio' AND '$datafine') OR (".$gTables['rental_events'].".end BETWEEN '$datainizio' AND '$datafine') ) AND ".$gTables['tesbro'].".custom_field REGEXP 'CONFIRMED'";
+	$where = $gTables['rental_events'].".type = 'ALLOGGIO' AND ".$gTables['rental_events'].".start <= '$datafine'  AND ".$gTables['rental_events'].".end >= '$datainizio'  AND ".$gTables['tesbro'].".custom_field REGEXP 'CONFIRMED'";
+	//echo "<br>where:",$where;
+	//echo "<br>table:",$tabella;
+	//echo "<br>select:",$select;
     $result = gaz_dbi_dyn_query($select, $tabella, $where , 'start');
     $numrow = gaz_dbi_num_rows($result);
 	
@@ -150,7 +153,7 @@ if (isset($_GET['anteprima']) and $msg == "") {
     $count=array();
     $fmt = new \IntlDateFormatter('it_IT', IntlDateFormatter::FULL, IntlDateFormatter::FULL);
     $fmt->setPattern('MMMM');
-
+	//echo "<pre>",print_r($rows),"</pre>";
     echo "<table class=\"Tlarge table table-striped table-bordered table-condensed table-responsive\">";
     if ($numrow > 0) {// se ci sono state prenotazioni avvio i calcoli statistici
 		$dataend = date('Y-m-d', strtotime($datafine. ' - 1 days'));// il giorno del check-out non conta per una notte

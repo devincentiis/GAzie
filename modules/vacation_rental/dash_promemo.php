@@ -54,7 +54,8 @@ $checkocc=(isset($_POST['set']) && $_POST['set']=="OCCUPAZIONE")?"checked":'';
 ?>
 <script>
 $('#closePdf').on( "click", function() {
-		$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
+		$('.framePdf').css({'display': 'none'});
+		$('#framePdf').attr('src','../../library/images/wait_spinner.html');
 	});
 function openframe(url,codice){
   var response = jQuery.ajax({
@@ -75,7 +76,8 @@ function openframe(url,codice){
   };
 	$('#closePdf').on( "click", function() {
 		$("#titolo").empty();
-		$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
+		$('.framePdf').css({'display': 'none'});
+		$('#framePdf').attr('src','../../library/images/wait_spinner.html');
 	});
 };
 </script>
@@ -87,8 +89,8 @@ function openframe(url,codice){
             <div class="col-xs-11" id="titolo" ></div>
             <div class="col-xs-1"><span><button type="button" id="closePdf"><i class="glyphicon glyphicon-remove"></i></button></span></div>
           </div>
-          <iframe id="framePdf"  style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
-      </div>
+		  <iframe id="framePdf"  style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
+		</div>
       <div class="panel panel-info col-sm-12">
         <div class="box-header company-color">
           <h4 class="box-title"><i class="glyphicon glyphicon-blackboard"></i> Riepilogo Vacation rental</h4>
@@ -126,7 +128,7 @@ function openframe(url,codice){
 					  <th class="text-center">Occupazione</th>
 					</tr>
 					<tr>
-					  <td class="text-center"><?php echo "€ ",number_format($tot_promemo['totalprice_booking'], 2, '.', ''); ?></td>
+					  <td class="text-center"><?php echo "€ ",number_format($tot_promemo['totalprice_booking'], 2, '.', '')," solo locazioni"; ?></td>
 					  <td class="text-center"><?php echo $tot_promemo['tot_nights_bookable']; ?></td>
 					  <td class="text-center"><?php echo $tot_promemo['tot_nights_booked']; ?></td>
 					  <td class="text-center"><?php echo number_format($tot_promemo['perc_booked'], 2, '.', ''),"%"; ?></td>

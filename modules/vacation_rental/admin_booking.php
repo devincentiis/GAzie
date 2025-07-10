@@ -569,7 +569,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             $form['initra'] = $initra;
             $form['datemi'] = $datemi;
             $form['id_agente'] = $form['id_tourOp'];// scambio perché l'agente è il tour operator mentre in id_agente ho il proprietario
-            if ($tesbro_data = json_decode($form['custom_field'], TRUE)){// se la testata ha un custom field
+            if (isset($form['custom_field']) && $tesbro_data = json_decode($form['custom_field'], TRUE)){// se la testata ha un custom field
               if (is_array($tesbro_data['vacation_rental']) ){
                 $tesbro_data['vacation_rental']['security_deposit']=$form['security_deposit'];// aggiorno il sec dep nel caso fosse stato modificato
                 $form['custom_field'] = json_encode($tesbro_data);// ricreo il json custom field
