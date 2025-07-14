@@ -1038,12 +1038,12 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 $form['discountable_price'][]=$total_price_disc;
                 $form['discount'][]= (floatval($total_price_disc)*floatval($discount['value']))/100;// aggiungo al totale sconti, lo sconto calcolato in percentuale
                 $form['descri_discount'][]=$discount['title']." ".$discount['value']."%";// incremento la descrizione con lo sconto applicato
-                $total_price_disc = $total_price-((floatval($total_price_disc)*floatval($discount['value']))/100);
+                $total_price_disc = $total_price_disc-((floatval($total_price_disc)*floatval($discount['value']))/100);
               }else{
                 $form['discountable_price'][]=$total_price_disc;
                 $form['discount'][]= floatval($discount['value'])/floatval("1.".$gen_iva_perc);// aggiungo al totale sconti, lo sconto a valore scorporando IVA
                 $form['descri_discount'][]= $discount['title']." ". number_format(floatval($discount['value'])/floatval("1.".$gen_iva_perc),3)."€";/// incremento la descrizione con lo sconto applicato
-                $total_price_disc = $total_price-(floatval($discount['value'])/floatval("1.".$gen_iva_perc));
+                $total_price_disc = $total_price_disc-(floatval($discount['value'])/floatval("1.".$gen_iva_perc));
               }
 
               if ($discount['stop_further_processing']==1){// se questo deve bloccare i successivi eventuali, interrompo il conteggio
@@ -1374,25 +1374,25 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 if (!isset($tmpPrezzoNetto_Sconto) or ( $tmpPrezzoNetto_Sconto >= 0)) { // non ho trovato un prezzo netto per il cliente/articolo
                     if ($form['listin'] == 2) {
                       if (floatval($artico['preve2'])<=0){
-                        echo "ERRORE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito";
+                        echo "ATTENZIONE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito, quindi non considero questa impostazione e uso il default.";
                       }else{
                         $form['rows'][$next_row]['prelis'] = number_format($artico['preve2'], $admin_aziend['decimal_price'], '.', '');
                       }
                     } elseif ($form['listin'] == 3) {
                       if (floatval($artico['preve3'])<=0){
-                        echo "ERRORE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito";
+                        echo "ATTENZIONE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito, quindi non considero questa impostazione e uso il default.";
                       }else{
                         $form['rows'][$next_row]['prelis'] = number_format($artico['preve3'], $admin_aziend['decimal_price'], '.', '');
                       }
                     } elseif ($form['listin'] == 4) {
                       if (floatval($artico['preve4'])<=0){
-                        echo "ERRORE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito";
+                        echo "ATTENZIONE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito, quindi non considero questa impostazione e uso il default.";
                       }else{
                         $form['rows'][$next_row]['prelis'] = number_format($artico['preve4'], $admin_aziend['decimal_price'], '.', '');
                       }
                     } elseif ($form['listin'] == 5) {// prezzo web
                       if (floatval($artico['preve5'])<=0){
-                        echo "ERRORE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito";
+                        echo "ATTENZIONE il cliente ha il listino ",$form['listin']," ma questo listino non ha un prezzo inserito, quindi non considero questa impostazione e uso il default.";
                       }else{
                         $form['rows'][$next_row]['prelis'] = number_format($form['in_prelis'], $admin_aziend['decimal_price'], '.', '');
                       }
