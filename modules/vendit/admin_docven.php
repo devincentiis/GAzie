@@ -703,9 +703,11 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       }
     }
     // faccio visualizzare l'errore in caso di iva diversa
+    /* recepita modifica di D.Crescenti del 25/07/2025 che consente comunque l'emissione verso la PA di aliquote diverse dallo split payment bypassando questo impedimento
     if ( $iva_altri_tipi && $iva_split_payment ) {
         $msg['err'][] = "66";
     }
+    */
     // dal 2019 non sarà più possibile emettere fatture a clienti che non ci hanno comunicato la PEC o il codice SdI
     if (isset ($cliente) && substr($datemi,0,4)>=2019 && strlen($cliente['pec_email'])<5 && strlen(trim($cliente['fe_cod_univoco']))<6 && $form['tipdoc']!='VRI' ){
         //$msg['err'][] = "62";

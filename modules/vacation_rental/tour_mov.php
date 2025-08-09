@@ -395,10 +395,10 @@ if (isset($_GET['XML']) and $msg == "") {
         if ($rowluodoc = gaz_dbi_fetch_assoc($res)) {
             $luogorilascidoc=$rowluodoc['stat_code'];
             if(strlen($luogorilascidoc)<>9){
-               echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
+               echo "Luogo di rilascio documento. Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
             }
         } else {
-            echo "Il comune non esiste nella tabella municipalities:",$name;die;
+            echo "Luogo di rilascio documento.Il comune non esiste nella tabella municipalities:",$name;die;
         }
 		}else{
 			$luogorilascidoc="";
@@ -418,10 +418,10 @@ if (isset($_GET['XML']) and $msg == "") {
         if ($rowluores = gaz_dbi_fetch_assoc($res)) {
             $luogoresidenza=$rowluores['stat_code'];
             if(strlen($luogoresidenza)<>9){
-               echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
+               echo "Residenza. Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
             }
         } else {
-            echo "Il comune non esiste nella tabella municipalities:",$name;die;
+            echo "Residenza. Il comune non esiste nella tabella municipalities:",$name;die;
         }
 
       }
@@ -438,10 +438,10 @@ if (isset($_GET['XML']) and $msg == "") {
         if ($rowluonas = gaz_dbi_fetch_assoc($res)) {
             $comunenascita=$rowluonas['stat_code'];
             if(strlen($comunenascita)<>9){
-               echo "Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
+               echo "Luogo di nascita. Il comune non ha un codice Polizia di Stato corretto; probabilmente è un comune soppresso:",$name;die;
             }
         } else {
-            echo "Il comune non esiste nella tabella municipalities:",$name;die;
+            echo "Luogo di nascita. Il comune non esiste nella tabella municipalities:",$name,"<br>",$query;die;
         }
 
       }

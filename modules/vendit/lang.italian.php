@@ -1114,11 +1114,14 @@ $strScript = array("admin_client.php" =>
             'La data di emissione &egrave; successiva a quella iniziale',
 			'Non ci sono effetti che soddisfano la scelta'
         ),
-        'preview' => 'Anteprima della distinta cartacea degli effetti',
+        'preview' => 'Anteprima della lista degli effetti',
         'header' => array('Num' => '', 'Tipo' => '', 'Scadenza' => '', 'Importo' => '',
             'Cliente/P.I.' => '', 'Fattura/Importo' => '', 'Appoggio/ABI-CAB' => ''
         ),
-        'date_emi' => 'Data della distinta',
+        'mesg' => array('La ricerca non ha dato risultati!',
+            'Inserire almeno 2 caratteri!',
+            'Cambia anagrafica'),
+        'clfoco' => 'Cliente',
         'bank' => 'Banca d\'accredito',
         'date_ini' => 'Data di scadenza inizio',
         'date_fin' => 'Data di scadenza fine',
@@ -1126,11 +1129,11 @@ $strScript = array("admin_client.php" =>
         'num_fin' => 'Numero fine',
         'period' => 'Imposta prossime scadenze',
         'period_value' => 'Scadenze prossime',
-        'reprint' => 'Distintato',
-        'reprint_value' => array('S' => 'Si', 'N' => 'No'),
+        'reprint' => 'Stato',
+        'reprint_value' => array('' =>'Entrambi','S' => 'Distintato', 'N' => 'Non distintato'),
         'type' => 'Tipo effetti: ',
         'type_value' => array('B' => 'Ricevute Bancarie','I' => 'RID', 'T' => 'Tratte', 'V' => 'MAV'),
-        'tot' => 'Totale della distinta'
+        'tot' => 'Totale della lista'
     ),
     "select_filerb.php" =>
     array('title' => 'Generazione File delle RiBa in formato CBI',

@@ -27,21 +27,20 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend=checkAdmin();
 
 
-if (!isset($_GET['de']) ||
+if (!isset($_GET['cl']) ||
     !isset($_GET['rp']) ||
     !isset($_GET['ba']) ||
     !isset($_GET['ni']) ||
     !isset($_GET['nf']) ||
     !isset($_GET['ri']) ||
     !isset($_GET['rf'])) {
-    header("Location: ".$_SERVER['HTTP_REFERER']);
+    header("Location: select_effett_report.php");
     exit;
 }
 
-$gioemi = substr($_GET['de'],0,2);
-$mesemi = substr($_GET['de'],2,2);
-$annemi = substr($_GET['de'],4,4);
-$utsemi= mktime(12,0,0,$mesemi,$gioemi,$annemi);
+$clfoco = intval($_GET['cl']);
+$banacc = intval($_GET['ba']);
+$reprint = substr($_GET['rp'],0,1);
 $gioini = substr($_GET['ri'],0,2);
 $mesini = substr($_GET['ri'],2,2);
 $annini = substr($_GET['ri'],4,4);
@@ -52,30 +51,33 @@ $mesfin = substr($_GET['rf'],2,2);
 $annfin = substr($_GET['rf'],4,4);
 $utsfin= mktime(0,0,0,$mesfin,$giofin,$annfin);
 $datafine = date("Ymd",$utsfin);
-
-if ($_GET['rp'] <> 'S') {
-    $ristampa = "(id_distinta = 0  OR id_distinta IS NULL) AND ";
+if ($reprint=='S'){
+  $where= '';
+} else if ($reprint==''){
+  $where= '';
 } else {
-    $ristampa = "(banacc = '".intval($_GET['ba'])."' OR banacc = 0) AND ";
+  $where= "(".$gTables['effett'].".id_distinta = 0  OR ".$gTables['effett'].".id_distinta IS NULL) AND ";
 }
 
+if ($clfoco>=100){
+  $where.=$gTables['effett'].".clfoco = ".$clfoco." AND ";
+  $orderby="scaden, progre";
+  // quando seleziono il cliente ignoro la banca di accredito ed il tipo di effetto
+} else {
+  if ($banacc>=100){
+    $where.=$gTables['effett'].".banacc = ".$banacc." AND ";
+  }
+}
 
-
-$where = $ristampa." scaden BETWEEN '".$datainizio."' AND '".$datafine."' AND progre BETWEEN '".intval($_GET['ni'])."' AND '".intval($_GET['nf'])."'";
-$result = gaz_dbi_dyn_query("*", $gTables['effett'],$where,"tipeff, scaden, id_tes");
+$where .= " scaden BETWEEN '".$datainizio."' AND '".$datafine."' AND progre BETWEEN '".intval($_GET['ni'])."' AND '".intval($_GET['nf'])."'";
+$result = gaz_dbi_dyn_query("*", $gTables['effett'],$where,"banacc, tipeff, scaden, progre");
 $anagrafica = new Anagrafica();
-$banacc = gaz_dbi_get_row($gTables['clfoco'],"codice",intval($_GET['ba']));
-$descbanacc = $banacc['descri'];
 $luogo_data=$admin_aziend['citspe'].", lì ";
 $gazTimeFormatter->setPattern('dd MMMM yyyy');
-if (isset($_GET['de'])) {
-  $luogo_data .= ucwords($gazTimeFormatter->format(new DateTime('@'.$utsemi)));
-} else {
-  $luogo_data .= ucwords($gazTimeFormatter->format(new DateTime()));
-}
+$luogo_data .= ucwords($gazTimeFormatter->format(new DateTime()));
 $gazTimeFormatter->setPattern('dd/MM/yyyy');
 $title = array('luogo_data'=>$luogo_data,
-               'title'=>'Effetti su '.$descbanacc." dal ".$gazTimeFormatter->format(new DateTime('@'.$utsini)).' al '.$gazTimeFormatter->format(new DateTime('@'.$utsfin)),
+               'title'=>'Effetti dal '.$gazTimeFormatter->format(new DateTime('@'.$utsini)).' al '.$gazTimeFormatter->format(new DateTime('@'.$utsfin)),
                'hile'=>array(array('lun' => 18,'nam'=>'Scadenza'),
                              array('lun' => 18,'nam'=>'Effetto'),
                              array('lun' => 100,'nam'=>'Cliente / Indirizzo,P.IVA / Fattura'),
@@ -99,69 +101,83 @@ $pdf->setFooterMargin(22);
 $pdf->setTopMargin(43);
 $pdf->setRiporti('');
 $pdf->AddPage();
-$ctrltipo="";
+$ctrl_type="";
+$ctrl_banacc="";
 $totaleff=0.00;
 $totnumeff=0;
 $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'],0,2)),hexdec(substr($admin_aziend['colore'],2,2)),hexdec(substr($admin_aziend['colore'],4,2)));
 $pdf->SetFont('helvetica','',8);
-while ($a_row = gaz_dbi_fetch_array($result)) {
-    if ($a_row["tipeff"] <> $ctrltipo){
-        if (isset($totaletipo))
-            $pdf->Cell(190,4,$totnumtipo.' '.$descreff.' per un totale di '.gaz_format_number($totaletipo),1,1,'R',1);
-        $totaletipo = 0.00;
-        $totnumtipo = 0;
-        switch($a_row['tipeff'])
-            {
-            case "B":
-            $descreff = 'RICEVUTE BANCARIE ';
-            break;
-            case "I":
-            $descreff = 'RID ';
-            break;
-            case "T":
-            $descreff = 'CAMBIALI TRATTE ';
-            break;
-            case "V":
-            $descreff = 'MAV ';
-            break;
-            }
+while ($r = gaz_dbi_fetch_array($result)) {
+  if ($r["banacc"] <> $ctrl_banacc) {
+    $pdf->SetFont('helvetica','B',8);
+    if ($ctrl_banacc!='') {
+      $pdf->Cell(190,4,$banacc['descri'].' n.'.$totnumtipo.' '.$descreff.' per € '.gaz_format_number($totaletipo),1,1,'R',1);
+      $pdf->Ln(4);
     }
-    $totnumeff++;
-    $totnumtipo++;
-    $totaleff += $a_row["impeff"];
-    $totaletipo += $a_row["impeff"];
-    $cliente = $anagrafica->getPartner($a_row['clfoco']);
-    $banapp = gaz_dbi_get_row($gTables['banapp'],"codice",$a_row['banapp']);
-    $scadenza = substr($a_row['scaden'],8,2).'-'.substr($a_row['scaden'],5,2).'-'.substr($a_row['scaden'],0,4);
-    $emission = substr($a_row['datemi'],8,2).'-'.substr($a_row['datemi'],5,2).'-'.substr($a_row['datemi'],0,4);
-    $datafatt = substr($a_row['datfat'],8,2).'-'.substr($a_row['datfat'],5,2).'-'.substr($a_row['datfat'],0,4);
-    if ($a_row["salacc"] == 'S')
-        $saldoacco = "a saldo";
-    else    $saldoacco = "in conto";
-    $pdf->Cell(18,4,'','LTR',0,'L');
-    $pdf->Cell(18,4,'n.'.$a_row["progre"].' del','LTR',0,'L');
-    $pdf->Cell(100,4,$cliente["ragso1"].' '.$cliente["ragso2"],'LTR',0,'L');
-    $pdf->Cell(30,4,'ABI '.$banapp["codabi"],'LTR',0,'R');
-    $pdf->Cell(24,4,'','LTR',1,'R');
-    $pdf->Cell(18,4,$scadenza,'LR',0,'L');
-    $pdf->Cell(18,4,$emission,'R',0,'L');
-    $pdf->Cell(100,4,$cliente["indspe"].' '.sprintf("%05d",$cliente["capspe"]).' '.$cliente["citspe"].' ('.$cliente["prospe"].') P.IVA '.$cliente["pariva"],0,0,'L', 0, '', 1);
-    $pdf->Cell(30,4,'CAB '.$banapp["codcab"],'R',0,'R');
-    $pdf->Cell(24,4,'','R',1,'R');
-    $pdf->Cell(18,4,'','LRB',0,'L');
-    $pdf->Cell(18,4,$saldoacco,'RB',0,'R');
-    $pdf->Cell(80,4,'Fatt.n.'.$a_row["numfat"].' del '.$datafatt,'B',0,'L');
-    $pdf->Cell(20,4,'','B');
-    $pdf->Cell(30,4,$banapp["descri"],'RB',0,'R');
-    $aRiportare['top'][1]['nam'] = gaz_format_number($totaletipo);
-    $aRiportare['bot'][1]['nam'] = gaz_format_number($totaletipo);
-    $pdf->setRiporti($aRiportare);
-    $pdf->Cell(24,4,gaz_format_number($a_row["impeff"]),'RB',1,'R');
-    $ctrltipo = $a_row["tipeff"];
+    $totaletipo = 0.00;
+    $totnumtipo = 0;
+    $banacc = gaz_dbi_get_row($gTables['clfoco'],"codice",$r['banacc']);
+    $pdf->Cell(190,6,'Banca di accredito: '.($banacc?$banacc['descri']:''),1,1,'',1);
+    $pdf->SetFont('helvetica','',8);
+  }
+  if ($r["tipeff"] <> $ctrl_type) {
+    if ($ctrl_type!='') $pdf->Cell(190,4,$totnumtipo.' '.$descreff.' per un totale di '.gaz_format_number($totaletipo),1,1,'R',1);
+    $totaletipo = 0.00;
+    $totnumtipo = 0;
+    switch($r['tipeff']){
+      case "B":
+      $descreff = 'RICEVUTE BANCARIE ';
+      break;
+      case "I":
+      $descreff = 'RID ';
+      break;
+      case "T":
+      $descreff = 'CAMBIALI TRATTE ';
+      break;
+      case "V":
+      $descreff = 'MAV ';
+      break;
+    }
+  }
+  $totnumeff++;
+  $totnumtipo++;
+  $totaleff += $r["impeff"];
+  $totaletipo += $r["impeff"];
+  $cliente = $anagrafica->getPartner($r['clfoco']);
+  $banapp = gaz_dbi_get_row($gTables['banapp'],"codice",$r['banapp']);
+  $scadenza = substr($r['scaden'],8,2).'-'.substr($r['scaden'],5,2).'-'.substr($r['scaden'],0,4);
+  $emission = substr($r['datemi'],8,2).'-'.substr($r['datemi'],5,2).'-'.substr($r['datemi'],0,4);
+  $datafatt = substr($r['datfat'],8,2).'-'.substr($r['datfat'],5,2).'-'.substr($r['datfat'],0,4);
+  if ($r["salacc"] == 'S')
+      $saldoacco = "a saldo";
+  else    $saldoacco = "in conto";
+  $pdf->Cell(18,4,'','LTR',0,'L');
+  $pdf->Cell(18,4,'n.'.$r["progre"].' del','LTR',0,'L');
+  $pdf->Cell(100,4,$cliente["ragso1"].' '.$cliente["ragso2"],'LTR',0,'L');
+  $pdf->Cell(30,4,'ABI '.$banapp["codabi"],'LTR',0,'R');
+  $pdf->Cell(24,4,'','LTR',1,'R');
+  $pdf->Cell(18,4,$scadenza,'LR',0,'L');
+  $pdf->Cell(18,4,$emission,'R',0,'L');
+  $pdf->Cell(100,4,$cliente["indspe"].' '.sprintf("%05d",$cliente["capspe"]).' '.$cliente["citspe"].' ('.$cliente["prospe"].') P.IVA '.$cliente["pariva"],0,0,'L', 0, '', 1);
+  $pdf->Cell(30,4,'CAB '.$banapp["codcab"],'R',0,'R');
+  $pdf->Cell(24,4,'','R',1,'R');
+  $pdf->Cell(18,4,'','LRB',0,'L');
+  $pdf->Cell(18,4,$saldoacco,'RB',0,'R');
+  $pdf->Cell(80,4,'Fatt.n.'.$r["numfat"].' del '.$datafatt,'B',0,'L');
+  $pdf->Cell(20,4,'','B');
+  $pdf->Cell(30,4,$banapp["descri"],'RB',0,'R');
+  $aRiportare['top'][1]['nam'] = gaz_format_number($totaletipo);
+  $aRiportare['bot'][1]['nam'] = gaz_format_number($totaletipo);
+  $pdf->setRiporti($aRiportare);
+  $pdf->Cell(24,4,gaz_format_number($r["impeff"]),'RB',1,'R');
+  $ctrl_type = $r["tipeff"];
+  $ctrl_banacc = $r["banacc"];
 }
 $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'],0,2)),hexdec(substr($admin_aziend['colore'],2,2)),hexdec(substr($admin_aziend['colore'],4,2)));
 $pdf->setRiporti();
-$pdf->Cell(190,4,$totnumtipo.' '.$descreff.' per un totale di € '.gaz_format_number($totaletipo),1,1,'R',1);
+$pdf->SetFont('helvetica','B',8);
+$pdf->Cell(190,4,$banacc['descri'].' n.'.$totnumtipo.' '.$descreff.' per € '.gaz_format_number($totaletipo),1,1,'R',1);
+$pdf->Ln(4);
 $pdf->SetFont('helvetica','B',12);
 $pdf->Cell(80);
 $pdf->Cell(80,10,'Totale degli effetti nella lista € ',1,0,'R');

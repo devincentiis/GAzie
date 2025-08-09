@@ -30,39 +30,38 @@ $admin_aziend=checkAdmin();
    del PDF senza che al momento del ritorno indietro (back button) si abbia la richiesta
    da parte del browser di ripostare i dati.
    Vengono sfruttati i registri $_SESSION['print_request'] e $_SESSION['script_ref'];
-   $_SESSION['print_request'] � bidimensionale e al suo interno sono contenuti i dati
-   da passare tramite URL allo script il cui nome � contenuto in ['script_name'],
+   $_SESSION['print_request'] è bidimensionale e al suo interno sono contenuti i dati
+   da passare tramite URL allo script il cui nome è contenuto in ['script_name'],
    nelle altre key si devono passare il nome della variabile (nella key) ed il suo valore.
 */
 
 if (isset($_SESSION['print_request'])){
-    $request = $_SESSION['print_request'];
-    unset ($_SESSION['print_request']);
-    if (isset($request['script_name'])) { // se � stata inviata una richiesta di stampa con il nome del template
-        //formattazione l'url
-        $url="setTimeout(\"window.location='".$request['script_name'].".php?";
-        unset($request['script_name']);
-        foreach($request as $k=>$v){
-          if ($v!=null)           if ($v!=null) $url .=$k.'='.preg_replace("/\'/",'`',$v).'&';
-
-        }
-        $url .="'\",500)\n";
-        //fine formattazione url
-        echo "<HTML><HEAD><TITLE>Wait for PDF</TITLE>\n";
-        echo "<script type=\"text/javascript\">\n";
-        echo $url;
-        echo "</script></HEAD>\n<BODY><DIV align=\"center\">Wait for PDF</DIV><DIV align=\"center\">Aspetta il PDF</DIV></BODY></HTML>";
-    } else {  //altrimenti torno indietro
-        header("Location: ".$_SERVER['HTTP_REFERER']);
-        exit;
+  $request = $_SESSION['print_request'];
+  unset ($_SESSION['print_request']);
+  if (isset($request['script_name'])) { // se viene stata inviata una richiesta di stampa con il nome del template
+    //formattazione l'url
+    $url="setTimeout(\"window.location='".$request['script_name'].".php?";
+    unset($request['script_name']);
+    foreach($request as $k=>$v){
+      if ($v!=null || is_numeric($v)|| empty($v)) $url .=$k.'='.preg_replace("/\'/",'`',$v).'&';
     }
-} else {
-    $ref=$_SERVER['HTTP_REFERER'];
-    if (isset($_SESSION['script_ref'])) {
-        $ref = $_SESSION['script_ref'];
-        unset ($_SESSION['script_ref']);
-    }
-    header("Location: ".$ref);
+    $url .="'\",500)\n";
+    //fine formattazione url
+    echo "<HTML><HEAD><TITLE>Wait for PDF</TITLE>\n";
+    echo "<script type=\"text/javascript\">\n";
+    echo $url;
+    echo "</script></HEAD>\n<BODY><DIV align=\"center\">Wait for PDF</DIV><DIV align=\"center\">Aspetta il PDF</DIV></BODY></HTML>";
+  } else {  //altrimenti torno indietro
+    header("Location: ".$_SERVER['HTTP_REFERER']);
     exit;
+  }
+} else {
+  $ref=$_SERVER['HTTP_REFERER'];
+  if (isset($_SESSION['script_ref'])) {
+      $ref = $_SESSION['script_ref'];
+      unset ($_SESSION['script_ref']);
+  }
+  header("Location: ".$ref);
+  exit;
 }
 ?>
