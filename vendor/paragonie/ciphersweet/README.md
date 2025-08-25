@@ -34,7 +34,7 @@ or noncommercial, open source or proprietary, at no cost to you.
   diverse range of compliance requirements. More can be added as needed:
   * `BoringCrypto` uses [libsodium](https://download.libsodium.org/doc/), the de
     facto standard encryption library for software developers.
-    [Algorithm details](https://ciphersweet.paragonie.com/security#moderncrypto).
+    [Algorithm details](https://ciphersweet.paragonie.com/security#boringcrypto).
   * `FIPSCrypto` only uses the cryptographic algorithms covered by the
     FIPS 140-3 recommendations to avoid auditing complexity.
     [Algorithm details](https://ciphersweet.paragonie.com/security#fipscrypto).
@@ -83,6 +83,8 @@ Security experts may be interested in [the security properties of our design](ht
 
 Please feel free to [create an issue](https://github.com/paragonie/ciphersweet/issues/new)
 if you'd like to integrate CipherSweet with your software.
+
+* [AWS KMS provider for CipherSweet](https://github.com/paragonie/ciphersweet-provider-aws-kms)
 
 ## CipherSweet in Other Languages
 
