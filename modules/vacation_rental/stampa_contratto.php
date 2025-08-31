@@ -58,9 +58,9 @@ if ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0){// se Ã
 if ($tesbro['tipdoc']=='VOR' || $tesbro['tipdoc']=='VOG') {
 	$type=false;
 	$template='Lease';
-    if (isset($_GET['dest'])&& $_GET['dest']=='E' ){ // se l'utente vuole inviare una mail
-		$type='E';
-    }
+  if (isset($_GET['dest'])&& $_GET['dest']=='E' ){ // se l'utente vuole inviare una mail
+    $type='E';
+  }
 	if (isset($_GET['lh'])){ // se l'utente vuole che venga stampata su una carta intestata
 		$type='H';
 	}

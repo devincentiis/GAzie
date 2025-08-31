@@ -937,15 +937,17 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
         return ($content);
     } else { // va all'interno del browser
       if ($save){
-         $pdf->Output($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');
-		 $pdf->Output(dirname(__DIR__).'/vacation_rental/files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');// questo è il pdf per l'utente
+        $pdf->Output($datadir . 'files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');
+        $pdf->Output(dirname(__DIR__).'/vacation_rental/files/' . $IDaz .'/pdf_'.$templateName.'/'.$testata['id_tes'].'.pdf','F');// questo è il pdf per l'utente
+        echo($testata['id_tes']);
+        exit;
       }
       if ($testata['tipdoc']=='AOR'){
         /* in caso di ordine a fornitore che non viene inviato via mail al fornitore ma solo al browser
         cambio la descrizione del file per ricordare a chi è stato fatto*/
         $doc_name = preg_replace("/[^a-zA-Z0-9]+/", "_", $docVars->cliente1 . '_' . $pdf->tipdoc) . '.pdf';
       }
-        $pdf->Output($doc_name);
+      $pdf->Output($doc_name);
     }
 }
 ?>

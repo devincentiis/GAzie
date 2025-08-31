@@ -722,10 +722,12 @@ $strScript = array(
 			'err_codfis' => 'Erreur de code fiscal : corrigez-la et réessayez',
 			'coupon_error' => 'Le code de réduction n\'est pas appliqué car il n\'est pas valide',
 			'cliente_anonimo' => 'Ce devis est destiné à un utilisateur anonyme, vous ne pouvez pas l\'utiliser pour réserver. Demandez un devis avec vos coordonnées ou faites une réservation sur le site Web',
-      'accesso_negato' => 'Accès refusé'
+      'accesso_negato' => 'Accès refusé',
+      'errore_proforma' => 'ERRORE nella generazione contratto proforma'
         ),
         'war' => array(
-            'ok' => 'ok riempitura array'
+            'ok' => 'ok riempitura array',
+            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
 		),
     'print'=>'Imprimer',
     'minors' => 'Mineurs',
@@ -736,7 +738,9 @@ $strScript = array(
     'booking_req' => 'Demande de modification de réservation',
     'user' => 'Utilisateur',
     'declaration' => "Je déclare être le titulaire de la réservation et demander irrévocablement sa <strong>modification / annulation / substitution</strong> comme indiqué ci-dessus. Je suis conscient que cette demande a une valeur contraignante conformément à l’art. 1326 du Code civil italien et modifiera le contrat correspondant que j’ai signé à l’époque, et qu’elle peut entraîner des frais ou des pénalités conformément aux clauses contractuelles. Ceci constitue une signature électronique conforme au Règlement (UE) n° 910/2014 eIDAS.",
-    'body2' => 'pour la réservation ID:',
+    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
+    'body1' => 'Gentile cliente,<br><br>abbiamo ricevuto la sua richiesta di',
+	'body2' => 'pour la réservation ID:',
     'body3' => 'Vous trouverez ci-joint une copie PDF avec les détails.<br><br>Cordialement,<br>',
     'sent_req' => 'Demande envoyée avec succès. Une copie vous a été envoyée à',
     'sent_req2' => 'Un administrateur examinera votre demande dans les plus brefs délais et vous recevrez une notification.',
@@ -1112,7 +1116,21 @@ $strScript = array(
         'text17' => '<p>Maintenant, si vous le souhaitez, vous pouvez également payer le solde immédiatement, ou à votre arrivée à l\’établissement.</p>',
         'text18' => '<p>Pour les paiements, l\’ajout d’extras éventuels et tout ce qui concerne votre compte, connectez-vous simplement à l’espace utilisateur du site et ouvrez votre réservation.</p>',
         'stay_from' => 'Séjour du',
-        'to' => 'au'
+        'to' => 'au',
+        'self_title' => "Demande d'accès autonome (self check-in) au logement",
+        'self_intr' => "<li>La procédure de demande de self check-in se déroulera via une webcam, avec laquelle vous devrez prendre un selfie dans le cadre du processus d'identification.</li>
+        <li>Ensuite, des documents d'identité valides et non expirés ainsi que leurs copies doivent être fournis pour tous les invités, y compris les nouveau-nés. NOTE IMPORTANTE : la carte de santé/code fiscal n'est PAS une pièce d'identité.</li>
+        <li>Pour continuer, vous devez signer l'avenant au contrat de location que vous avez précédemment signé et régler à l'avance tous les paiements : solde du loyer et dépôt de garantie.</li>
+        <li>Une fois cela terminé, un administrateur vérifiera l'exactitude et, si positive, autorisera le self check-in.</li>",
+        'addendum_title' => "Avenant au contrat de location n",
+        'the_undersigned' => "Le soussigné",
+        'self_ask' => "demande à pouvoir accéder au logement de manière autonome, car l'heure prévue d'arrivée ne correspond pas à la plage horaire autorisée. Par conséquent, une fois l'autorisation reçue, il/elle s'engage à vérifier le logement au moment de l'accès autonome et à signaler immédiatement, <b>dans les 2 heures</b>, par email/whatsapp/sms avec photos et texte descriptif, tout éventuel problème constaté concernant la propreté ou l'état du bien ; passé ce délai, il/elle accepte et confirme tacitement que l'état du logement est conforme à celui décrit dans le contrat de location, en bon état de propreté et d'entretien et avec tous les équipements et extras convenus.</p>
+        <p>Le soussigné accepte que, pour établir l'heure exacte d'accès au logement, le registre généré automatiquement par les dispositifs électroniques utilisés pour l'accès autonome (boîte à clés/serrure électronique) soit utilisé.",
+        'self_ask2' => "Enfin, il/elle déclare être le titulaire du contrat de location susmentionné et être conscient(e) que cette demande a une valeur contraignante conformément à l'art. 1326 c.c., uniquement après l'envoi correct des documents et paiements demandés et sous réserve de l'approbation du propriétaire. <br>La présente déclaration d'intention est signée au moyen d'une procédure électronique simple conformément au Règlement (UE) n° 910/2014 (eIDAS). Le signataire a été identifié par une authentification avec accès restreint utilisant des identifiants personnels. Les données relatives à la signature (IP, horodatage, identifiant utilisateur, contenu signé) sont conservées de manière sécurisée à des fins juridiques et probatoires.</label>",
+        'check_to_sign' => "Pour confirmer la demande, il est nécessaire de cocher la case ci-dessus. Cette action a valeur d'acceptation contractuelle conformément à l'art. 1326 c.c.",
+        'self_gdpr' => "Les données de signature sont conservées de manière sécurisée à des fins juridiques et de suivi, conformément au RGPD.",
+        'sign_by'=>'Online signed by',
+        'auth_method' =>"authentication method."
     )
 );
 ?>

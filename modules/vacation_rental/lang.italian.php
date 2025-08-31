@@ -34,7 +34,7 @@ $strScript = array(
       array('warning_sess'=>'ATTENZIONE: Nel tuo browser sono state disabilitate le sessioni. Devi abilitarle oppure cambiare browser',
         'login'=>'Accesso',
         'log_instr'=>'Si prega di inserire e-mail e password',
-        'forgot'=>'Password dimenticata?',
+        'forgot'=>'Password dimenticata?  Primo accesso?',
         'log_in'=>'Accedi',
         'required'=>'Necessario',
         'pw_recover'=>'Recupero password',
@@ -486,11 +486,12 @@ $strScript = array(
 			'inexistent_booking' => 'La prenotazione NON esiste',
 			'wrong_data' => 'I dati inseriti non sono corretti',
 			'too_many_error' => 'Accesso BLOCCATO per troppi errori. Riprovare più tardi',
-			'text_missing' => 'Il testo della recensione è mancante o troppo corto',
+			'text_missing' => 'Il commento della recensione è mancante o troppo corto',
 			'err_codfis' => 'Errore nel codice fiscale, correggere e riprovare',
 			'coupon_error' => 'Codice sconto non applicato perché non valido',
 			'cliente_anonimo' => 'Questo preventivo è per un utente anonimo, non puoi usarlo per prenotare. Chiedi un preventivo con i tuoi dati oppure fai una prenotazione nel sito internet',
-      'accesso_negato' => 'Accesso negato'
+      'accesso_negato' => 'Accesso negato',
+      'errore_proforma' => 'ERRORE nella generazione contratto proforma'
       ),
         'war' => array(
             'ok' => 'ok riempitura array',
@@ -516,7 +517,7 @@ $strScript = array(
     'date_changing' => 'Modifica giorni',
     'changement_acc' => 'Sostituzione alloggio',
     'new_accommodation' => 'Nuovo alloggio',
-    'declaration' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
+    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
 		'guest'=>'Ospiti',
 		'rules_label'=>'Leggere il contratto di locazione',
 		'privacy_label'=>'Leggere il regolamento sulla privacy',
@@ -531,7 +532,7 @@ $strScript = array(
 		'check_submit2' => "Sì, confermo di aver letto integralmente il contratto, di aver avuto la possibilità di scaricarlo e/o stamparlo. Sono consapevole che il contratto sarà vincolante solo previa conferma da parte del proprietario, e che tale conferma è subordinata al versamento immediato della caparra confirmatoria, che costituisce una ulteriore manifestazione della volontà di concludere l'accordo. La presente manifestazione di volontà costituisce una firma elettronica ai sensi dell’art. 1326 c.c. ed è conforme al Regolamento (UE) n. 910/2014 (eIDAS). L’indirizzo IP, la data e l’ora della sottoscrizione vengono registrati a fini probatori.",
 		'check_submit' => 'Sì, confermo di aver preso consapevole visione e di accettare integralmente le seguenti clausole: 1,2,3,4,5,6,7.',
 		'contractor' => 'Il contraente',
-		'how_sign' => 'Per firmare, spuntare le caselle di conferma',
+		'how_sign' => 'Per firmare, selezionare il pagamento e spuntare le caselle di conferma',
 		'price_for' => 'Prezzo per ',
 		'discount_to' => 'Sconto da applicare ',
 		'select_guest' => 'Seleziona gli ospiti ',
@@ -636,7 +637,7 @@ $strScript = array(
 		'change_status' => 'Lo stato della prenotazione è cambiato in',
 		'booking_number' => 'Numero prenotazione',
 		'deposit_return' => 'In assenza di danni, il deposito cauzionale sarà restituito al check-out',
-		'ask_feedback' => 'Grazie per essere stato nostro ospite, speriamo che il soggiorno sia stato di suo gradimento.<br>La soddisfazione totale degli ospiti è il nostro obbiettivo. Una sua recensione sarebbe molto apprezzata, ci dedichi solo pochi minuti e lasci una recensione accedendo alla sua pagina utente, per favore.',
+		'ask_feedback' => 'Grazie per essere stato nostro ospite, speriamo che il soggiorno sia stato di suo gradimento.<br>La soddisfazione totale degli ospiti è il nostro obbiettivo. Una sua recensione sarebbe molto apprezzata, ci dedichi solo pochi minuti e lasci una recensione. Per inserirla acceda al sito, clicchi sulla sua prenotazione appena conclusa e in basso troverà il modulo per recensire.',
 		'ask_feedback2' => 'Il suo giudizio è molto importante per noi. <br>Sperando di rivederla presto <br> Cordiali saluti',
 		'use_access' => 'Per accedere usi i seguenti codici di accesso',
 		'more_info' => 'Maggiori info',
@@ -832,7 +833,7 @@ $strScript = array(
     'recesso7' => 'Qualora a causa di eventi straordinari che rendessero inagibile l\'alloggio (a solo titolo di esempio: incendio, terremoto, allagamento etc) il conduttore sia costretto a terminare anticipatamente la locazione, il locatore restituirà l\'importo delle notti non godute. Nessun altro danno potrà essere richiesto al locatore.',
     'recesso8' => 'Il mancato rispetto, da parte del conduttore, anche di un solo punto del presente contratto così come la mancata presentazione del conduttore, in mancanza di disdetta, alla data di arrivo e nella fascia oraria stabilita comporterà la risoluzione espressa ipso iure del presente contratto ai sensi dell\'art. 1456 del C.C. e l\'obbligo del pagamento del saldo della locazione.',
     'accettazione' => 'Accettazione',
-    'accettazione1' => "Il presente contratto è stato letto integralmente, scaricato e/o stampato, approvato e sottoscritto on-line con la spunta sulle apposite caselle: privacy, lettura download e stampa del contratto, firma e accettazione clausole vessatorie. Pertanto è redatto ai sensi dell'art. 1326 c.c. e conforme al Regolamento (UE) n. 910/2014 (eIDAS). L’indirizzo IP, la data e l’ora della sottoscrizione vengono registrati a fini probatori. L'avvenuto pagamento della caparra confirmatoria costituisce una ulteriore manifestazione della volontà di accettazione",
+    'accettazione1' => "Il presente contratto è stato letto integralmente, scaricato e/o stampato, approvato e sottoscritto on-line con la spunta sulle apposite caselle: privacy, lettura download e stampa del contratto, firma e accettazione clausole vessatorie. Pertanto è redatto ai sensi dell'art. 1326 c.c. e conforme al Regolamento (UE) n. 910/2014 (eIDAS). L’indirizzo IP, la data e l’ora della sottoscrizione vengono registrati a fini probatori. Il presente contratto sarà vincolante solo previa conferma da parte del proprietario/locatore, e tale conferma è subordinata al versamento immediato del conduttore della caparra confirmatoria. Questo versamento costituisce una ulteriore manifestazione della volontà di accettazione.",
     'accettazione2' => 'Per ogni controversia in ordine all\'esecuzione del presente contratto viene tra le parti convenuta ed accettata la competenza esclusiva del foro di Fermo.',
     'sign-online' => 'Firmato in modalità telematica',
     'sign-clauses' => 'Ai sensi e per gli effetti degli articoli 1341 e 1342 del Codice Civile, il conduttore dichiara di aver preso visione e di aver approvato on-line specificamente le seguenti clausole: 1,2,3,4,5,6,7.',
@@ -954,7 +955,21 @@ $strScript = array(
         'text17' => '<p>Adesso, se lo desideri puoi anche effettuare subito il pagamento del saldo, oppure lo potrai fare al tuo arrivo alla struttura.</p>',
         'text18' => '<p>Per il pagamento, l\'aggiunta di eventuali extra, e tutto quello che riguarda il tuo account è sufficiente accedere all\'area utente del sito internet e aprire la locazione.</p>',
         'stay_from' => 'Soggiorno dal',
-        'to' => 'al'
+        'to' => 'al',
+        'self_title' => "Richiesta di accesso autonomo (self check-in) all’alloggio",
+        'self_intr' => "<li>La procedura di richiesta del self-checkin si svolgerà attraverso una webcam con la quale si dovrà scattare un selfie come parte del processo di identificazione.</li>
+        <li>Successivamente si dovranno fornire dati e copie dei documenti di identità validi e non scaduti di tutti gli alloggiati, anche di eventuali neonati. NOTA BENE: la tessera sanitaria/codice fiscale NON è un documento di identità.</li>
+        <li>per procedere devi sottoscrivere l'addendum al contratto di locazione  che hai a suo tempo firmato e completare anticipatamente tutti i pagamenti: saldo locazione e deposito cauzionale.</li>
+        <li>Al completamento di quanto soprà un amministratore ne esaminerà la correttezza e, in caso positivo, autorizzerà il self-checkin</li>",
+        'addendum_title' => "Addendum al contratto di locazione n",
+        'the_undersigned' => "Il sottoscritto",
+        'self_ask' => "richiede di poter accedere all'alloggio in autonomia in quanto il suo orario di arrivo previsto non rientra nella fascia oraria ammessa. Pertanto, una volta ricevuta l'autorizzazione, si impegna a verificare l’alloggio al momento dell'accesso in autonomia e a comunicare tempestivamente, <b>entro 2 ore</b>, via e-mail/whatsapp/sms con fotografie e testo descrittivo, qualsiasi eventuale problema riscontrato riguardo la pulizia o lo stato dell’immobile; trascorso tale termine, accetta e conferma tacitamente che lo stato dell’alloggio è come descritto nel contratto di locazione, in buono stato di pulizia e manutenzione e con tutte le dotazioni e gli extra concordati.</p>
+        <p>Il sottoscritto accetta che per stabilire l'orario esatto di accesso all'alloggio sarà utilizzato il log registrato automaticamente dai dispositivi elettronici utilizzati per l'accesso in autonomia (box chiavi/serratura elettronica).",
+        'self_ask2' => "Infine, dichiara di essere l'intestatario del contratto di locazione di cui sopra e di essere consapevole che questa richiesta ha valore vincolante ai sensi dell'art. 1326 c.c., solo dopo il corretto invio dei documenti e pagamenti richiesti e previa approvazione del proprietario . <br>La presente manifestazione di volontà è firmata tramite procedura elettronica semplice ai sensi del Regolamento (UE) n. 910/2014 (eIDAS). Il firmatario è stato identificato mediante autenticazione con accesso riservato tramite credenziali personali. I dati relativi alla firma (IP, timestamp, identificativo utente, contenuto firmato) sono conservati in modo sicuro per finalità legali e probatorie.</label>",
+        'check_to_sign' => "Per confermare la richiesta, è necessario spuntare la casella soprastante. Tale azione ha valore di accettazione contrattuale ai sensi dell’art. 1326 c.c.",
+        'self_gdpr' => "I dati di firma sono conservati in modo sicuro per finalità legali e di tracciamento, in conformità al GDPR.",
+        'sign_by'=>'Firmato online da',
+        'auth_method' =>"Metodo di autentificazione"
     )
 );
 ?>

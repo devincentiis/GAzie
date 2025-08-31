@@ -46,30 +46,95 @@ function cols_from($table_name, ...$col_names) {
     return implode(", ", $full_names);
 }
 
-// visualizza il bottone degli addendum
-function mostra_addendum($id_tes,$IDaz) {
-    $log_pdf_dir = __DIR__ . "/files/".$IDaz."/addendum_pdf/".$id_tes;
-    // Controlla se la cartella esiste
-    if (!is_dir($log_pdf_dir)) {
-        return NULL; // La cartella non esiste
+// Funzione per ottenere il percorso dell'immagine dinamicamente
+function getSelfieImagePath($prefix) {
+    $uploadsDir = 'self_checkin/uploads/';  // Directory principale "uploads"
+
+    // Usa glob per trovare tutte le cartelle che iniziano con il prefisso dato (ad esempio 'self_771')
+    $directories = glob($uploadsDir . $prefix . '*', GLOB_ONLYDIR);
+
+    if (empty($directories)) {
+        return null;  // Se non c'è alcuna cartella che corrisponde al prefisso, ritorna null
     }
 
-    // Scansione della cartella
-    $files = scandir($log_pdf_dir);
+    // Prendi la prima cartella trovata (assumiamo che ci sia solo una corrispondenza)
+    $folder = $directories[0];
 
-    // Rimuovi "." e ".." dalla lista dei file
-    $files = array_diff($files, array('.', '..'));
+    // Estrai il nome dopo le parentesi tonde usando una regular expression
+    preg_match('/\)(.*)/', basename($folder), $matches);
 
-    // Se non ci sono file, restituisci NULL
-    if (count($files) === 0) {
+    if (empty($matches)) {
+        return null;  // Se non trovi nulla dopo le parentesi, ritorna null
+    }
+
+    // Il nome estratto dalla cartella, che si trova dopo le parentesi
+    $name = ltrim($matches[1], '-');  // Rimuoviamo il trattino iniziale se presente
+
+    // Prova a trovare un file con il prefisso 'selfie-' e le estensioni .jpg o .pdf
+    $filePath = null;
+    foreach (['jpg', 'pdf'] as $ext) {
+        // Verifica la presenza del file con estensione .jpg o .pdf
+        $potentialFile = $folder . '/selfie-' . $name . '.' . $ext;
+        if (file_exists($potentialFile)) {
+            $filePath = $potentialFile;
+            break;
+        }
+    }
+
+    // Se è stato trovato un file, ritorna il percorso
+    if ($filePath) {
+        return $filePath;
+    }
+
+    // Se non è stato trovato nessun file, ritorna null
+    return null;
+}
+
+// visualizza il bottone degli addendum
+
+function mostra_addendum($id_tes, $IDaz) {
+    $log_pdf_dir = __DIR__ . "/files/" . $IDaz . "/addendum_pdf/" . $id_tes;
+    if (!is_dir($log_pdf_dir)) {
         return NULL;
     }
-    // Se ci sono file, restituisci un pulsante con icona e link
-    ?>
-    <a onclick="printPdf('stampa_addendum.php?id_tes=<?php echo $id_tes; ?>')" class="btn btn-default" role="button" title="Addendum">
-        <span style="font-size: 1em; color: #007bff;">📝</span>
-    </a>
+    $files = scandir($log_pdf_dir);
+    // Filtra i file che iniziano con 'richiesta_'
+    $filtered_files = array_filter($files, function($file) use ($log_pdf_dir) {
+        return is_file($log_pdf_dir . '/' . $file) && strpos($file, 'richiesta_') === 0;
+    });
+    if (count($filtered_files) === 0) {
+        return NULL;
+    }
+    $filtered_files = array_values($filtered_files); // reindicizza
+    if (count($filtered_files) === 1) {
+        // Solo uno: pulsante classico
+        ?>
+        <a onclick="printPdf('stampa_addendum.php?id_tes=<?php echo $id_tes; ?>&file=<?php echo urlencode($filtered_files[0]); ?>')" class="btn btn-default" role="button" title="Addendum">
+            <span style="font-size: 1em; color: #007bff;">📝</span>
+        </a>
+        <?php
+    } else {
+      ?>
+    <div class="dropdown" style="display: inline-block;">
+        <button class="btn btn-default dropdown-toggle" type="button"
+                id="dropdownAddendum<?php echo $id_tes; ?>"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span style="font-size: 1em; color: #007bff;">📝</span> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right"
+            aria-labelledby="dropdownAddendum<?php echo $id_tes; ?>">
+            <?php foreach ($filtered_files as $file): ?>
+                <li>
+                    <a href="javascript:void(0);"
+                       onclick="printPdf('stampa_addendum.php?id_tes=<?php echo $id_tes; ?>&file=<?php echo urlencode($file); ?>')">
+                        <?php echo htmlspecialchars($file); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
     <?php
+    }
 }
 
 // visualizza i bottoni dei documenti di evasione associati all'ordine
@@ -168,6 +233,13 @@ $vacation_url_user=$res['val'];// carico l'url per la pagina front-end utente
 ?>
 <link rel="stylesheet" type="text/css" href="jquery/jquery.datetimepicker.min.css"/ >
 <script src="jquery/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+<style>
+/* Limita altezza dropdown e abilita scroll */
+.dropdown-menu {
+    max-height: 250px;   /* puoi modificare */
+    overflow-y: auto;
+}
+</style>
 <?php
 $script_transl = HeadMain(0, array('custom/modal_form'));
 
@@ -921,8 +993,10 @@ $(function() {
 
     if (new_stato_check=='OUT'){
       $("#feedback_email").show();
+      $("#give_point").show();
     }else{
       $("#feedback_email").hide();
+      $("#give_point").hide();
     }
     $('#sel_stato_check').on('change', function () {
         //ways to retrieve selected option and text outside handler
@@ -932,8 +1006,10 @@ $(function() {
         new_stato_check = this.value;
         if (new_stato_check=='OUT'){
           $("#feedback_email").show();
+          $("#give_point").show();
         }else{
           $("#feedback_email").hide();
+          $("#give_point").hide();
         }
     });
 
@@ -951,8 +1027,9 @@ $(function() {
             $("#dialog_check_inout").css("background", "url("+'spinner.gif'+") center no-repeat");
             var d = $("#datepicker").val();
             var email=$('#checkbox_email_inout').prop('checked');
+            var give_point=$('#checkbox_give_point').prop('checked');
             $.ajax({
-              data: {'type':'set_new_status_check','ref':refcheck,'new_status':new_stato_check,email:email,cust_mail:cust_mail,cust_mail2:cust_mail2,datetime:d},
+              data: {'type':'set_new_status_check','ref':refcheck,'new_status':new_stato_check,email:email,give_point:give_point,cust_mail:cust_mail,cust_mail2:cust_mail2,datetime:d},
               type: 'POST',
               url: 'change_status.php',
               success: function(output) {
@@ -971,80 +1048,175 @@ $(function() {
 		$("#dialog_check_inout" ).dialog( "open" );
 	});
 
-  $("#dialog_selfcheck").dialog({ autoOpen: false });
-	$('.dialog_selfcheck').click(function() {
-		$("p#num_status_self").append(" "+$(this).attr("numdoc"));
-		$("p#de_status_self").html($(this).attr("status_now"));
+
+	$("#dialog_selfcheck").dialog({ autoOpen: false });
+
+$('.dialog_selfcheck').click(function() {
+    // Setto i dati nel dialogo come nel tuo codice
+    $("p#num_status_self").append(" "+$(this).attr("numdoc"));
+    $("p#de_status_self").html($(this).attr("status_now"));
     var msgself = $(this).attr('msgself');
     $("#msgself").val(msgself);
-    $("#msgself").prop("disabled", "disabled");// all'inizio disabilito il test messaggio perché è anche disabilitato l'ivio mail
+    //$("#msgself").prop("disabled", "disabled");
+
     var ref = $(this).attr('ref');
     var id_anagra = $(this).attr('id_anagra');
     var new_stato_lavorazione = $(this).attr("proself");
-
     var cust_mail = $(this).attr("cust_mail");
+    var imgPath = $(this).attr("data-img-path");  // Ottieni il percorso dell'immagine
+
     $("#sel_stato_self").val(new_stato_lavorazione);
     $('#sel_stato_self').on('change', function () {
-        //retrieve selected option and text outside handler
         new_stato_lavorazione = this.value;
     });
-     $('#checkbox_email_self').on('change', function () {//retrieve click on check box mail
 
-       if(($('#checkbox_email_self').prop('checked'))){// se invio mail posso scrivere il testo
-         $("#msgself").prop("disabled", false);
-       }else{// se non invio mail il testo è bloccato
-          $("#msgself").prop("disabled", "disabled");
-       }
+    $('#checkbox_email_self').on('change', function () {
+
+      if ($('#checkbox_email_self').prop('checked')) {
+          $("#msgself_wrapper").fadeIn();
+      } else {
+          $("#msgself_wrapper").fadeOut();
+      }
+
     });
-		$( "#dialog_selfcheck" ).dialog({
-			minHeight: 1,
-			width: "auto",
-			modal: "true",
-			show: "blind",
-			hide: "explode",
-			buttons: {
-				delete:{
-					text:'Modifica',
-					'class':'btn btn-danger delete-button',
-					click:function (event, ui) {
-            $("#dialog_selfcheck").css("background", "url("+'spinner.gif'+") center no-repeat");
-            var email=$('#checkbox_email_self').prop('checked');
-            var msgself=$('#msgself').val();
-            var new_text_lavorazione = $(this).find("option:selected").text();
-            $.ajax({
-              data: {'opt':'selfcheck','term':ref,'new_status':new_stato_lavorazione,'new_text':new_text_lavorazione,'email':email,'cust_mail':cust_mail, 'msgself':msgself,'id_anagra':id_anagra},
-              type: 'GET',
-              url: 'ajax_request.php',
-              success: function(output) {
-                 //alert('ho passato questi >> ref:'+ref+' new:'+new_stato_lavorazione+' email:'+email+' cust mail:'+cust_mail+' text:'+msgself);
-                 //alert(output);
-                window.location.replace("./report_booking.php?auxil=VOR");
-              }
+
+    // Pulsante per visualizzare l'immagine o il PDF
+    var imgButton = {
+        text: "Visualizza Immagine",
+        'class': 'btn btn-info',
+        click: function() {
+            // Crea un popup/modal per l'immagine o PDF
+            var imageModal = $("<div>").attr("id", "imageModal").css({
+                "position": "fixed",
+                "top": "50%",
+                "left": "50%",
+                "transform": "translate(-50%, -50%)",
+                "background": "#fff",
+                "padding": "20px",
+                "z-index": "9999",
+                "max-width": "90%",
+                "max-height": "90vh",
+                "overflow": "auto"
             });
-          }},
-        "Non cambiare": function() {
-          $(this).dialog("close");
-          $(this).dialog("destroy");
-				}
-			}
-		});
-		$("#dialog_selfcheck" ).dialog( "open" );
-	});
+
+            var fileExtension = imgPath.split('.').pop().toLowerCase(); // Estrai l'estensione del file
+            var closeButton = $("<button>").text("Chiudi").addClass("btn btn-danger").click(function() {
+                imageModal.remove();
+            });
+
+			if (imgPath === ""){
+				imageModal.append("<p>Il file non esiste.</p>");
+			}else if (fileExtension === 'jpg' || fileExtension === 'jpeg') {
+                // Se è un'immagine, mostriamo l'immagine
+                var imgElement = $("<img>").attr("src", imgPath).css({
+                    "max-width": "100%",
+                    "max-height": "80vh"
+                });
+                imageModal.append(imgElement);
+            } else if (fileExtension === 'pdf') {
+                // Se è un PDF, lo carichiamo in un iframe
+                var iframeElement = $("<iframe>").attr("src", imgPath).css({
+                    "width": "100%",
+                    "height": "80vh",
+                    "border": "none"
+                });
+                imageModal.append(iframeElement);
+            } else {
+                imageModal.append("<p>Tipo di file non supportato.</p>");
+            }
+
+            imageModal.append(closeButton);
+            $("body").append(imageModal);
+        }
+    };
+
+    // Aggiungi il pulsante 'Visualizza Immagine' insieme agli altri pulsanti nel dialogo
+    $( "#dialog_selfcheck" ).dialog({
+        minHeight: 1,
+        width: "auto",
+        modal: "true",
+        show: "blind",
+        hide: "explode",
+        buttons: {
+            delete: {
+                text: 'Modifica',
+                'class': 'btn btn-danger delete-button',
+                click: function (event, ui) {
+                    $("#dialog_selfcheck").css("background", "url('spinner.gif') center no-repeat");
+                    var email = $('#checkbox_email_self').prop('checked');
+                    var msgself = $('#msgself').val();
+                    var new_text_lavorazione = $(this).find("option:selected").text();
+
+                    $.ajax({
+                        data: {'opt': 'selfcheck', 'term': ref, 'new_status': new_stato_lavorazione, 'new_text': new_text_lavorazione, 'email': email, 'cust_mail': cust_mail, 'msgself': msgself, 'id_anagra': id_anagra},
+                        type: 'GET',
+                        url: 'ajax_request.php',
+                        success: function(output) {
+                            window.location.replace("./report_booking.php?auxil=VOR");
+                        }
+                    });
+                }
+            },
+            "Non cambiare": function() {
+                $(this).dialog("close");
+                $(this).dialog("destroy");
+            },
+            // Aggiungi il pulsante 'Visualizza Immagine' nel dialogo
+            "Visualizza Immagine": imgButton
+        }
+    });
+
+    $("#dialog_selfcheck").dialog("open");
+});
+
+
 
 });
 
 
-function printPdf(urlPrintDoc){
-  //alert(urlPrintDoc);
-	$(function(){
-		$('#framePdf').attr('src',urlPrintDoc);
-		$('#framePdf').css({'height': '100%'});
-		$('.framePdf').css({'display': 'block','width': '90%', 'height': '80%', 'z-index':'2000'});
-		$('#closePdf').on( "click", function() {
-			$('.framePdf').css({'display': 'none'}); $('#framePdf').attr('src','../../library/images/wait_spinner.html');
-		});
-	});
-};
+let mainPdfUrl = null;
+let signaturePdfUrl = null;
+
+function printPdf(urlPrintDoc, urlPdfFirma = null) {
+  mainPdfUrl = urlPrintDoc;
+  signaturePdfUrl = urlPdfFirma;
+
+  // Mostra PDF principale
+  $('#framePdf').attr('src', mainPdfUrl);
+  $('#framePdf').css({ height: '100%' });
+  $('.framePdf').css({ display: 'block', width: '90%', height: '80%', 'z-index': '2000' });
+
+  // Gestione pulsanti
+  if (mainPdfUrl.includes('stampa_contratto.php') && signaturePdfUrl) {
+    $('#viewSignaturePdf').show();
+  } else {
+    $('#viewSignaturePdf').hide();
+  }
+
+  $('#viewMainPdf').hide(); // all'inizio si vede il contratto
+
+  // Pulsante chiusura
+  $('#closePdf').off('click').on('click', function () {
+    $('.framePdf').css({ display: 'none' });
+    $('#framePdf').attr('src', '../../library/images/wait_spinner.html');
+  });
+
+  // Pulsante per vedere PDF della firma
+  $('#viewSignaturePdf').off('click').on('click', function () {
+    if (signaturePdfUrl) {
+      $('#framePdf').attr('src', signaturePdfUrl);
+      $('#viewMainPdf').show();          // mostra "torna al contratto"
+      $('#viewSignaturePdf').hide();     // nasconde "firma"
+    }
+  });
+
+  // Pulsante per tornare al contratto
+  $('#viewMainPdf').off('click').on('click', function () {
+    $('#framePdf').attr('src', mainPdfUrl);
+    $('#viewSignaturePdf').show();       // mostra "firma"
+    $('#viewMainPdf').hide();            // nasconde "torna"
+  });
+}
 </script>
 <div align="center" class="FacetFormHeaderFont"><?php echo $script_transl['title_value'][substr($tipo,0,2).'R']; ?></div>
 <?php
@@ -1111,12 +1283,30 @@ $ts->output_navbar();
   </div>
   <iframe id="frame_email"  style="height: 90%; width: 100%" src=""> </iframe>
 </div>
-<div class="framePdf panel panel-success" style="display: none; position: fixed; left: 5%; top: 10px">
+<div class="framePdf panel panel-success" style="display: none; position: fixed; left: 5%; top: 10px;">
   <div class="col-lg-12">
-    <div class="col-xs-11"><h4><?php echo $script_transl['print'];; ?></h4></div>
-    <div class="col-xs-1"><h4><button type="button" id="closePdf"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
+    <div class="col-xs-10">
+      <h4><?php echo $script_transl['print']; ?></h4>
+    </div>
+    <div class="col-xs-2 text-right">
+      <!-- Pulsante "Firma" -->
+      <button type="button" id="viewSignaturePdf" style="display: none;" title="Visualizza PDF con firma" class="btn btn-xs btn-info">
+        ✍️ Firma
+      </button>
+
+      <!-- Pulsante "Torna al contratto" -->
+      <button type="button" id="viewMainPdf" style="display: none;" title="Torna al contratto" class="btn btn-xs btn-default">
+        ↩️ Torna
+      </button>
+
+      <!-- Pulsante chiusura -->
+      <button type="button" id="closePdf" class="btn btn-xs btn-danger" title="Chiudi">
+        <i class="glyphicon glyphicon-remove"></i>
+      </button>
+    </div>
   </div>
-  <iframe id="framePdf"  style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
+
+  <iframe id="framePdf" style="height: 100%; width: 100%" src="../../library/images/wait_spinner.html"></iframe>
 </div>
 <input type="hidden" name="info" value="none" />
 <div style="display:none" id="dialog_delete" title="Conferma eliminazione">
@@ -1180,6 +1370,9 @@ $ts->output_navbar();
     <div  id="feedback_email">
     invia email richiesta recensione <input id="checkbox_email_inout"  type="checkbox" name="checkbox_email_inout" value="0" >
     </div>
+    <div  id="give_point">
+    Attribuisci i punti <input id="checkbox_give_point"  type="checkbox" name="checkbox_give_point" value="1" checked>
+    </div>
     <?php } ?>
 </div>
 <div style="display:none" id="dialog_feedback" title="Recensione lasciata dal cliente">
@@ -1214,10 +1407,11 @@ $ts->output_navbar();
         <option value="3">Rifiutato</option>
     </select>
     <span id="date_stato_check"></span>
-    <p><br>Invia messaggio: <input type="text" name="msgself" id="msgself" value=""></p>
-    <?php if (isset($vacation_url_user) && strlen($vacation_url_user)>4){ ?>
+
+    <?php if (isset($vacation_url_user) && strlen($vacation_url_user)>4){ // abilito l'invio di e-mail solo se ho un sito web con pagina utente impostato?>
     <div  id="selfcheck_email">
     invia email <input id="checkbox_email_self"  type="checkbox" name="checkbox_email_self" value="0" >
+    <p id="msgself_wrapper" style="display: none;">Messaggio da inviare: <input type="text" name="msgself" id="msgself" value="" ></p>
     </div>
     <?php } ?>
 </div>
@@ -1692,11 +1886,38 @@ $ts->output_navbar();
                           <?php
 
                           if ($stato_btn_selfcheck!==""){// se c'è il self checkin inserisco icona
-                           ?>
-                          <a title="<?php echo $title_selfcheck; ?>" class="btn btn-xs <?php echo $stato_btn_selfcheck; ?> dialog_selfcheck" ref="<?php echo $r['id_tes']; ?>" status_now="<?php echo $title_selfcheck; ?>" proself="<?php echo $data['vacation_rental']['self_checkin_status']; ?>" cust_mail="<?php echo $r['base_mail']; ?>" numdoc="<?php echo $r['numdoc']; ?>" id_anagra="<?php echo $r['id']; ?>" msgself="<?php echo $data['vacation_rental']['self_checkin_status_msg']; ?>">
-                            <i class="glyphicon glyphicon-ok-circle"></i>
-                          </a>
-                          <?php
+                            $prefix = 'self_'.$r['id_tes'];
+                            $imagePath = getSelfieImagePath($prefix);
+if (!empty($imagePath) && is_string($imagePath)) {
+                            // Percorso relativo da passare al proxy: senza radix, sempre riferito alla root URL
+                            $relativeForProxy = ltrim($imagePath, '/');
+                            if (strpos($relativeForProxy, 'modules/vacation_rental/') !== 0) {
+                                $relativeForProxy = 'modules/vacation_rental/' . $relativeForProxy;
+                            }
+
+                            // Se siamo in localhost, aggiungiamo radix
+                            if ($_SERVER['HTTP_HOST'] === 'localhost') {
+                                $proxyUrl = '/' . $GLOBALS['radix'] . '/modules/vacation_rental/image_proxy.php?image=' . urlencode($relativeForProxy);
+                            } else {
+                                $proxyUrl = '/modules/vacation_rental/image_proxy.php?image=' . urlencode($relativeForProxy);
+                            }
+}else{
+  $proxyUrl=""; // è stato cancellato al check-out
+}
+                            ?>
+                            <a title="<?php echo $title_selfcheck; ?>"
+                               class="btn btn-xs <?php echo $stato_btn_selfcheck; ?> dialog_selfcheck"
+                               ref="<?php echo $r['id_tes']; ?>"
+                               status_now="<?php echo $title_selfcheck; ?>"
+                               proself="<?php echo $data['vacation_rental']['self_checkin_status']; ?>"
+                               cust_mail="<?php echo $r['base_mail']; ?>"
+                               numdoc="<?php echo $r['numdoc']; ?>"
+                               id_anagra="<?php echo $r['id']; ?>"
+                               msgself="<?php echo $data['vacation_rental']['self_checkin_status_msg']; ?>"
+                               data-img-path="<?php echo $proxyUrl; ?>">  <!-- Aggiungi il percorso dell'immagine -->
+                               <i class="glyphicon glyphicon-ok-circle"></i>
+                            </a>
+                            <?php
                           }
 
                           if (isset($r['text'])){// se c'è una recensione inserisco icona
@@ -1708,11 +1929,11 @@ $ts->output_navbar();
                           }
 
                           if ($polservice && isset($r['status_webservice']) && intval($r['status_webservice'])<2 && $check_inout=="IN"){// se il check-in è fatto, il webservice attivato ma non è stato ancora inviato il file alla Polizia di Stato
-                           ?>
-						   <a href="tour_mov.php" style="text-decoration: none;">
-                           <div title="ATTENZIONE: non sono ancora state inviate le schedine alloggiati alla Polizia di Stato" class="sirena" style="font-size: 4rem; opacity: 1;">🚨</div>
-						   </a>
-                          <?php
+                            ?>
+                            <a href="tour_mov.php" style="text-decoration: none;">
+                              <div title="ATTENZIONE: non sono ancora state inviate le schedine alloggiati alla Polizia di Stato" class="sirena" style="font-size: 4rem; opacity: 1;">🚨</div>
+                            </a>
+                            <?php
                           }
 
                         }
@@ -1733,18 +1954,16 @@ $ts->output_navbar();
               $PDFurl = (dirname(__DIR__, 2).'/data/' . 'files/' . $admin_aziend['company_id'] .'/pdf_Lease/'.$r['id_tes'].'.pdf');
               if ( $tipo !== "VPR" && file_exists($PDFurl)) {
 
-                  echo "&nbsp;<a class=\"btn btn-xs btn-default btn-stampa\"";
-                  // vedo se è presente un file di template adatto alla stampa su carta già intestata
-                  if($enable_lh_print_dialog>0 && withoutLetterHeadTemplate($r['tipdoc'])){
-                    echo ' onclick="choice_template(\''.$modulo.'\');" title="Stampa contratto"';
-                  }else{
-                    echo " style=\"cursor:pointer;\" onclick=\"printPdf('stampa_contratto.php?id_tes=". $r['id_tes'] . "&id_ag=". $r['id_agent'] ."')\"";
+                  $mainPdfUrl = "stampa_contratto.php?id_tes=" . $r['id_tes'] . "&id_ag=" . $r['id_agent'];
+                  $firmaPdfUrl = "stampa_firma.php?url=./files/". $admin_aziend['company_id'] ."/pdf_Lease/". intval ($r['id_tes']) ."_firma.pdf";
+                  echo '<a class="btn btn-xs btn-default btn-stampa"';
+                  if ($enable_lh_print_dialog > 0 && withoutLetterHeadTemplate($r['tipdoc'])) {
+                      echo ' onclick="choice_template(\'' . $modulo . '\');" title="Stampa contratto"';
+                  } else {
+                      echo ' style="cursor:pointer;" onclick="printPdf(\'' . $mainPdfUrl . '\', \'' . $firmaPdfUrl . '\')"';
                   }
-                  echo "><i class=\"glyphicon glyphicon-book\" title=\"Stampa contratto PDF\"></i></a>";
-
+                  echo '><i class="glyphicon glyphicon-book" title="Stampa contratto PDF"></i></a>';
                   mostra_addendum($r['id_tes'],$admin_aziend['company_id']);// se è il caso mostro addendum
-
-
 
               }
               echo "</td>";
@@ -1879,6 +2098,18 @@ $(document).ready(function() {
       visibile = !visibile;
       sirene.css('opacity', visibile ? '1' : '0.05');
     }, 800);
+
+    // Aggiunge automaticamente la classe "dropup" se il bottone è troppo vicino al fondo
+    $('.dropdown').on('show.bs.dropdown', function () {
+        var $dropdown = $(this).find('.dropdown-menu');
+        var dropdownBottom = $(this).offset().top + $(this).outerHeight() + $dropdown.outerHeight();
+        var windowBottom = $(window).scrollTop() + $(window).height();
+        if (dropdownBottom > windowBottom) {
+            $(this).addClass('dropup');
+        } else {
+            $(this).removeClass('dropup');
+        }
+    });
 
   });
 </script>

@@ -489,10 +489,13 @@ $strScript = array(
 			'text_missing' => 'Falta el texto de la reseña o es demasiado corto',
 			'err_codfis' => 'Error en el código fiscal, corregir e intentar de nuevo',
 			'coupon_error' => 'Código de descuento no aplicado porque no es válido',
-			'cliente_anonimo' => 'Este presupuesto es para un usuario anónimo, no puedes usarlo para reservar. Solicita un presupuesto con tus datos o haz una reserva en el sitio web'
+			'cliente_anonimo' => 'Este presupuesto es para un usuario anónimo, no puedes usarlo para reservar. Solicita un presupuesto con tus datos o haz una reserva en el sitio web',
+      'accesso_negato' => 'Accesso negato',
+      'errore_proforma' => 'ERRORE nella generazione contratto proforma'
         ),
         'war' => array(
-            'ok' => 'ok riempitura array'
+            'ok' => 'ok riempitura array',
+            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
 		),
     'print'=>'Imprimir',
     'minors' => 'Menores',
@@ -503,7 +506,8 @@ $strScript = array(
     'booking_req' => 'Solicitud de modificación de reserva',
     'user' => 'Usuario',
     'declaration' => 'Declaro que soy el titular de la reserva y que solicito irrevocablemente su <strong>modificación / cancelación / sustitución</strong> según lo indicado anteriormente. Soy consciente de que esta solicitud tiene valor vinculante conforme al art. 1326 del Código Civil italiano y modificará el contrato correspondiente que firmé en su momento, y que puede implicar costes o penalizaciones según las cláusulas contractuales. Esta es una firma electrónica conforme al Reglamento (UE) n.º 910/2014 eIDAS.',
-    'body1' => 'Estimado cliente,<br><br>hemos recibido su solicitud de',
+    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
+	'body1' => 'Estimado cliente,<br><br>hemos recibido su solicitud de',
     'body2' => 'para la reserva ID:',
     'body3' => 'Adjunto encontrará una copia en PDF con los detalles.<br><br>Atentamente,<br>',
     'sent_req' => 'Solicitud enviada correctamente. Se le ha enviado una copia a',
@@ -921,7 +925,21 @@ $strScript = array(
         'text17' => '<p>Ahora, si lo deseas, puedes realizar el pago del saldo de inmediato, o hacerlo al llegar al alojamiento.</p>',
         'text18' => '<p>Para los pagos, añadir extras o gestionar tu cuenta, solo tienes que acceder al área de usuario en la web y abrir tu reserva.</p>',
         'stay_from' => 'Estancia desde',
-        'to' => 'hasta'
+        'to' => 'hasta',
+        'self_title' => "Solicitud de acceso autónomo (self check-in) al alojamiento",
+        'self_intr' => "<li>El procedimiento de solicitud del self check-in se realizará a través de una cámara web con la que se deberá tomar una selfie como parte del proceso de identificación.</li>
+        <li>Posteriormente, se deberán proporcionar datos y copias de documentos de identidad válidos y no caducados de todos los huéspedes, incluidos los recién nacidos. NOTA IMPORTANTE: la tarjeta sanitaria/código fiscal NO es un documento de identidad.</li>
+        <li>Para proceder debes suscribir el anexo al contrato de arrendamiento que firmaste en su momento y completar por adelantado todos los pagos: saldo del alquiler y depósito de garantía.</li>
+        <li>Al completarse lo anterior, un administrador verificará la corrección y, en caso positivo, autorizará el self check-in.</li>",
+        'addendum_title' => "Anexo al contrato de arrendamiento n",
+        'the_undersigned' => "El abajo firmante",
+        'self_ask' => "solicita poder acceder al alojamiento de forma autónoma ya que su hora prevista de llegada no entra dentro del horario permitido. Por lo tanto, una vez recibida la autorización, se compromete a verificar el alojamiento en el momento del acceso autónomo y a comunicar de manera inmediata, <b>dentro de 2 horas</b>, por correo electrónico/whatsapp/sms con fotografías y texto descriptivo, cualquier posible problema encontrado respecto a la limpieza o al estado del inmueble; transcurrido dicho plazo, acepta y confirma tácitamente que el estado del alojamiento es el descrito en el contrato de arrendamiento, en buen estado de limpieza y mantenimiento y con todas las dotaciones y extras acordados.</p>
+        <p>El abajo firmante acepta que para establecer la hora exacta de acceso al alojamiento se utilizará el registro generado automáticamente por los dispositivos electrónicos usados para el acceso autónomo (caja de llaves/cerradura electrónica).",
+        'self_ask2' => "Finalmente, declara ser el titular del contrato de arrendamiento antes mencionado y ser consciente de que esta solicitud tiene valor vinculante según el art. 1326 c.c., únicamente después del envío correcto de los documentos y pagos requeridos y previa aprobación del propietario. <br>La presente manifestación de voluntad se firma mediante procedimiento electrónico simple conforme al Reglamento (UE) n.º 910/2014 (eIDAS). El firmante ha sido identificado mediante autenticación con acceso reservado a través de credenciales personales. Los datos relativos a la firma (IP, timestamp, identificador de usuario, contenido firmado) se conservan de manera segura con fines legales y probatorios.</label>",
+        'check_to_sign' => "Para confirmar la solicitud, es necesario marcar la casilla anterior. Esta acción tiene valor de aceptación contractual según el art. 1326 c.c.",
+        'self_gdpr' => "Los datos de la firma se conservan de forma segura con fines legales y de seguimiento, de conformidad con el GDPR.",
+        'sign_by'=>'Online signed by',
+        'auth_method' =>"authentication method."
     )
 );
 ?>

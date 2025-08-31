@@ -51,9 +51,9 @@ function iCalDecoder($file) {
       $icalarray[] = $majorarray;
       unset($majorarray);
     }
-    if (isset($icalarray)){
-      return $icalarray;
-    }
+
+    return !empty($icalarray) ? $icalarray : false;
+
 }
 
 // controlla se il numero carta di credito è corretto
@@ -334,7 +334,7 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
 	$on="";
     if ($tourist_tax == TRUE && $add_extra==FALSE){// se richiesta la tassa turistica ma esclusi gli extra
       $where .= " AND (codart LIKE 'TASSA-TURISTICA%' OR (".$tableart.".custom_field REGEXP 'accommodation_type'))";
-      
+
     }
     if ($add_extra==FALSE && $tourist_tax == FALSE){// escludo gli extra ma anche la tassa turistica
       $where .= " AND (".$tableart.".custom_field REGEXP 'accommodation_type') AND codart NOT LIKE 'TASSA-TURISTICA%'";
@@ -342,16 +342,16 @@ function get_totalprice_booking($tesbro,$tourist_tax=TRUE,$vat=FALSE,$preeminent
     }
     if ($tourist_tax == TRUE && $add_extra==TRUE){// se richiesta la tassa turistica e gli extra
       $where .= "";
-      
+
     }
      if ($tourist_tax == FALSE && $add_extra==TRUE){// se richiesti solo gli extra
       $where .= " AND codart NOT LIKE 'TASSA-TURISTICA%'";
       //$on="AND ".$tablerig.".codart NOT LIKE 'TASSA-TURISTICA'";
     }
 	$where .=")";
-	
+
     if ($vat==FALSE){// devo restituire l'imponibile
-	
+
      // 3/7/25 corretta perché non prendeva lo sconto // $sql = "SELECT SUM(quanti * prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codart = ".$tableart.".codice AND ".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
 	 $sql = "SELECT SUM(".$tablerig.".quanti * ".$tablerig.".prelis) AS totalprice FROM ".$tablerig." LEFT JOIN ".$tableart." ON (".$tablerig.".codart = ".$tableart.".codice) OR (".$tablerig.".codice_fornitore = ".$tableart.".codice) ".$on." ".$where;
 	  //echo $sql;
@@ -535,7 +535,7 @@ function get_datasets($startprom,$endprom){// STAT graph
     //echo $sql;
     $result = mysqli_query($link, $sql);
 	if ($result->num_rows>0){
-		
+
 		foreach($result as $row){ // per ogni evento dell'alloggio
 		  //echo "<pre>evento alloggio:",print_r($row),"</pre>";
 		  $datediff = strtotime($row['end'])-strtotime($row['start']);
@@ -823,8 +823,41 @@ function check_availability($start,$end,$house_code, $open_from="", $open_to="")
   return $unavailable;
 }
 
-function set_imap($id_anagra){// restituisce le impostazioni imap tranne la password
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+use Ddeboer\Imap\Server;
+function set_mailer() {
+  global $gTables;  // Accedi alla variabile globale gTables
+
+  // Impostazioni per PHPMailer
+  $host = gaz_dbi_get_row($gTables['company_config'], 'var', 'smtp_server')['val'];
+  $usr = gaz_dbi_get_row($gTables['company_config'], 'var', 'smtp_user')['val'];
+
+  $rsdec = gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val), '".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'smtp_password'");
+  $rdec = gaz_dbi_fetch_row($rsdec);
+  $psw = $rdec ? $rdec[0] : '';
+
+  $port = gaz_dbi_get_row($gTables['company_config'], 'var', 'smtp_port')['val'];
+
+  // Imposta l'oggetto PHPMailer
+  $mail = new PHPMailer(true);
+  $mail->CharSet = 'UTF-8';
+  $mail->isSMTP();  // Usa SMTP
+  $mail->Host = $host;  // Server SMTP
+  $mail->SMTPAuth = true;  // Abilita l'autenticazione SMTP
+  $mail->Username = $usr;  // Nome utente SMTP
+  $mail->Password = $psw;  // Password SMTP
+  $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  // TLS/SSL
+  $mail->Port = $port;  // Porta SMTP
+  $mail->Timeout = 10;  // Timeout in secondi
+
+  return $mail;  // Restituisce l'oggetto PHPMailer
+}
+
+function set_imap($id_anagra){// restituisce le impostazioni imap in un array
   global $genTables,$azTables,$link,$IDaz;
+  include("./manual_settings.php");
   if (intval($id_anagra)>0){
     $sql = "SELECT ".$genTables."anagra.custom_field, codice FROM ".$genTables."anagra"." LEFT JOIN ".$azTables."clfoco"." ON ".$azTables."clfoco".".id_anagra = ".$id_anagra." WHERE id = ".$id_anagra." AND codice LIKE '2%' LIMIT 1";
     if ($result = mysqli_query($link, $sql)) { // prendo il custom field del proprietario
@@ -886,6 +919,7 @@ function set_imap($id_anagra){// restituisce le impostazioni imap tranne la pass
                   $val = mysqli_fetch_assoc($result);
                   $imap['imap_secure']=$val['val'];
                 }
+                $imap['imap_pwr']=$imap_pwr;
                 return $imap;
               }
               }
@@ -915,7 +949,6 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
   $accommodations['aliquo']=$aliquo;
   $startw=$start;
   while (strtotime($startw) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
-
     //Calcolo del prezzo locazione
     $what = "price, minstay";
     $where = "start <= '". $startw ."' AND end >= '". $startw."' AND house_code ='".mysqli_real_escape_string($link,$housecode)."'";
@@ -932,6 +965,7 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
         //break;
       }
     }
+
     // NB: il prezzo mostrato al pubblico deve essere sempre IVA compresa
     if (isset($prezzo)){// se c'è un prezzo nel calendario lo uso
       if ($ivac=="si"){
@@ -948,7 +982,6 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
     }
     $startw = date ("Y-m-d", strtotime("+1 days", strtotime($startw)));// aumento di un giorno il ciclo
   }
-
   // Se ho trovato prezzo disponibile procedo con il calcolo sconti
   $accommodations['fixquote'] = floatval($in_fixquote)+((floatval($in_fixquote)*floatval($aliquo))/100);// inizializzo eventuale quota fissa e aggiungo IVA
   $accommodations['price'] += $accommodations['fixquote'];
@@ -990,5 +1023,45 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
     }
   }
   return $accommodations;
+}
+
+function delete_id_cards($tesbro) {
+    // Percorso della cartella principale
+    $directory = __DIR__ . DIRECTORY_SEPARATOR . 'self_checkin' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $tesbro;
+    $keepFile = 'data.json';
+
+    // Se la cartella dei documenti esiste
+    if (is_dir($directory)) {
+        $files = scandir($directory);
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+
+            $filePath = $directory . DIRECTORY_SEPARATOR . $file;
+
+            if (is_file($filePath) && $file !== $keepFile) {
+                @unlink($filePath); // @ sopprime eventuali warning
+            }
+        }
+    }
+
+    // Cerca la cartella selfie (es. self_12345_xyz)
+    $pattern = __DIR__ . DIRECTORY_SEPARATOR . 'self_checkin' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'self_' . $tesbro . '*';
+    $matchingFolders = glob($pattern, GLOB_ONLYDIR);
+    // Se esiste almeno una cartella che corrisponde al pattern, cancellala
+    if (!empty($matchingFolders)) {
+        $selfieDir = $matchingFolders[0]; // Ne esiste solo una, per forza in quanto tesbro è univoco
+        $files = scandir($selfieDir);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+            $filePath = $selfieDir . DIRECTORY_SEPARATOR . $file;
+            if (is_file($filePath)) {
+                @unlink($filePath);
+            }
+        }
+        @rmdir($selfieDir); // Cancella la cartella una volta svuotata
+    }
 }
 ?>

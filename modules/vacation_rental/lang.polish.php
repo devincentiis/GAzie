@@ -489,10 +489,13 @@ $strScript = array(
 			'text_missing' => 'Brak tekstu recenzji lub jest on zbyt krótki',
 			'err_codfis' => 'Błąd w kodzie podatkowym, popraw i spróbuj ponownie',
 			'coupon_error' => 'Nie zastosowano kodu rabatowego, ponieważ jest on nieprawidłowy',
-			'cliente_anonimo' => 'Ta wycena jest przeznaczona dla anonimowego użytkownika, nie możesz jej użyć do rezerwacji. Poproś o wycenę ze swoimi danymi lub dokonaj rezerwacji na stronie internetowej'
+			'cliente_anonimo' => 'Ta wycena jest przeznaczona dla anonimowego użytkownika, nie możesz jej użyć do rezerwacji. Poproś o wycenę ze swoimi danymi lub dokonaj rezerwacji na stronie internetowej',
+      'accesso_negato' => 'Accesso negato',
+      'errore_proforma' => 'ERRORE nella generazione contratto proforma'
         ),
         'war' => array(
-            'ok' => 'ok riempitura array'
+            'ok' => 'ok riempitura array',
+            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
 		),
     'print'=>'Druk',
     'minors' => 'Dzieci',
@@ -503,7 +506,8 @@ $strScript = array(
     'booking_req' => 'Wniosek o zmianę rezerwacji',
     'user' => 'Użytkownik',
     'declaration' => 'Oświadczam, że jestem właścicielem rezerwacji i nieodwołalnie wnioskuję o jej <strong>zmianę / anulowanie / zastąpienie</strong> zgodnie z powyższym. Mam świadomość, że niniejszy wniosek ma charakter wiążący zgodnie z art. 1326 włoskiego kodeksu cywilnego i zmieni odpowiednią umowę, którą podpisałem w swoim czasie, oraz że może wiązać się z kosztami lub karami zgodnie z postanowieniami umowy. Jest to podpis elektroniczny zgodny z rozporządzeniem (UE) nr 910/2014 eIDAS.',
-    'body1' => 'Szanowny kliencie,<br><br>otrzymaliśmy Twoje zapytanie o',
+    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
+	'body1' => 'Szanowny kliencie,<br><br>otrzymaliśmy Twoje zapytanie o',
     'body2' => 'dla rezerwacji ID:',
     'body3' => 'W załączniku znajduje się kopia PDF z szczegółami.<br><br>Z poważaniem,<br>',
     'sent_req' => 'Wniosek został pomyślnie wysłany. Kopia została wysłana na adres',
@@ -923,7 +927,21 @@ $strScript = array(
         'text17' => '<p>Teraz, jeśli chcesz, możesz dokonać płatności końcowej, lub zrobić to po przybyciu do obiektu.</p>',
         'text18' => '<p>Aby dokonać płatności, dodać ewentualne dodatki i zarządzać kontem, wystarczy zalogować się do strefy użytkownika na stronie i otworzyć rezerwację.</p>',
         'stay_from' => 'Pobyt od',
-        'to' => 'do'
+        'to' => 'do',
+        'self_title' => "Wniosek o autonomiczny dostęp (self check-in) do zakwaterowania",
+        'self_intr' => "<li>Procedura wniosku o self check-in odbędzie się za pośrednictwem kamery internetowej, za pomocą której należy wykonać selfie w ramach procesu identyfikacji.</li>
+        <li>Następnie należy dostarczyć dane i kopie ważnych i niewygasłych dokumentów tożsamości wszystkich gości, w tym noworodków. WAŻNA UWAGA: karta zdrowia/kod podatkowy NIE jest dokumentem tożsamości.</li>
+        <li>Aby kontynuować, należy podpisać aneks do umowy najmu, którą wcześniej podpisano, oraz uiścić z góry wszystkie płatności: saldo czynszu i kaucję zabezpieczającą.</li>
+        <li>Po zakończeniu powyższego administrator sprawdzi poprawność, a w przypadku pozytywnym zatwierdzi self check-in.</li>",
+        'addendum_title' => "Aneks do umowy najmu nr",
+        'the_undersigned' => "Niżej podpisany",
+        'self_ask' => "wnioskuje o możliwość samodzielnego dostępu do zakwaterowania, ponieważ przewidywana godzina przyjazdu nie mieści się w dozwolonym przedziale czasowym. Dlatego też, po otrzymaniu zgody, zobowiązuje się do sprawdzenia zakwaterowania w momencie autonomicznego dostępu i do niezwłocznego zgłoszenia, <b>w ciągu 2 godzin</b>, e-mailem/whatsapp/sms wraz ze zdjęciami i opisem, wszelkich problemów dotyczących czystości lub stanu nieruchomości; po upływie tego terminu milcząco akceptuje i potwierdza, że stan zakwaterowania jest zgodny z opisem w umowie najmu, w dobrym stanie czystości i utrzymania oraz ze wszystkimi uzgodnionymi wyposażeniami i dodatkami.</p>
+        <p>Niżej podpisany akceptuje, że w celu ustalenia dokładnej godziny dostępu do zakwaterowania zostanie wykorzystany rejestr automatycznie zapisany przez urządzenia elektroniczne używane do autonomicznego dostępu (skrzynka na klucze/zamek elektroniczny).",
+        'self_ask2' => "Na koniec oświadcza, że jest posiadaczem wyżej wymienionej umowy najmu i że jest świadomy, iż niniejszy wniosek ma moc wiążącą zgodnie z art. 1326 k.c., wyłącznie po prawidłowym przesłaniu wymaganych dokumentów i płatności oraz za zgodą właściciela. <br>Niniejsze oświadczenie woli jest podpisywane w ramach prostej procedury elektronicznej zgodnie z Rozporządzeniem (UE) nr 910/2014 (eIDAS). Podpisujący został zidentyfikowany poprzez uwierzytelnienie z ograniczonym dostępem przy użyciu danych osobowych. Dane dotyczące podpisu (IP, znacznik czasu, identyfikator użytkownika, podpisana treść) są bezpiecznie przechowywane do celów prawnych i dowodowych.</label>",
+        'check_to_sign' => "Aby potwierdzić wniosek, należy zaznaczyć powyższe pole. Ta czynność ma moc akceptacji umowy zgodnie z art. 1326 k.c.",
+        'self_gdpr' => "Dane podpisu są bezpiecznie przechowywane do celów prawnych i śledzenia, zgodnie z RODO.",
+        'sign_by'=>'Online signed by',
+        'auth_method' =>"authentication method."
     )
 );
 ?>

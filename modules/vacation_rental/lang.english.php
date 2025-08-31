@@ -722,10 +722,12 @@ $strScript = array(
 			'err_codfis' => 'Tax code error: correct it and try again',
 			'coupon_error' => 'Discount code not applied because it is invalid',
 			'cliente_anonimo' => 'This quote is for an anonymous user, you cannot use it to book. Request a quote with your details or make a reservation on the website',
-       'accesso_negato' => 'Denied access'
+      'accesso_negato' => 'Denied access',
+      'errore_proforma' => 'ERRORE nella generazione contratto proforma'
         ),
         'war' => array(
-            'ok' => 'ok riempitura array'
+            'ok' => 'ok riempitura array',
+            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
 		),
     'print'=>'Print',
     'minors' => 'Minors',
@@ -736,7 +738,9 @@ $strScript = array(
     'booking_req' => 'Booking modification request',
     'user' => 'User',
     'declaration' => 'I declare that I am the holder of the booking and that I irrevocably request its <strong>modification / cancellation / replacement</strong> as indicated above. I acknowledge that this request is legally binding pursuant to Art. 1326 of the Italian Civil Code and will amend the related contract previously signed by me, and that it may involve costs or penalties as per the contractual clauses. This is an electronic signature in compliance with Regulation (EU) No. 910/2014 eIDAS.',
-    'body2' => 'for booking ID:',
+    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
+    'body1' => 'Gentile cliente,<br><br>abbiamo ricevuto la sua richiesta di',
+	'body2' => 'for booking ID:',
     'body3' => 'Attached you will find a PDF copy with the details.<br><br>Best regards,<br>',
     'sent_req' => 'Request successfully sent. A copy has been sent to you at',
     'sent_req2' => 'An administrator will review your request as soon as possible, and you will receive a notification.',
@@ -1113,7 +1117,20 @@ $strScript = array(
         'text17' => '<p>Now, if you wish, you can also pay the remaining balance immediately, or do it upon arrival at the property.</p>',
         'text18' => '<p>For payments, adding extras, and everything related to your account, simply log in to the user area of the website and open your booking.</p>',
         'stay_from' => 'Stay from',
-        'to' => 'to'
+        'to' => 'to','self_title' => "Request for autonomous access (self check-in) to the accommodation",
+        'self_intr' => "<li>The self check-in request procedure will take place through a webcam, with which you will need to take a selfie as part of the identification process.</li>
+        <li>Subsequently, valid and non-expired identity documents and copies must be provided for all guests, including newborns. IMPORTANT NOTE: the health card/tax code is NOT an identity document.</li>
+        <li>To proceed, you must sign the addendum to the lease contract you previously signed and complete all payments in advance: rental balance and security deposit.</li>
+        <li>Once this is completed, an administrator will review the correctness and, if positive, will authorize the self check-in.</li>",
+        'addendum_title' => "Addendum to lease contract n",
+        'the_undersigned' => "The undersigned",
+        'self_ask' => "requests to be able to access the accommodation independently as the expected arrival time does not fall within the permitted time frame. Therefore, once authorization is received, he/she undertakes to check the accommodation at the time of autonomous access and to promptly report, <b>within 2 hours</b>, via email/whatsapp/sms with photos and descriptive text, any possible problems found regarding the cleanliness or condition of the property; after this period, he/she tacitly accepts and confirms that the condition of the accommodation is as described in the lease contract, in good condition of cleanliness and maintenance and with all agreed equipment and extras.</p>
+        <p>The undersigned accepts that, in order to establish the exact time of access to the accommodation, the log automatically recorded by the electronic devices used for autonomous access (key box/electronic lock) will be used.",
+        'self_ask2' => "Finally, he/she declares to be the holder of the aforementioned lease contract and to be aware that this request has binding value pursuant to art. 1326 c.c., only after the correct submission of the requested documents and payments and subject to the owner's approval. <br>This declaration of intent is signed through a simple electronic procedure pursuant to Regulation (EU) No. 910/2014 (eIDAS). The signatory has been identified by authentication with restricted access using personal credentials. The data relating to the signature (IP, timestamp, user ID, signed content) are securely stored for legal and evidentiary purposes.</label>",
+        'check_to_sign' => "To confirm the request, it is necessary to tick the above box. This action has contractual acceptance value pursuant to art. 1326 c.c.",
+        'self_gdpr' => "Signature data are securely stored for legal and tracking purposes, in compliance with GDPR.",
+        'sign_by'=>'Online signed by',
+        'auth_method' =>"authentication method."
     )
 );
 ?>

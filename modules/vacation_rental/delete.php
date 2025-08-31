@@ -131,7 +131,7 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
         // Cancello i PDF della prenotazione e del contratto
         //unlink (DATA_DIR."files/".$admin_aziend['codice']."/pdf_BookingSummary/". $_POST['id_tes'] . ".pdf");
         @unlink (DATA_DIR."files/".$admin_aziend['codice']."/pdf_Lease/". $_POST['id_tes'] . ".pdf");
-		@unlink (dirname(__DIR__).'/vacation_rental/files/' . $admin_aziend['codice'] .'/pdf_Lease/'.$_POST['id_tes'].'.pdf');
+        array_map('unlink', array_filter(glob(dirname(__DIR__).'/vacation_rental/files/' . $admin_aziend['codice'] . '/pdf_Lease/' . intval($_POST['id_tes']) . '*.*'), 'is_file')); // cancello tutti i file che ganno id_tes come iniziale nel nome
 			}
 		break;
 		case "ical":
