@@ -131,7 +131,7 @@ function confirmemail(cod_partner,id_tes,genorder=false) {
 		modal: true,
 		show: "blind",
 		hide: "explode",
-		width: "auto",
+    minWidth:400,
 		buttons: {
 			Annulla: function() {
 				$(this).dialog('close');
@@ -349,7 +349,7 @@ function printPdf(urlPrintDoc){
 			$anagrafica = new Anagrafica();
 			//recupero le testate in base alle scelte impostate
       $result = gaz_dbi_dyn_query(cols_from($gTables['tesbro'],
-        "id_tes","tipdoc","clfoco","seziva","datemi","email","id_parent_doc","initra","numdoc","status") . ", " .
+        "id_tes","tipdoc","clfoco","seziva","datemi","email","id_parent_doc","initra","numdoc","status","custom_field") . ", " .
       cols_from($gTables['anagra'],
         "pec_email",
         "ragso1",
@@ -361,12 +361,27 @@ function printPdf(urlPrintDoc){
       $ts->getOffset(),
       $ts->getLimit());
       while ($r = gaz_dbi_fetch_array($result)) {
+        // controllo se è stata inviata la mail
+        $bool_mail = false;
+        if ($tes_custom_field = json_decode($r["custom_field"].'',true)){
+          if (!isset($tes_custom_field['email']['ord'])) {
+            $classe_mail = "btn-default";
+            $tilte_mail= "Mai inviata. Inviala a ".$r["e_mail"];
+          } else {
+            $classe_mail = "btn-success";
+            $tilte_mail="Ultimo invio: ".$tes_custom_field['email']['ord'];
+            $bool_mail = true;
+          }
+        } else {
+          $classe_mail = "btn-default";
+          $tilte_mail= "Mai inviata. Inviala a ".$r["e_mail"];
+        }
 				$linkstatus=false;
 				if ($r["tipdoc"] == 'APR') { // preventivo
 					$rs_parent = gaz_dbi_get_row($gTables["tesbro"],'id_parent_doc',$r['id_tes']);
 					$clastatus='info';
 					$status='Ordina';
-					if (strlen($r['email'])<8){
+					if (!$bool_mail){
 						$clastatus='warning';
 						$status='da inviare';
 					}
@@ -382,7 +397,7 @@ function printPdf(urlPrintDoc){
         } elseif ($r["tipdoc"] == 'AOR') {
 					$linkstatus='stampa_ordfor.php?id_tes='.$r['id_tes'];
 					$rs_parent = gaz_dbi_get_row($gTables["tesbro"],'id_tes',$r['id_parent_doc']);
-					if (strlen($r['email'])>8){
+					if ($bool_mail){
 						$clastatus='success';
 						$status='Inviato';
 					} else {
@@ -471,20 +486,7 @@ function printPdf(urlPrintDoc){
 				// colonna mail
 				echo '<td align="center">';
         if (!empty($r["e_mail"])) {
-          $gaz_custom_field = gaz_dbi_get_single_value( $gTables['tesbro'], 'custom_field', 'id_tes = '.$r['id_tes'] );
-          if (isset($gaz_custom_field) && $gaz_custom_data = json_decode($gaz_custom_field,true)){
-            if ( !isset($gaz_custom_data['email']['ord'])) {
-              $classe_mail = "btn-default";
-              $title= "Mai inviata. Inviala a ".$r["e_mail"];
-            } else {
-              $classe_mail = "btn-success";
-              $title="Ultimo invio: ".$gaz_custom_data['email']['ord'];
-            }
-          }else{
-            $classe_mail = "btn-default";
-            $title= "Mai inviata. Inviala a ".$r["e_mail"];
-          }
-          echo ' <a class="btn btn-xs btn-default btn-email ',$classe_mail,'" title="',$title,'" onclick="confirmemail(\''.$r["clfoco"].'\',\''.$r['id_tes'].'\',false);" id="doc'.$r["id_tes"].'"><i class="glyphicon glyphicon-envelope"></i></a>';
+          echo ' <a class="btn btn-xs btn-default btn-email ',$classe_mail,'" title="',$tilte_mail,'" onclick="confirmemail(\''.$r["clfoco"].'\',\''.$r['id_tes'].'\',false);" id="doc'.$r["id_tes"].'"><i class="glyphicon glyphicon-envelope"></i></a>';
         } else {
 					echo '<a title="Non hai memorizzato l\'email per questo fornitore, inseriscila ora" target="_blank" href="admin_fornit.php?codice='.substr($r["clfoco"],3).'&Update"><i class="glyphicon glyphicon-edit"></i></a>';
 				}

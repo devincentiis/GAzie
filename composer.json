@@ -10,6 +10,7 @@
         "tecnickcom/tcpdf": "^6.6",
         "setasign/fpdi": "^2.0",
         "dg/mysql-dump":"^1.5",
-        "paragonie/ciphersweet":"^4"
+        "paragonie/ciphersweet":"^4",
+        "composer/pcre":"^3.3"
     }
 }
