@@ -8118,4 +8118,5 @@ INSERT INTO `gaz_municipalities` (`id`, `id_province`, `name`, `postal_code`, `d
 	(8100, 111, 'Villamassargia', '09010', '0781', '420092094', 'L968', 'https://www.comune.villamassargia.ca.it/'),
 	(8101, 111, 'Villaperuccio', '09010', '0781', '420092104', 'M278', '');
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
+ALTER TABLE `gaz_XXXagenti`	ADD COLUMN `custom_field` TEXT NULL AFTER `tipo_contratto`;
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione )

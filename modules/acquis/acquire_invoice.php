@@ -1369,9 +1369,9 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
           //echo"<pre>",print_r($movmag_prev);die;
 					$form['rows'][$i]['id_tes'] = $ultimo_id;
 					$aliiva=$form['rows'][$i]['codvat'];
-          if($naturaN6){
+          //if($naturaN6){
             $form['rows'][$i]['pervat']=gaz_dbi_get_row($gTables['aliiva'], 'codice', $aliiva)['aliquo'];
-          }
+          //}
 					$exist_new_codart=gaz_dbi_get_row($gTables['artico'], "codice", $new_codart);
 					if ($exist_new_codart && substr($v['codart'],0,6)!='Insert') { // il codice esiste lo uso, ma prima controllo se l'ho volutamente cambiato sul form
 						if( $exist_new_codart['codice'] != $form['rows'][$i]['codart'] ){ // ho scelto un codice diverso

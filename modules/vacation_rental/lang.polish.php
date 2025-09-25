@@ -911,6 +911,7 @@ $strScript = array(
         'born_missing' => 'Uzupełnij wszystkie pola: data urodzenia',
         'citizenship' => 'Obywatelstwo',
         'coucard' => 'Kraj wydania dokumentu',
+        'coures' => 'PAŃSTWO ZAMIESZKANIA',
         'loccard' => 'Miejsce wydania',
         'no_parent' => 'Brak obecności rodzica',
         'load_aut' => 'Załaduj zgodę rodzica',

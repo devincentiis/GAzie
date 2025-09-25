@@ -909,6 +909,7 @@ $strScript = array(
         'born_missing' => 'Completa todos los campos: fecha de nacimiento',
         'citizenship' => 'Ciudadanía',
         'coucard' => 'País de emisión del documento',
+        'coures' => 'ESTADO DE RESIDENCIA',
         'loccard' => 'Lugar de emisión',
         'no_parent' => 'No hay ningún padre presente',
         'load_aut' => 'Sube la autorización del padre/madre',

@@ -80,18 +80,22 @@ $admin_aziend=checkAdmin(9);
         <li>Calendario delle disponibilità degli alloggi e degli extra se con quantità limitate</li>
         <li>Creazione e stampa o invio via e-mail del PDF della prenotazione</li>
         <li>Creazione e stampa o invio via e-mail del PDF del contratto di locazione</li>
+        <li>Gestione della firma elettronica semplice sul contratto di locazione online con memorizzazione del PDF, di tutti i metadati e generazione dell'hash SHA-256 per la prova di integrità. </li>
         <li>Gestione del Calendario dei prezzi giornalieri per ogni singolo alloggio</li>
         <li>Gestione di alloggi con proprietario diverso dall'azienda di GAzie (contratto di locazione specifico)</li>
-        <li>Gestione di un eventuale tour operator che ha venduto la prenotazione</li>
-        <li>Gestione dell'accettazione per check-in e check-out con data e ora</li>
+        <li>Gestione di un eventuale OTA (Agenzia di viaggio online) che ha venduto la prenotazione</li>
         <li>Creazione di statistiche generali, suddivise per strutture, anche ai fini della compilazione del mod ISA (indici sintetici affidabilità fiscale) e del pagamento della tassa di soggiorno turistica</li>
         <li>Invio automatico di promemoria/benvenuto x giorni prima del check-in (richiede un cron job)</li>
         <li>Controllo automatico delle prenotazioni con caparra non pagata, invio di sollecito e successivo annullamento automatico (richiede un cron job)</li>
         <li>Widget nella home page di GAzie con riepilogo occupazione e prossimi check-in e check-out</li>
-        <li>Gestione dei feedback. Al check-out verrà inviata al cliente la richiesta di lasciare una valutazione con voti su elementi personalizzabili e relativo commento. Possibilità di re-invio della richiesta</li>
-        <li>Possibilità di sincronizzare in automatico il voto lasciato dal cliente con il sito web; ad esempio aggiornamento stelle di gradimento nella pagina web dell'alloggio.(necessita di apposito script)</li>
-        <li>Possibilità di sincronizzare in automatico la descrizione e il titolo di un alloggio nella relativa pagine del sito web (necessita di apposito script)</li>
-        <li>Gestione completa del programma di fidelizzazione: attribuzione di punti per ogni x Euro di spesa al check-out con gestione dei livelli raggiunti e attribuzione automatica di sconti per i clienti appartenenti ad un dato livello.</li>
+        <li>Gestione dei feedback. Al check-out verrà inviata al cliente la richiesta di lasciare una valutazione con voti su elementi personalizzabili e relativo commento. Possibilità di re-invio della richiesta in automatico dopo 3 giorni o anche in manuale (l'automatico richiede un cronjob) </li>
+        <li>Possibilità di sincronizzare in automatico il voto lasciato dal cliente con il sito web; ad esempio aggiornamento stelle di gradimento nella pagina web dell'alloggio.(necessita di apposito script interfaccia)</li>
+        <li>Possibilità di sincronizzare in automatico la descrizione e il titolo di un alloggio nella relativa pagine del sito web (necessita di apposito script interfaccia)</li>
+        <li>Gestione completa del programma di fidelizzazione: attribuzione di punti per ogni X Euro di spesa al check-out con gestione dei livelli raggiunti e attribuzione automatica di sconti per i clienti appartenenti ad un dato livello.</li>
+        <li>Gestione del check-in e check-out con memorizzazione di data e ora</li>
+        <li>Gestione dell'accettazione alloggiati con invio automatico delle schedine alla Polizia di Stato e alla Regione tramite webservice; cioè GAzie comunica direttamente con i siti istituzionali</li>
+        <li>Gestione del pre-checkin nel front-end del sito web da parte del cliente e conseguente pre-impostazione delle schedine alloggiati in GAzie.</li>
+        <li>Gestione del self-checkin con scatto di un selfie del capogruppo e successivo pre-checkin nel front-end. Da GAzie se ne gestirà poi il controllo e l'approvazione.</p>
 
         <p><br>Utilizzabile in un qualsiasi sito web tramite apposito Iframe:</p>
         <li>Front-end per il cliente tramite iframe su qualsiasi sito internet interconnesso con GAzie</li>
@@ -101,16 +105,17 @@ $admin_aziend=checkAdmin(9);
         <li>Calcolo sconti automatico per alloggio, struttura, numero di notti, periodo limitato e codice sconto</li>
         <li>Visualizzazione calendario delle disponibilità totali</li>
         <li>Visualizzazione delle recensioni per ogni singolo alloggio nel front-end</li>
-        <li>Pagamenti online con bonifico bancario, carta di credito off-line, PayPal e Stripe(richiede licenza d'uso)</li>
+        <li>Pagamenti online con bonifico bancario, carta di credito off-line, Hype, PayPal e Stripe(richiede licenza d'uso)</li>
         <li>Possibilita di richiedere il pagamento della prenotazione a favore di soggetti diversi dall'azienda di GAzie (proprietario)</li>
         <li>Avviso automatico, tramite un pop-up nel front-end, quando un cliente ha impostato una ricerca disponibilità e prezzi con il numero notti di poco inferiore a quello necessario per ottenere uno sconto.</li>
-
+        <li>Pre-checkin e self-checkin</li>
+        <li>Firma digitale semplice del contratto di locazione generato in pdf</li>
+        <li>Richiesta di modifica successiva della prenotazione con firma elettronica semplice e creazione di addendum in pdf.</li>
 
       </ul>
       <p>Per la versione PRO contattare lo sviluppatore: Antonio Germani Massignano (AP) https://www.programmisitiweb.lacasettabio.it - telefono +39 340 50 11 912</p>
-      <p><h3>Sito demo per testare il lato cliente su un sito Joomla di esempio: https://tony.netsons.org/index.php/it/</h3></p>
-      <p><h3>Per il sito demo gestionale (GAzie) contattare lo sviluppatore per avere senza impegno le chiavi di accesso test</h3></p>
-      <p><h3>Questo è il primo sito di produzione (NON demo) che usa Vacation rental PRO: https://gmonamour.it/</h3></p>
+
+      <p><h3>Questo è un sito di produzione (NON demo) che usa Vacation rental PRO: https://gmonamour.it/</h3></p>
 
     </div>
 	</div>

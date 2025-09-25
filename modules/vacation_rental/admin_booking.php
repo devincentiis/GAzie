@@ -1146,7 +1146,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             break;
           case "2":
             if (strlen($form['tour_tax_from'])>2){//se ci sono impostazioni nella struttura
-              $daytopay=tour_tax_daytopay($night,$form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
+              $daytopay=tour_tax_daytopay($form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
             }else{// se non ci sono utilizzo tutte le notti
               $daytopay = $night;
             }
@@ -1154,7 +1154,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             break;
           case "3":
             if (strlen($form['tour_tax_from'])>2){//se ci sono impostazioni nella struttura
-              $daytopay=tour_tax_daytopay($night,$form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
+              $daytopay=tour_tax_daytopay($form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
             }else{// se non ci sono utilizzo tutte le notti
               $daytopay = $night;
             }

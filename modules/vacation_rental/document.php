@@ -733,6 +733,8 @@ class DocContabVars {
 function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $dest = false, $lang_template=false,$genTables='',$azTables='',$IDaz='',$link='',$id_ag=0,$lang='it',$user_level="",$save=false) {
     global $azTables;
 		$azTables=$GLOBALS['azTables'];
+    global $genTables;
+		$genTables=$GLOBALS['genTables'];
 		global $link;
 		$link=$GLOBALS['link'];
     if (!isset($lang_template) || $lang_template=='' || $lang_template==false){// se non è impostata alcuna lingua metto italiano
@@ -819,29 +821,27 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
         'Lease' => 'lease'
     );
 
-    //$config = new Config;
-    $configTemplate = new configTemplate;
 
-    if ($lang_template) {// se c'è una lingua per il template
-      if (file_exists("templates.".$lang_template)){// se la lingua esiste la prendo
-
-        $ts=$configTemplate->template;
-        $configTemplate->setTemplateLang($lang_template);
-        if (empty($ts)){
-          $configTemplate->template=substr($configTemplate->template, 1);
+    $lang_template = strtolower($lang_template);// normalizzo tutto in minuscolo
+    if ($lang_template && $lang_template != '' && $lang_template <> 'italian') {// se viene passata una lingua che non sia italian
+        if (file_exists("templates." . $lang_template )) {
+            $templatePath = "templates." . $lang_template ;
+        } else {// se non esiste la lingua passata metto inglese
+            $templatePath = "templates.english";
         }
-      }else{// altrimenti carico di default inglese
-        $ts=$configTemplate->template;
-        $configTemplate->setTemplateLang('english');
-        if (empty($ts)){
-          $configTemplate->template=substr($configTemplate->template, 1);
-        }
-      }
+    } else {// se non viene passata alcuna lingua o quella passata è italian
+        $templatePath = "templates";
     }
+    if (!isset($templates[$templateName])) {
+        die("Template '$templateName' non definito.");
+    }
+
     $lh=(($dest && $dest == 'H')?'_lh':''); // eventuale scelta di stampare su carta intestata, aggiungo il suffisso "lh";
 
-    require_once ("templates" . ($configTemplate->template ? '.' . $configTemplate->template : '') . '/' . $templates[$templateName] .$lh. '.php');
+    require_once ( $templatePath . '/' . $templates[$templateName] .$lh. '.php');
     $pdf = new $templateName();
+    $pdf->lang = $lang;
+    $pdf->lang_transl = $lang_template;
     $docVars = new DocContabVars();
 
     $docVars->setData($gTables, $testata, $testata['id_tes'], $rows, false, $genTables, $azTables, $lang, $user_level);
@@ -849,7 +849,14 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 
 	 // se il template è lease e c'è un proprietario devo intestare il contratto al proprietario
 	if ($templateName=='Lease' && intval($id_ag)>0){// modifico i dati intestazione con quelli del proprietario
-		$ag_anagra=gaz_dbi_get_row($gTables['anagra'], 'id', intval($id_ag));
+
+    $sql = "SELECT * FROM ".$genTables."anagra"." WHERE id = ". intval($id_ag)." LIMIT 1";
+    if ($result = mysqli_query($link, $sql)) {
+      $ag_anagra = mysqli_fetch_assoc($result);
+    }else{
+    echo "Error: " . $sql . "<br>" . mysqli_error($link);
+    }
+
 		$docVars->intesta1=$ag_anagra['ragso1']." ".$ag_anagra['ragso2'];
 		$docVars->intesta2=$ag_anagra['indspe']." ".$ag_anagra['capspe']." ".$ag_anagra['citspe']." ".$ag_anagra['prospe'];
 		$docVars->intesta3= "tel.: ".$ag_anagra['telefo']." ";

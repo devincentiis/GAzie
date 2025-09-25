@@ -29,13 +29,33 @@
  --------------------------------------------------------------------------
 */
 require("../../library/include/datlib.inc.php");
-$admin_aziend=checkAdmin();
+
 include_once("manual_settings.php");
 $genTables = constant("table_prefix")."_";
 $azTables = constant("table_prefix").$idDB;
 $IDaz=preg_replace("/[^1-9]/", "", $azTables );
+
+$servername = constant("Host");
+$username = constant("User");
+$pass = constant("Password");
+$dbname = constant("Database");
+// Create connection
+$link = mysqli_connect($servername, $username, $pass, $dbname);
+// Check connection
+if (!$link) {
+    die("Connection DB failed: " . mysqli_connect_error());
+}
+$link -> set_charset("utf8");
+
 require("document.php");
-$tesbro = gaz_dbi_get_row($gTables['tesbro'],"id_tes", intval($_GET['id_tes']));
+
+$sql = "SELECT * FROM ".$azTables."tesbro"." WHERE id_tes = ". intval($_GET['id_tes'])." LIMIT 1";
+if ($result = mysqli_query($link, $sql)) {
+  $tesbro = mysqli_fetch_assoc($result);
+}else{
+echo "Error: " . $sql . "<br>" . mysqli_error($link);
+}
+
 if ($tesbro_data = json_decode($tesbro['custom_field'], TRUE)){// se la testata ha un custom field
   if (is_array($tesbro_data['vacation_rental']) && isset($tesbro_data['vacation_rental']['security_deposit'])){
     $tesbro['security_deposit']=$tesbro_data['vacation_rental']['security_deposit'];
@@ -46,7 +66,15 @@ if (isset($_GET['id_ag']) && $_GET['id_ag']>0){// se è stato passato un proprie
 	$id_ag=intval($_GET['id_ag']);
 }
 $lang = false;
-$id_anagra = gaz_dbi_get_row($gTables['clfoco'], 'codice', $tesbro['clfoco']);
+
+$sql = "SELECT id_anagra FROM ".$azTables."clfoco"." WHERE codice = ". $tesbro['clfoco']." LIMIT 1";
+if ($result = mysqli_query($link, $sql)) {
+  $res = mysqli_fetch_assoc($result);
+  $id_anagra['id_anagra']=$res['id_anagra'];
+}else{
+echo "Error: " . $sql . "<br>" . mysqli_error($link);
+}
+
 $stato = gaz_dbi_get_row($gTables['anagra'], 'id', $id_anagra['id_anagra']);
 if ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0){// se è italiano o non è impostato
     $lang = '';

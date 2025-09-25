@@ -36,6 +36,40 @@ $genclass="active";
 $feedclass="";
 $remclass="";
 $pointclass="";
+$otaclass="";
+
+// Se la richiesta è una chiamata AJAX per ottenere tourtax
+if (isset($_GET['id_fornitore'])) {
+  global $gTables;
+    $id_fornitore = $_GET['id_fornitore'];
+    // Query per ottenere il campo custom_field del fornitore
+    $sql = "
+        SELECT custom_field
+        FROM {$gTables['agenti']}
+        WHERE id_fornitore = '$id_fornitore'
+    ";
+    // Esegui la query usando la tua funzione gaz_dbi_query()
+    $result = gaz_dbi_query($sql);
+    // Verifica se la query ha restituito un risultato
+    if ($result && gaz_dbi_num_rows($result) > 0) {
+        $row = gaz_dbi_fetch_array($result);
+        $custom_field_json = $row['custom_field'];
+        // Decodifica il JSON
+        $json_data = (isset($custom_field_json) && $custom_field_json !== null) ? json_decode($custom_field_json, true) : [];
+        // Imposta il valore di tourtax a default "NO"
+        $tourtax_value = "NO";
+        // Verifica se la chiave vacation_rental esiste e se contiene tourtax
+        if (isset($json_data['vacation_rental']) && isset($json_data['vacation_rental']['tourtax'])) {
+            $tourtax_value = strtoupper($json_data['vacation_rental']['tourtax']) == "SI" ? "SI" : "NO";
+        }
+        // Restituisci il valore di tourtax
+        echo $tourtax_value;
+    } else {
+        echo "NO"; // Se non trovato, restituisci NO
+    }
+
+    exit(); // Termina lo script, nessun output HTML aggiuntivo dopo l'ajax
+}
 
 if (isset($_POST['addElement'])){// se è stato richiesto di inserire un nuovo elemento feedback
   $genclass="";
@@ -49,6 +83,23 @@ if (isset($_POST['addElement'])){// se è stato richiesto di inserire un nuovo e
     $columns = array('element', 'description', 'facility', 'status');
     tableInsert($table, $columns, $set);
   }
+}
+
+if (isset($_POST['submitOTA']) && $_POST['submitOTA']=='ota'){// se è stato richiesto di registrare le impostazioni OTA
+// echo "<pre>",print_r($_POST),"</pre>";die;
+  $row = gaz_dbi_get_row($gTables['agenti'], 'id_agente', $_POST['agente']);
+
+  if ($row !== null && isset($row['custom_field'])) {
+      $custom_field = $row['custom_field'];
+  } else {
+      $custom_field = null; // o valore di default
+  }
+ if (isset($custom_field) ){// se c'è un il custom field json ne carico tutto il contenuto
+  $data = json_decode($custom_field,true);
+ }
+ $data['vacation_rental']['tourtax']=$_POST['tourtax'];// inserisco/modifico il valore impostato nel form
+ $form['custom_field'] = json_encode($data);
+ gaz_dbi_put_row($gTables['agenti'], 'id_fornitore', intval($_POST['agente']), 'custom_field', $form['custom_field']);
 }
 if (isset($_POST['delElement']) && intval($_POST['delElement'])>0){// se è stato richiesto di cancellare un elemento feedback
   $genclass="";
@@ -79,6 +130,7 @@ if (isset($_POST['SaveupdElement']) && intval($_POST['SaveupdElement'])>0){// se
     $newValue = array('element'=>$set['element'], 'description'=>$set['description'], 'facility'=>$set['facility'],'status'=>$set['status']);
     tableUpdate($table, $columns, $codice, $newValue);
 }
+
 
 if (count($_POST) > 1 && !isset($_POST['addElement']) && !isset($_POST['delElement']) && !isset($_POST['updElement']) && !isset($_POST['SaveupdElement'])) {
 
@@ -113,6 +165,7 @@ $point = gaz_dbi_dyn_query("*", $gTables['company_config'], " var LIKE 'point%'"
   <li class="<?php echo $feedclass; ?>"><a data-toggle="pill" href="#feedback"><b>Recensioni</b></a></li>
   <li class="<?php echo $remclass; ?>"><a data-toggle="pill" href="#reminder"><b>Promemoria</b></a></li>
   <li class="<?php echo $pointclass; ?>"><a data-toggle="pill" href="#point"><b>Punti</b></a></li>
+  <li class="<?php echo $otaclass; ?>"><a data-toggle="pill" href="#ota"><b>OTA</b></a></li>
   <li style="float: right;"><div class="btn btn-warning" id="upsave">Salva</div></li>
 </ul>
 <?php
@@ -349,12 +402,125 @@ $point = gaz_dbi_dyn_query("*", $gTables['company_config'], " var LIKE 'point%'"
               </div><!-- chiude row  -->
               <?php
               }
-
             ?>
-
             </form>
       </div><!-- chiude feedback  -->
 
+      <div id="ota" class="tab-pane fade in <?php echo $otaclass; ?>">
+            <form method="post" id="ota">
+            <div class="row text-info bg-info">
+              OTA Agenzia di viaggio online
+            </div><!-- chiude row  -->
+            <div class="row ">
+                  <div class="form-group " >
+                    <div class="row">
+                      <label for="inputElement" class="col-sm-5 control-label">Seleziona se l'agenzia si occupa di riscuotere per proprio conto la tassa di soggiorno turistica.</label>
+                        <div class="col-sm-7">
+                        <?php
+                        // Query per ottenere gli agenti
+                       $sql = "
+                            SELECT ag.id_fornitore, CONCAT(na.ragso1, ' ', na.ragso2) AS nome_agente
+                            FROM {$gTables['agenti']} AS ag
+                            JOIN {$gTables['clfoco']} AS cf ON cf.codice = ag.id_fornitore
+                            JOIN {$gTables['anagra']} AS na ON na.id = cf.id_anagra
+                        ";
+                        $result = gaz_dbi_query($sql);
+                        if ($result->num_rows > 0) {
+
+                            echo '<select name="agente" id="agente">';
+                              echo '<option value="">Seleziona un agente</option>'; // Opzione vuota di default
+                            // Ciclo attraverso i risultati per creare le opzioni della select
+                            while ($row = $result->fetch_assoc()) {
+                                // Ottieni id_fornitore e nome_agente
+                                $id_fornitore = $row['id_fornitore'];
+                                $nome_agente = $row['nome_agente'];
+
+                                echo "<option value='$id_fornitore'>$nome_agente</option>";
+                            }
+
+
+                            echo '</select>';
+
+                        } else {
+                            echo "Nessun agente trovato.";
+                        }
+                        // Campo input per tourtax, inizialmente "NO"
+                        ?>
+                           <label for="tourtax">Tourtax: </label>
+                        <select id="tourtax" name="tourtax">
+                            <option value="" selected></option>
+                            <option value="NO">No</option>
+                            <option value="SI">Sì</option>
+                        </select>
+                        <!-- Pulsante di submit inizialmente nascosto -->
+                        <button name="submitOTA" id="submitOtaButton" value="ota" type="submit" style="display:none;">Inserisci</button>
+                        <?php
+
+                        ?>
+                        </div>
+                    </div>
+                  </div>
+            </div>
+
+      </form>
+      <script>
+    $(document).ready(function() {
+    // Variabile globale per memorizzare il valore iniziale di tourtax
+    var initialTourtaxValue = null;
+
+    // Funzione che gestisce la logica per verificare se il submit deve essere visualizzato
+    function checkSelections() {
+        var currentTourtaxValue = $('#tourtax').val();  // Ottieni il valore attuale di tourtax
+
+        // Se entrambi i campi sono selezionati e il valore di tourtax è diverso da quello iniziale
+        if ($('#tourtax').val() !== "" && $('#agente').val() !== "" && currentTourtaxValue !== initialTourtaxValue) {
+            // Se le condizioni sono soddisfatte, mostra il pulsante di submit
+            $('#submitOtaButton').show();
+        } else {
+            // Se le condizioni non sono soddisfatte, nascondi il pulsante di submit
+            $('#submitOtaButton').hide();
+        }
+    }
+
+    // Evento di change per monitorare i cambiamenti nelle selezioni
+    $('#tourtax, #agente').on('change', function() {
+        checkSelections(); // Verifica le selezioni ogni volta che una cambia
+    });
+
+    // Quando un tab viene selezionato e il suo contenuto è visibile
+    $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+        var targetTab = $(e.target).attr('href'); // Prendi l'ID del tab attivo
+
+        if (targetTab === '#ota') {
+            // Gestisci l'evento change per l'elemento #agente nel tab OTA
+            $('#agente').change(function() {
+                var idFornitore = $(this).val();
+
+                // Esegui la richiesta AJAX per ottenere il valore di tourtax
+                $.ajax({
+                    url: '', // La stessa pagina
+                    method: 'GET',
+                    data: { id_fornitore: idFornitore },
+                    success: function(response) {
+                        //console.log("Risposta AJAX: " + response); // Log della risposta
+                        $('#tourtax').val(response); // Aggiorna il campo input "tourtax" con la risposta
+                        initialTourtaxValue = response;  // Memorizza il valore iniziale di tourtax
+                        checkSelections();  // Verifica se entrambe le selezioni sono complete
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Errore AJAX: " + error); // Log dell'errore in caso di problemi con la richiesta
+                    }
+                });
+            });
+        }
+    });
+
+});
+
+</script>
+
+
+      </div><!-- chiude feedback  -->
 
 
   </div><!-- chiude tab-content  -->

@@ -25,6 +25,8 @@
 require('booking_template_lease.php');
 #[AllowDynamicProperties]
 class Lease extends Template{
+  public $lang = 'en';
+  public $lang_transl = 'english';
 	function get_string_lang($string, $lang){
 		$string = " ".$string;
 		$ini = strpos($string,"<".$lang.">");
@@ -77,10 +79,9 @@ class Lease extends Template{
     }
     function body()
     {
-      require("./lang.english.php");
+      require("./lang." . (!empty($this->lang_transl) ? $this->lang_transl : "english") . ".php"); // se + vuoto metto english di default
       $script_transl = $strScript["lease.php"];
-      $lang="en";
-      $lines = $this->docVars->getRigo();
+      $lang = $this->lang;
 
       // create some HTML content
       $html = "<p><b>".$script_transl['parti']."</b><br>-<b>".$script_transl['locatore']."</b> ".$this->intesta1." ".$this->intesta2." ".$this->intesta3."<br>-"

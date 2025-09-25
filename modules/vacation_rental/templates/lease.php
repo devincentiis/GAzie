@@ -32,6 +32,8 @@ require('booking_template_lease.php');
 
 #[AllowDynamicProperties]
 class Lease extends Template{
+  public $lang = 'it';
+  public $lang_transl = 'italian';
 	function get_string_lang($string, $lang){
 		$string = " ".$string;
 		$ini = strpos($string,"<".$lang.">");
@@ -84,15 +86,10 @@ class Lease extends Template{
     }
     function body()
     {
-      $admin_aziend = checkAdmin();
-      require("./lang." . $admin_aziend['lang'] . ".php");
+      require("./lang." . (!empty($this->lang_transl) ? $this->lang_transl : "italian") . ".php"); // se + vuoto metto italian di default
       $script_transl = $strScript["lease.php"];
+      $lang = $this->lang;
 
-      if ($admin_aziend['id_language']==1){
-        $lang="it";
-      }else{
-        $lang="en";
-      }
 
       $lines = $this->docVars->getRigo();
 

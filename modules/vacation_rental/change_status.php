@@ -197,7 +197,7 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         /*
         Conservazione delle copie: il Garante per la Privacy ha chiarito più volte che gli hotel non sono autorizzati a trattenere copie digitalizzate dei documenti (scannerizzazioni, fotografie, PDF) né cartacee.
         Dati da conservare: ciò che va mantenuto è il registro delle presenze (schede alloggiati), secondo i termini previsti dalla normativa, ma non la copia del documento di identità.
-        Tutte le evntuali copie vanno distrutte al momento dell'invio telematico ossia dopo l'autenticazione 'de visu' (riferita al documento di identità)
+        Tutte le eventuali copie vanno distrutte al momento dell'invio telematico ossia dopo l'autenticazione 'de visu' (riferita al documento di identità)
         */
         delete_id_cards($i);
       }
@@ -462,8 +462,12 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         //Recipients
         $mail->setFrom($admin_aziend['e_mail'],$admin_aziend['ragso1']." ".$admin_aziend['ragso2']); // sender (e-mail dell'account che sta inviando)
         $mail->addReplyTo($admin_aziend['e_mail']); // reply to sender (e-mail dell'account che sta inviando)
-        $mail->addAddress($_POST['cust_mail']);                  // email destinatario
-        if (filter_var($_POST['cust_mail2'], FILTER_VALIDATE_EMAIL)){ // se c'è una seconda mail destinatario gliela mando per conoscenza
+
+        $cust_mail = filter_var(trim($_POST['cust_mail']), FILTER_SANITIZE_EMAIL);
+        if (filter_var($cust_mail, FILTER_VALIDATE_EMAIL)) {
+            $mail->addAddress($cust_mail); // email destinatario
+        }
+        if (isset($_POST['cust_mail2']) && filter_var($_POST['cust_mail2'], FILTER_VALIDATE_EMAIL)){ // se c'è una seconda mail destinatario gliela mando per conoscenza
            $mail->addCC($_POST['cust_mail2']);
         }
         if ($imap_usr==''){
@@ -473,6 +477,30 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         $mail->Subject = $script_transl['feedback_request'].$script_transl['booking']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi']);
         $mail->Body    = "<p>".$script_transl['ask_feedback']."</p><p><a href=".$vacation_url_user.">".$vacation_url_user."</a></p><br>".$script_transl['booking_number'].": <b>".$tesbro['numdoc']."</b><p>".$script_transl['ask_feedback2']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
         if($mail->send()) {
+
+          // qui registro che l'invio è avvenuto ['rem_feedback'] 'SENT+yyy-mm-gg'
+          if ($data = json_decode($tesbro['custom_field'],true)){// se c'è un json
+            if (isset($data['vacation_rental']) && is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
+
+              if (isset($data['vacation_rental']['rem_feedback']) && strpos($data['vacation_rental']['rem_feedback'], "RESENT") === 0) {
+                // Se è già stata inviata la seconda richiesta → aggiorno la data
+                $data['vacation_rental']['rem_feedback'] = "RESENT" . date('Y-m-d');
+              } else {
+                // Se è la prima richiesta → SENT
+                $data['vacation_rental']['rem_feedback'] = "SENT" . date('Y-m-d');
+              }
+
+            } else { //se non c'è il modulo "vacation_rental" lo aggiungo
+              $data['vacation_rental']= array('rem_feedback' => "SENT" . date('Y-m-d'));
+
+            }
+          }else { //se non c'è un json creo "vacation_rental" anche se è impossibile che non ci sia...
+              $data['vacation_rental']= array('rem_feedback' => "SENT" . date('Y-m-d'));
+
+          }
+          $custom_json = json_encode($data);
+          gaz_dbi_put_row($gTables['tesbro'], 'id_tes', $i, 'custom_field', $custom_json);
+
           if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata
             if($imap = @imap_open("{".$imap_server.":".$imap_port."/".$imap_secure."}".$imap_sent_folder, $imap_usr, $imap_pwr)){
               if ($append=@imap_append($imap, "{".$imap_server."}".$imap_sent_folder, $mail->getSentMIMEMessage(),"\\seen")){

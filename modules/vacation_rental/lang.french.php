@@ -1100,6 +1100,7 @@ $strScript = array(
         'born_missing' => 'Veuillez remplir tous les champs : date de naissance',
         'citizenship' => 'Citoyenneté',
         'coucard' => 'Pays de délivrance du document',
+        'coures' => 'ÉTAT DE RÉSIDENCE',
         'loccard' => 'Lieu de délivrance',
         'no_parent' => 'Aucun parent présent',
         'load_aut' => 'Télécharger l’autorisation parentale',

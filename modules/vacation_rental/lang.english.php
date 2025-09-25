@@ -1101,6 +1101,7 @@ $strScript = array(
         'born_missing' => 'Please fill out all required fields: date of birth',
         'citizenship' => 'Citizenship',
         'coucard' => 'Country of document issuance',
+        'coures' => 'State of residence',
         'loccard' => 'Place of issuance',
         'no_parent' => 'No parent present',
         'load_aut' => 'Upload parent’s authorization',

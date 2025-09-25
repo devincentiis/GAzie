@@ -215,7 +215,7 @@ if ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo
                     if ($form['operation_type'] == '') {
                         $form['operation_type'] = $partner['operation_type'];
                     }
-                    if ($form['inserimdoc'] > 0 && $countPartners == 1) { // solo se è previsto l'utilizzo dei dati dei documenti ed ho un solo partner lo setto
+                    if ($countPartners == 1) { // solo se è previsto l'utilizzo dei dati dei documenti ed ho un solo partner lo setto
                         $form['cod_partner'] = $_POST['conto_rc' . $i];
                     } else {
                         $form['cod_partner'] = '';

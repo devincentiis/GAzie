@@ -174,7 +174,7 @@ define('SET_DYNAMIC_IP', (defined('MY_SET_DYNAMIC_IP')) ? MY_SET_DYNAMIC_IP : ''
 define( 'HELPDIR',  (defined('MY_HELPDIR')) ? MY_HELPDIR : 'help');
 
 // versione software
-define( 'GAZIE_VERSION',  (defined('MY_GAZIE_VERSION')) ? MY_GAZIE_VERSION: '9.11');
+define( 'GAZIE_VERSION',  (defined('MY_GAZIE_VERSION')) ? MY_GAZIE_VERSION: '9.12');
 
 // versioning degli asset (file statici)
 // se si usa nginx e non c'è la direttiva su nginx.conf si disattiva con la stringa vuota
