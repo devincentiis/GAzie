@@ -372,7 +372,8 @@ $strScript = array("admin_client.php" =>
 			'lotinsuf' => 'Per questo ID lotto non c\'è la quantità richiesta',
 			'forceone' => 'Un articolo prevede la matricola/numero di serie pertanto la quantit&agrave; &egrave; stata forzata ad 1',
 			'filesize' => 'File troppo grande',
-			'filenoload' => 'Il file non è stato caricato'
+			'filenoload' => 'Il file non è stato caricato',
+			'business_date_cessation' => 'Data successiva alla cessazione'
 		),
         'consentivisua' => '<center>ATTENZIONE MANCANO I DATI FISCALI</center>'
     ),
@@ -478,7 +479,8 @@ $strScript = array("admin_client.php" =>
         "Provvigioni",
         "Vuoi modificare un D.d.T. gi&agrave; fatturato!",
         "Questo documento &egrave; gi&agrave; stato contabilizzato!",
-        'Non è possibile spostare su un rigo linkato',
+        "Non è possibile spostare su un rigo linkato",
+        "Data successiva alla cessazione",
         'speban' => "Spese incasso",
         'speban_title' => 'Spese incasso non documentate/rate',
         'traspo_title' => 'Spese trasporto non documentate',

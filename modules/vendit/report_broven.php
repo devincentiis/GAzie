@@ -412,37 +412,38 @@ $ts->output_navbar();
           $remains_atleastone = false; // Almeno un rigo e' rimasto da evadere.
           $processed_atleastone = false; // Almeno un rigo e' gia' stato evaso.
           $rigbro_result = gaz_dbi_dyn_query('*', $gTables['rigbro'], "id_tes = " . $r['id_tes'] . " AND tiprig <=1 ", 'id_tes DESC');
+          $totquanti_da_evadere=0;
           while ( $rigbro_r = gaz_dbi_fetch_array($rigbro_result) ) {
             if ( $rigbro_r['tiprig']==1 ){
-              $totquanti_da_evadere = 1;
+              $totquanti_da_evadere += 1;
               $totimp_da_evadere = CalcolaImportoRigo($rigbro_r['quanti'], $rigbro_r['prelis'], $rigbro_r['sconto']);
             } elseif ($rigbro_r['tiprig']==0) {
-              $totquanti_da_evadere = $rigbro_r['quanti'];
+              $totquanti_da_evadere += $rigbro_r['quanti'];
               $totimp_da_evadere = CalcolaImportoRigo($rigbro_r['quanti'], $rigbro_r['prelis'], $rigbro_r['sconto']);
             } else {
-              $totquanti_da_evadere = $rigbro_r['quanti'];
               $totimp_da_evadere = 0;
             }
             $totimpbro_da_evadere += $totimp_da_evadere;
-            $totquanti_evaso = 0;
-            $totimp_evaso = 0;
-            $rigdoc_result = gaz_dbi_dyn_query('*', $gTables['rigdoc'], "id_order=" . $r['id_tes'] . " AND codart='".$rigbro_r['codart']."' AND tiprig <=1 ", 'id_tes DESC');
-            while ($rigdoc_r = gaz_dbi_fetch_array($rigdoc_result)) {
-              $totquanti_evaso += $rigdoc_r['quanti'];
-              $processed_atleastone = true;
-              if ( $rigdoc_r['tiprig']==1 ){
-                $totimp_evaso = CalcolaImportoRigo($rigdoc_r['quanti'], $rigdoc_r['prelis'], $rigdoc_r['sconto']);
-              } elseif ($rigdoc_r['tiprig']==0) {
-                $totimp_evaso = CalcolaImportoRigo($rigdoc_r['quanti'], $rigdoc_r['prelis'], $rigdoc_r['sconto']);
-              } else {
-                $totimp_evaso = 0;
-              }
-              $totimpdoc_evaso += $totimp_evaso;
-            }
-            if ( $totquanti_evaso < $totquanti_da_evadere ) {
-              $remains_atleastone = true;
-            }
           }
+          $totquanti_evaso = 0;
+          $totimp_evaso = 0;
+          $rigdoc_result = gaz_dbi_dyn_query('*', $gTables['rigdoc'], "id_order=" . $r['id_tes'] . " AND tiprig <=1 ", 'id_tes DESC');
+          while ($rigdoc_r = gaz_dbi_fetch_array($rigdoc_result)) {
+            $totquanti_evaso += $rigdoc_r['quanti'];
+            $processed_atleastone = true;
+            if ( $rigdoc_r['tiprig']==1 ){
+              $totimp_evaso = CalcolaImportoRigo($rigdoc_r['quanti'], $rigdoc_r['prelis'], $rigdoc_r['sconto']);
+            } elseif ($rigdoc_r['tiprig']==0) {
+              $totimp_evaso = CalcolaImportoRigo($rigdoc_r['quanti'], $rigdoc_r['prelis'], $rigdoc_r['sconto']);
+            } else {
+              $totimp_evaso = 0;
+            }
+            $totimpdoc_evaso += $totimp_evaso;
+          }
+          if ( $totquanti_evaso < $totquanti_da_evadere ) {
+            $remains_atleastone = true;
+          }
+
           // su questa linea di codice mi ritrovo con $totimpbro_da_evadere (l'imponibile totale dell'ordine) e $totimpdoc_evaso (l'imponibile già evaso)
           if ( ($form['swStatus']=="Tutti" OR $form['swStatus']=="") OR ($form['swStatus']=="Inevasi" AND  $remains_atleastone == true) ){
             if ($r['tipdoc'] == 'VPR') {

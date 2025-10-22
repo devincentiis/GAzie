@@ -63,8 +63,13 @@ class DocContabVars {
         }
 
         if ($data_tesbro = json_decode($tesdoc['custom_field'], TRUE)){
-         $this->status = $data_tesbro['vacation_rental']['status'];
-         $this->security_deposit = (isset($data_tesbro['vacation_rental']['security_deposit']))?$data_tesbro['vacation_rental']['security_deposit']:-1;
+          $this->status = $data_tesbro['vacation_rental']['status'];
+          $this->security_deposit = (isset($data_tesbro['vacation_rental']['security_deposit']))?$data_tesbro['vacation_rental']['security_deposit']:-1;
+          if (!empty($data_tesbro['vacation_rental']['child_age']) && is_array($data_tesbro['vacation_rental']['child_age'])) {
+            $ages = array_map('intval', $data_tesbro['vacation_rental']['child_age']); // assicuro interi
+            $this->child_age = " (anni: ". implode(", ", $ages). ")";
+          }
+
         }
 
         $this->layout_pos_logo_on_doc = $company['val'];
@@ -762,12 +767,12 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 
       // Header content type
       header("Content-type: application/pdf");
-	  if (file_exists($PDFurl)){
-		header("Content-Length: " . filesize($PDFurl));
+      if (file_exists($PDFurl)){
+        header("Content-Length: " . filesize($PDFurl));
 
-		// Send the file to the browser.
-		readfile($PDFurl);
-	  }
+        // Send the file to the browser.
+        readfile($PDFurl);
+      }
       return;
     }
     $access=" ";

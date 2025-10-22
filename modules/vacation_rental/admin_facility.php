@@ -978,7 +978,7 @@ $("#datepicker_open_to").datepicker("setDate", "<?php echo $form['open_to']; ?>"
               <div id="minor" class="row IERincludeExcludeRow">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <label for="minor" class="col-sm-4 control-label">Età massima bambini/minorenni</label>
+                    <label for="minor" class="col-sm-4 control-label">Limite di età per esenzione tassa turistica</label>
                     <input class="col-sm-8" type="text" value="<?php echo $form['minor']; ?>" name="minor" maxlength="2" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
                   </div>
                 </div>

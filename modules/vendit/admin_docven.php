@@ -28,6 +28,7 @@ require("../../modules/magazz/lib.function.php");
 $admin_aziend = checkAdmin();
 $backDocList = gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
 $scorrimento = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
+
 $msgtoast = "";
 $msg = ['err'=>[],'war'=>[]];
 $calc = new Compute;
@@ -501,6 +502,14 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $datemi = gaz_format_date($form['datemi'],true);// adatto al db;
   // Se viene inviata la richiesta di conferma totale ...
   if (isset($_POST['ins'])) {
+    $ctrldatemi = new DateTime($datemi);
+    $business_date_cessation = gaz_dbi_get_row($gTables['company_config'], 'var', 'business_date_cessation')['val'];
+    if (strlen($business_date_cessation)==10){ // in configurazione avanzata azienda
+      $cessation = new DateTime(gaz_format_date($business_date_cessation,true));
+      if ($ctrldatemi > $cessation){ // in configurazione azienda ho settato l'ultimo giorno di operatività dell'azienda
+       $msg['err'][] = "business_date_cessation";
+      }
+    }
     $sezione = $form['seziva'];
     $utsemi = gaz_format_date($form['datemi'],2); // mktime
     if ($form['tipdoc'] != 'DDT' && $form['tipdoc'] != 'FAD' && $form['tipdoc'] != 'DDY' && $form['tipdoc'] != 'DDS'

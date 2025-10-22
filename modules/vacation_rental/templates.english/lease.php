@@ -168,7 +168,7 @@ class Lease extends Template{
                 <dd>- ".$script_transl['durata5']."</dd>";
 
       $html .= "<dt>3- <b>".$script_transl['canone']."</b></dt>" ;
-      $html .= "<dd>- ".$script_transl['body5'].(intval($adult)+intval($child)).$script_transl['body6'].$adult.$script_transl['body7'].$child.$script_transl['body8'].$minor."</dd>";
+      $html .= "<dd>- ".$script_transl['body5'].(intval($adult)+intval($child)).$script_transl['body6'].$adult.$script_transl['body7'].$child.$script_transl['body8'].$this->docVars->child_age;"</dd>";
 
       $html .= "<dd>- ".$script_transl['canone1']." € ".number_format(($totamount),2,",",".")." (".$in_words.") ".$script_transl['canone2']."</dd>";
       if ($secdep>1){// se è previsto un deposito cauzionale lo scrivo

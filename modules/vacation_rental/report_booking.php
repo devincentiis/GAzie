@@ -1178,11 +1178,22 @@ let mainPdfUrl = null;
 let signaturePdfUrl = null;
 
 function printPdf(urlPrintDoc, urlPdfFirma = null) {
+  //alert('url: ' + urlPrintDoc);
   mainPdfUrl = urlPrintDoc;
   signaturePdfUrl = urlPdfFirma;
 
-  // Mostra PDF principale
-  $('#framePdf').attr('src', mainPdfUrl);
+  // Forza reload pulito dell'iframe
+  const frameElem = document.getElementById('framePdf');
+  frameElem.src = 'about:blank';
+
+  setTimeout(() => {
+    const sep = mainPdfUrl.includes('?') ? '&' : '?';
+    const urlNoCache = mainPdfUrl + sep + 't=' + new Date().getTime();
+    console.log("Carico PDF aggiornato:", urlNoCache);
+    frameElem.src = urlNoCache;
+    console.log("Frame SRC dopo impostazione:", frameElem.src);
+  }, 100);
+
   $('#framePdf').css({ height: '100%' });
   $('.framePdf').css({ display: 'block', width: '90%', height: '80%', 'z-index': '2000' });
 
@@ -1193,7 +1204,7 @@ function printPdf(urlPrintDoc, urlPdfFirma = null) {
     $('#viewSignaturePdf').hide();
   }
 
-  $('#viewMainPdf').hide(); // all'inizio si vede il contratto
+  $('#viewMainPdf').hide();
 
   // Pulsante chiusura
   $('#closePdf').off('click').on('click', function () {
@@ -1205,18 +1216,19 @@ function printPdf(urlPrintDoc, urlPdfFirma = null) {
   $('#viewSignaturePdf').off('click').on('click', function () {
     if (signaturePdfUrl) {
       $('#framePdf').attr('src', signaturePdfUrl);
-      $('#viewMainPdf').show();          // mostra "torna al contratto"
-      $('#viewSignaturePdf').hide();     // nasconde "firma"
+      $('#viewMainPdf').show();
+      $('#viewSignaturePdf').hide();
     }
   });
 
   // Pulsante per tornare al contratto
   $('#viewMainPdf').off('click').on('click', function () {
     $('#framePdf').attr('src', mainPdfUrl);
-    $('#viewSignaturePdf').show();       // mostra "firma"
-    $('#viewMainPdf').hide();            // nasconde "torna"
+    $('#viewSignaturePdf').show();
+    $('#viewMainPdf').hide();
   });
 }
+
 </script>
 <div align="center" class="FacetFormHeaderFont"><?php echo $script_transl['title_value'][substr($tipo,0,2).'R']; ?></div>
 <?php

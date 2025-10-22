@@ -1,6 +1,28 @@
 <?php include('_header.php'); ?>
 <script src='../../js/sha256/forge-sha256.min.js'></script>
 <?php
+
+// Controllo l'indirizzo mail dell'amministratore del sito GAzie admin mail
+$domain_ok = false;
+$admin_mail = gaz_dbi_get_row($gTables['config'], 'variable', 'admin_mail')['cvalue'];
+if ($admin_mail && filter_var($admin_mail, FILTER_VALIDATE_EMAIL)) {
+  $domain = substr(strrchr($admin_mail, '@'), 1);
+    if ($domain) {
+        // preferisci checkdnsrr se disponibile
+        if (function_exists('checkdnsrr') && @checkdnsrr($domain, 'MX')) {
+            $domain_ok = true;
+        } elseif (function_exists('dns_get_record')) {
+            $mx = @dns_get_record($domain, DNS_MX);
+            if (!empty($mx)) $domain_ok = true;
+            else {
+                $a = @dns_get_record($domain, DNS_A + DNS_AAAA);
+                if (!empty($a)) $domain_ok = true;
+            }
+        }
+        // se nessuna funzione disponibile lasciamo $domain_ok = false (non verificabile)
+    }
+}
+
 if ($login->passwordResetLinkIsValid() == true) {
     ?>
     <form method="post" onsubmit="document.getElementById('login-password').value=forge_sha256(document.getElementById('login-password').value);document.getElementById('user_password_new').value=forge_sha256(document.getElementById('user_password_new').value);document.getElementById('user_password_repeat').value=forge_sha256(document.getElementById('user_password_repeat').value);" action="login_password_reset.php" name="new_password_form" id="resetform">
@@ -71,6 +93,15 @@ if ($login->passwordResetLinkIsValid() == true) {
                         <div class="panel-title">
                             <?php echo MESSAGE_WELCOME_ADMIN; ?>
                         </div>
+                        <?php if ($domain_ok === false): ?>
+                          <div class="alert alert-warning" role="alert">
+                            <strong>- ATTENZIONE - Indirizzo e-mail dell'amministratore non configurato correttamente: <?php echo $admin_mail; ?>.</strong>
+                            <p>Prima di continuare controlla cosa è stato inserito alla voce 'GAzie admin mail' in 'Impostazioni globali' dell'utente amministratore. (Nota bene: le impostazioni globali sono accessibili solamente agli amministratori con il massimo dei privilegi)</p><p>Se continui con questa impostazione L'email per la reimpostazione potrebbe non arrivare correttamente perché contrassegnata come SPAM.</p>
+                            <div class="mt-2" style="font-size:.9rem;color:#6c757d;">
+                              Se non hai i massimi privilegi di amministratore, contattalo e riferisci quanto sopra.
+                            </div>
+                          </div>
+                        <?php endif; ?>
                         <div style="color: red; float:right; font-size: 100%; position: relative; top:-10px"></div>
                     </div>
                     <div style="padding-top:10px" class="panel-body" >

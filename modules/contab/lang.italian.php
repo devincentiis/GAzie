@@ -183,7 +183,8 @@ $strScript = array("select_liqiva.php" =>
             'ATTENZIONE stai modificando un movimento che interessa un registro IVA!',
             'Stai tentando di registrare un documento gi&agrave; registrato',
             'Il totale dei movimenti dello scadenzario non coincidono con l\'importo del rigo ad esso relativo',
-            'Se stai registrando una fattura con reverse charge non è possibile avere più righi IVA'
+            'Se stai registrando una fattura con reverse charge non è possibile avere più righi IVA',
+            'Data di registrazione successiva alla cessazione'
         ),
         'id_testata' => 'Numero di movimento',
         'date_reg' => 'Data di registrazione',

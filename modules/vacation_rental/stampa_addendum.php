@@ -107,7 +107,23 @@ function mergePdfs($directory, $pdfFiles) {
 }
 
 // Ottieni tutti i file PDF nella directory
-$pdfFiles = getPdfFilesFromDirectory($directory);
+if (isset($_GET['file'])) {
+    $fileName = basename($_GET['file']);
+    $filePath = $directory . '/' . $fileName;
+
+    if (file_exists($filePath)) {
+        mergePdfs($directory, [$fileName]);
+    } else {
+        echo "File PDF specificato non trovato.";
+    }
+} else {
+    $pdfFiles = getPdfFilesFromDirectory($directory);
+    if (!empty($pdfFiles)) {
+        mergePdfs($directory, $pdfFiles);
+    } else {
+        echo "Nessun file PDF trovato nella directory.";
+    }
+}
 
 // Se ci sono file PDF, concatenali e visualizzali
 if (!empty($pdfFiles)) {

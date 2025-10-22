@@ -132,7 +132,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
       $form['max_booking_days']=(intval($_POST['max_booking_days'])>0)?$_POST['max_booking_days']:'';
       $form['security_deposit'] = (isset($_POST['security_deposit']))?$_POST['security_deposit']:0;
     }
-
+    $form['children_ages'] = $_POST['children_ages'];
     $form['id_tes'] = $_POST['id_tes'];
     $anagrafica = new Anagrafica();
     $cliente = $anagrafica->getPartner($_POST['clfoco']);
@@ -294,7 +294,6 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
       $provvigione = new Agenti;// NB: PIù SOTTO AVVERRà UNO SCAMBIO FRA AGENTE E TOUROP
       $form['in_provvigione'] = $provvigione->getPercent($form['id_tourOp']);
     }
-
     $form['rows'] = array();
     $next_row = 0;
     if (isset($_POST['rows'])) {
@@ -512,6 +511,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
           }
         }
         if ($msg == "") {// nessun errore
+        //echo var_dump($form['children_ages']);
         //echo "<pre>",print_r($form);die;
              $initra .= " " . $form['oratra'] . ":" . $form['mintra'] . ":00";
             if (preg_match("/^id_([0-9]+)$/", $form['clfoco'], $match)) {
@@ -572,6 +572,17 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             if (isset($form['custom_field']) && $tesbro_data = json_decode($form['custom_field'], TRUE)){// se la testata ha un custom field
               if (is_array($tesbro_data['vacation_rental']) ){
                 $tesbro_data['vacation_rental']['security_deposit']=$form['security_deposit'];// aggiorno il sec dep nel caso fosse stato modificato
+                $tesbro_data['vacation_rental']['child_age'] = [];// aggiorno anche le età dei minori
+                if (!empty($_POST['children_ages'])) {
+                    $decoded = json_decode($_POST['children_ages'], true);  // decode come array
+
+                    if (is_array($decoded)) {
+                        // Crea array associativo con chiavi numeriche come stringhe (1, 2, ...)
+                        foreach (array_values($decoded) as $i => $val) {
+                            $tesbro_data['vacation_rental']['child_age'][(string)($i + 1)] = (string)$val;
+                        }
+                    }
+                }
                 $form['custom_field'] = json_encode($tesbro_data);// ricreo il json custom field
               }
             }
@@ -647,17 +658,28 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                     $accomodation_type="Locazione turistica";
                     break;
                 }
+                $ex_minors = 0;
+                $limit = intval($form['minor'] ?? 0);
+                $ages = json_decode($form['children_ages'] ?? '[]', true);
+                if (is_array($ages)) {
+                    foreach ($ages as $age) {
+                        if (is_numeric($age) && intval($age) <= $limit) {
+                            $ex_minors++;
+                        }
+                    }
+                }
+                $form['ex_minors'] = $ex_minors;
                 $form['checked_in_date']=(isset($rental_events['checked_in_date']))?$rental_events['checked_in_date']:NULL;
                 $form['checked_out_date']=(isset($rental_events['checked_out_date']))?$rental_events['checked_out_date']:NULL;
                 $form['voucher_id']=(isset($rental_events['voucher_id']))?$rental_events['voucher_id']:NULL;
-				$form['status_webservice']=(isset($rental_events['status_webservice']))?$rental_events['status_webservice']:0;
+                $form['status_webservice']=(isset($rental_events['status_webservice']))?$rental_events['status_webservice']:0;
                 $form['type']="ALLOGGIO";
                 $form['access_code'] = $access;
                 $form['title']= "Soggiorno ".$accomodation_type." ".$form['rows'][$i]['codart']." - ".$form['search']['clfoco'];
                 $form['house_code']=$form['rows'][$i]['codart'];
-                $columns = array('id', 'title', 'start', 'end', 'house_code', 'id_tesbro', 'id_rigbro', 'voucher_id', 'checked_in_date', 'checked_out_date', 'adult', 'child', 'type', 'access_code', 'status_webservice');
+                $columns = array('id', 'title', 'start', 'end', 'house_code', 'id_tesbro', 'id_rigbro', 'voucher_id', 'checked_in_date', 'checked_out_date', 'adult', 'child', 'type', 'access_code', 'status_webservice', 'ex_minors');
                 tableInsert($table, $columns, $form);// inserisco il nuovo rental events
-				
+
                 $artico = gaz_dbi_get_row($gTables['artico'], "codice", $form['rows'][$i]['codart']);
                 $data = json_decode($artico['custom_field'], TRUE);
                 $data['vacation_rental']['pause']=(isset($data['vacation_rental']['pause']))?$data['vacation_rental']['pause']:0;
@@ -1133,7 +1155,17 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
           $form['in_facility_id'] = 0;
         }
       } elseif ($form['in_codart']=="TASSA-TURISTICA") {//SE E' tassa turistica
-
+        // prima calcolo quanti minori sono esclusi
+        $ages = json_decode($form['children_ages'], true); // true = ritorna un array associativo (in questo caso numerico)
+        $ex_minors = 0;
+        if (!empty($ages) && is_array($ages)) {
+            $limit = intval($form['minor']); // soglia di esenzione (es. 12 anni)
+            foreach ($ages as $age) {
+                if (is_numeric($age) && intval($age) <= $limit) {
+                    $ex_minors++; // minori esclusi dalla tassa turistica
+                }
+            }
+        }
         // calcolo prezzo tassa turistica
         switch ($form['tur_tax_mode']) {//0 => 'a persona', '1' => 'a persona escluso i minori', '2' => 'a notte', '3' => 'a notte escluso i minori'
           case "0":
@@ -1141,24 +1173,18 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             $daytopay=0;
             break;
           case "1":
-            $tot_turtax=floatval($form['tur_tax'])*(intval($form['adult']));
+            $tot_turtax=floatval($form['tur_tax'])*(intval($form['adult'])+(intval($form['child'])-intval($ex_minors)));
             $daytopay=0;
             break;
           case "2":
-            if (strlen($form['tour_tax_from'])>2){//se ci sono impostazioni nella struttura
-              $daytopay=tour_tax_daytopay($form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
-            }else{// se non ci sono utilizzo tutte le notti
-              $daytopay = $night;
-            }
+            $daytopay=tour_tax_daytopay($form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
+
             $tot_turtax=(floatval($form['tur_tax'])*(intval($daytopay)))*(intval($form['adult'])+intval($form['child']));
             break;
           case "3":
-            if (strlen($form['tour_tax_from'])>2){//se ci sono impostazioni nella struttura
-              $daytopay=tour_tax_daytopay($form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
-            }else{// se non ci sono utilizzo tutte le notti
-              $daytopay = $night;
-            }
-            $tot_turtax=(floatval($form['tur_tax'])*(intval($daytopay)))*(intval($form['adult']));
+            $daytopay=tour_tax_daytopay($form['start'],$form['end'],$form['tour_tax_from'],$form['tour_tax_to'],$form['tour_tax_day']);
+
+            $tot_turtax=(floatval($form['tur_tax'])*(intval($daytopay)))*(intval($form['adult'])+(intval($form['child'])-intval($ex_minors)));
             break;
           case "4":
             $tot_turtax=$form['tur_tax'];
@@ -1749,7 +1775,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 } elseif ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo accesso per UPDATE
     $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($_GET['id_tes']));
     $form['security_deposit']=0;
-   
+
     $anagrafica = new Anagrafica();
     $cliente = $anagrafica->getPartner($tesbro['clfoco']);
     $form['indspe'] = $cliente['indspe'];
@@ -1914,10 +1940,16 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
               $gen_iva_code = $rigo['codvat'];
 				if ($tesbro_data = json_decode($tesbro['custom_field'], TRUE)){// se la testata ha un custom field
 				  if (is_array($tesbro_data['vacation_rental']) && isset($tesbro_data['vacation_rental']['security_deposit'])){
-					$form['security_deposit']=$tesbro_data['vacation_rental']['security_deposit'];
+            $form['security_deposit']=$tesbro_data['vacation_rental']['security_deposit'];
 				  }else{
-					 $form['security_deposit']= $data['vacation_rental']['security_deposit'];
+            $form['security_deposit']= $data['vacation_rental']['security_deposit'];
 				  }
+          if (!empty($tesbro_data['vacation_rental']['child_age']) && is_array($tesbro_data['vacation_rental']['child_age'])) {
+            $ages = array_map('intval', $tesbro_data['vacation_rental']['child_age']); // assicuro interi
+            $form['children_ages']=htmlspecialchars(json_encode($ages));
+          }else{
+            $form['children_ages']="";
+          }
 				}else{
 					 $form['security_deposit']= $data['vacation_rental']['security_deposit'];
 				  }
@@ -2021,6 +2053,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['id_tes'] = "";
     $form['start'] = "";
     $form['end'] = "";
+    $form['children_ages'] = "";
     $form['adult'] = 0;
     $form['child'] = 0;
     $form['access_code'] = '';
@@ -2276,7 +2309,17 @@ echo "</script>\n";
              I N I Z I O   P A G I N A
 
 ******************************************************/
-echo "<form method=\"POST\" name=\"broven\" enctype=\"multipart/form-data\">\n";
+echo '<script>
+function safeChkSubmit(event) {
+    let submitter = event.submitter || document.activeElement;
+    if (submitter && submitter.id === "preventDuplicate") {
+        return chkSubmit();
+    }
+    return true;
+}
+</script>';
+echo "<form method=\"POST\" name=\"broven\" enctype=\"multipart/form-data\" onsubmit=\"return safeChkSubmit(event);\">\n";
+
 ?>
 <div class="framePdf panel panel-success" style="display: none; position: absolute; left: 5%; top: 100px">
   <div class="col-lg-12">
@@ -3075,8 +3118,38 @@ echo '<div class="fissa" ><div class="FacetSeparatorTD" align="center">Inserimen
         Numero minori di anni <?php echo $form['minor']; ?>
       </td>
       <td class="FacetDataTD" style="width: 25%;">
-        <input type="number" name="child" value="<?php echo $form['child']; ?>" min="0" max="5" class="FacetInput">
+        <input
+          type="number"
+          name="child"
+          id="childInput"
+          value="<?php echo $form['child']; ?>"
+          min="0"
+          max="5"
+          class="FacetInput"
+          oninput="updateAgeSelects()"
+        >
         <input type="hidden" name="access_code" value="<?php echo $form['access_code']; ?>">
+        <?php
+        if (!empty($form['children_ages']) && is_string($form['children_ages'])) {
+    $agesString = html_entity_decode($form['children_ages']);  // <-- qui la magia
+    $agesDecoded = json_decode($agesString, true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($agesDecoded)) {
+        $form['children_ages'] = array_values($agesDecoded);
+    } else {
+        $form['children_ages'] = [];
+    }
+} else {
+    $form['children_ages'] = [];
+}
+        ?>
+        <input
+          type="hidden"
+          name="children_ages"
+          id="childrenAgesHidden"
+          value="<?php echo htmlspecialchars(json_encode($form['children_ages'])); ?>"
+        >
+        <!-- Contenitore per le select delle età -->
+        <div id="childrenAgesContainer" style="margin-top:10px;"></div>
       </td>
     </tr>
   </table>
@@ -3151,11 +3224,11 @@ if ($form['stamp'] > 0) {
 		<table>
 			<?php
 			if ($next_row > 0) {
-				echo '		<tr>
-								<td class="text-center">
-									<input name="ins" class="btn '.$class_btn_confirm.'" id="preventDuplicate" onClick="chkSubmit();" type="submit" value="' . ucfirst($script_transl[$toDo]) . '">
-								</td>
-							';
+				echo '  <tr>
+            <td class="text-center">
+                <input name="ins" class="btn '.$class_btn_confirm.'" id="preventDuplicate" type="submit" value="' . ucfirst($script_transl[$toDo]) . '">
+            </td>
+        </tr>';
 			}
 			if ($toDo == 'update' and $form['tipdoc'] == 'VPR') {
 				echo '<td colspan="2"> <input disabled title="Codice ancora da terminare. manca la generazione dei righi in rental_events" type="submit" class="btn btn-default" accesskey="o" name="ord" value="Genera prenotazione" /></td></tr>';
@@ -3223,8 +3296,93 @@ if (last_focus_value != "") {
 }
 last_focus_value = "";
 
+// Funzione per generare le select delle età
+  function updateHiddenInput() {
+    const container = document.getElementById("childrenAgesContainer");
+    const selects = container.querySelectorAll("select");
+    const ages = [];
+
+    selects.forEach((select) => {
+      // Prendi il valore, se vuoto metti null o ignora a seconda delle necessità
+      const val = select.value;
+      if (val !== "") {
+        ages.push(parseInt(val));
+      } else {
+        ages.push(null); // o skip
+      }
+    });
+
+    // Aggiorna il campo hidden in JSON
+    document.getElementById("childrenAgesHidden").value = JSON.stringify(ages);
+  }
+
+  function updateAgeSelects() {
+    const container = document.getElementById("childrenAgesContainer");
+    const numberOfChildren = parseInt(document.getElementById("childInput").value) || 0;
+
+    // Legge le età dal campo hidden (in formato JSON)
+    let childrenAges = [];
+    try {
+      childrenAges = JSON.parse(document.getElementById("childrenAgesHidden").value || '[]');
+    } catch (e) {
+      console.warn("childrenAgesHidden contiene JSON non valido");
+    }
+
+    container.innerHTML = '';
+
+    const maxChildren = 5;
+    const childrenToGenerate = Math.min(numberOfChildren, maxChildren);
+
+    for (let i = 0; i < childrenToGenerate; i++) {
+      const select = document.createElement("select");
+      select.name = `child_age_${i}`;
+      select.className = "FacetInput";
+      select.required = true;
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = "Inserire età";
+      defaultOption.disabled = true;
+      defaultOption.selected = true;
+      select.appendChild(defaultOption);
+
+      for (let age = 0; age <= 17; age++) {
+        const option = document.createElement("option");
+        option.value = String(age);
+        option.textContent = age;
+        select.appendChild(option);
+      }
+
+      if (childrenAges[i] !== undefined && childrenAges[i] !== null) {
+        select.value = String(childrenAges[i]);
+        defaultOption.selected = false;
+      }
+
+      // Quando cambia la select aggiorna l'hidden
+      select.addEventListener("change", updateHiddenInput);
+
+      const label = document.createElement("label");
+      label.textContent = `Età minore ${i + 1}: `;
+      label.style.display = "block";
+      label.style.marginTop = "5px";
+
+      label.appendChild(select);
+      container.appendChild(label);
+    }
+
+    // Aggiorna l'hidden al caricamento delle select (serve se ci sono già valori)
+    updateHiddenInput();
+  }
+
 $( document ).ready(function() {
 	$(".codricTooltip").each(function(index){$(this).attr('title', $("#in_codric option[value='"+$( this ).text().trim()+"']").text());});
+
+  // Evento input su numero di minori
+  $('#childInput').on('input', updateAgeSelects);
+
+  // Carica subito le select al caricamento pagina
+  updateAgeSelects();
+
 });
 
 </script>

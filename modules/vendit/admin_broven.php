@@ -337,16 +337,24 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 // INIZIO MODEL
 	// Se viene inviata la richiesta di conferma totale ...
     if (isset($_POST['ins'])) {
-        $sezione = $form['seziva'];
-        $datemi = $form['annemi'] . "-" . $form['mesemi'] . "-" . $form['gioemi'];
-        $utsemi = mktime(0, 0, 0, $form['mesemi'], $form['gioemi'], $form['annemi']);
-        $initra = $form['anntra'] . "-" . $form['mestra'] . "-" . $form['giotra'];
-        $utstra = mktime(0, 0, 0, $form['mestra'], $form['giotra'], $form['anntra']);
-        if (!checkdate($form['mestra'], $form['giotra'], $form['anntra']))
-          $msg .= "37+";
-        if (!isset($_POST['rows'])) {
-          $msg .= "39+";
+      $sezione = $form['seziva'];
+      $datemi = $form['annemi'] . "-" . $form['mesemi'] . "-" . $form['gioemi'];
+      $utsemi = mktime(0, 0, 0, $form['mesemi'], $form['gioemi'], $form['annemi']);
+      $initra = $form['anntra'] . "-" . $form['mestra'] . "-" . $form['giotra'];
+      $utstra = mktime(0, 0, 0, $form['mestra'], $form['giotra'], $form['anntra']);
+      if (!checkdate($form['mestra'], $form['giotra'], $form['anntra']))
+        $msg .= "37+";
+      if (!isset($_POST['rows'])) {
+        $msg .= "39+";
+      }
+      $ctrldatemi = new DateTime($datemi);
+      $business_date_cessation = gaz_dbi_get_row($gTables['company_config'], 'var', 'business_date_cessation')['val'];
+      if (strlen($business_date_cessation)==10){ // in configurazione avanzata azienda
+        $cessation = new DateTime(gaz_format_date($business_date_cessation,true));
+        if ($ctrldatemi > $cessation){ // in configurazione azienda ho settato l'ultimo giorno di operatività dell'azienda
+         $msg .= "60+";
         }
+      }
 
         // --- inizio controllo coerenza date-numerazione
         if ($toDo == 'update') {  // controlli in caso di modifica

@@ -259,17 +259,32 @@ function get_lang_translation($ref, $table, $lang_id){// nuovo sistema traduzion
 
 // calcolo dei giorni da pagare per la tassa turistica fra due date specifiche
 function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax_day = 0, $full_start = null, $full_end = null) {
-    $year = date("Y", strtotime($start));
+  if (empty($tour_tax_from) || empty($tour_tax_to)) {
+      // Tassa valida tutto l'anno: 1 gennaio - 31 dicembre
+      $tour_tax_from = "01-01";
+      $tour_tax_to   = "31-12";
+      
+      $startYear = date("Y", strtotime($start));
+      $endYear = date("Y", strtotime($end));
+
+      if ($endYear > $startYear) {
+          $tour_tax_to = "31-12";
+          $multi_year = true;
+      } else {
+          $multi_year = false;
+      }
+  }
+  $year = date("Y", strtotime($start));
 	$from_parts = explode('-', $tour_tax_from); // es: ['15', '12']
 	$to_parts   = explode('-', $tour_tax_to);   // es: ['15', '01']
 
 	$from_date = new DateTime("$year-{$from_parts[1]}-{$from_parts[0]}");
-	$to_date   = new DateTime("$year-{$to_parts[1]}-{$to_parts[0]}");
+  $to_date   = new DateTime("$year-{$to_parts[1]}-{$to_parts[0]}");
 
-	// Se to < from, vuol dire che to è nel gennaio dell’anno successivo
-	if ($to_date < $from_date) {
-		$to_date->modify('+1 year');
-	}
+  // Estendi il periodo tassa se attraversa l’anno o se è tassa "tutto l’anno" su soggiorno multi-year
+  if ($to_date < $from_date || (!empty($multi_year) && $multi_year)) {
+      $to_date->modify('+1 year');
+  }
 
 	$tour_tax_from = $from_date->format('Y-m-d');
 	$tour_tax_to   = $to_date->format('Y-m-d');
@@ -300,45 +315,41 @@ function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax
 	// ** LOGICA PER IL CALCOLO STATISTICO **
     // Se viene passato anche il periodo completo locazione, controllo se start e end 
     // rientrano nelle prime tour_tax_day notti dalla locazione completa.
-   if (strtotime($tour_tax_from) && strtotime($tour_tax_to) && $full_start !== null && $full_end !== null && intval($tour_tax_day) > 0) {
-		$full_start_dt = new DateTime($full_start);
-		$full_end_dt = new DateTime($full_end);
-		$start_dt = new DateTime($start);
-		$end_dt = new DateTime($end);
-		$tax_start = new DateTime($tour_tax_from);
-		$tax_end = new DateTime($tour_tax_to);
+    if (strtotime($tour_tax_from) && strtotime($tour_tax_to) && $full_start !== null && $full_end !== null && intval($tour_tax_day) > 0) {
+      $full_start_dt = new DateTime($full_start);
+      $full_end_dt = new DateTime($full_end);
+      $start_dt = new DateTime($start);
+      $end_dt = new DateTime($end);
+      $tax_start = new DateTime($tour_tax_from);
+      $tax_end = new DateTime($tour_tax_to);
 
-		// Iteriamo l'intero soggiorno (full_start → full_end), ma consideriamo solo i giorni nel periodo tassa
-		$interval = new DateInterval('P1D');
-		$full_period = new DatePeriod($full_start_dt, $interval, $full_end_dt);
+      // Iteriamo l'intero soggiorno (full_start → full_end), ma consideriamo solo i giorni nel periodo tassa
+      $interval = new DateInterval('P1D');
+      $full_period = new DatePeriod($full_start_dt, $interval, $full_end_dt);
 
-		$tassabili = [];
-		foreach ($full_period as $d) {
-			if ($d >= $tax_start && $d <= $tax_end) {
-				$tassabili[] = $d->format('Y-m-d');
-			}
-		}
+      $tassabili = [];
+      foreach ($full_period as $d) {
+        if ($d >= $tax_start && $d <= $tax_end) {
+          $tassabili[] = $d->format('Y-m-d');
+        }
+      }
 
-		// Prendiamo solo le prime X notti tassabili
-		$tassabili_limitate = array_slice($tassabili, 0, intval($tour_tax_day));
+      // Prendiamo solo le prime X notti tassabili
+      $tassabili_limitate = array_slice($tassabili, 0, intval($tour_tax_day));
 
-		// Ora verifichiamo se $start (giorno singolo, nel caso statistico) rientra in quelle notti tassabili
-		$giorno_analizzato = $start_dt->format('Y-m-d');
+      // Ora verifichiamo se $start (giorno singolo, nel caso statistico) rientra in quelle notti tassabili
+      $giorno_analizzato = $start_dt->format('Y-m-d');
 
-		if (in_array($giorno_analizzato, $tassabili_limitate)) {
-			$daytopay = 1;
-		} else {
-			$daytopay = 0;
-		}
-	}
-
-
+      if (in_array($giorno_analizzato, $tassabili_limitate)) {
+        $daytopay = 1;
+      } else {
+        $daytopay = 0;
+      }
+    }
     // Applico limite massimo di notti da pagare 
     if (intval($tour_tax_day) > 0 && $daytopay > intval($tour_tax_day)) {
         $daytopay = intval($tour_tax_day);
     }
-	
-
     return $daytopay;
 }
 

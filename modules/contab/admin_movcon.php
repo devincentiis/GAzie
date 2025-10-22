@@ -546,85 +546,94 @@ if ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo
 
     // Se viene inviata la richiesta di conferma totale ...
     if (isset($_POST['ins'])) {
-        $ctrl_tot_D = 0.00;
-        $ctrl_tot_A = 0.00;
-        $ctrl_mov_iva = 0.00;
-        $ctrl_bal = 0.00;
-        $ctrl_ritenute = 0.00; // per aggiungere le ritenute al valore cliente/fornitore e fare il controllo
-        $ctrl_mov_con = 0.00;
-        $acc_partner_mov = array();
-		$fattura_allegata = false;
-        //calcolo i totali dare e avere per poter eseguire il controllo
-        for ($i = 0; $i < $_POST['rigcon']; $i++) {
-            $_POST['importorc'][$i] = preg_replace("/\,/", '.', $_POST['importorc'][$i]);
-            $nr = $i + 1;
-            if (substr($_POST['conto_rc' . $i], 3, 6) < 1) { //controllo che tutti i conti siano stati introdotti...
-                $msg .= "0+";
-            }
-            if ($_POST['importorc'][$i] == 0) { //controllo che non ci siamo valori a 0
-                $msg .= "1+";
-            }
-            if ($_POST['registroiva'] == 4){ // il movimento riguarda il registro  IVA corrispettivi
-				if (substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['mascli'] || substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['masfor'] || (preg_match("/^id_([0-9]+)$/", $_POST['conto_rc' . $i], $match))) { // in caso di scontrino intestato faccio il push al valore massimo
-					$fattura_allegata = true;
-					if ($ctrl_mov_con <= $_POST['importorc'][$i]) {
-						$ctrl_mov_con = number_format($_POST['importorc'][$i], 2, '.', '');
-					}
-				} elseif ((substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['masban'] || substr($_POST['conto_rc' . $i], 0, 3) == substr($admin_aziend['cassa_'], 0, 3)) && $fattura_allegata == false ) {
-                    $ctrl_mov_con += number_format($_POST['importorc'][$i], 2, '.', '');
-				}
-			} elseif (substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['mascli'] || substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['masfor'] || (preg_match("/^id_([0-9]+)$/", $_POST['conto_rc' . $i], $match))) {
-                // ... ed anche in caso di cliente/fornitore eseguo il push del valore massimo
-                if ($ctrl_mov_con <= $_POST['importorc'][$i]) {
-                    $ctrl_mov_con = number_format($_POST['importorc'][$i], 2, '.', '');
-                }
-            }
-			if ($_POST['conto_rc' . $i] == $admin_aziend['c_ritenute'] || $_POST['conto_rc' . $i] == $admin_aziend['c_ritenute_autonomi']) {
-				$ctrl_ritenute +=$_POST['importorc'][$i];
+      $ctrl_tot_D = 0.00;
+      $ctrl_tot_A = 0.00;
+      $ctrl_mov_iva = 0.00;
+      $ctrl_bal = 0.00;
+      $ctrl_ritenute = 0.00; // per aggiungere le ritenute al valore cliente/fornitore e fare il controllo
+      $ctrl_mov_con = 0.00;
+      $acc_partner_mov = array();
+      $fattura_allegata = false;
+      $datareg = $_POST['date_reg_Y'] . "-" . $_POST['date_reg_M'] . "-" . $_POST['date_reg_D'];
+      $ctrldatreg = new DateTime($datareg);
+      $business_date_cessation = gaz_dbi_get_row($gTables['company_config'], 'var', 'business_date_cessation')['val'];
+      if (strlen($business_date_cessation)==10){ // in configurazione avanzata azienda
+        $cessation = new DateTime(gaz_format_date($business_date_cessation,true));
+        if ($ctrldatreg > $cessation){ // in configurazione azienda ho settato l'ultimo giorno di operatività dell'azienda
+         $msg .= "17+";
+        }
+      }
 
-			}
-            if ($_POST['darave_rc'][$i] == "D") {
-                $ctrl_tot_D += $_POST['importorc'][$i];
-            } else {
-                $ctrl_tot_A += $_POST['importorc'][$i];
+      //calcolo i totali dare e avere per poter eseguire il controllo
+      for ($i = 0; $i < $_POST['rigcon']; $i++) {
+        $_POST['importorc'][$i] = preg_replace("/\,/", '.', $_POST['importorc'][$i]);
+        $nr = $i + 1;
+        if (substr($_POST['conto_rc' . $i], 3, 6) < 1) { //controllo che tutti i conti siano stati introdotti...
+            $msg .= "0+";
+        }
+        if ($_POST['importorc'][$i] == 0) { //controllo che non ci siamo valori a 0
+            $msg .= "1+";
+        }
+        if ($_POST['registroiva'] == 4){ // il movimento riguarda il registro  IVA corrispettivi
+          if (substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['mascli'] || substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['masfor'] || (preg_match("/^id_([0-9]+)$/", $_POST['conto_rc' . $i], $match))) { // in caso di scontrino intestato faccio il push al valore massimo
+            $fattura_allegata = true;
+            if ($ctrl_mov_con <= $_POST['importorc'][$i]) {
+              $ctrl_mov_con = number_format($_POST['importorc'][$i], 2, '.', '');
             }
-            $ctrl_bal = round($ctrl_tot_D - $ctrl_tot_A, 2);
-        }
-        //calcolo i totali iva per poter eseguire il controllo
-        if (!isset($_POST['rigiva'])) {
-            $_POST['rigiva'] = 0;
-        }
-        for ($i = 0; $i < $_POST['rigiva']; $i++) {
-            $_POST['imponi_ri'][$i] = number_format(preg_replace("/\,/", '.', $_POST['imponi_ri'][$i]),2,'.','');
-            $_POST['impost_ri'][$i] = number_format(preg_replace("/\,/", '.', $_POST['impost_ri'][$i]),2,'.','');
-            $ctrl_mov_iva += $_POST['imponi_ri'][$i] + $_POST['impost_ri'][$i];
-        }
-        $ctrl_mov_iva = round(abs($ctrl_mov_iva), 2);
-        if ($ctrl_bal != 0) {
-            $msg .= "2+";
-        }
-        if ($ctrl_tot_D == 0) {
-            $msg .= "3+";
-        }
-        if ($ctrl_tot_A == 0) {
-            $msg .= "4+";
-        }
-		$ctrl_mov_con += $ctrl_ritenute;
-		if (abs($ctrl_mov_con)>=0.01){ // controlli solo in caso di totale imputabile a fornitore/cliente
-          if ($_POST['registroiva'] > 0 && $ctrl_mov_iva == 0) {
-              $msg .= "5+";
+          } elseif ((substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['masban'] || substr($_POST['conto_rc' . $i], 0, 3) == substr($admin_aziend['cassa_'], 0, 3)) && $fattura_allegata == false ) {
+                      $ctrl_mov_con += number_format($_POST['importorc'][$i], 2, '.', '');
           }
-          if ($_POST['registroiva'] > 0 && !((abs($ctrl_mov_iva-$ctrl_mov_con)/$ctrl_mov_con) < 0.00001)) {
-				print $ctrl_mov_iva . ' ' . $ctrl_mov_con . '<br><hr>';
-              $msg .= "6+";
+        } elseif (substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['mascli'] || substr($_POST['conto_rc' . $i], 0, 3) == $admin_aziend['masfor'] || (preg_match("/^id_([0-9]+)$/", $_POST['conto_rc' . $i], $match))) {
+          // ... ed anche in caso di cliente/fornitore eseguo il push del valore massimo
+          if ($ctrl_mov_con <= $_POST['importorc'][$i]) {
+              $ctrl_mov_con = number_format($_POST['importorc'][$i], 2, '.', '');
           }
-		}
-        if (empty($_POST['descrizion'])) {
-            $msg .= "7+";
         }
-        //controllo le date
-        if (!checkdate($_POST['date_reg_M'], $_POST['date_reg_D'], $_POST['date_reg_Y']))
-            $msg .= "8+";
+        if ($_POST['conto_rc' . $i] == $admin_aziend['c_ritenute'] || $_POST['conto_rc' . $i] == $admin_aziend['c_ritenute_autonomi']) {
+          $ctrl_ritenute +=$_POST['importorc'][$i];
+        }
+        if ($_POST['darave_rc'][$i] == "D") {
+            $ctrl_tot_D += $_POST['importorc'][$i];
+        } else {
+            $ctrl_tot_A += $_POST['importorc'][$i];
+        }
+        $ctrl_bal = round($ctrl_tot_D - $ctrl_tot_A, 2);
+      }
+      //calcolo i totali iva per poter eseguire il controllo
+      if (!isset($_POST['rigiva'])) {
+          $_POST['rigiva'] = 0;
+      }
+      for ($i = 0; $i < $_POST['rigiva']; $i++) {
+          $_POST['imponi_ri'][$i] = number_format(preg_replace("/\,/", '.', $_POST['imponi_ri'][$i]),2,'.','');
+          $_POST['impost_ri'][$i] = number_format(preg_replace("/\,/", '.', $_POST['impost_ri'][$i]),2,'.','');
+          $ctrl_mov_iva += $_POST['imponi_ri'][$i] + $_POST['impost_ri'][$i];
+      }
+      $ctrl_mov_iva = round(abs($ctrl_mov_iva), 2);
+      if ($ctrl_bal != 0) {
+          $msg .= "2+";
+      }
+      if ($ctrl_tot_D == 0) {
+          $msg .= "3+";
+      }
+      if ($ctrl_tot_A == 0) {
+          $msg .= "4+";
+      }
+      $ctrl_mov_con += $ctrl_ritenute;
+      if (abs($ctrl_mov_con)>=0.01){ // controlli solo in caso di totale imputabile a fornitore/cliente
+        if ($_POST['registroiva'] > 0 && $ctrl_mov_iva == 0) {
+            $msg .= "5+";
+        }
+        if ($_POST['registroiva'] > 0 && !((abs($ctrl_mov_iva-$ctrl_mov_con)/$ctrl_mov_con) < 0.00001)) {
+          print $ctrl_mov_iva . ' ' . $ctrl_mov_con . '<br><hr>';
+          $msg .= "6+";
+        }
+      }
+      if (empty($_POST['descrizion'])) {
+          $msg .= "7+";
+      }
+      //controllo le date
+      if (!checkdate($_POST['date_reg_M'], $_POST['date_reg_D'], $_POST['date_reg_Y']))
+          $msg .= "8+";
         //controllo che siano stati inseriti in maniera giusta i dati del documento
         if ($_POST['inserimdoc'] > 0) {
             if (!gaz_format_date($form['datdoc'], 'chk')) {
@@ -655,7 +664,6 @@ if ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo
             $calc = new Schedule;
             //se è un update recupero i vecchi righi per trovare quelli da inserire/modificare/cancellare
             //formatto le date
-            $datareg = $_POST['date_reg_Y'] . "-" . $_POST['date_reg_M'] . "-" . $_POST['date_reg_D'];
             $datadoc = gaz_format_date($form['datdoc'], true);
             $dataliq = gaz_format_date($form['datliq'], true);
             if ($_POST['inserimdoc'] == 0 and $_POST['registroiva'] == 0) { //se non sono richisti i dati documenti e iva
