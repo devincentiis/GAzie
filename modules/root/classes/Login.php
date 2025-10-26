@@ -717,9 +717,11 @@ class Login
 		$link = EMAIL_PASSWORDRESET_URL . '?user_name=' . urlencode($user_name) . '&verification_code=' . urlencode($user_password_reset_hash);
 		$Body = EMAIL_PASSWORDRESET_CONTENT . '<br><a href="' . $link . '"> ' . MESSAGE_EMAIL_LINK_FOR_RESET . '</a>';
 
-		$headers = "MIME-Version: 1.0" . "\r\n";
-		$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-		$headers .= "From: ".$admin_mail. " : your server mail" . "\r\n";
+		$headers = "MIME-Version: 1.0\r\n";
+		$headers .= "Content-type: text/html; charset=UTF-8\r\n";
+		$headers .= "From: " . $admin_mail . "\r\n";
+		$headers .= 'Reply-To: ' . $admin_mail . "\r\n";
+
 		if ( function_exists( 'mail' ) ){
 			if (@mail($user_email,EMAIL_PASSWORDRESET_SUBJECT,$Body,$headers)){
 				$this->messages[] = MESSAGE_PASSWORD_RESET_MAIL_SUCCESSFULLY_SENT;

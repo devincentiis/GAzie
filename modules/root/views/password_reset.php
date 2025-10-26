@@ -5,7 +5,7 @@
 // Controllo l'indirizzo mail dell'amministratore del sito GAzie admin mail
 $domain_ok = false;
 $admin_mail = gaz_dbi_get_row($gTables['config'], 'variable', 'admin_mail')['cvalue'];
-if ($admin_mail && filter_var($admin_mail, FILTER_VALIDATE_EMAIL)) {
+if ($admin_mail && filter_var($admin_mail, FILTER_VALIDATE_EMAIL) && $admin_mail<>"order@mydomain.com") {
   $domain = substr(strrchr($admin_mail, '@'), 1);
     if ($domain) {
         // preferisci checkdnsrr se disponibile
