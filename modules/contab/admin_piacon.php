@@ -51,6 +51,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['ceeave'] = substr($_POST['ceeave'],0,8);
     $form['paymov'] = substr($_POST['paymov'],0,1);
     $form['annota'] = filter_var($_POST['annota'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $form['status'] = substr($_POST['status'],0,10);
     if (isset($_POST['Submit'])) { // conferma tutto
        //eseguo i controlli formali
        $code_exist = gaz_dbi_dyn_query('codice',$gTables['clfoco'],"codice = ".$form['codice'],'codice DESC',0,1);
@@ -162,6 +163,11 @@ echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['annota']." </td>\n";
 echo "\t<td class=\"FacetDataTD\" colspan=\"2\">
       <textarea name=\"annota\" cols=50 rows=10 maxlength=\"100\" >".$form['annota']."</textarea></td>\n";
 echo "</tr>\n";
+echo "<tr>\n";
+echo '<td class="FacetFieldCaptionTD">'.$script_transl['status'].'</td>';
+echo "\t<td class=\"FacetDataTD\" colspan=\"2\">";
+$gForm->variousSelect('status', $script_transl['status_value'], $form['status'], '', false);
+echo "</td></tr>";
 echo "<tr>\n";
 echo "\t<td class=\"FacetFooterTD\">".$script_transl['sqn']."</td>";
 echo "\t </td>\n";

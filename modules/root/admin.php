@@ -146,6 +146,22 @@ $(function(){
 });
 </script>
 <?php
+$serviceExpiry = gaz_dbi_get_row($gTables['company_config'], 'var', 'business_date_cessation');
+if ($serviceExpiry && strlen($serviceExpiry['val'])==10) {
+  $today = new DateTime(); // today
+  $dexpi = new DateTime($serviceExpiry['val']);
+  $daysdiff = $dexpi->diff($today);
+  if ( $daysdiff->days < 1){
+?>
+  <div class="alert alert-danger text-center" role="alert"> **** ATTENZIONE IL SERVIZIO E' SCADUTO IL <?php echo gaz_format_date($serviceExpiry['cvalue']); ?> E STA PER ESSERE DISATTIVATO  **** </div>
+<?php
+  } else {
+?>
+  <div class="alert alert-warning text-center" role="alert"> ATTENZIONE!!! QUESTO SERVIZIO SCADRA' TRA <?php echo $daysdiff->days; ?> GIORNI,<br/> SI PREGA PROVVEDERE ALLA REGOLARIZZAZIONE DELLO STESSO PRIMA CHE VENGA DISATTIVATO</div>
+<?php
+  }
+}
+
 //Backup automatico
 if ($backupMode == "automatic" && $lastBackup && $admin_aziend['Abilit'] == 9) {
     $sysdisk = $checkUpd->get_system_disk();

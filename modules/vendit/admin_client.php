@@ -267,9 +267,11 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
     $form['hidden_req'] = '';
     $form['tab'] = 'home';
-    $form['datnas_Y'] = substr($form['datnas'], 0, 4);
-    $form['datnas_M'] = substr($form['datnas'], 5, 2);
-    $form['datnas_D'] = substr($form['datnas'], 8, 2);
+    if($form['datnas']) {
+      $form['datnas_Y'] = substr($form['datnas'], 0, 4); $form['datnas_M'] = substr($form['datnas'], 5, 2); $form['datnas_D'] = substr($form['datnas'], 8, 2);
+    } else {
+      $form['datnas_D'] = $form['datnas_M'] = 1; $form['datnas_Y'] = '1970';
+    }
     // inizio mandati rid
     $nd = 0;
     $rs_r = gaz_dbi_dyn_query("*", $gTables['files'], "id_ref = '" . intval($admin_aziend['mascli'] * 1000000 + $_GET['codice']) . "' AND table_name_ref = 'clfoco'", "id_doc DESC");

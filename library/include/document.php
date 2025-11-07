@@ -447,6 +447,9 @@ class DocContabVars {
         $this->ritenuta = 0.00;
         $results = array();
         while ($rigo = gaz_dbi_fetch_array($rs_rig)) {
+          $rigo['translate_descri'] = false;
+          $rigo['translate_body_text'] = false;
+          $rigo['translate_custom_field'] = false;
           // Antonio Germani - se c'è un codice a barre valorizzo barcode
           $art = gaz_dbi_get_row( $this->gTables['artico'], 'codice', $rigo['codart']);
           if ($art && intval($art['barcode'])>0){
@@ -493,7 +496,14 @@ class DocContabVars {
             $tipodoc = substr($this->tesdoc["tipdoc"], 0, 1);
             $rigo['importo'] = CalcolaImportoRigo($rigo['quanti'], $rigo['prelis'], $rigo['sconto']);
             $v_for_castle = CalcolaImportoRigo($rigo['quanti'], $rigo['prelis'], array($rigo['sconto'], $this->tesdoc['sconto']));
-            if ($rigo['tiprig'] == 1) {
+            if ($rigo['tiprig'] == 0 && $this->client['id_language'] > 1 ) { // controllo se ho la traduzione dell'articolo
+              $translate_bt = gaz_dbi_get_row($this->gTables['body_text'], "table_name_ref", 'artico'," AND code_ref = '".$rigo['codart']."' AND lang_id = ".$this->client['id_language']);
+              if ($translate_bt){
+                $rigo['translate_descri'] = $translate_bt['descri'];
+                $rigo['translate_body_text'] = $translate_bt['body_text'];
+                $rigo['translate_custom_field'] = $translate_bt['custom_field'];
+              }
+            } elseif ($rigo['tiprig'] == 1) {
               $rigo['importo'] = CalcolaImportoRigo(1, $rigo['prelis'], 0);
               $v_for_castle = CalcolaImportoRigo(1, $rigo['prelis'], $this->tesdoc['sconto']);
             } elseif ($rigo['tiprig'] == 4) {

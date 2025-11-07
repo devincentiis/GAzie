@@ -1838,7 +1838,9 @@ if ( $_POST['rigcon']>=1){
         echo "</td>\n";
         echo "<td>";
         $gForm->lockSubtoMaster($form["mastro_rc"][$i], 'conto_rc' . $i);
-        $gForm->sub_Account('conto_rc' . $i, $form['conto_rc' . $i], $form['search']['conto_rc' . $i], $form['hidden_req'], $script_transl['mesg']);
+        // visualizzo i conti HIDDEN solo se in modifica e conto già valorizzato
+        $hidden = ($toDo == 'update' && $form['conto_rc' . $i]>=100000001) ? false : true ;
+        $gForm->sub_Account('conto_rc' . $i, $form['conto_rc' . $i], $form['search']['conto_rc' . $i], $form['hidden_req'], $script_transl['mesg'],$hidden);
         if (!preg_match("/^id_([0-9]+)$/", $form['conto_rc' . $i], $match)) { // non è un partner da inserire sul piano dei conti
             echo '<a class="btn btn-xs btn-default" href="select_partit.php?id=' . $form['conto_rc' . $i] . '" title="' . $script_transl['visacc'] . '" target="_new">
 								<i class="glyphicon glyphicon-eye-open"></i>
@@ -1905,7 +1907,9 @@ if ( $_POST['rigcon']>=1){
     echo "</td>\n";
     echo "<td>\n";
     $gForm->lockSubtoMaster($form['insert_mastro'], 'insert_conto');
-    $gForm->sub_Account('insert_conto', $form['insert_conto'], $form['search']['insert_conto'], $form['hidden_req'], $script_transl['mesg']);
+    // visualizzo i conti HIDDEN solo se in modifica e conto già valorizzato
+    $hidden = ($toDo == 'update' && $form['insert_conto']>=100000001) ? false : true ;
+    $gForm->sub_Account('insert_conto', $form['insert_conto'], $form['search']['insert_conto'], $form['hidden_req'], $script_transl['mesg'],$hidden);
     echo "</td>\n";
     echo "<td><div onmousedown=\"toggleContent('insert')\" class=\"clickarea\" style=\"cursor:pointer;\">";
     echo "<input style=\"text-align:right;\" type=\"text\" value=\"\" maxlength=\"13\" id=\"insert_import\" name=\"insert_import\"> &crarr;</div>\n";

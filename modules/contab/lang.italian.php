@@ -142,23 +142,25 @@ $strScript = array("select_liqiva.php" =>
         'add_row' => 'Aggiungi un rigo'
     ),
     "admin_piacon.php" =>
-    array('title' => 'Piano dei conti',
-        'ins_this' => 'Inserisci un nuovo conto',
-        'upd_this' => 'Modifica il conto ',
-        'errors' => array('Il codice non &egrave; valido!',
-            'Il codice scelto &egrave; gi&agrave; stato usato!',
-            'Non &egrave; stata inserita la descrizione!'
-        ),
-        'codice' => "Codice ",
-        'mas' => "Mastro",
-        'sub' => "Sottoconto",
-        'descri' => "Descrizione",
-        'ceedar' => "Riclassificazione Bilancio CEE / DARE",
-        'ceeave' => "Riclassificazione Bilancio CEE / AVERE",
-		'paymov' => "Apre scadenzario",
-		'paymov_value' => array(''=>'No','D'=>'Apre in DARE (portafoglio attivo)','A'=>'Apre in AVERE (portafoglio passivo)'),
-        'annota' => "Note"
-    ),
+    [ 'title' => 'Piano dei conti',
+      'ins_this' => 'Inserisci un nuovo conto',
+      'upd_this' => 'Modifica il conto ',
+      'errors' => array('Il codice non &egrave; valido!',
+          'Il codice scelto &egrave; gi&agrave; stato usato!',
+          'Non &egrave; stata inserita la descrizione!'
+      ),
+      'codice' => "Codice ",
+      'mas' => "Mastro",
+      'sub' => "Sottoconto",
+      'descri' => "Descrizione",
+      'ceedar' => "Riclassificazione Bilancio CEE / DARE",
+      'ceeave' => "Riclassificazione Bilancio CEE / AVERE",
+      'paymov' => "Apre scadenzario",
+      'paymov_value' => array(''=>'No','D'=>'Apre in DARE (portafoglio attivo)','A'=>'Apre in AVERE (portafoglio passivo)'),
+      'annota' => "Note",
+      'status' => 'Visibilit&agrave; alla ricerca',
+      'status_value' => array('' => 'Attiva', 'HIDDEN' => 'Disabilitata')
+    ],
     "admin_movcon.php" =>
     array('title' => 'Movimenti contabili',
         'ins_this' => 'Inserisci un nuovo movimento contabile ',

@@ -127,7 +127,7 @@ $where = "(codice < " . $admin_aziend['mascli'] . "000001 OR codice > " . $admin
 $select = " SUM(import*(darave='D')) AS dare, SUM(import*(darave='A')) AS avere";
 $table = $gTables['rigmoc'] . " LEFT JOIN " . $gTables['tesmov'] . " ON " . $gTables['rigmoc'] . ".id_tes = " . $gTables['tesmov'] . ".id_tes ";
 $where2 = " AND datreg BETWEEN " . $date_ini . " AND " . $final_date . " GROUP BY codcon";
-$rs = gaz_dbi_dyn_query('codice,descri', $gTables['clfoco'], $where, 'codice');
+$rs = gaz_dbi_dyn_query('codice,descri,status', $gTables['clfoco'], $where, 'codice');
 $collapse = 0;
 $css_class = ["gaz-attivo","gaz-passivo","gaz-costi","gaz-ricavi","gaz-transitori"];
 $section = [1=>"Attività",2=>"Passività",3=>"Costi",4=>"Ricavi",5=>"Transitori"];
@@ -172,7 +172,7 @@ while ($r = gaz_dbi_fetch_array($rs)) {
       echo "</td></tr>";
     } else {
       echo '<tr class="' . $collapse.' collapse tr_piacon" aria-expanded="false"><td class="noborder tr_piacon"> </td>
-            <td class="'.$color_class.'"><a class="btn btn-xs btn-default" href="admin_piacon.php?Update&amp;codice=' . $r["codice"] . '" title="' . $script_transl['edit_account'] . '"><i class="glyphicon glyphicon-edit"></i>&nbsp;' . substr($r["codice"], 3) . '</a></td>
+            <td class="'.$color_class.'"><a class="btn btn-xs btn-default" href="admin_piacon.php?Update&amp;codice=' . $r["codice"] . '" title="' . $script_transl['edit_account'] . '"><i class="glyphicon glyphicon-'.($r["status"]=='HIDDEN'?'eye-close':'edit').'"></i>&nbsp;' . substr($r["codice"], 3) . '</a></td>
             <td class="'.$color_class.'">' . $r["descri"] . ' </td>
             <td class="'.$color_class.' text-right">' . gaz_format_number($r2["dare"]) . ' </td>
             <td class="'.$color_class.' text-right">' . gaz_format_number($r2["avere"]) . ' </td>

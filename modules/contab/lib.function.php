@@ -234,7 +234,7 @@ class contabForm extends GAzieForm {
         return $anagrafiche;
     }
 
-    function sub_Account($name, $val, $strSearch = '', $val_hiddenReq = '', $mesg='') {
+    function sub_Account($name, $val, $strSearch = '', $val_hiddenReq = '', $mesg='',$hidden=false) {
         global $gTables, $admin_aziend;
         $this->gTables = $gTables;
         $this->name = $name;
@@ -254,102 +254,103 @@ class contabForm extends GAzieForm {
             $where = "codice NOT LIKE '%000000'";
         }
         if ($ctrl_mas == $admin_aziend['mascli'] || $ctrl_mas == $admin_aziend['masfor']) { // se è un partner commerciale
-            // cliente o fornitore
-            $anagrafica = new Anagrafica();
-            if ($val > 100000000 && $ctrl_mas == substr($val, 0, 3)) { //vengo da una modifica della precedente select case quindi non serve la ricerca
-                $partner = gaz_dbi_get_row($gTables['clfoco'] . ' LEFT JOIN ' . $gTables['anagra'] . ' ON ' . $gTables['clfoco'] . '.id_anagra = ' . $gTables['anagra'] . '.id', "codice", $val);
-                echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
-                echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"" . substr($partner['ragso1'], 0, 8) . "\">\n";
-                echo "\t<input type=\"submit\" tabindex=\"999\" value=\"" . $partner['ragso1'] . "\" name=\"change\" onclick=\"this.form.$name.value='0'; this.form.hidden_req.value='change';\" title=\"PI=" . $partner['pariva'] . ' ' . $mesg[2] . "\">\n";
-                echo ' <button  class="btn btn-warning btn-xs" title="Scadenzario" onclick="dialogSchedule(this);return false;" id="paymov' . $val . $name . '"><i class="glyphicon glyphicon-time"></i></button> ';
-            } elseif (preg_match("/^id_([0-9]+)$/", $val, $match)) { // e' stata selezionata la sola anagrafica
-                $partner = gaz_dbi_get_row($gTables['anagra'], 'id', $match[1]);
-                echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
-                echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"" . substr($partner['ragso1'], 0, 8) . "\">\n";
-                echo "\t<input type=\"submit\" tabindex=\"999\" style=\"background:#FFBBBB\"; value=\"" . $partner['ragso1'] . "\" name=\"change\" onclick=\"this.form.$name.value='0'; this.form.hidden_req.value='change';\" title=\"$mesg[2]\">\n";
-            } else {
-                if (strlen($strSearch) >= 2) { //sto ricercando un nuovo partner
-                    if ($this->master_value > 100) { //ho da ricercare nell'ambito di un mastro
-                        $this->setWhat($this->master_value);
-                    }
-                    if (is_numeric($strSearch)) {                      //ricerca per partita iva
-                        $partner = $this->queryAnagra(" pariva = " . intval($strSearch));
-                    } else {                                      //ricerca per ragione sociale
-                        $partner = $this->queryAnagra(" a.ragso1 LIKE '" . addslashes($strSearch) . "%'");
-                    }
-                    if (count($partner) > 1 || $_POST['hidden_req']=='change') {
-                        echo "\t<select name=\"$name\" class=\"FacetSelect\"  onchange=\"if(typeof(this.form.hidden_req)!=='undefined'){this.form.hidden_req.value='$name';} this.form.submit();\">\n";
-                        echo "<option value=\"0\"> ---------- </option>";
-                        preg_match("/^id_([0-9]+)$/", $val, $match);
-                        foreach ($partner as $r) {
-                            if ($r['codpart'] > 0) {
-                                $r['codice'] = $r['codpart'];
-                            }
-                            $style = '';
-                            $selected = '';
-                            $disabled = '';
-                            if ($r['status'] == 'HIDDEN') {
-                                $disabled = ' disabled ';
-                            }
-                            if (isset($match[1]) && $match[1] == $r['id']) {
-                                $selected = "selected";
-                            } elseif ($r['codice'] == $val && $val > 0) {
-                                $selected = "selected";
-                            }
-                            if ($this->master_value < 0) { // vado cercando tutti i partner del piano dei conti
-                                if ($r["codice"] < 1) {  // disabilito le anagrafiche presenti solo in altre aziende
-                                    $disabled = ' disabled ';
-                                    $style = 'style="background:#FF6666";';
-                                }
-                            } elseif ($r["codice"] < 1) {
-                                $style = 'style="background:#FF6666";';
-                                $r['codice'] = 'id_' . $r['id'];
-                            } elseif (substr($r["codice"], 0, 3) != substr($this->master_value, 0, 3)) {
-                                $style = 'style="background:#FFBBBB";';
-                                $r['codice'] = 'id_' . $r['id'];
-                            }
-                            echo "\t\t <option $style value=\"" . $r['codice'] . "\" $selected $disabled>" . substr($r["codice"], 3, 6) . '-' . $r["ragsoc"] . " " . $r["citta"] . "</option>\n";
-                        }
-                        echo "\t </select>\n";
-					} elseif(count($partner) == 1){
-						$style='';
-						if ($this->master_value < 0) { // vado cercando tutti i partner del piano dei conti
-							if ($partner[0]["codpart"] < 1) {  // disabilito le anagrafiche presenti solo in altre aziende
-							}
-						} elseif ($partner[0]["codpart"] < 1) {
-							$partner[0]['codpart'] = 'id_' . $partner[0]['id'];
-							$style = 'style="background:#FF6666";';
-						} elseif (substr($partner[0]["codpart"], 0, 3) != substr($this->master_value,0,3)) {// non appartiene al mastro passato in $m
-							$partner[0]['codpart'] = 'id_' . $partner[0]['id'];
-							$style = 'style="background:#FF6666";';
-						}
-						$val=$partner[0]['codpart'];
-						echo "\t<input type=\"submit\" id=\"onlyone_submit\" value=\"→ \" onclick=\"if(typeof(this.form.hidden_req)!=='undefined'){this.form.hidden_req.value='$name';} this.form.submit();\">\n";
-						echo "\t<input type=\"hidden\" id=\"$name\" name=\"$name\" value=\"$val\">\n";
-						echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"" . substr($partner[0]['ragsoc'], 0, 8) . "\">\n";
-						echo "\t<input type=\"submit\" tabindex=\"999\" value=\"" . $partner[0]['ragsoc'] . "\" name=\"change\" ".$style." onclick=\"this.form.$name.value='0'; this.form.hidden_req.value='change';\" title=\"$mesg[2]\">\n";
-                    } else {
-                        $msg = $mesg[0];
-                        echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
-                    }
-                } else {
-                    $msg = $mesg[1];
-                    echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
+          // cliente o fornitore
+          $anagrafica = new Anagrafica();
+          if ($val > 100000000 && $ctrl_mas == substr($val, 0, 3)) { //vengo da una modifica della precedente select case quindi non serve la ricerca
+              $partner = gaz_dbi_get_row($gTables['clfoco'] . ' LEFT JOIN ' . $gTables['anagra'] . ' ON ' . $gTables['clfoco'] . '.id_anagra = ' . $gTables['anagra'] . '.id', "codice", $val);
+              echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
+              echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"" . substr($partner['ragso1'], 0, 8) . "\">\n";
+              echo "\t<input type=\"submit\" tabindex=\"999\" value=\"" . $partner['ragso1'] . "\" name=\"change\" onclick=\"this.form.$name.value='0'; this.form.hidden_req.value='change';\" title=\"PI=" . $partner['pariva'] . ' ' . $mesg[2] . "\">\n";
+              echo ' <button  class="btn btn-warning btn-xs" title="Scadenzario" onclick="dialogSchedule(this);return false;" id="paymov' . $val . $name . '"><i class="glyphicon glyphicon-time"></i></button> ';
+          } elseif (preg_match("/^id_([0-9]+)$/", $val, $match)) { // e' stata selezionata la sola anagrafica
+              $partner = gaz_dbi_get_row($gTables['anagra'], 'id', $match[1]);
+              echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
+              echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"" . substr($partner['ragso1'], 0, 8) . "\">\n";
+              echo "\t<input type=\"submit\" tabindex=\"999\" style=\"background:#FFBBBB\"; value=\"" . $partner['ragso1'] . "\" name=\"change\" onclick=\"this.form.$name.value='0'; this.form.hidden_req.value='change';\" title=\"$mesg[2]\">\n";
+          } else {
+            if (strlen($strSearch) >= 2) { //sto ricercando un nuovo partner
+              if ($this->master_value > 100) { //ho da ricercare nell'ambito di un mastro
+                  $this->setWhat($this->master_value);
+              }
+              if (is_numeric($strSearch)) {                      //ricerca per partita iva
+                  $partner = $this->queryAnagra(" pariva = " . intval($strSearch));
+              } else {                                      //ricerca per ragione sociale
+                  $partner = $this->queryAnagra(" a.ragso1 LIKE '" . addslashes($strSearch) . "%'");
+              }
+              if (count($partner) > 1 || $_POST['hidden_req']=='change') {
+                echo "\t<select name=\"$name\" class=\"FacetSelect\"  onchange=\"if(typeof(this.form.hidden_req)!=='undefined'){this.form.hidden_req.value='$name';} this.form.submit();\">\n";
+                echo "<option value=\"0\"> ---------- </option>";
+                preg_match("/^id_([0-9]+)$/", $val, $match);
+                foreach ($partner as $r) {
+                  if ($r['codpart'] > 0) {
+                      $r['codice'] = $r['codpart'];
+                  }
+                  $style = '';
+                  $selected = '';
+                  $disabled = '';
+                  if ($r['status'] == 'HIDDEN') {
+                      $disabled = ' disabled ';
+                  }
+                  if (isset($match[1]) && $match[1] == $r['id']) {
+                      $selected = "selected";
+                  } elseif ($r['codice'] == $val && $val > 0) {
+                      $selected = "selected";
+                  }
+                  if ($this->master_value < 0) { // vado cercando tutti i partner del piano dei conti
+                      if ($r["codice"] < 1) {  // disabilito le anagrafiche presenti solo in altre aziende
+                          $disabled = ' disabled ';
+                          $style = 'style="background:#FF6666";';
+                      }
+                  } elseif ($r["codice"] < 1) {
+                      $style = 'style="background:#FF6666";';
+                      $r['codice'] = 'id_' . $r['id'];
+                  } elseif (substr($r["codice"], 0, 3) != substr($this->master_value, 0, 3)) {
+                      $style = 'style="background:#FFBBBB";';
+                      $r['codice'] = 'id_' . $r['id'];
+                  }
+                  echo "\t\t <option $style value=\"" . $r['codice'] . "\" $selected $disabled>" . substr($r["codice"], 3, 6) . '-' . $r["ragsoc"] . " " . $r["citta"] . "</option>\n";
                 }
-				if( !strstr($val,'id') && $val<=100000000){
-					echo "\t<input type=\"text\" id=\"search_$name\" name=\"search[$name]\" value=\"" . $strSearch . "\" maxlength=\"16\" size=\"10\" class=\"FacetInput\">\n";
-				}
-				if (isset($msg)) {
-					echo "<input type=\"text\" style=\"color: red; font-weight: bold;\" size=\"" . strlen($msg) . "\" disabled value=\"$msg\">\n";
-				}
-				if( !strstr($val,'id') && $val<=100000000){
-				   echo '<button type="submit" class="btn btn-default btn-sm" name="search_str"><i class="glyphicon glyphicon-search"></i></button>';
-				}
+                echo "\t </select>\n";
+              } elseif(count($partner) == 1){
+                $style='';
+                if ($this->master_value < 0) { // vado cercando tutti i partner del piano dei conti
+                  if ($partner[0]["codpart"] < 1) {  // disabilito le anagrafiche presenti solo in altre aziende
+                  }
+                } elseif ($partner[0]["codpart"] < 1) {
+                  $partner[0]['codpart'] = 'id_' . $partner[0]['id'];
+                  $style = 'style="background:#FF6666";';
+                } elseif (substr($partner[0]["codpart"], 0, 3) != substr($this->master_value,0,3)) {// non appartiene al mastro passato in $m
+                  $partner[0]['codpart'] = 'id_' . $partner[0]['id'];
+                  $style = 'style="background:#FF6666";';
+                }
+                $val=$partner[0]['codpart'];
+                echo "\t<input type=\"submit\" id=\"onlyone_submit\" value=\"→ \" onclick=\"if(typeof(this.form.hidden_req)!=='undefined'){this.form.hidden_req.value='$name';} this.form.submit();\">\n";
+                echo "\t<input type=\"hidden\" id=\"$name\" name=\"$name\" value=\"$val\">\n";
+                echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"" . substr($partner[0]['ragsoc'], 0, 8) . "\">\n";
+                echo "\t<input type=\"submit\" tabindex=\"999\" value=\"" . $partner[0]['ragsoc'] . "\" name=\"change\" ".$style." onclick=\"this.form.$name.value='0'; this.form.hidden_req.value='change';\" title=\"$mesg[2]\">\n";
+              } else {
+                $msg = $mesg[0];
+                echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
+              }
+            } else {
+                $msg = $mesg[1];
+                echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
             }
+            if( !strstr($val,'id') && $val<=100000000){
+              echo "\t<input type=\"text\" id=\"search_$name\" name=\"search[$name]\" value=\"" . $strSearch . "\" maxlength=\"16\" size=\"10\" class=\"FacetInput\">\n";
+            }
+            if (isset($msg)) {
+              echo "<input type=\"text\" style=\"color: red; font-weight: bold;\" size=\"" . strlen($msg) . "\" disabled value=\"$msg\">\n";
+            }
+            if( !strstr($val,'id') && $val<=100000000){
+               echo '<button type="submit" class="btn btn-default btn-sm" name="search_str"><i class="glyphicon glyphicon-search"></i></button>';
+            }
+          }
         } else {   // altri sottoconti
             echo "\t<input type=\"hidden\" name=\"search[$name]\" value=\"\">\n";
             echo "\t<select name=\"$name\" class=\"FacetSelect\" onchange=\"this.form.hidden_req.value='$name'; this.form.submit();\">\n";
             echo "<option value=\"0\"> - - - - - - - - - - - - - - - - - - - </option>";
+            $where = $hidden ? $where." AND status <> 'HIDDEN' " : $where;
             $result = gaz_dbi_dyn_query("*", $gTables['clfoco'], $where, "codice ASC");
             while ($r = gaz_dbi_fetch_array($result)) {
                 $selected = '';
