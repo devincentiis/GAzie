@@ -131,6 +131,10 @@ class FatturaImmediata extends Template_con_scheda
 
                 switch($rigo['tiprig']) {
                 case "0":
+                    if ($rigo['translate_descri']){
+                      $this->Cell(105,5, $rigo['translate_descri'],'LR',0,'L',0,'',1);
+                      $this->Cell(81,5,'','LR',1);
+                    }
                     $this->Cell(25, 6, $rigo['codart'],1,0,'L', 0, '', 1);
                     $this->Cell(80, 6, $rigo['descri'],1,0,'L',0,'',1);
                     $this->Cell(7,  6, $rigo['unimis'],1,0,'C');

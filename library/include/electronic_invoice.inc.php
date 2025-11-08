@@ -1,6 +1,5 @@
 <?php
-
-/* $
+/*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
   Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
@@ -22,7 +21,7 @@
   scriva   alla   Free  Software Foundation, 51 Franklin Street,
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
- */
+*/
 
 require_once("../../library/include/expiry_calc.php");
 
@@ -497,6 +496,16 @@ class invoiceXMLvars {
         $nr_idtes++; // è un tipo rigo a cui possono essere riferiti i DatiOrdiniAcquisto,ecc lo aumento
       }
       $ctrl_idtes=$rigo['id_tes'];
+      // traduzione
+      if ($rigo['tiprig'] == 0 && $this->client['id_language']) { // controllo la presenza di una eventuale traduzione
+        // se ho la traduzione in body_text la aggiungo come rigo di commento prima del rigo stesso
+        $translate_bt = gaz_dbi_get_row($this->gTables['body_text'], "table_name_ref", 'rigdoc'," AND code_ref = '".$rigo['codart']."' AND lang_id = ".$this->client['id_language']." AND id_ref = ".$rigo['id_rig']);
+        if ($translate_bt){
+          $rigo_L = ['id_rig'=>0,'tiprig'=>'L','descri'=>$translate_bt['descri'],'importo'=>0,'pervat'=>0,'ritenuta'=>0,'natura'=>''];
+          $results[$nr] = $rigo_L;
+          $nr++;
+        }
+      }
       $results[$nr] = $rigo;
       $nr++;
     }
@@ -1176,6 +1185,30 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
 					$benserv = $xpath->query("//FatturaElettronicaBody/DatiBeniServizi")->item(0);
           $el = $domDoc->createElement("DettaglioLinee", "\n");
           $el1 = $domDoc->createElement("NumeroLinea", $n_linea);
+          $el->appendChild($el1);
+          $el1 = $domDoc->createElement("Descrizione", substr($rigo['descri'], -1000));
+          $el->appendChild($el1);
+          $el1 = $domDoc->createElement("PrezzoUnitario", '0.00');
+          $el->appendChild($el1);
+          $el1 = $domDoc->createElement("PrezzoTotale", '0.00');
+          $el->appendChild($el1);
+          $el1 = $domDoc->createElement("AliquotaIVA", number_format($XMLvars->descrifae_vat, 2, '.', ''));
+          $el->appendChild($el1);
+          if ($XMLvars->descrifae_vat <= 0) {
+            $el1 = $domDoc->createElement("Natura", $XMLvars->descrifae_natura);
+            $el->appendChild($el1);
+          }
+          $benserv->appendChild($el);
+          $nl = true;
+          break;
+        case "L": // traduzione
+					$benserv = $xpath->query("//FatturaElettronicaBody/DatiBeniServizi")->item(0);
+          $el = $domDoc->createElement("DettaglioLinee", "\n");
+          $el1 = $domDoc->createElement("NumeroLinea", $n_linea);
+          $el->appendChild($el1);
+          $el1 = $domDoc->createElement("CodiceArticolo", ''); // uso il contenuto di questo elemento per indicare che è una traduzione e il riferimento al rigo (il successivo)
+          $el2 = $domDoc->createElement("CodiceTipo","Traduzione");
+          $el1->appendChild($el2);
           $el->appendChild($el1);
           $el1 = $domDoc->createElement("Descrizione", substr($rigo['descri'], -1000));
           $el->appendChild($el1);

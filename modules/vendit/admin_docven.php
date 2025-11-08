@@ -28,7 +28,6 @@ require("../../modules/magazz/lib.function.php");
 $admin_aziend = checkAdmin();
 $backDocList = gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
 $scorrimento = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
-
 $msgtoast = "";
 $msg = ['err'=>[],'war'=>[]];
 $calc = new Compute;
@@ -146,6 +145,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $form['numfat'] = $_POST['numfat'];
   $form['datfat'] = $_POST['datfat'];
   $form['clfoco'] = $_POST['clfoco'];
+  $form['partner_lang'] = intval($_POST['partner_lang']);
   //tutti i controlli su  tipo di pagamento e rate
   $form['speban'] = floatval($_POST['speban']);
   $form['numrat'] = intval($_POST['numrat']);
@@ -292,7 +292,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       if (isset($_POST["row_$next_row"])) { //se ho un rigo testo
         $form["row_$next_row"] = $_POST["row_$next_row"];
       }
-      $form['rows'][$next_row]['descri'] = substr($v['descri'], 0, 100);
+      $form['rows'][$next_row]['descri'] = substr($v['descri'],0,1000);
       $form['rows'][$next_row]['tiprig'] = intval($v['tiprig']);
       $form['rows'][$next_row]['codart'] = substr($v['codart'], 0, 32);
       if ($_POST['hidden_req']=="fae_tipo_cassa".$next_row && $v['tiprig']==4) { // se provengo da un cambiamento di un rigo cassa previdenziale aggiorno la descrizione
@@ -320,6 +320,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       $form['rows'][$next_row]['id_warehouse'] = intval($v['id_warehouse']);
       $form['rows'][$next_row]['id_position'] = (isset($v['id_position']))?intval($v['id_position']):'';
       $form['rows'][$next_row]['row_cosepos'] = (isset($v['row_cosepos']))?intval($v['row_cosepos']):'';
+      $form['rows'][$next_row]['translate_descri'] = substr($v['translate_descri'],0,1000);
       $form['rows'][$next_row]['annota'] = substr($v['annota'], 0, 50);
       $form['rows'][$next_row]['scorta'] = floatval($v['scorta']);
       $form['rows'][$next_row]['quamag'] = floatval($v['quamag']);
@@ -736,6 +737,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         $i = 0;
         $count = count($form['rows']) - 1;
         while ($val_old_row = gaz_dbi_fetch_array($old_rows)) {
+          // elimino sempre e comunque le vecchie traduzioni riferite a righi articoli
+          gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'rigdoc' AND code_ref = '".$val_old_row['codart']."' AND lang_id = ".$form['partner_lang']." AND id_ref", $val_old_row['id_rig']);
           $form['rows'][$i]['peso_specifico']=$form['rows'][$i]['pesosp'];
           // per evitare problemi qualora siano stati modificati i righi o comunque cambiati di ordine elimino sempre il vecchio movimento di magazzino e sotto ne inserisco un altro attenendomi a questo
           if (intval($val_old_row['id_mag']) > 0) {  //se c'è stato un movimento di magazzino lo azzero
@@ -747,6 +750,10 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
             $form['rows'][$i]['id_tes'] = $form['id_tes'];
             $codice = array('id_rig', $val_old_row['id_rig']);
             rigdocUpdate($codice, $form['rows'][$i]);
+            // reinserisco le eventuali traduzioni cancellate sopra
+            if ($form['partner_lang'] > 1 && !empty(trim($form['rows'][$i]['translate_descri'])) && strlen($form['rows'][$i]['codart']) >=1 ) {
+              bodytextInsert(['table_name_ref' => 'rigdoc', 'id_ref' => $val_old_row['id_rig'], 'code_ref' => $form['rows'][$i]['codart'], 'descri' => $form['rows'][$i]['translate_descri'], 'lang_id' => $form['partner_lang']]);
+            }
             if (isset($form["row_$i"]) && $val_old_row['id_body_text'] > 0) { //se è un rigo testo giè presente lo modifico
                 bodytextUpdate(array('id_body', $val_old_row['id_body_text']), array('table_name_ref' => 'rigdoc', 'id_ref' => $val_old_row['id_rig'], 'body_text' => $form["row_$i"], 'lang_id' => $admin_aziend['id_language']));
                 gaz_dbi_put_row($gTables['rigdoc'], 'id_rig', $val_old_row['id_rig'], 'id_body_text', $val_old_row['id_body_text']);
@@ -790,6 +797,10 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
           $form['rows'][$i]['peso_specifico']=$form['rows'][$i]['pesosp'];
           $form['rows'][$i]['id_tes'] = $form['id_tes'];
           $last_rigdoc_id=rigdocInsert($form['rows'][$i]);// inserisco il rig doc
+          // inserisco l'eventuale traduzione in lingua in body_text
+          if ($form['partner_lang'] > 1 && !empty(trim($form['rows'][$i]['translate_descri'])) && strlen($form['rows'][$i]['codart']) >=1 ) {
+            bodytextInsert(['table_name_ref' => 'rigdoc', 'id_ref' => $last_rigdoc_id, 'code_ref' => $form['rows'][$i]['codart'], 'descri' => $form['rows'][$i]['translate_descri'], 'lang_id' => $form['partner_lang']]);
+          }
 					// INIZIO INSERIMENTO DOCUMENTI ALLEGATI
           if  (( $form['rows'][$i]['tiprig']==51 || $form['rows'][$i]['tiprig']==50 ) && !empty($form['rows'][$i]['extdoc'])) {
             if (file_exists(DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/tmp/'.$i.'_rigdoc_'.$form['rows'][$i]['extdoc'] )) {
@@ -962,6 +973,10 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
           $form['rows'][$i]['peso_specifico']=$v['pesosp'];
           $form['rows'][$i]['id_tes'] = $ultimo_id;
           $last_rigdoc_id = rigdocInsert($form['rows'][$i]);
+          // inserisco l'eventuale traduzione in lingua in body_text
+          if ($form['partner_lang'] > 1 && !empty(trim($v['translate_descri'])) && strlen($v['codart']) >=1 ) {
+            bodytextInsert(['table_name_ref' => 'rigdoc', 'id_ref' => $last_rigdoc_id, 'code_ref' => $v['codart'], 'descri' => $v['translate_descri'], 'lang_id' => $form['partner_lang']]);
+          }
 					// INIZIO INSERIMENTO DOCUMENTI ALLEGATI
           if  (( $form['rows'][$i]['tiprig']==51 || $form['rows'][$i]['tiprig']==50 ) && !empty($form['rows'][$i]['extdoc'])) {
             if (file_exists(DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/tmp/'.$i.'_rigdoc_'.$form['rows'][$i]['extdoc'] )) { // se ho scelto un altro file cancello tutti i vecchi e sposto il nuovo
@@ -1057,6 +1072,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
     } else {
       $cliente = $anagrafica->getPartner($form['clfoco']);
     }
+    $form['partner_lang']=$cliente['id_language'];
     $result = gaz_dbi_get_row($gTables['imball'], "codice", $cliente['imball']);
     $form['imball'] = ($result)?$result['descri']:'';
     if (($form['net_weight'] - $form['gross_weight']) >= 0) {
@@ -1333,7 +1349,14 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       $form['rows'][$old_key]['annota'] = '';
       $form['rows'][$old_key]['pesosp'] = '';
       $form['rows'][$old_key]['gooser'] = 0;
-      if ($form['in_tiprig'] == 0 && ! empty($form['in_codart'])) {  //rigo normale
+      if ($form['in_tiprig'] == 0 && !empty($form['in_codart'])) {  //rigo normale
+        // traduzione
+        if ($form['partner_lang'] > 1) { // controllo se ho la traduzione dell'articolo
+          $translate_bt = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico'," AND code_ref = '".$form['in_codart']."' AND lang_id = ".$form['partner_lang']);
+          if ($translate_bt){
+            $form['rows'][$old_key]['translate_descri'] = $translate_bt['descri'];
+          }
+        }
         $form['rows'][$old_key]['annota'] = $artico['annota'];
         $form['rows'][$old_key]['pesosp'] = $artico['peso_specifico'];
         $form['rows'][$old_key]['gooser'] = $artico['good_or_service'];
@@ -1505,6 +1528,12 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       $form['rows'][$next_row]['ritenuta'] = $form['in_ritenuta'];
       if ($form['in_tiprig'] == 0 || $form['in_tiprig'] == 50) {  //rigo normale
         $form['rows'][$next_row]['codart'] = $form['in_codart'];
+        // traduzione
+        $translate_bt=false;
+        if ($form['partner_lang'] > 1) { // controllo se ho la traduzione dell'articolo
+          $translate_bt = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico'," AND code_ref = '".$form['in_codart']."' AND lang_id = ".$form['partner_lang']);
+        }
+        $form['rows'][$next_row]['translate_descri'] = $translate_bt ? $translate_bt['descri'] : $artico['descri'];
         $form['rows'][$next_row]['annota'] = $artico['annota'];
         $form['rows'][$next_row]['pesosp'] = $artico['peso_specifico'];
         $form['rows'][$next_row]['gooser'] = $artico['good_or_service'];
@@ -2004,6 +2033,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $tesdoc = gaz_dbi_get_row($gTables['tesdoc'], "id_tes", $form['id_tes']);
   $anagrafica = new Anagrafica();
   $cliente = $anagrafica->getPartner($tesdoc['clfoco']);
+  $form['partner_lang']=$cliente['id_language'];
   $id_des = $anagrafica->getPartner($tesdoc['id_des']);
   $rs_rig = gaz_dbi_dyn_query("*", $gTables['rigdoc'], "id_tes = " . $form['id_tes'], "id_rig asc");
   $form['hidden_req'] = '';
@@ -2146,6 +2176,12 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
           $text = gaz_dbi_get_row($gTables['body_text'], "id_body", $rigo['id_body_text']);
           $form["row_$next_row"] = $text?$text['body_text']:'';
       }
+      // riprendo una eventuale traduzione del rigo
+      $form['rows'][$next_row]['translate_descri'] = '';
+      if ($form['partner_lang'] > 1 && $rigo['tiprig'] == 0  ) {
+        $translate_bt = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'rigdoc'," AND code_ref = '".$rigo['codart']."' AND id_ref = ".$rigo['id_rig']." AND lang_id = ".$form['partner_lang']);
+      }
+      if ($translate_bt) { $form['rows'][$next_row]['translate_descri'] = $translate_bt['descri']; }
       $form['rows'][$next_row]['descri'] = $rigo['descri'];
       $form['rows'][$next_row]['tiprig'] = $rigo['tiprig'];
       $form['rows'][$next_row]['codart'] = $rigo['codart'];
@@ -2330,6 +2366,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $form['numfat'] = "";
   $form['datfat'] = "";
   $form['clfoco'] = 0;
+  $form['partner_lang'] = 0;
   $form['pagame'] = "";
   $form['change_pag'] = "";
   $form['banapp'] = "";
@@ -2377,6 +2414,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   }
 
 }
+$form['partner_lang'] = $form['partner_lang'] > 1 ? $form['partner_lang'] : 1;
+$partner_lang=gaz_dbi_get_row($gTables['languages'], 'lang_id', $form['partner_lang']);
 
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup','custom/autocomplete','custom/miojs'));
@@ -2394,6 +2433,38 @@ if (isset($admin_aziend['lang'])){
 ?>
 <script>
 $(function () {
+  $( "#dialog_translate_descri" ).dialog({
+    autoOpen: false
+  });
+	$('.dialog_translate_descri').click(function() {
+		var idref = $(this).attr("ref");
+		$("p#dialog_translate_prev").html($("#"+idref).val());
+		$("#dialog_translate_next").val($("#"+idref).val());
+    $("#dialog_translate_descri" ).dialog({
+      width: "auto",
+      modal: "true",
+      show: "blind",
+      hide: "explode",
+      buttons: {
+				confirm:{
+					text:'Conferma',
+					'class':'btn btn-success',
+					click:function (event, ui) {
+         		$("#"+idref).val($("#dialog_translate_next").val());
+            $(this).dialog('destroy');
+          }
+        },
+   			close: {
+					text:'Annulla modifiche',
+					'class':'btn btn-default',
+          click:function() {
+            $(this).dialog("close");
+          }
+        }
+      }
+    });
+    $("#dialog_translate_descri" ).dialog( "open" );
+  });
   $("#initra").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
   $("#datemi").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
   $("#search_id_des").autocomplete({
@@ -2459,6 +2530,12 @@ if (count($msg['war']) > 0) { // ho un alert-danger
 }
 ?>
 <form method="POST" name="docven" enctype="multipart/form-data">
+
+<div style="display:none" id="dialog_translate_descri" title="Translate: <?php echo $partner_lang['title'].' '.base64_decode($partner_lang['emoji']); ?>">
+  <p class="ui-state-highlight" id="dialog_translate_prev"></p>
+  <p ><input type="text" value="" id="dialog_translate_next" maxlength="1000" size="30" /></p>
+</div>
+
 <div class="framePdf panel panel-success" style="display: none; position: absolute; left: 5%; top: 100px">
 	<div class="col-lg-12">
 		<div class="col-xs-11"><h4><?php echo $script_transl['print'];; ?></h4></div>
@@ -2473,6 +2550,7 @@ echo '	<input type="hidden" value="" name="' . ucfirst($toDo) . '" />
 	<input type="hidden" value="' . $form['ritorno'] . '" name="ritorno" />
 	<input type="hidden" value="' . $form['roundup_y'] . '" name="roundup_y">
 	<input type="hidden" value="' . $form['change_pag'] . '" name="change_pag" />
+	<input type="hidden" value="' . $form['partner_lang'] . '" name="partner_lang" />
 	<input type="hidden" value="' . $form['protoc'] . '" name="protoc" />
 	<input type="hidden" value="' . $form['numdoc'] . '" name="numdoc" />
 	<input type="hidden" value="' . $form['numfat'] . '" name="numfat" />
@@ -2746,6 +2824,7 @@ foreach ($form['rows'] as $k => $v) {
 
     $descrizione = htmlentities($v['descri'], ENT_QUOTES);
     echo "<input type=\"hidden\" value=\"" . $v['codart'] . "\" name=\"rows[$k][codart]\">\n";
+    echo '<input type="hidden" value="'.$v['translate_descri'].'" name="rows['.$k.'][translate_descri]" id="translate_descri_'.$k.'">';
     echo "<input type=\"hidden\" value=\"" . $v['status'] . "\" name=\"rows[$k][status]\">\n";
     echo "<input type=\"hidden\" value=\"" . $v['tiprig'] . "\" name=\"rows[$k][tiprig]\">\n";
     echo "<input type=\"hidden\" value=\"" . $v['codvat'] . "\" name=\"rows[$k][codvat]\">\n";
@@ -2807,6 +2886,9 @@ foreach ($form['rows'] as $k => $v) {
               </td>';
         echo '<td><small>'.$magazz->selectIdWarehouse('rows[' . $k . '][id_warehouse]',$v["id_warehouse"],true,'col-xs-12',$v['codart'],gaz_format_date($form['datemi'],true),($docOperat[$form['tipdoc']]*$v['quanti']*-1)).'</small></td>';
         echo '<td><input class="gazie-tooltip" data-type="product-thumb" data-id="' . $v["codart"] . '" data-title="' . $v['annota'] . '" type="text" name="rows[' . $k . '][descri]" value="' . $descrizione . '" maxlength=100 size=100 />';
+        if ($form['partner_lang'] > 1 ) { // bottone per dialog traduzione se previsto dalla lingua del cliente
+          echo '<a class="btn btn-xs dialog_translate_descri" ref="translate_descri_'.$k.'" href="#" title="'.$v['translate_descri'].'" > '.base64_decode($partner_lang['emoji']).'</a>';
+        }
         if (gaz_dbi_get_single_value($gTables['shelves'],'id_shelf','id_shelf > 0 LIMIT 1')){
         echo 'Ubicazione:';
           $select_position = new selectPosition("rows[$k][id_position]");

@@ -167,6 +167,10 @@ class FatturaSemplice extends Template {
         switch ($rigo['tiprig']) {
 
           case "0":
+            if ($rigo['translate_descri']){
+              $this->Cell(105,5, $rigo['translate_descri'],'LR',0,'L',0,'',1);
+              $this->Cell(81,5,'','LR',1);
+            }
             $this->Cell(25, 5, $rigo['codart'], 1, 0, 'L', 0, '', 1);
             $this->Cell(80, 5, $rigo['descri'], 1, 0, 'L', 0, '', 1);
             $this->Cell(7, 5, $rigo['unimis'], 1, 0, 'C');

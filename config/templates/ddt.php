@@ -166,6 +166,10 @@ class DDT extends Template_con_scheda
                 }
                 if ($rigo['tiprig'] < 2) {
                   $h=6;
+                  if ($rigo['translate_descri']){
+                    $this->Cell(127,6, $rigo['translate_descri'],'LR',0,'L',0,'',1);
+                    $this->Cell(60,6,'','LR',1);
+                  }
                   if (intval($rigo['barcode'])>0){
                     $h=16;
                     $x = $this->GetX();
