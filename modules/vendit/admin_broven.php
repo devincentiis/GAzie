@@ -96,6 +96,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['seziva'] = $_POST['seziva'];
     $form['indspe'] = $_POST['indspe'];
     $form['tipdoc'] = $_POST['tipdoc'];
+    $form['template'] = $_POST['template'];
     $form['gioemi'] = $_POST['gioemi'];
     $form['mesemi'] = $_POST['mesemi'];
     $form['annemi'] = $_POST['annemi'];
@@ -1510,6 +1511,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['cosear'] = "";
     $form['seziva'] = $tesbro['seziva'];
     $form['tipdoc'] = $tesbro['tipdoc'];
+    $form['template'] = $tesbro['template'];
     $form['gioemi'] = substr($tesbro['datemi'], 8, 2);
     $form['mesemi'] = substr($tesbro['datemi'], 5, 2);
     $form['annemi'] = substr($tesbro['datemi'], 0, 4);
@@ -1676,6 +1678,10 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     } else {
         $form['tipdoc'] = $_GET['tipdoc'];
     }
+    // se esistente prendo l'ultimo template utilizzato
+    $rs_ultimo_template = gaz_dbi_dyn_query($gTables['tesbro'] . ".template", $gTables['tesbro'], "tipdoc = '" . $form['tipdoc'] . "'", 'datemi DESC, numdoc DESC', 0, 1);
+    $ultimo_template = gaz_dbi_fetch_array($rs_ultimo_template);
+    $form['template'] = $ultimo_template ? $ultimo_template['template'] : '';
     $form['id_tes'] = "";
     $form['weekday_repeat'] = date("N") - 1;
     $form['gioemi'] = date("d");
@@ -2049,9 +2055,33 @@ echo '	<input type="hidden" name="' . ucfirst($toDo) . '" value="" />
 		<input type="hidden" value="' . $form['numfat'] . '" name="numfat" />
 		<input type="hidden" value="' . $form['datfat'] . '" name="datfat" />
 		<input type="hidden" value="' . (isset($_POST['last_focus']) ? $_POST['last_focus'] : "") . '" name="last_focus" />
-		<div align="center" class="FacetFormHeaderFont">' . $title . '  a :';
+		<div align="center" class="row FacetFormHeaderFont">' . $title . '  a :';
 $select_cliente = new selectPartner('clfoco');
 $select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli']);
+$template_sets=[];
+$relativePath = '../../config';
+if ($handle = opendir($relativePath)) {
+  while ($file = readdir($handle)) {
+    if (substr($file, 0, 9) != "templates" || substr($file, -7) == "english") continue;
+    $template_sets[substr($file, 10)] = substr($file, 10);
+  }
+  closedir($handle);
+}
+
+if (count($template_sets) > 1 ) {
+  echo '<span class="small"> modulo stampa: </span><select name="template">';
+  foreach ($template_sets as $v) {
+    $selected = "";
+    if ($form["template"] == $v) {
+        $selected = " selected ";
+    }
+    echo '<option value="' .$v. '"' . $selected . ">" .( empty($v)?'standard':$v ). "</option>";
+  }
+  echo "</select>\n";
+} else {
+  echo '<input type="hidden" value="' . $form['template'] . '" name="template" />';
+}
+
 echo '	</div><div class="table-responsive">
 		<table class="Tlarge table table-striped table-bordered table-condensed">
 			<tr>
@@ -2061,7 +2091,7 @@ echo '	</div><div class="table-responsive">
 for ($counter = 1; $counter <= 5; $counter++) {
     $selected = "";
     if ($form['seziva'] == $counter) {
-        $selected = ' selected=""';
+        $selected = ' selected ';
     }
     echo '				<option value="' . $counter . '"' . $selected . '>' . $counter . '</option>';
 }

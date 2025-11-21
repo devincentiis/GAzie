@@ -112,7 +112,8 @@ class FatturaImmediata extends Template_con_scheda
         $lines = $this->docVars->getRigo();
       $prevTiprig=false;
       foreach ($lines AS $key => $rigo) {
-            if (($this->GetY() >= 157 && $this->taxstamp >= 0.01) || $this->GetY() >= 186 ) { // mi serve per poter stampare la casella del bollo
+            $act_y = $this->GetY();
+            if (($act_y >= 157 && $this->taxstamp >= 0.01) || $act_y >= 186 ) { // mi serve per poter stampare la casella del bollo
                 $this->Cell(186,6,'','T',1);
                 $this->SetFont('helvetica', '', 20);
                 $this->SetY(225);
@@ -132,8 +133,10 @@ class FatturaImmediata extends Template_con_scheda
                 switch($rigo['tiprig']) {
                 case "0":
                     if ($rigo['translate_descri']){
-                      $this->Cell(105,5, $rigo['translate_descri'],'LR',0,'L',0,'',1);
-                      $this->Cell(81,5,'','LR',1);
+                      $this->ImageSVG('@'.$this->docVars->client['language_svg_flag'],10.5,($act_y+0.7),4,3);
+                      $this->Cell(5,5,'','L');
+                      $this->Cell(107,5,$rigo['translate_descri'],'R',0,'L',0,'',1);
+                      $this->Cell(74,5,'','LR',1);
                     }
                     $this->Cell(25, 6, $rigo['codart'],1,0,'L', 0, '', 1);
                     $this->Cell(80, 6, $rigo['descri'],1,0,'L',0,'',1);
@@ -175,7 +178,7 @@ class FatturaImmediata extends Template_con_scheda
                     break;
                 case "6":
                 case "8":
-                    $this->writeHtmlCell(186,6,10,$this->GetY(),$rigo['descri'],1,1);
+                    $this->writeHtmlCell(186,6,10,$act_y,$rigo['descri'],1,1);
                     break;
                 case "11":
                     $this->Cell(25, 5, '', 'L');
@@ -261,9 +264,9 @@ class FatturaImmediata extends Template_con_scheda
                   $this->Cell(81,5,'','R',1);
                   break;
                 case "210":
-                    $oldy = $this->GetY();
+                    $oldy = $act_y;
                     $this->SetFont('helvetica', '', 8);
-                    $this->SetY($this->GetY()-6);
+                    $this->SetY($act_y-6);
                     $this->Cell(105, 8, '('.$rigo['unimis'].' '.gaz_format_quantity($rigo['quanti'],1,$this->decimal_quantity).')',0,0,'R');
                     $this->SetY( $oldy );
                     $this->SetFont('helvetica', '', 9);

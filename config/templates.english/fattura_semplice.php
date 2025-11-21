@@ -147,7 +147,8 @@ class FatturaSemplice extends Template {
       $lines = $this->docVars->getRigo();
       $prevTiprig=false;
       foreach ($lines AS $key => $rigo) {
-        if (($this->GetY() >= 166 && $this->docVars->taxstamp >= 0.01 ) || $this->GetY() >= 195 || (strlen($this->descriptive_last_row)>300 && $this->GetY() >= 186)) { // mi serve per poter stampare la casella del bollo
+        $act_y = $this->GetY();
+        if (($act_y >= 166 && $this->docVars->taxstamp >= 0.01 ) || $act_y >= 195 || (strlen($this->descriptive_last_row)>300 && $act_y >= 186)) { // mi serve per poter stampare la casella del bollo
           $this->Cell(186, 6, '', 'T', 1);
           $this->SetFont('helvetica', '', 20);
           $this->SetY(225);
@@ -167,7 +168,9 @@ class FatturaSemplice extends Template {
 
           case "0":
             if ($rigo['translate_descri']){
-              $this->Cell(105,5, $rigo['translate_descri'],'LR',0,'L',0,'',1);
+              $this->ImageSVG('@'.$this->docVars->client['language_svg_flag'],10.5,($act_y+0.7),4,3);
+              $this->Cell(5,5,'','L');
+              $this->Cell(107,5,$rigo['translate_descri'],'R',0,'L',0,'',1);
               $this->Cell(81,5,'',0,1);
             }
             $this->Cell(25, 5, $rigo['codart'], 1, 0, 'L', 0, '', 1);

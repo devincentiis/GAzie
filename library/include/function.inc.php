@@ -1567,7 +1567,7 @@ class GAzieMail {
       /* Imposto email a cui rispondere (se � stata impostata nella tabella gaz_xxxcompany_config`)
        * deve stare prima di $mail->SetFrom perch� altrimenti aggiunge il from al reply
        */
-      if (isset($config_replyTo) && !empty($config_replyTo['val'])) {  // utilizzo l'indirizzo in company_config
+      if (isset($config_replyTo) && strlen($config_replyTo['val']) >= 10 ) {  // utilizzo l'indirizzo in company_config
           $mittente = $config_replyTo['val'];
       } elseif (strlen($user['user_email'])>=10)  { // utilizzo quella dell'utente
           $mittente = $user['user_email'];

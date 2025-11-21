@@ -171,6 +171,8 @@ class DocContabVars {
       $this->perbollo = 0;
       $this->iva_bollo = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['taxstamp_vat']);
       $this->client = $anagrafica->getPartner($tesdoc['clfoco']);
+      $this->client['id_language'] = $this->client['id_language'] < 1 ? 1 : $this->client['id_language'];
+      $this->client['language_svg_flag']  = gaz_dbi_get_row($gTables['languages'], "lang_id",$this->client['id_language'])['image_svg'];
       if(!$this->client){
         $this->client=['ragso1'=>': ','ragso2'=>'','pec_email'=>'','fe_cod_univoco'=>'','fe_cod_univoco'=>'','indspe'=>'','citspe'=>'','country'=>'IT','capspe'=>'','prospe'=>'','pariva'=>'','pariva'=>'','codfis'=>'','sedleg'=>'','fiscal_rapresentative_id'=>'','stapre'=>'','id_currency'=>$admin_aziend['id_currency']];
       }
@@ -700,13 +702,17 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
 			$templates['DDT']='ddt2xA5';
 		}
 	}
-    $config = new Config;
-    $configTemplate = new configTemplate;
-    if ($lang_template) {
+  $config = new Config;
+  $configTemplate = new configTemplate;
+  if (is_string($template)) {
+    $configTemplate->template=$template;
+  }
+  if ($lang_template) {
 		$ts=$configTemplate->template;
 		$configTemplate->setTemplateLang($lang_template);
 		if (empty($ts)){$configTemplate->template=substr($configTemplate->template, 1);}
-    }
+  }
+  //var_dump($template);
 	$lh=(($dest && $dest == 'H')?'_lh':''); // eventuale scelta di stampare su carta intestata, aggiungo il suffisso "lh";
 	require_once ("../../config/templates" . ($configTemplate->template ? '.' . $configTemplate->template : '') . '/' . $templates[$templateName] .$lh. '.php');
     $pdf = new $templateName();

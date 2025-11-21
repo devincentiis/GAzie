@@ -293,14 +293,14 @@ if (isset($_POST['preview']) and $msg=='') {
         echo "</tr>";
 		$genera="";
 		$nr=0;$message_rem="";
-     foreach($m as $key => $mv){
+    foreach($m as $key => $mv){
 			$er="";
 
 			if ($mv['id_movmag']>0){ // se è un movimento del SIAN connesso al movimento di magazzino
 			$legenda_cod_op= array('1'=>'Confezionamento con etichettatura','2'=>'Confezionamento senza etichettatura','3'=>'Etichettatura','4'=>'Svuotamento di olio confezionato','5'=>'Movimentazione interna senza cambio di origine','S7'=>'Scarico di olio destinato ad altri usi','10'=>'Carico olio lampante da recupero','8'=>'Reso olio confezionato da clienti','9'=>'Olio ha ottenuto certificazione DOP');
-				if ($form['date_ini_Y'].$form['date_ini_M'].$form['date_ini_D']==str_replace("-", "", $mv['datdoc']) AND strlen($mv['status'])>1) {
+				if ($form['date_ini_Y'].$form['date_ini_M'].$form['date_ini_D']==str_replace("-", "", $mv['datdoc']) && strlen($mv['status'])>1) {
 				// escludo i movimenti già inseriti null'ultimo file con stessa data
-				} else if ($mv['id_orderman']>0 AND $mv['operat']==-1 AND $mv['cod_operazione']<>"S7"){
+				} else if ($mv['id_orderman']>0 && $mv['operat']==-1 && $mv['cod_operazione']<>"S7"){
 						if (strtotime($ult_mov) < strtotime($mv['datdoc'])){
 							if (intval($mv['cod_operazione'])<>3 ){// escludo codice operazione 3
               	//echo "<br><br>PRODUZIONE SCarico fusto ",$mv['recip_stocc']," di:",$mv['quanti']," totale recipiente:",$totcont[$mv['recip_stocc']]," - datdoc:",$mv['datdoc'];
@@ -338,7 +338,7 @@ if (isset($_POST['preview']) and $msg=='') {
 				} else {
 
 					$nr++;
-					if ($mv['id_orderman']==0 AND $mv['operat']==1){
+					if ($mv['id_orderman']==0 && $mv['operat']==1){
 						$legenda_cod_op['3']='Carico olio da lavorazione/deposito presso terzi';
 						$legenda_cod_op['5']='Carico olio da altro stabilimento/deposito stessa impresa';
             $legenda_cod_op['7']='Reso di olio sfuso da clienti';
@@ -366,7 +366,7 @@ if (isset($_POST['preview']) and $msg=='') {
 						  $mv['ragso1']=$re['ragso1'].' '.$re['ragso2'];
 						}
 					}
-					if ($mv['id_orderman']==0 AND $mv['operat']==-1){
+					if ($mv['id_orderman']==0 && $mv['operat']==-1){
 						$legenda_cod_op['0']='Vendita olio a consumatore finale';
 						$legenda_cod_op['1']='Vendita/cessione olio a ditta italiana';
 						$legenda_cod_op['2']='Vendita/cessione olio a ditta comunitaria';
@@ -381,10 +381,9 @@ if (isset($_POST['preview']) and $msg=='') {
 							//echo "<br>recip stocc:",$mv['recip_stocc']," - rec stoc destin:",$mv['recip_stocc_destin'];
 							//$totcont[$mv['recip_stocc']]=(isset($totcont[$mv['recip_stocc']]))?$totcont[$mv['recip_stocc']]:0;
 							//echo "<br>SCarico fusto ",$mv['recip_stocc'],", contenente kg",$totcont[$mv['recip_stocc']],", di kg:",$mv['quanti'];
-							if (intval($mv['recip_stocc'])>0){// se c'è il recipiente di stoccaggio
+							if (strlen($mv['recip_stocc']) > 0){// se c'è il recipiente di stoccaggio
 								$totcont[$mv['recip_stocc']] -= $mv['quanti'];
 								$totcont[$mv['recip_stocc']]=(number_format($totcont[$mv['recip_stocc']], 5)==0)?0:$totcont[$mv['recip_stocc']];
-
 								if ($totcont[$mv['recip_stocc']]<0){
 									//echo"<br>", $mv['desdoc'],"ERRORE  al rigo ",$nr, " - contenuto kg:",$totcont[$mv['recip_stocc']];
 									$message = "Al rigo ".$nr." la giacenza del silos ".$mv['recip_stocc']." è negativa"."\n";
@@ -427,20 +426,20 @@ if (isset($_POST['preview']) and $msg=='') {
 
 
 			}
-         }
-         echo "\t<tr class=\"FacetFieldCaptionTD\">\n";
-		 if (!empty($msg)) {
+    }
+    echo "\t<tr class=\"FacetFieldCaptionTD\">\n";
+		if (!empty($msg)) {
 			echo '<td colspan="2" class="FacetDataTDred">'.$gForm->outputErrors($msg,$script_transl['errors'])."</td></tr>\n";
 			if (!empty($message)){
 				echo "<script type='text/javascript'>alert(" . json_encode($message) . ");</script>";
 			}
-		}elseif ($genera=="ok"){
+		} elseif ($genera=="ok"){
 			echo '<td colspan="7" align="right"><input type="submit" name="create" value="';
 			echo "Genera file SIAN";
 			echo '">';
 			echo "\t </td>\n";
-		 }
-         echo "\t </tr>\n";
+		}
+    echo "\t </tr>\n";
 	}
   echo "</table></form>";
 }

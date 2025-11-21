@@ -526,14 +526,15 @@ $ts->output_navbar();
             }
             echo "</td>";
             // Colonna stampa
-            echo "<td align=\"center\"><a class=\"btn btn-xs btn-default btn-stampa\"";
+            echo "<td align=\"center\" title=\"Stampa documento PDF su modulo ".(strlen($r['template']) > 2 ? $r['template']:'standard')."\"><a class=\"btn btn-xs btn-".(strlen($r['template']) > 2 ? 'info':'default')." btn-stampa\"";
             // vedo se è presente un file di template adatto alla stampa su carta già intestata
             if($enable_lh_print_dialog>0 && withoutLetterHeadTemplate($r['tipdoc'])){
               echo ' onclick="choice_template(\''.$modulo.'\');" title="Scegli modulo per stampa"';
             }else{
               echo " style=\"cursor:pointer;\" onclick=\"printPdf('".$modulo."')\"";
             }
-            echo "><i class=\"glyphicon glyphicon-print\" title=\"Stampa documento PDF\"></i></a>";
+            $custom_template = strlen($r['template']) > 2 ? '<i class="glyphicon glyphicon-user"></i>':'';
+            echo '><i class="glyphicon glyphicon-print"></i> '.$custom_template.'</a>';
             echo "</td>";
             // Colonna Mail
             echo "<td align=\"center\">";

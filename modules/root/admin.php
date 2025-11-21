@@ -148,17 +148,20 @@ $(function(){
 <?php
 $serviceExpiry = gaz_dbi_get_row($gTables['company_config'], 'var', 'business_date_cessation');
 if ($serviceExpiry && strlen($serviceExpiry['val'])==10) {
-  $today = new DateTime(); // today
-  $dexpi = new DateTime($serviceExpiry['val']);
-  $daysdiff = $dexpi->diff($today);
-  if ( $daysdiff->days < 1){
-?>
-  <div class="alert alert-danger text-center" role="alert"> **** ATTENZIONE IL SERVIZIO E' SCADUTO IL <?php echo gaz_format_date($serviceExpiry['cvalue']); ?> E STA PER ESSERE DISATTIVATO  **** </div>
-<?php
-  } else {
-?>
-  <div class="alert alert-warning text-center" role="alert"> ATTENZIONE!!! QUESTO SERVIZIO SCADRA' TRA <?php echo $daysdiff->days; ?> GIORNI,<br/> SI PREGA PROVVEDERE ALLA REGOLARIZZAZIONE DELLO STESSO PRIMA CHE VENGA DISATTIVATO</div>
-<?php
+  $today = new DateTime(date("Y-m-d H:i:s", mktime(00,00,00))); // today at H 0:0:0
+  $dexpi = DateTime::createFromFormat('d/m/Y', $serviceExpiry['val']);
+  if ($dexpi) {
+    $daysdiff = date_diff($today,$dexpi);
+    if ( $daysdiff->invert == 1 && $daysdiff->days >= 1) {
+  ?>
+    <div class="alert alert-danger text-center" role="alert"> **** ATTENZIONE IL SERVIZIO E' SCADUTO IL <?php echo $serviceExpiry['val']; ?> E STA PER ESSERE DISATTIVATO  **** </div>
+  <?php
+    } else {
+
+  ?>
+    <div class="alert alert-warning text-center" role="alert"> ATTENZIONE!!! QUESTO SERVIZIO  <?php echo $daysdiff->days == 0 ? " E' SCADUTO OGGI ":" SCADRA' TRA ".$daysdiff->days.' GIORNI'; ?><br/> SI PREGA DI PROVVEDERE ALLA REGOLARIZZAZIONE DELLO STESSO PRIMA CHE VENGA DISATTIVATO</div>
+  <?php
+    }
   }
 }
 

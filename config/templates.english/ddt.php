@@ -148,7 +148,8 @@ class DDT extends Template_con_scheda
 			} else {
 				$maxy=215;
 			}
-            if ($this->GetY() >= $maxy) {
+            $act_y = $this->GetY();
+            if ($act_y >= $maxy) {
                 $this->Cell(155,6,'','T',1);
                 $this->SetFont('helvetica', '', 20);
                 $this->SetY(225);
@@ -167,7 +168,9 @@ class DDT extends Template_con_scheda
                 if ($rigo['tiprig'] < 2) {
                   $h=6;
                   if ($rigo['translate_descri']){
-                    $this->Cell(127,6, $rigo['translate_descri'],'LR',0,'L',0,'',1);
+                    $this->ImageSVG('@'.$this->docVars->client['language_svg_flag'],10.5,($act_y+0.7),4,3);
+                    $this->Cell(5,6,'','L');
+                    $this->Cell(122,6, $rigo['translate_descri'],'R',0,'L',0,'',1);
                     $this->Cell(60,6,'','LR',1);
                   }
                   if (intval($rigo['barcode'])>0){

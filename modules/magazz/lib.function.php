@@ -181,9 +181,9 @@ class magazzForm extends GAzieForm {
 
     function get_codice_caumag($clifor,$insdoc,$operat) {  // trovo il codice della causale in base al tipo di partner e di documento
         global $gTables;
-		$query = 'SELECT * FROM `' . $gTables['caumag'] . '` WHERE `clifor`='.$clifor.' AND `insdoc`='.$insdoc.' AND `operat`='.$operat.' ORDER BY `codice` ASC';
-		$result = gaz_dbi_query($query);
-        return gaz_dbi_fetch_row($result)[0]; // restituisco il codice (index 0)
+        $query = 'SELECT * FROM `' . $gTables['caumag'] . '` WHERE `clifor`='.$clifor.' AND `insdoc`='.$insdoc.' AND `operat`='.$operat.' ORDER BY `codice` ASC';
+        $result = gaz_dbi_query($query);
+        return @gaz_dbi_fetch_row($result)[0]; // restituisco il codice (index 0)
     }
 
     function getStockEvalMethod() {  // Prendo il metodo di valorizzazione del magazzino impostato in configurazione azienda

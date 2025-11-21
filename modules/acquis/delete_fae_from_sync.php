@@ -28,7 +28,7 @@ if (isset($_GET['id_doc']) && isset($_GET['fn'])) {
   $file=gaz_dbi_get_row($gTables['files'], 'id_doc', intval($_GET['id_doc']));
   gaz_dbi_del_row($gTables['files'], 'id_doc',$file['id_doc']);
   unlink( DATA_DIR . 'files/' . $admin_aziend['codice'] . '/doc/'.$file['id_doc'].'.'.$file['extension']);
-  unlink( DATA_DIR . 'files/' . $admin_aziend['codice'] . '/tmp/'.$file['title']);
+  @unlink( DATA_DIR . 'files/tmp/'.$file['title']);
   header("Location: acquire_invoice.php");
   exit;
 }

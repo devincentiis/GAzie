@@ -8121,4 +8121,5 @@ INSERT INTO `gaz_municipalities` (`id`, `id_province`, `name`, `postal_code`, `d
 ALTER TABLE `gaz_XXXagenti`	ADD COLUMN `custom_field` TEXT NULL AFTER `tipo_contratto`;
 INSERT INTO `gaz_XXXcompany_config` (`description`, `var`, `val`) VALUES ('Data (GG/MM/AAAA) oltre la quale non è consentita l\'emissione di documenti','business_date_cessation','');
 ALTER TABLE `gaz_XXXcompany_config` ADD `lang_id` INT NULL DEFAULT 1 AFTER `id`,	ADD INDEX (`lang_id`);
+INSERT INTO `gaz_XXXcompany_config` ( lang_id, `description` , var,val) SELECT 1,'Mittente fisso su e-mail (Reply to)', 'reply_to','' FROM DUAL WHERE NOT EXISTS ( SELECT * FROM `gaz_XXXcompany_config` WHERE var = 'reply_to' );
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione )
