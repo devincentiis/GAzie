@@ -1807,6 +1807,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         $form['rows'][$i]['cod_operazione'] = '';
         $form['rows'][$i]['recip_stocc'] = '';
         $form['rows'][$i]['recip_stocc_destin'] ='';
+        $form['rows'][$i]['status'] = $row['status'];
       if ($articolo){
         $form['rows'][$i]['annota'] = $articolo['annota'];
         $mv = $magazz->getStockValue(false, $row['codart'], gaz_format_date($form['datemi'], true), $admin_aziend['stock_eval_method']);

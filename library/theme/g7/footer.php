@@ -41,9 +41,6 @@ if (!isset($_SESSION['menu_alerts_lastcheck'])||((round(time()/60)-$_SESSION['me
             }
         }
 }
-// solo quando verrà aggiornato KINT potremo utilizzarlo, tolto sulla 7.43
-//if ( $debug_active==true ) echo "<div>".d($GLOBALS, $_SERVER)."</div>";
-
 $contact_link=(isset($contact_link))?$contact_link:'';
 ?>
 
@@ -54,14 +51,14 @@ $contact_link=(isset($contact_link))?$contact_link:'';
   </div>
   <div class=" text-center col-lg-3 hidden-xs">
     <?php
-    if ( $debug_active == true ){
+    if ( $debug_active == TRUE && $admin_aziend['Abilit']==9 ){
       echo '<a class="btn btn-xs btn-warning" href="" style="cursor:default;"> DEBUG ATTIVATO </a>  DB:'.gaz_dbi_fetch_array(gaz_dbi_query(" SELECT @@version"))[0].' - PHP:'.phpversion();
     }
     ?>
   </div>
   <div class=" text-center col-lg-3 hidden-xs">
     <?php
-    if ( $debug_active == true ){
+    if ( $debug_active == TRUE && $admin_aziend['Abilit']==9 ){
       echo $_SESSION['aes_key'].' <a class="btn btn-xs btn-info" href="../../passhash.php" > HASHES UTILITY </a>';
     }
     ?>

@@ -145,10 +145,6 @@ if (count($_POST) > 10) {
   exit;
 }
 
-if ($modal === false) {
-    require("../../library/include/header.php");
-    $script_transl = HeadMain(0, array('custom/autocomplete'));
-} else {
     $script = basename($_SERVER['PHP_SELF']);
     require("../../language/" . $admin_aziend['lang'] . "/menu.inc.php");
     require("./lang." . $admin_aziend['lang'] . ".php");
@@ -156,29 +152,24 @@ if ($modal === false) {
         $script_transl = $strScript[$script];
     }
     $script_transl = $strCommon + $script_transl;
-}
 $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0, 1000);
 ?>
 <div align="center" class="FacetFormHeaderFont">
     <?php echo $script_transl['title']; ?><br>
 </div>
 
-<ul class="nav nav-pills">
-        <li class="active"><a data-toggle="pill" href="#generale">Configurazione</a></li>
-        <li class=""><a data-toggle="pill" href="#email">Test e-mail</a></li>
-        <li class=""><a data-toggle="pill" href="#pec">Test PEC</a></li>
-        <li style="float: right;"><div class="btn btn-warning" id="upsave">Salva</div></li>
-</ul>
 <div class="panel panel-default gaz-table-form div-bordered">
   <div class="container-fluid">
+    <ul class="nav nav-pills">
+      <li class="active"><a data-toggle="pill" href="#generale">Configurazione</a></li>
+      <li class=""><a data-toggle="pill" href="#email">Test e-mail</a></li>
+      <li class=""><a data-toggle="pill" href="#pec">Test PEC</a></li>
+      <li style="float: right;"><div class="btn btn-warning" id="uppersave">Salva</div></li>
+    </ul>
     <div class="tab-content">
         <div id="generale" class="tab-pane fade in active">
         <form method="post" id="sbmt-form">
         <?php
-        if ($modal) { ?>
-        	<input type="hidden" name="mode" value="modal" />
-        <?php
-        }
         if (isset($_GET["ok_insert"])) { ?>
             <div class="alert alert-success text-center head-msg" role="alert"><b>
                 <?php echo "Le modifiche sono state salvate correttamente<br/>"; ?>
@@ -238,7 +229,7 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
             <div class="form-group" >
                 <label class="col-sm-5 control-label"></label>
                 <div class="col-sm-7 text-center">
-                    <button type="submit" class="btn btn-warning">Salva</button>
+                    <button type="submit" id="bottomsave" class="btn btn-warning">Salva</button>
                 </div>
             </div>
         </div>
@@ -274,9 +265,14 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
  </div><!-- chiude container-fluid  -->
 </div><!-- chiude panel  -->
 <script>
-if ($(".head-msg").length) {
-}
+
 $( "#wait" ).hide();
+
+$('#uppersave').click(function(){
+  $("#bottomsave").click();
+  return false;
+});
+
 $("#btn_send").click( function() {
 	$.ajax({
 		url: "config_aziend.php?e-test=true",
@@ -330,15 +326,7 @@ $("#btn_sendPEC").click( function() {
 		},
 	})
 });
-<?php
-if ($modal === false) {
-?>
-$( "#upsave" ).click(function() {
-    $( "#sbmt-form" ).submit();
-});
-<?php
-} else {
-?>
+
 $("#sbmt-form").submit(function (e) {
     $.ajax({
         type: "POST",
@@ -347,22 +335,8 @@ $("#sbmt-form").submit(function (e) {
         success: function (data) {
             $("#edit-modal .modal-sm").css('width', '100%');
             $("#edit-modal .modal-body").html(data);
+            $('#edit-modal').animate({ scrollTop: 0 }, 'slow');
 		},
-        error: function(data){
-            alert(data);
-        }
-    });
-    e.preventDefault(); // avoid to execute the actual submit of the form.
-});
-$( "#upsave" ).click(function() {
-    $.ajax({
-        type: "POST",
-        url: "config_aziend.php?mode=modal",
-        data: $("#sbmt-form").serialize(), // serializes the form's elements.
-        success: function (data) {
-            $("#edit-modal .modal-sm").css('width', '100%');
-            $("#edit-modal .modal-body").html(data);
-        },
         error: function(data){
             alert(data);
         }
@@ -379,13 +353,9 @@ $( "#upsave" ).click(function() {
   function printCheckbox(){
   }
   $config = new UserConfig;
-}
 ?>
 </script>
 <?php
-if ($modal === false) {
-  require("../../library/include/footer.php");
-}
 function isJson($str) {
 	return !preg_match('/[^,:{}\\[\\]0-9.\\-+Eaeflnr-u \\n\\r\\t]/', preg_replace('/"(\\.|[^"\\\\])*"/', '', $str));
 }

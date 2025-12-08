@@ -738,7 +738,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         $count = count($form['rows']) - 1;
         while ($val_old_row = gaz_dbi_fetch_array($old_rows)) {
           // elimino sempre e comunque le vecchie traduzioni riferite a righi articoli
-          gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'rigdoc' AND code_ref = '".$val_old_row['codart']."' AND lang_id = ".$form['partner_lang']." AND id_ref", $val_old_row['id_rig']);
+          if (strlen($val_old_row['codart']) >=1 ) {
+            gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'rigdoc' AND code_ref = '".$val_old_row['codart']."' AND lang_id = ".$form['partner_lang']." AND id_ref", $val_old_row['id_rig']);
+          }
           $form['rows'][$i]['peso_specifico']=$form['rows'][$i]['pesosp'];
           // per evitare problemi qualora siano stati modificati i righi o comunque cambiati di ordine elimino sempre il vecchio movimento di magazzino e sotto ne inserisco un altro attenendomi a questo
           if (intval($val_old_row['id_mag']) > 0) {  //se c'è stato un movimento di magazzino lo azzero
@@ -1514,6 +1516,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
 			$form['rows'][$next_row]['recip_stocc_destin'] = "";
       $form['rows'][$next_row]['tiprig'] = $form['in_tiprig'];
       $form['rows'][$next_row]['pesosp'] = 0;
+      $form['rows'][$next_row]['translate_descri'] = '';
 			if ($form['in_tiprig']<=1 || $form['in_tiprig']==90){
 				$form['RiferimentoNumeroLinea'][$next_row+1] = substr($form['in_descri'],0,20);
 			}
@@ -2178,6 +2181,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       }
       // riprendo una eventuale traduzione del rigo
       $form['rows'][$next_row]['translate_descri'] = '';
+      $translate_bt = false;
       if ($form['partner_lang'] > 1 && $rigo['tiprig'] == 0  ) {
         $translate_bt = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'rigdoc'," AND code_ref = '".$rigo['codart']."' AND id_ref = ".$rigo['id_rig']." AND lang_id = ".$form['partner_lang']);
       }

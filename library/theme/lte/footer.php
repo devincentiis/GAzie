@@ -37,14 +37,14 @@ $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
       </div>
       <div class=" text-center col-lg-5 hidden-xs">
         <?php
-        if ( $debug_active == true ){
+        if ( $debug_active == TRUE && $admin_aziend['Abilit']==9 ){
           echo '<a class="btn btn-xs btn-danger" href="" style="cursor:default;"> DEBUG ON </a>  DB:'.gaz_dbi_fetch_array(gaz_dbi_query(" SELECT @@version"))[0].' - PHP:'.phpversion();
         }
         ?>
       </div>
       <div class="text-center col-lg-3 hidden-xs">
         <?php
-        if ( $debug_active == true ){
+        if ( $debug_active == TRUE && $admin_aziend['Abilit']==9 ){
           echo $_SESSION['aes_key'].' &nbsp; <a class="btn btn-xs btn-info" href="../../passhash.php" > HASHES UTILITY </a>';
         }
         ?>

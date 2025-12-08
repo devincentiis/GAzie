@@ -347,7 +347,7 @@ if ({}.toString.call($('#check').button) === '[object Function]') {
 <?php
 $gForm = new configForm();
 if (count($msg['err']) > 0) { // ho un errore
-    $gForm->gazHeadMessage($msg['err'], $script_transl['err'], 'err');
+  $gForm->gazHeadMessage($msg['err'], $script_transl['err'], 'err');
 }
 ?>
 <form method="POST" name="form" enctype="multipart/form-data">
@@ -368,7 +368,13 @@ if (count($msg['err']) > 0) { // ho un errore
       <li class="<?php echo $form['tab']=='home'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#home">Dati principali</a></li>
       <li class="<?php echo $form['tab']=='setup'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#setup">Impostazioni</a></li>
       <li class="<?php echo $form['tab']=='contab'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#contab">Contabilità</a></li>
-      <li><a id="config_aziend" href="" style="color:black; background-color:white" data-toggle="modal" data-target="#edit-modal"><i class="glyphicon glyphicon-export"></i>Avanzata<i class="glyphicon glyphicon-lock"></i></a></li>
+<?php
+if ($admin_aziend['Abilit']==9){
+?>
+      <li><a id="config_aziend" href="" style="color:red;" data-toggle="modal" data-target="#edit-modal"> Configurazione Avanzata <i class="glyphicon glyphicon-cog"></i></a></li>
+<?php
+}
+?>
       <li style="float: right;"><input class="btn btn-warning" name="Submit" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
     </ul>
         <div class="tab-content">

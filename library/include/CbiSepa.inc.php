@@ -120,7 +120,7 @@ class CbiSepa {
                     $newel2->setAttribute("Ccy", "EUR");
                 $el->appendChild($el1);
                 $el1 = $domDoc->createElement("Cdtr", "");
-                    $el2 = $domDoc->createElement("Nm", $v['Nm']);
+                    $el2 = $domDoc->createElement("Nm", substr(htmlspecialchars(str_replace(chr(0xE2).chr(0x82).chr(0xAC),"",trim($v['Nm'])), ENT_XML1 | ENT_QUOTES, 'UTF-8', true),0,70));
                     $el1->appendChild($el2);
                 $el->appendChild($el1);
                 $el1 = $domDoc->createElement("CdtrAcct", "");

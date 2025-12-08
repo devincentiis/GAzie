@@ -568,14 +568,14 @@ $(function(){
       var jsondata = $.parseJSON(jsondatastr);
       myAppendGrid.load( jsondata );
 		}
-
 		$( "#dialog_module_card" ).dialog({
 			minHeight: 1,
 			width: 370,
       position: { my: "top+100", at: "top+100", of: "div.container-fluid,div.wrapper div.content-wrapper",collision:" none" },
       modal: "true",
-			show: "blind",
+			show: "puff",
 			hide: "explode",
+      duration: 500,
 			buttons: {
 				delete:{
 					text:'Annulla',
@@ -606,7 +606,10 @@ $(function(){
 					}
 				  }
 				}
-			}
+			},
+      open: function() {
+        $("body div.ui-widget-overlay").css("opacity", 0.9);
+      }
 		});
 		$("#dialog_module_card" ).dialog( "open" );
 	});
@@ -634,6 +637,22 @@ $(function(){
       $('#capsalert').remove();
     }
   });
+
+  $("#set_config_data").click(function () {
+      $.ajax({
+          type: "POST",
+          url: "../root/set_config_data.php",
+          data: 'mode=modal',
+          success: function (msg) {
+              $("#edit-modal .modal-sm").css('width', '100%');
+              $("#edit-modal .modal-body").html(msg);
+          },
+          error: function () {
+              alert("failure");
+          }
+      });
+  });
+
 });
 </script>
 <form method="POST" enctype="multipart/form-data"
@@ -668,6 +687,13 @@ onsubmit="document.getElementById('user_password_new').value=forge_sha256(docume
     <ul class="nav nav-pills">
       <li class="active"><a data-toggle="pill" href="#generale">Dati utente</a></li>
       <li><a data-toggle="pill" href="#imap">Impostazioni IMAP</a></li>
+<?php
+if ($admin_aziend['Abilit']==9){
+?>
+      <li> <a id="set_config_data" href="" style="color: red;" data-toggle="modal" data-target="#edit-modal">  Dati globali <i class="glyphicon glyphicon-cog"> </i> </a> </li>
+<?php
+}
+?>
     </ul>
 
     <div class="tab-content">
@@ -853,151 +879,151 @@ onsubmit="document.getElementById('user_password_new').value=forge_sha256(docume
           </td>
           </tr>
 
-          <?php
-          if ($user_data["Abilit"] == 9) {
-            function getModule($login, $company_id) {
-              global $gTables, $admin_aziend;
-              //trovo i moduli installati
-              $mod_found = [];
-              $relativePath = '../../modules';
-              if ($handle = opendir($relativePath)) {
-                while ($exist_mod = readdir($handle)) {
-                  if ($exist_mod == "." || $exist_mod == ".." || $exist_mod == ".svn" || $exist_mod == "root" || !file_exists("../../modules/$exist_mod/menu." . $admin_aziend['lang'] . ".php"))
-                  continue;
-                  $rs_mod = gaz_dbi_dyn_query("am.access,am.moduleid, am.custom_field, module.name ", $gTables['admin_module'] . ' AS am LEFT JOIN ' . $gTables['module'] .
-                  ' AS module ON module.id=am.moduleid ', " am.adminid = '" . $login . "' AND module.name = '$exist_mod' AND am.company_id = '$company_id'", "am.adminid", 0, 1);
-                  require("../../modules/$exist_mod/menu." . $admin_aziend['lang'] . ".php");
-                  $row = gaz_dbi_fetch_array($rs_mod);
-                  $row['excluded_script'] = [];
-                  if (!isset($row['moduleid'])) {
-                    $row['name'] = $exist_mod;
-                    $row['moduleid'] = 0;
-                    $row['access'] = 0;
-                    $row['custom_field'] = '';
-                  }
-                  $chkes = is_string($row['custom_field'])?json_decode($row['custom_field']):false;
-                  if ($chkes && isset($chkes->excluded_script)) {
-                    $row['excluded_script'] = $chkes->excluded_script;
-                  }
-                  $row['transl_name'] = $transl[$exist_mod]['name'];
-                  $mod_found[$exist_mod] = $row;
-                }
-                closedir($handle);
-              }
-              return $mod_found;
-            }
-
-
-              ?>
-
-          <?php
-           //richiamo tutte le aziende installate e vedo se l'utente  e' abilitato o no ad essa
-            $table = $gTables['aziend'] . ' AS a';
-            $what = "a.codice AS id, ragso1 AS ragsoc, (SELECT COUNT(*) FROM " . $gTables['admin_module'] . " WHERE a.codice=" . $gTables['admin_module'] . ".company_id AND " . $gTables['admin_module'] . ".adminid='" . $form["user_name"] . "') AS set_co ";
-            $co_rs = gaz_dbi_dyn_query($what, $table, 1, "ragsoc ASC");
-           while ($co = gaz_dbi_fetch_array($co_rs)) {
-              $co_id = sprintf('%03d', $co['id']);
-            echo '<tr></tr><tr><td colspan="4"><h3><img src="../../modules/root/view.php?table=aziend&value='.$co['id'].'" alt="Logo" height="30"> ' . $co['ragsoc'] . '  - ID:' . $co['id'] . '</h3></td></tr>';
-            echo "<tr><td class=\"FacetDataTD\">" .'<input type=hidden name="' . $co_id . 'nusr_root" value="3"><b>'. $script_transl['mod_perm'] . ":</b></td>\n";
-            echo "<td><b>" . $script_transl['all'] . "</b></td>\n";
-            echo '<td align="center"><b> Script esclusi</b></td>';
-            echo "<td><b>" . $script_transl['none'] . "</b></td></tr>\n";
-            $mod_found = getModule($form["user_name"], $co['id']);
-            $mod_admin = getModule($user_data["user_name"], $co['id']);
-            foreach ($mod_found as $mod) {
-              echo "<tr>\n";
-              echo '<td>
-                        <img height="16" src="../' . $mod['name'] . '/' . $mod['name'] . '.png" /> ' . $mod['transl_name'] . ' (' . $mod['name'] . ")</td>\n";
-              if ($mod['moduleid'] == 0) { // il modulo non è stato mai attivato
-                if ($form["user_name"] <> $user_data["user_name"]) { // sono un amministratore che sta operando sul profilo di altro utente
-                  if ($mod_admin[$mod['name']]['access']==3){ // il modulo è attivo sull'amministratore
-                      // per evitare conflitti nemmeno l'amministratore può attivare un modulo se questo non lo è ancora sul suo
-                      echo "  <td colspan=2 ><input type=radio name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"3\"></td>";
-                      echo "  <td><input type=radio checked name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"0\"></td>";
-                  } else { // modulo non attivo sull'amministratore
-                      echo '  <td colspan=2 >Non attivato</td>';
-                      echo '  <td><input type="hidden"  name="' . $co_id . "nusr_" . $mod['name'] . '" value="0"></td>';
-                  }
-                } elseif ($co['set_co'] == 0) { // il modulo mai attivato
-                  echo "  <td colspan=2><input type=radio name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"3\"></td>";
-                  echo "  <td><input type=radio checked name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"0\"></td>";
-                } else { // se l'amministratore che sta operando sul proprio profilo può attivare un nuovo modulo e creare il relativo menù
-                  echo "  <td class=\"FacetDataTDred\" colspan=2><input class=\"btn btn-warning\" type=radio name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"3\">Modulo attivabile</td>";
-                  echo "  <td class=\"FacetDataTDred\"><input type=radio checked name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"0\"></td>";
-                }
-              } elseif ($mod['access'] == 0) { // il modulo è attivato, quindi propongo i valori precedenti
-                echo "  <td colspan=2><input type=radio name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"3\"></td>";
-                echo "  <td><input type=radio checked name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"0\"></td>";
-              } else {
-                echo '<td><input type=radio checked name="'. $co_id . 'acc_' . $mod['moduleid'] . '" value="3"> </td><td><a class="btn btn-xs dialog_module_card" module="'.$mod['name'].'" adminid="'.$form['user_name'].'" transl_name="'.$mod['transl_name'].'"><i class="glyphicon glyphicon-edit"></i>'.((count($mod['excluded_script'])>=1)?'<p class="text-left">'.implode('.php</p><p class="text-left">',$mod['excluded_script']).'.php</p>':'nessuno</p>').'</a></td>';
-                echo "  <td><input type=radio name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"0\"></td>";
-              }
-              echo "</tr>\n";
-            }
+<?php
+if ($user_data["Abilit"] == 9) {
+  function getModule($login, $company_id) {
+    global $gTables, $admin_aziend;
+    //trovo i moduli installati
+    $mod_found = [];
+    $relativePath = '../../modules';
+    if ($handle = opendir($relativePath)) {
+      while ($exist_mod = readdir($handle)) {
+        if ($exist_mod == "." || $exist_mod == ".." || $exist_mod == ".svn" || $exist_mod == "root" || !file_exists("../../modules/$exist_mod/menu." . $admin_aziend['lang'] . ".php"))
+        continue;
+        $rs_mod = gaz_dbi_dyn_query("am.access,am.moduleid, am.custom_field, module.name ", $gTables['admin_module'] . ' AS am LEFT JOIN ' . $gTables['module'] .
+        ' AS module ON module.id=am.moduleid ', " am.adminid = '" . $login . "' AND module.name = '$exist_mod' AND am.company_id = '$company_id'", "am.adminid", 0, 1);
+        require("../../modules/$exist_mod/menu." . $admin_aziend['lang'] . ".php");
+        $row = gaz_dbi_fetch_array($rs_mod);
+        $row['excluded_script'] = [];
+        if (!isset($row['moduleid'])) {
+          $row['name'] = $exist_mod;
+          $row['moduleid'] = 0;
+          $row['access'] = 0;
+          $row['custom_field'] = '';
+        }
+        $chkes = is_string($row['custom_field'])?json_decode($row['custom_field']):false;
+        if ($chkes && isset($chkes->excluded_script)) {
+          $row['excluded_script'] = $chkes->excluded_script;
+        }
+        $row['transl_name'] = $transl[$exist_mod]['name'];
+        $mod_found[$exist_mod] = $row;
+      }
+      closedir($handle);
+    }
+    return $mod_found;
+  }
+  //richiamo tutte le aziende installate e vedo se l'utente  e' abilitato o no ad essa
+  $table = $gTables['aziend'] . ' AS a';
+  $what = "a.codice AS id, ragso1 AS ragsoc, (SELECT COUNT(*) FROM " . $gTables['admin_module'] . " WHERE a.codice=" . $gTables['admin_module'] . ".company_id AND " . $gTables['admin_module'] . ".adminid='" . $form["user_name"] . "') AS set_co ";
+  $co_rs = gaz_dbi_dyn_query($what, $table, 1, "ragsoc ASC");
+  while ($co = gaz_dbi_fetch_array($co_rs)) {
+    $co_id = sprintf('%03d', $co['id']);
+    echo '<tr></tr><tr><td colspan="4"><h3><img src="../../modules/root/view.php?table=aziend&value='.$co['id'].'" alt="Logo" height="30"> ' . $co['ragsoc'] . '  - ID:' . $co['id'] . '</h3></td></tr>';
+    echo "<tr><td class=\"FacetDataTD\">" .'<input type=hidden name="' . $co_id . 'nusr_root" value="3"><b>'. $script_transl['mod_perm'] . ":</b></td>\n";
+    echo "<td><b>" . $script_transl['all'] . "</b></td>\n";
+    echo '<td align="center"><b> Script esclusi</b></td>';
+    echo "<td><b>" . $script_transl['none'] . "</b></td></tr>\n";
+    $mod_found = getModule($form["user_name"], $co['id']);
+    $mod_admin = getModule($user_data["user_name"], $co['id']);
+    foreach ($mod_found as $mod) {
+      echo "<tr>\n";
+      echo '<td>
+                <img height="16" src="../' . $mod['name'] . '/' . $mod['name'] . '.png" /> ' . $mod['transl_name'] . ' (' . $mod['name'] . ")</td>\n";
+      if ($mod['moduleid'] == 0) { // il modulo non è stato mai attivato
+        if ($form["user_name"] <> $user_data["user_name"]) { // sono un amministratore che sta operando sul profilo di altro utente
+          if ($mod_admin[$mod['name']]['access']==3){ // il modulo è attivo sull'amministratore
+              // per evitare conflitti nemmeno l'amministratore può attivare un modulo se questo non lo è ancora sul suo
+              echo "  <td colspan=2 ><input type=radio name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"3\"></td>";
+              echo "  <td><input type=radio checked name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"0\"></td>";
+          } else { // modulo non attivo sull'amministratore
+              echo '  <td colspan=2 >Non attivato</td>';
+              echo '  <td><input type="hidden"  name="' . $co_id . "nusr_" . $mod['name'] . '" value="0"></td>';
           }
-          ?>
+        } elseif ($co['set_co'] == 0) { // il modulo mai attivato
+          echo "  <td colspan=2><input type=radio name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"3\"></td>";
+          echo "  <td><input type=radio checked name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"0\"></td>";
+        } else { // se l'amministratore che sta operando sul proprio profilo può attivare un nuovo modulo e creare il relativo menù
+          echo "  <td class=\"FacetDataTDred\" colspan=2><input class=\"btn btn-warning\" type=radio name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"3\">Modulo attivabile</td>";
+          echo "  <td class=\"FacetDataTDred\"><input type=radio checked name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"0\"></td>";
+        }
+      } elseif ($mod['access'] == 0) { // il modulo è attivato, quindi propongo i valori precedenti
+        echo "  <td colspan=2><input type=radio name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"3\"></td>";
+        echo "  <td><input type=radio checked name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"0\"></td>";
+      } else {
+        echo '<td><input type=radio checked name="'. $co_id . 'acc_' . $mod['moduleid'] . '" value="3"> </td><td><a class="btn btn-xs dialog_module_card" module="'.$mod['name'].'" adminid="'.$form['user_name'].'" transl_name="'.$mod['transl_name'].'"><i class="glyphicon glyphicon-edit"></i>'.((count($mod['excluded_script'])>=1)?'<p class="text-left">'.implode('.php</p><p class="text-left">',$mod['excluded_script']).'.php</p>':'nessuno</p>').'</a></td>';
+        echo "  <td><input type=radio name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"0\"></td>";
+      }
+      echo "</tr>\n";
+    }
+  }
+ }
+?>
           </table>
-      </div> <!-- chiude generale -->
-
-      <div id="imap" class="tab-pane fade">
-          <?php if ($imap_check){ ?>
-          <table class="table-striped">
-            <tr>
-              <td colspan="3" class="FacetFieldCaptionTD"><b>Inserire le credenziali di accesso IMAP attiva la possibilità di avere le e-mail inviate da GAzie nella cartella di posta inviata specificata. Questo sistema sostituirà l'invio per conoscenza al proprio indirizzo</b></td>
-            </tr>
-            <tr>
-              <td colspan="1" class="FacetFieldCaptionTD">IMAP user name</td>
-              <td colspan="2" class="FacetDataTD"><input title="Nome utente IMAP (Lasciare vuoto se non serve)" type="text" name="imap_usr" value="<?php echo $form['imap_usr'] ?>" maxlength="40"  class="FacetInput">&nbsp;</td>
-            </tr>
-            <tr>
-              <td class="FacetFieldCaptionTD">IMAP password</td>
-              <td colspan="2" class="FacetDataTD"><input title="Password IMAP (lasciare vuoto se non serve)" type="password" name="imap_pwr" placeholder="Invisibile, digita solo se vuoi inserirla o cambiarla (minimo 4 caratteri)" value="<?php echo $form["imap_pwr"] ?>" maxlength="40"  class="FacetInput">&nbsp;</td>
-            </tr>
-            <tr>
-              <td class="FacetFieldCaptionTD">IMAP percorso cartella utente della posta inviata</td>
-              <td colspan="2" class="FacetDataTD"><input title="Password IMAP (lasciare vuoto se non serve)" type="text" name="imap_sent_folder" value="<?php echo $form["imap_sent_folder"] ?>" maxlength="40"  class="FacetInput">&nbsp;</td>
-            </tr>
-          </table>
-          <div id="email" class="tab-pane">
-            <div>Il test di configurazione ti permette di verificare le impostazioni IMAP inserite. <br><b>Salva</b> la configurazione prima di avviare il test.
-            </div>
-            <div id="wait">
-              <span>Please wait...</span>
-            </div>
-            <div id="btn_send" class="btn btn-default">TEST CONFIGURAZIONE IMAP</div>
-            <div id="reply_send"></div>
-          </div><!-- chiude email  -->
-
-          <script>
-          $( "#wait" ).hide();
-          $("#btn_send").click( function() {
-            $.ajax({
-              url: "admin_utente.php?user_name=<?php echo $form["user_name"] ?>&Update&e-test=true",
-              type: "GET",
-              data: { 'e-test': true },
-               beforeSend: function () {
-                // ... your initialization code here (so show loader) ...
-                $( "#wait" ).show();
-              },
-              complete: function () {
-                // ... your finalization code here (hide loader) ...
-                $( "#wait" ).hide();
-              },
-              success: function(json) {
-                result = JSON.parse(json);
-                if (  result.send == 'SUCCESS') {
-                    $("#reply_send").html( "<strong>Invio riuscito</strong><br><div>Controlla se c'è una email test nella cartella posta inviata che hai impostato in <i>"+result.sender+"</i></div>");
-                } else {
-                  $("#reply_send").html("<strong>Invio FALLITO!</strong><br><div>Errore: "+result.error+"!</div>");
-                }
-              },
-              error: function(richiesta,stato,errori){
-                  $("#reply_send").html("<strong>Invio FALLITO!</strong><br><div>"+errori+"</div>");
+        <div class="FacetFooterTD text-center col-xs-12">
+          <input name="conferma" id="conferma" class="btn btn-warning" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>">
+        </div>
+  </div> <!-- chiude tab generale -->
+  <div id="imap" class="tab-pane fade">
+<?php
+  if ($imap_check) {
+?>
+      <table class="table-striped">
+        <tr>
+          <td colspan="3" class="FacetFieldCaptionTD"><b>Inserire le credenziali di accesso IMAP attiva la possibilità di avere le e-mail inviate da GAzie nella cartella di posta inviata specificata. Questo sistema sostituirà l'invio per conoscenza al proprio indirizzo</b></td>
+        </tr>
+        <tr>
+          <td colspan="1" class="FacetFieldCaptionTD">IMAP user name</td>
+          <td colspan="2" class="FacetDataTD"><input title="Nome utente IMAP (Lasciare vuoto se non serve)" type="text" name="imap_usr" value="<?php echo $form['imap_usr'] ?>" maxlength="40"  class="FacetInput">&nbsp;</td>
+        </tr>
+        <tr>
+          <td class="FacetFieldCaptionTD">IMAP password</td>
+          <td colspan="2" class="FacetDataTD"><input title="Password IMAP (lasciare vuoto se non serve)" type="password" name="imap_pwr" placeholder="Invisibile, digita solo se vuoi inserirla o cambiarla (minimo 4 caratteri)" value="<?php echo $form["imap_pwr"] ?>" maxlength="40"  class="FacetInput">&nbsp;</td>
+        </tr>
+        <tr>
+          <td class="FacetFieldCaptionTD">IMAP percorso cartella utente della posta inviata</td>
+          <td colspan="2" class="FacetDataTD"><input title="Password IMAP (lasciare vuoto se non serve)" type="text" name="imap_sent_folder" value="<?php echo $form["imap_sent_folder"] ?>" maxlength="40"  class="FacetInput">&nbsp;</td>
+        </tr>
+      </table>
+      <div>Il test di configurazione ti permette di verificare le impostazioni IMAP inserite. <br><b>Salva</b> la configurazione prima di avviare il test.
+      </div>
+      <div id="wait">
+        <span>Please wait...</span>
+      </div>
+      <div id="btn_send" class="btn btn-default">TEST CONFIGURAZIONE IMAP</div>
+      <div id="reply_send"></div>
+      <script>
+        $( "#wait" ).hide();
+        $("#btn_send").click( function() {
+          $.ajax({
+            url: "admin_utente.php?user_name=<?php echo $form["user_name"] ?>&Update&e-test=true",
+            type: "GET",
+            data: { 'e-test': true },
+             beforeSend: function () {
+              // ... your initialization code here (so show loader) ...
+              $( "#wait" ).show();
+            },
+            complete: function () {
+              // ... your finalization code here (hide loader) ...
+              $( "#wait" ).hide();
+            },
+            success: function(json) {
+              result = JSON.parse(json);
+              if (  result.send == 'SUCCESS') {
+                  $("#reply_send").html( "<strong>Invio riuscito</strong><br><div>Controlla se c'è una email test nella cartella posta inviata che hai impostato in <i>"+result.sender+"</i></div>");
+              } else {
+                $("#reply_send").html("<strong>Invio FALLITO!</strong><br><div>Errore: "+result.error+"!</div>");
               }
-            })
-          });
-          </script>
-          <?php } else{ ?>
+            },
+            error: function(richiesta,stato,errori){
+                $("#reply_send").html("<strong>Invio FALLITO!</strong><br><div>"+errori+"</div>");
+            }
+          })
+        });
+        </script>
+<?php
+  } else {
+?>
+        <div>
           <table class="table-striped" style="width:100%;">
             <tr>
             <td class="FacetFieldCaptionTD">Prima di inserire le credenziali di accesso IMAP dell'utente bisogna impostare il server IMAP in configurazione azienda, tab 'Avanzata'</td>
@@ -1006,38 +1032,37 @@ onsubmit="document.getElementById('user_password_new').value=forge_sha256(docume
             <td class="FacetDataTD text-right"><a href="../config/admin_aziend.php" class="btn btn-warning"> Configura </a></td>
             </tr>
           </table>
-          <?php
-          }
-          ?>
-      </div><!-- chiude pill imap -->
-    </div> <!-- chiude tab-content -->
-  </div> <!-- chiude container-fluid -->
-</div> <!-- chiude panel -->
-            <?php
-
-}
-
+        </div>
+<?php
+  }
 ?>
-</table><br/>
-<div class="FacetFooterTD text-center"><input name="conferma" id="conferma" class="btn btn-warning" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></div>
-</form>
+      </div><!-- chiude tab imap -->
+    </div> <!-- chiude tab-content -->
+  </div><!-- chiude container-fluid -->
+</div> <!-- chiude panel -->
 <?php
 if ($admin_aziend['Abilit']==9){
-	?>
-	<div style="display:none; padding-bottom: 30px;" id="dialog_module_card" title="Disabilitazione script">
+?>
+      <div  id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="max-width:1500px; margin:auto;">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header active">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><div class="btn btn-danger glyphicon glyphicon-remove"></div></button>
+                </div>
+                <div class="modal-body edit-content small"></div>
+                <!--<div class="modal-footer"></div>-->
+            </div>
+        </div>
+      </div>
+	<div style="display:none;" id="dialog_module_card" title="Disabilitazione script">
     <p><b>Modulo:</b></p>
 		<p class="ui-state-highlight" id="iddescri"></p>
 		<table id="tblAppendGrid"></table>
 	</div>
-	<div style="padding-top: 30px; padding-bottom: 3000px;">
-    <div class="col-sm-12 col-md-1"></div><div class="col-sm-12 col-md-11"><b>Gli amministratore possono </b> <a data-toggle="collapse" class="btn btn-sm btn-warning" href="#gconfig" aria-expanded="false" aria-controls="gconfig"> accedere ai dati globali ↕ </a></div>
-    <div class="collapse" id="gconfig">
-      <iframe src="../../modules/root/set_config_data.php?iframe=TRUE" title="Configurazione globale" width="100%" height="1330"  frameBorder="0"></iframe>
-    </div>
-	</div>
-	<?php
+<?php
 }
 ?>
+</form>
 <?php
 require("../../library/include/footer.php");
 ?>

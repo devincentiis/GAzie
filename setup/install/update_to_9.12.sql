@@ -8117,6 +8117,7 @@ INSERT INTO `gaz_municipalities` (`id`, `id_province`, `name`, `postal_code`, `d
 	(8099, 111, 'Tratalias', '09010', '0781', '420092085', 'L337', ''),
 	(8100, 111, 'Villamassargia', '09010', '0781', '420092094', 'L968', 'https://www.comune.villamassargia.ca.it/'),
 	(8101, 111, 'Villaperuccio', '09010', '0781', '420092104', 'M278', '');
+UPDATE `gaz_country` SET `name`='TAIWAN ("Chinese Taipei" for ROC)' WHERE `iso`='TW';
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
 ALTER TABLE `gaz_XXXagenti`	ADD COLUMN `custom_field` TEXT NULL AFTER `tipo_contratto`;
 INSERT INTO `gaz_XXXcompany_config` (`description`, `var`, `val`) VALUES ('Data (GG/MM/AAAA) oltre la quale non è consentita l\'emissione di documenti','business_date_cessation','');

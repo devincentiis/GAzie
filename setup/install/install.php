@@ -270,7 +270,7 @@ function executeQueryFileUpgrade($table_prefix) // funzione dedicata alla gestio
 {
     global $disable_set_time_limit;
     if (!$disable_set_time_limit) {
-        set_time_limit (300);
+      set_time_limit (0);
     }
     // Luigi Rambaldi 13 Ottobre 2005
     // Inizializzazione accumulatore
