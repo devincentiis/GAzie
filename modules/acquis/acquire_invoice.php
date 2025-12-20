@@ -267,25 +267,30 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 
     if (!empty($_FILES['userfile']['name'])) {
       if ( $_FILES['userfile']['type'] == "application/x-zip-compressed") {
-        $filepath= DATA_DIR . 'files/' . $admin_aziend['codice'] . '/tmp/'.$send_fae_zip_package['val'] .'_' . $_FILES['userfile']['name'];
-        if (move_uploaded_file($_FILES['userfile']['tmp_name'],$filepath)) { // nessun errore
-				} else { // no upload
-					$msg['err'][] = 'no_upload';
-				}
-        $zip = new ZipArchive;
-        if ($zip->open($filepath) === TRUE) {
-          for($i = 0; $i < $zip->numFiles; $i++) {
-            $filename = $zip->getNameIndex($i);
-            $fileinfo = pathinfo($filename);
-            $zip->extractTo(DATA_DIR .'files/' .$admin_aziend['codice'].'/tmp/',$filename);
-   					$file_id=gaz_dbi_table_insert('files', ["table_name_ref"=>date('Y-m-d H:i:s'), "item_ref"=>"faesync","extension"=>$fileinfo['extension'],"title"=>$filename]);
-            copy(DATA_DIR . 'files/' . $admin_aziend['codice'] . '/tmp/'.$filename, DATA_DIR . 'files/' . $admin_aziend['codice'] . '/doc/'.$file_id.'.'.$fileinfo['extension']);
-          }
-          $zip->close();
-          header("Location: acquire_invoice.php");
-          exit;
+        $filepath = DATA_DIR . 'files/' . $admin_aziend['codice'] . '/tmp/'.$send_fae_zip_package['val'] .'_' . $_FILES['userfile']['name'];
+        if (file_exists($filepath)){ // non consento lo spacchettamento di file con lo stesso nome di altri presenti in tmp
+          $msg['err'][] = 'zip_exists';
         } else {
-          $msg['err'][] = 'filmim';
+          $filepath= DATA_DIR . 'files/' . $admin_aziend['codice'] . '/tmp/'.$send_fae_zip_package['val'] .'_' . $_FILES['userfile']['name'];
+          if (move_uploaded_file($_FILES['userfile']['tmp_name'],$filepath)) { // nessun errore
+          } else { // no upload
+            $msg['err'][] = 'no_upload';
+          }
+          $zip = new ZipArchive;
+          if ($zip->open($filepath) === TRUE) {
+            for($i = 0; $i < $zip->numFiles; $i++) {
+              $filename = $zip->getNameIndex($i);
+              $fileinfo = pathinfo($filename);
+              $zip->extractTo(DATA_DIR .'files/' .$admin_aziend['codice'].'/tmp/',$filename);
+              $file_id=gaz_dbi_table_insert('files', ["table_name_ref"=>date('Y-m-d H:i:s'), "item_ref"=>"faesync","extension"=>$fileinfo['extension'],"title"=>$filename]);
+              copy(DATA_DIR . 'files/' . $admin_aziend['codice'] . '/tmp/'.$filename, DATA_DIR . 'files/' . $admin_aziend['codice'] . '/doc/'.$file_id.'.'.$fileinfo['extension']);
+            }
+            $zip->close();
+            header("Location: acquire_invoice.php");
+            exit;
+          } else {
+            $msg['err'][] = 'filmim';
+          }
         }
 			} else if (!( $_FILES['userfile']['type'] == "application/pkcs7-mime" || $_FILES['userfile']['type'] == "application/pkcs7" || $_FILES['userfile']['type'] == "text/xml")) {
 				$msg['err'][] = 'filmim';

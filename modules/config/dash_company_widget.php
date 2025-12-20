@@ -99,9 +99,6 @@ function selectCompany($name, $val, $strSearch = '', $val_hiddenReq = '', $mesg=
 		}
 		?>
     </div>
-    <div>
-        <?php echo $script_transl['logout']; ?> <input class="btn btn-xs" type="submit" value="&rArr;" /> <input name="logout" type="submit" value=" Logout ">
-    </div>
 </div>
 <style type="text/css">
 

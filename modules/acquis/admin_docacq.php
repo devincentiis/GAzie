@@ -1115,8 +1115,10 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
             $form['speban'] = 0.00;
             $form['numrat'] = 1;
         }
-        if ($fornitore['cosric'] > 0) {
-            $form['in_codric'] = $fornitore['cosric'];
+        if (intval($fornitore['cosric']) > 100000000) {
+          $form['in_codric'] = $fornitore['cosric'];
+        } else {
+          $form['in_codric'] = $admin_aziend['impacq'];
         }
         if ($fornitore['ritenuta'] > 0 ) { // carico la ritenuta se previsto
             $form['in_ritenuta'] = $fornitore['ritenuta'];

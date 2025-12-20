@@ -646,6 +646,7 @@ $strScript = array("admin_fornit.php" =>
             'invalid_xml' => 'Il contenuto del file non è un XML valido',
             'invalid_fae' => 'Il contenuto del file XML non sembra essere una fattura elettronica',
             'file_exists' => 'Un file con questo nome è stato già stato acquisito',
+            'zip_exists' => 'Un pacchetto di files con questo nome è stato già stato acquisito',
             'not_mine' => 'La fattura non è stata rilasciata nei confronti di questa azienda',
             'no_upload' => 'File non inviato',
             'no_pagame' => 'Non hai selezionato la modalità di pagamento',

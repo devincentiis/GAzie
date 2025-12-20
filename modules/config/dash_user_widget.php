@@ -11,10 +11,25 @@ if ($t > 4 && $t <= 13) {
     $msg = $script_transl['night'];
 }
 ?>
+<script>
+$(function(){
+  $('#logout').click(function(){
+    $("#post_logout").attr('name', 'logout');
+    window.location.replace("./logout.php");
+  });
+});
+</script>
 <div class="panel panel-info col-md-12" >
-  <div class="box-header company-color">
-    <b><?php echo ucfirst($msg) . " " . $admin_aziend['user_firstname'] . ' </b>(ip=' . $admin_aziend['last_ip'] . ')'; ?>
-		<a class="pull-right dialog_grid" id_bread="<?php echo $grr['id_bread']; ?>" style="cursor:pointer;"><i class="glyphicon glyphicon-cog"></i></a>
+  <div class="box-header company-color col-xs-12 ">
+    <div class="col-xs-4">
+  		<div class="btn btn-sm btn-warning" id="logout" href="" style="cursor: pointer;"> Logout <i class="fa fa-sign-out"> </i> </div>
+    </div>
+    <div class="col-xs-6">
+      <b><?php echo ucfirst($msg) . " " . $admin_aziend['user_firstname'] . ' </b>(ip=' . $admin_aziend['last_ip'] . ')'; ?></b>
+    </div>
+    <div class="col-xs-2 text-right">
+      <a class="dialog_grid" id_bread="<?php echo $grr['id_bread']; ?>" style="cursor:pointer;"><i class="glyphicon glyphicon-cog"></i></a>
+    </div>
   </div>
   <div class="img-containter">
     <a href="../config/admin_utente.php?user_name=<?php echo $admin_aziend['user_name']; ?>&Update">
@@ -28,6 +43,7 @@ if ($t > 4 && $t <= 13) {
     <a class="btn btn-default" href="../config/print_privacy_regol.php" > <?php echo $script_transl['user_regol'];?></a>
   </div>
 </div>
+<input id="post_logout" type="hidden" name="" />
 <style>
 img.usr-picture:hover {
 	box-shadow: 0 0 5px #<?php echo $admin_aziend['colore']; ?>;
