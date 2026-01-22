@@ -2,7 +2,7 @@
 /*
  --------------------------------------------------------------------------
                             GAzie - Gestione Azienda
-    Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+    Copyright (C) 2004-2022 - Antonio De Vincentiis Montesilvano (PE)
          (https://www.devincentiis.it)
            <https://gazie.sourceforge.net>
  --------------------------------------------------------------------------
@@ -21,19 +21,12 @@
     scriva   alla   Free  Software Foundation, 51 Franklin Street,
     Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
  --------------------------------------------------------------------------
-  --------------------------------------------------------------------------
-  GAzie - MODULO 'VACATION RENTAL'
-  Copyright (C) 2022-present - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
-
-  --------------------------------------------------------------------------
 */
 require('booking_template_lease.php');
-
 #[AllowDynamicProperties]
 class Lease extends Template{
-  public $lang = 'it';
-  public $lang_transl = 'italian';
+	public $lang = 'en';
+	public $lang_transl = 'english';
 	function get_string_lang($string, $lang){
 		$string = " ".$string;
 		$ini = strpos($string,"<".$lang.">");
@@ -86,24 +79,21 @@ class Lease extends Template{
     }
     function body()
     {
-      require("./lang." . (!empty($this->lang_transl) ? $this->lang_transl : "italian") . ".php"); // se + vuoto metto italian di default
+      require("./lang." . (!empty($this->lang_transl) ? $this->lang_transl : "english") . ".php"); // se + vuoto metto english di default
       $script_transl = $strScript["lease.php"];
       $lang = $this->lang;
 
-
-      $lines = $this->docVars->getRigo();
-
-      // create HTML content
+      // create some HTML content
       $html = "<p><b>".$script_transl['parti']."</b><br>-<b>".$script_transl['locatore']."</b> ".$this->intesta1." ".$this->intesta2." ".$this->intesta3."<br>-"
       .$script_transl['e']."<b>".$script_transl['conduttore']."</b>"." ".$this->cliente1." ".$this->cliente2." ".$this->cliente3." ".$this->cliente4." ".$this->cliente4b." ".$this->cliente5." "."<br>".$script_transl['body1']."</p>
       <p>1- <b>".$script_transl['oggetto']."</b><br>".$script_transl['body2']."</p>";
       $html .= "<ul>";
-      $tour_tax="";
+	  $lines = $this->docVars->getRigo($this->lang_transl);
       foreach ($lines as $rigo){
         //echo "<br><pre>",print_r($rigo);
         if (isset ($rigo['custom_field']) && ($custom = json_decode($rigo['custom_field'],true)) && (json_last_error() == JSON_ERROR_NONE)){
           if (array_key_exists('accommodation_type', $custom['vacation_rental'])) {// è un alloggio
-              switch ($custom['vacation_rental']['accommodation_type']) {//3 => 'Appartamento', 4 => 'Casa indipendente', 5=> 'Bed & breakfast'
+              switch ($custom['vacation_rental']['accommodation_type']) {//3 => 'Appartamento', 4 => 'Casa vacanze', 5=> 'Bed & breakfast', 6=> 'Camera', 7=> 'Locazione turistica'
                 case "3":
                   $accomodation_type=$script_transl['apartment'];
                   break;
@@ -113,12 +103,15 @@ class Lease extends Template{
                 case "5":
                   $accomodation_type=$script_transl['bandb'];
                   break;
-                case "6":
+				case "6":
                   $accomodation_type=$script_transl['room'];
-                  break;
-                case "7":
+                  break; 
+				case "7":
                   $accomodation_type=$script_transl['loc'];
                   break;
+				default:
+					$accomodation_type='N.D.';
+					break;  
               }
 
               if (intval ($rigo['id_artico_group'])>0){// se l'alloggio fa parte di una struttura
@@ -135,34 +128,30 @@ class Lease extends Template{
                 $checkin='15 - 19';
                 $checkout='8 - 10';
               }
-
-              $html .= "<li>".$accomodation_type." ".$rigo['codart'].', '.get_string_lang($rigo['desart'], $lang).", ".$rigo['annota'];
               $rigo['web_url']=get_string_lang($rigo['web_url'], $lang);
+              $html .= "<li>".$accomodation_type." chiamato "." ".$rigo['codart'].', '.get_string_lang($rigo['desart'], $lang).", ".$rigo['annota'];
               if (strlen($rigo['web_url'])>5){
                 $html .= "<br>".$script_transl['body3'].": ".$rigo['web_url'].". ".$script_transl['body4'];
               }
               $html .= "</li>";
-
               $adult=$rigo['adult'];
               $child=$rigo['child'];
               $start=$rigo['start'];
               $end=$rigo['end'];
-
-              if (!isset($this->docVars->security_deposit) || (isset($this->docVars->security_deposit) && $this->docVars->security_deposit==-1)){
-                $secdep = $custom['vacation_rental']['security_deposit'];// quello di default dell'alloggio
+              if ($this->docVars->security_deposit==-1){
+                $secdep = $custom['vacation_rental']['security_deposit'];
               }else{
                 $secdep = $this->docVars->security_deposit;
-              }
-          }
+              }          }
           if (array_key_exists('extra', $custom['vacation_rental'])) { // è un extra
-              $html .= "<li>Q.tà. ".intval($rigo['quanti'])." Extra ".get_string_lang($rigo['desart'], $lang)." ".$rigo['annota'];
+              $html .= "<li>".intval($rigo['quanti'])."Extra ".get_string_lang($rigo['desart'], $lang)." ".$rigo['annota'];
               if (strlen($rigo['web_url'])>5){
                 $html .= "<br>   ".$script_transl['body3'].": ".$rigo['web_url'].".   ".$script_transl['body4'];
               }
               $html .= "</li>";
           }
         } elseif($rigo['codart']=="TASSA-TURISTICA"){ // è la tassa turistica
-          $tour_tax=$script_transl['tour_tax'];
+          $html .= "<li>".$rigo['descri']."</li>";
         }
       }
 
@@ -174,9 +163,9 @@ class Lease extends Template{
       $totivafat = $this->docVars->totivafat;
       $impbol = $this->docVars->impbol;
       $taxstamp=$this->docVars->taxstamp;
-      $totamount = floatval(number_format(($totimpfat + $totivafat + $impbol + $taxstamp),2,".",""));
-      // creo l'importo in lettere nella lingua impostata per questo contratto
-      $fmt = numfmt_create($lang, NumberFormatter::SPELLOUT);
+      $totamount = $totimpfat + $totivafat + $impbol + $taxstamp;
+      $locale = 'it_IT';// creo l'importo in lettere
+      $fmt = numfmt_create($locale, NumberFormatter::SPELLOUT);
       $in_words = numfmt_format($fmt, $totamount);
 
       $html .= "</ul>";
@@ -184,16 +173,16 @@ class Lease extends Template{
       $html .= "<dl>";
 
       $html .= "<dt>2- <b>".$script_transl['durata']."</b></dt>" ;
-      $html .= "<dd>- ".$script_transl['durata1'].$nights."</dd><dd>- ".$script_transl['durata2']." ".date("d-m-Y", strtotime($start))." ".$script_transl['durata2bis']." ".get_string_lang($checkin, $lang)."</dd>
-                <dd>- ".$script_transl['durata3']." ".date("d-m-Y", strtotime($end))." ".$script_transl['durata2bis']." ".get_string_lang($checkout, $lang).". ".$script_transl['durata4']."</dd>
+      $html .= "<dd>- ".$script_transl['durata1'].$nights."</dd><dd>- ".$script_transl['durata2']." ".date("Y-m-d", strtotime($start))." ".$script_transl['durata2bis']." ".get_string_lang($checkin, $lang)."</dd>
+                <dd>- ".$script_transl['durata3']." ".date("Y-m-d", strtotime($end))." ".$script_transl['durata2bis']." ".get_string_lang($checkout, $lang).". ".$script_transl['durata4']."</dd>
                 <dd>- ".$script_transl['durata5']."</dd>";
 
       $html .= "<dt>3- <b>".$script_transl['canone']."</b></dt>" ;
       $html .= "<dd>- ".$script_transl['body5'].(intval($adult)+intval($child)).$script_transl['body6'].$adult.$script_transl['body7'].$child.$script_transl['body8'].$this->docVars->child_age;"</dd>";
 
-      $html .= "<dd>- ".$script_transl['canone1']." € ".number_format(($totamount),2,",",".")." (".$in_words.") ".$script_transl['canone2bis'].$tour_tax.$script_transl['canone2']."</dd>";
+      $html .= "<dd>- ".$script_transl['canone1']." € ".number_format(($totamount),2,",",".")." (".$in_words.") ".$script_transl['canone2']."</dd>";
       if ($secdep>1){// se è previsto un deposito cauzionale lo scrivo
-        $html .= "<dd>- ".$script_transl['canone3']." € ".number_format(($secdep),2,",",".")." (". numfmt_format($fmt, floatval(number_format(($secdep),2,".","")))."). ".$script_transl['canone4']."</dd>";
+        $html .= "<dd>- ".$script_transl['canone3']." € ".number_format(($secdep),2,",",".")." ".$script_transl['canone4']."</dd>";
       }
 
       $html .= "<dt>4- <b>".$script_transl['divieti']."</b></dt>";
@@ -206,7 +195,7 @@ class Lease extends Template{
       $html .= "<dd>- ".$script_transl['rinvio1']."</dd>";
 
       $html .= "<dt>7- <b>".$script_transl['accettazione']."</b></dt>" ;
-      if (strlen($this->ip)>7){// se firmato on line lo preciso
+      if (strlen($this->ip)>6){// se firmato on line lo preciso
         $html .= "<dd>- ".$script_transl['accettazione1']."</dd>";
       }
       $html .= "<dd>- ".$script_transl['accettazione2']."</dd>";
@@ -214,25 +203,28 @@ class Lease extends Template{
       $html .= "<dl>";
       if (strlen($this->ip)>7){// firme digitali
         $html .= "<br><p><b>".$script_transl['sign-online']."</b></p>";
+		$html .= "<p>Il locatore <b>".$this->intesta1."</b></p>";
         $html .= "<br><p><span>Il conduttore <b>".$this->cliente1." ".$this->cliente2."</b> - firma registrata con IP:".$this->ip;
         if (strlen($this->date_ip)>7){
           $html .= " ".$this->date_ip;
         }
+		$html .="</span></p>";
         $html .= "<br><p><b>".$script_transl['sign-clauses']."</b></p>";
-        $html .= "<br><p><span>Il conduttore <b>".$this->cliente1." ".$this->cliente2."</b> - firma registrata con IP:".$this->ip;
+        $html .= "<br><span>Il conduttore <b>".$this->cliente1." ".$this->cliente2."</b> - firma registrata con IP:".$this->ip;
         if (strlen($this->date_ip)>7){
           $html .= " ".$this->date_ip;
         }
-        $html .="</span></p>";
-        $html .= "<p>Il locatore <b>".$this->intesta1."</b><br><br><br><br><br><br><br><br><br><br><br><br><br></p>";
+        $html .="</span>";
+        
 
       }else{// firme fisiche
         $html .= "<br><p><b>Letto, Firmato e Sottoscritto </b></p><span>Il locatore ".$this->intesta1."</span><span style=\" letter-spacing: 30px;\">&nbsp; &nbsp;</span><span> Il conduttore ".$this->cliente1." ".$this->cliente2."</span><br>";
         $html .= "<br><p><b>Ai sensi e per gli effetti degli articoli 1341 e 1342 del Codice Civile, il conduttore dichiara di aver preso visione e di approvare specificamente le seguenti clausole: 1,2,3,4,5,6,7.</b></p><span> Il conduttore ".$this->cliente1." ".$this->cliente2."</span><br><br><br><br><br><br><br><br><br><br><br><br><br>";
       }
-      $html .= "<p><b>CHECK-IN</b> Il conduttore dichiara di aver controllato l'appartamento, di averlo trovato in buono stato di manutenzione e pulizia con tutte le dotazioni e gli extra concordati e di riceverne le chiavi. </p><br><span style=\" letter-spacing: 270px;\">&nbsp; &nbsp;</span>___________________________________________________";
-      $html .= "<br><br><br><br><b>CHECK-IN</b> Il locatore dichiara di ricevere il deposito cauzionale di cui al punto 3. ________________________________________";
-      $html .= "<br><br><br><br><b>CHECK-OUT</b> Il conduttore dichiara che il deposito cauzionale di cui al punto 3 gli è stato restituito per cessata locazione. <br><span style=\" letter-spacing: 270px;\">&nbsp; &nbsp;</span>___________________________________________________";
+	  $html .= "<br><br><br><br><br><br><br><br><br><b>AL CHECK-IN</b> Il conduttore dichiara di aver visionato l'appartamento, di averlo trovato in buono stato di manutenzione e pulizia, con tutti i servizi e extra concordati, e di riceverne le chiavi. <br><span style=\" letter-spacing: 270px;\">&nbsp; &nbsp;</span>___________________________________________________";
+	 $html .= "<br><br><br><br><b>AL CHECK-IN</b> Il locatore dichiara di aver ricevuto il deposito cauzionale di cui al punto 3. <br><br>_______________________________";
+	 $html .= "<br><br><br><br><b>AL CHECK-OUT</b> Il conduttore dichiara che il deposito cauzionale di cui al punto 3 gli è stato restituito a seguito della cessazione del contratto di locazione. <br><span style=\" letter-spacing: 270px;\">&nbsp; &nbsp;</span>___________________________________________________";
+
       // output the HTML content
       $this->writeHTML($html, true, false, true, false, '');
 

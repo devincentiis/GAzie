@@ -3,14 +3,14 @@
     --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
    --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -50,6 +50,33 @@ if ($_GET['token'] == md5($token.date('Y-m-d'))){
       die("Connection DB failed: " . mysqli_connect_error());
   }
   $link -> set_charset("utf8");
+  
+	if (isset($_GET['id'])){ // se ho ricevuto il codice alloggio controllo se è aperto o chiuso
+		//$sql = "SELECT ordinabile FROM ".$azTables."artico WHERE codice = '".substr(mysqli_escape_string($link,$_GET['id']), 0, 32)."' LIMIT 1";	 
+		$house_code = substr(mysqli_real_escape_string($link, $_GET['id']), 0, 32);
+		$sql = "
+		SELECT a.ordinabile, g.custom_field
+		FROM ".$azTables."artico AS a
+		LEFT JOIN ".$azTables."artico_group AS g
+		  ON a.id_artico_group = g.id_artico_group
+		WHERE a.codice = '".$house_code."'
+		LIMIT 1
+		";
+		
+		$result = mysqli_query($link, $sql);
+		$row_artico = mysqli_fetch_assoc($result); // restituisce array 
+		
+		 if ($row_artico === null) {
+		  $ordinabile = '';
+		} else {
+			$ordinabile = $row_artico['ordinabile'] ?? '';
+			if ($ordinabile == "N"){// se l'alloggio è chiuso blocca
+				echo "L'alloggio non è al momento prenotabile. Contattare il gestore per maggiori informazioni";
+				return;
+			}	
+		}
+	}
+  
   $data = array();
 
   if(isset($_GET['id'])){
@@ -68,6 +95,55 @@ if ($_GET['token'] == md5($token.date('Y-m-d'))){
 		);
 		}
     }
+	
+	
+	if(isset($row_artico['custom_field']) && $dataJson = json_decode($row_artico['custom_field'],true)){
+		if (intval($dataJson['vacation_rental']['open_from'])>0 && intval($dataJson['vacation_rental']['open_to'])){ // se è impostato un periodo di apertura
+			$year = date('Y');
+			list($day, $month) = explode('-', $dataJson['vacation_rental']['open_from']);			
+			$iso_date_from = sprintf('%04d-%02d-%02d', $year, $month, $day); 
+			$iso_date_from_nextyear = sprintf('%04d-%02d-%02d', $year+1, $month, $day);
+			$iso_date_from_nextyear2 = sprintf('%04d-%02d-%02d', $year+2, $month, $day);
+			list($day, $month) = explode('-', $dataJson['vacation_rental']['open_to']);			
+			$iso_date_to = sprintf('%04d-%02d-%02d', $year, $month, $day);
+			$iso_date_to_nextyear = sprintf('%04d-%02d-%02d', $year+1, $month, $day);
+			 
+			$addrow = [
+			  'id' => 0,
+			  'title' => 'Struttura chiusa',
+			  'start' => sprintf('%04d-%02d-%02d', (int)date('Y'), (int)date('m'), (int)date('d')),// da oggi
+			  'end' => $iso_date_from,// alla data di apertura
+			  'house_code' => $house_code,
+			  'id_tesbro' => 0
+			];	
+			$data[]=$addrow;
+			
+			$addrow = [
+			  'id' => 0,
+			  'title' => 'Struttura chiusa',
+			  'start' =>  $iso_date_to,// dalla data di chiusura
+			  'end' => $iso_date_from_nextyear, // alla data di apertura dell'anno successivo
+			  'house_code' => $house_code,
+			  'id_tesbro' => 0
+			];	
+			$data[]=$addrow;
+			 
+			$addrow = [
+			  'id' => 0,
+			  'title' => 'Struttura chiusa',
+			  'start' => $iso_date_to_nextyear, // dalla data chiusura dell'anno successivo
+			  'end' => $iso_date_from_nextyear2, // alla data di apertura dell'anno successivo +2
+			  'house_code' => $house_code,
+			  'id_tesbro' => 0
+			];	
+			$data[]=$addrow;
+			
+		}			
+	}
+	
+	
+	
+	
     echo json_encode($data);
   }
 }

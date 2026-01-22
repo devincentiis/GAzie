@@ -54,7 +54,8 @@ $strScript = array(
         'no_pw_yet'=>'Hasło nie zostało jeszcze ustawione: użyj odzyskiwania hasła, aby je wprowadzić',
 		'no_json_anagra'=>'Nigdy nie wprowadzono hasła, wprowadź je, klikając Nie pamiętam hasła lub skontaktuj się z administratorem.',
         'reset_success'=>'Hasło zostało ustawione; możesz zalogować się za pomocą nowego hasła.',
-        'dashboard' => 'Panel sterowania'
+        'dashboard' => 'Panel sterowania',
+		'banner_search'=>'Sprawdź dostępność'
       ),
     "browse_document.php" =>
       array('title' => "Lista dei Documenti/Certificati",
@@ -73,13 +74,13 @@ $strScript = array(
         'select' => "Sel.",
         'code' => "Codice"),
 	"thanks.php" =>
-      array('title' => 'Pagina di ringraziamento Vacation rental',
-        'thanks' => "GRAZIE!",
-        'booked' => "La prenotazione è stata effettuata.",
-        'instr_sent' => "Il riepilogo con tutte le informazioni è stato inviato all'indirizzo e-mail fornito.<br>",
-        'not_received' => "In mancanza di ricevemento e dopo aver controllato nella cartella di spam, contattare l'amministratore del sito.",
-        'close'=>'Questo messaggio si chiuderà fra ',
-      ),
+      array('title' => 'Strona podziękowania – Wynajem wakacyjny',
+		'thanks' => "DZIĘKUJEMY!",
+		'booked' => "Rezerwacja została dokonana.",
+		'instr_sent' => "Podsumowanie ze wszystkimi informacjami zostało wysłane na podany adres e-mail.<br>",
+		'not_received' => "Jeśli nie otrzymano wiadomości i po sprawdzeniu folderu spam, prosimy o kontakt z administratorem strony.",
+		'close'=>'Ta wiadomość zamknie się za ',
+	),
     "report_facility.php" =>
       array('title' => 'Lista deglle strutture ricettive',
         'codice' => "Codice",
@@ -442,38 +443,38 @@ $strScript = array(
         )
     ),
 	"banner_search.php" =>
-    array('title' => 'Iframe ricerca generale',
-        'err' => array(
-			'date_uguali'=> 'Le date di check-in e check-out sono uguali',
-			'start>end'=> 'il check-in è posteriore al check-out'
-        ),
-        'war' => array(
-            'ok' => 'ok riempitura array'
+    array('title' => 'Iframe ogólnego wyszukiwania',
+		'err' => array(
+			'date_uguali'=> 'Daty zameldowania i wymeldowania są takie same',
+			'start>end'=> 'Data zameldowania jest późniejsza niż data wymeldowania'
 		),
-		'guest'=>'Ospiti',
-		'look'=>'Guarda',
-		'price'=>'Prezzo',
-		'search'=>"Cerca",
-		'open_calendar'=>"Apri il calendario generale",
-		'imposta'=>"Per prezzo o prenotazione impostare le date",
-		'risultato'=>"Disponibilità per ",
-		'book'=>"Prenota",
-		'nessun_risultato'=>"Per il periodo selezionato non ci sono disponibilità. Provare a modificare le date o a visionare il calendario generale.",
-		'for_night' => 'a notte',
-		'nights' => 'notti',
-		'over_guest' => 'Attenzione: questo alloggio è disponibile ma ha una capienza massima di',
-		'persons' => 'persone',
-		'avviso' => 'Il soggiorno minimo è di',
-		'avviso2' => 'Ci sono sconti crescenti per 12, 21 e 28 notti.',
-		'over_max_booking' => 'Alcuni alloggi hanno il limite massimo di ',
-		'over_max_booking2' => 'Prova a ridurre le notti nella richiesta.',
-		'no_search_house' => 'L\'alloggio richiesto non è disponibile, guarda la disponibilità nel suo calendario. Oppure ci sono queste alternative:',
-		'msg_no_price' => 'L\'alloggio sarebbe disponibile ma NON c\'è il prezzo per il giorno',
-		'msg_minstay' => 'Questo alloggio sarebbe disponibile ma il soggiorno minimo è di',
-		'msg_minstay2' => 'notti mentre ne sono state richieste solo',
-		'available' => 'DISPONIBILE! Guarda o prenota subito',
-    'alternative' => 'Disponibilità alternative prenotabili:'
-    ),
+		'war' => array(
+			'ok' => 'ok – wypełnienie tablicy'
+		),
+		'guest'=>'Goście',
+		'look'=>'Zobacz',
+		'price'=>'Cena',
+		'search'=>"Szukaj",
+		'open_calendar'=>"Otwórz ogólny kalendarz",
+		'imposta'=>"Aby wyświetlić cenę lub dokonać rezerwacji, ustaw daty",
+		'risultato'=>"Dostępność dla ",
+		'book'=>"Rezerwuj",
+		'nessun_risultato'=>"Brak dostępności w wybranym okresie. Spróbuj zmienić daty lub sprawdź ogólny kalendarz.",
+		'for_night' => 'za noc',
+		'nights' => 'noce',
+		'over_guest' => 'Uwaga: to zakwaterowanie jest dostępne, ale ma maksymalną pojemność',
+		'persons' => 'osób',
+		'avviso' => 'Minimalny pobyt wynosi',
+		'avviso2' => 'Rosnące rabaty obowiązują przy pobytach 12, 21 i 28 nocy.',
+		'over_max_booking' => 'Niektóre obiekty mają maksymalny limit ',
+		'over_max_booking2' => 'Spróbuj zmniejszyć liczbę nocy w zapytaniu.',
+		'no_search_house' => 'Wybrane zakwaterowanie nie jest dostępne — sprawdź jego kalendarz. Alternatywnie dostępne są:',
+		'msg_no_price' => 'Zakwaterowanie byłoby dostępne, ale brak ceny dla dnia',
+		'msg_minstay' => 'To zakwaterowanie byłoby dostępne, ale minimalny pobyt wynosi',
+		'msg_minstay2' => 'nocy, podczas gdy poproszono tylko o',
+		'available' => 'DOSTĘPNE! Zobacz lub zarezerwuj teraz',
+		'alternative' => 'Alternatywne dostępności możliwe do rezerwacji:'
+	),
 	"booking_form.php" =>
     array('title' => 'Formularz rezerwacji',
         'err' => array(
@@ -495,10 +496,13 @@ $strScript = array(
         ),
         'war' => array(
             'ok' => 'ok riempitura array',
-            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
+            'pay_thanks' => 'Dziękujemy, płatność została przekazana. Zostanie wkrótce potwierdzona.',
+			'extra_thanks' => 'Dziękujemy, dodatek został pomyślnie dodany.'
 		),
     'print'=>'Druk',
     'minors' => 'Dzieci',
+	'how_age' => "Należy brać pod uwagę wiek w momencie zameldowania.",
+	'minor_rule' => "Osoby poniżej 18 roku życia muszą być zawsze w towarzystwie osoby dorosłej. Jeżeli osoba dorosła nie jest rodzicem, powinna mieć pisemną zgodę osób sprawujących władzę rodzicielską nad nieletnim. UWAGA: Każdy nieletni, nawet noworodek, musi posiadać własny dokument tożsamości w każdym przypadku.",
     'adults' => 'Dorośli',
     'total_people' => 'Razem osób',
     'people_number_change' => 'Zmień osoby',
@@ -550,6 +554,7 @@ $strScript = array(
 		'quantity' => 'ilość',
 		'per_stay' => 'za salon',
 		'dashboard' => 'Panel sterowania',
+		'banner_search'=>'Sprawdź dostępność',
 		'per_night_adult' => 'za noc z wyłączeniem nieletnich',
 		'per_person_adult' => 'za osobę, z wyłączeniem małoletnich',
 		'required' => 'obowiązkowe',
@@ -603,6 +608,7 @@ $strScript = array(
 		'email_confirm_add_access_url' => 'Rezerwację znajdzie Pan/Pani na swojej osobistej stronie użytkownika na stronie internetowej (panel), gdzie można również dodać usługi dodatkowe i dokonać dalszych płatności.',
 		'email_confirm_add_access_code' => ' oraz następujące kody dostępu: ',
 		'regards' => 'Z poważaniem,',
+		'download_app' => "Pobierz aplikację na Androida, aby znaleźć idealny dom wakacyjny w Grottammare, zarządzać rezerwacją, otrzymywać powiadomienia w czasie rzeczywistym i korzystać ze wszystkich funkcji: <a href=\"https://play.google.com/store/apps/details?id=com.agermani.mygmonamour\" target=\"_blank\">Download from Google Play</a>",
 		'of' => 'z dnia',
 		'discount_code' => 'Jeśli masz kod rabatowy, wpisz go tutaj; zostanie zastosowany w następnym kroku.',
 		'coupon_apply' => 'Należy zastosować kupon rabatowy',
@@ -806,7 +812,7 @@ $strScript = array(
     'body6' => ' persone, di cui ',
     'body7' => ' adulti e ',
     'body8' => ' minori di anni ',
-    'divieto1' => 'E\' vietato Il pernotto, anche occasionale, di un numero di persone superiore a quanto concordato.',
+    'divieto1' => 'È fatto assoluto divieto agli ospiti di far soggiornare o consentire l\’accesso all\’alloggio a persone diverse da quelle indicate nel presente contratto e al momento del check-in.',
     'divieto2' => 'Il conduttore si impegna a concordare con il locatore gli orari previsti di arrivo e partenza con almeno 12 ore di anticipo. Il conduttore si impegna a comunicare al locatore, durante il viaggio, l\'eventuale aggiornamento dell\'orario di arrivo previsto.',
     'divieto3' => 'Con il ritiro delle chiavi, il conduttore accetta e si obbliga di diventare il custode dell\'alloggio per tutta la durata della locazione. Pertanto si assume l\'obbligo di custodirlo con la dovuta diligenza e di non arrecare danni all\'alloggio, al mobilio e agli elettrodomestici, di non apportare alcuna modifica alla disposizione dei mobili e degli oggetti e di non effettuare alcuna riparazione se non preventivamente autorizzata dal locatore.',
     'divieto7' => 'Eventuali guasti o rotture dovranno immediatamente essere comunicati al locatore. Qualora guasti o rotture siano derivati da un corretto e coscenzioso uso del bene essi saranno a carico del locatore altrimenti verranno addebitati al conduttore. I tempi tecnici per la riparazione e/o ripristino saranno determinati di volta in volta da un tecnico competente che verrà incaricato dal locatore. In attesa della riparazione, per il mancato uso del bene guasto il conduttore dichiara sin da ora di rinunciare ad ogni tipo di risarcimento.',
@@ -841,21 +847,22 @@ $strScript = array(
     'sign' => 'Firmato'
     ),
     "review_viewer.php" =>
-    array('title' => 'Visualizzatore di recensioni',
-        'err' => array(
-			'date_uguali'=> 'Le date di check-in e check-out sono uguali'
-        ),
-        'war' => array(
-          'ok' => 'ok riempitura array'
+	array(
+		'title' => 'Przeglądarka opinii',
+		'err' => array(
+			'date_uguali'=> 'Daty zameldowania i wymeldowania są takie same'
 		),
-		'guest'=>'Ospiti',
-    'opinion' => 'Valutazione degli ospiti',
-    'average' => 'Media delle valutazioni',
-    'guest_reviews' => 'Recensioni degli ospiti',
-    'no_review' => 'Non ci sono ancora recensioni',
-    'prev' => ' Precedente ',
-    'next' => ' Successiva '
-    ),
+		'war' => array(
+			'ok' => 'ok wypełnianie tablicy'
+		),
+		'guest'=>'Goście',
+		'opinion' => 'Ocena gości',
+		'average' => 'Średnia ocen',
+		'guest_reviews' => 'Opinie gości',
+		'no_review' => 'Brak opinii',
+		'prev' => ' Poprzednia ',
+		'next' => ' Następna '
+	),
     "self_checkin.php" =>
     array('title' => 'Zarządzanie self check-in',
         'choose_sex' => 'Wybierz płeć',

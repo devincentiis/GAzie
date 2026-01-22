@@ -3,14 +3,14 @@
    --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
     --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -59,6 +59,42 @@
 //require("../../library/include/datlib.inc.php");
 include_once("manual_settings.php");
 $id=substr($_GET['house_code'],0,32);
+
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host   = $_SERVER['HTTP_HOST'];
+$url = $scheme . '://' . $host . dirname($_SERVER['SCRIPT_NAME']) . '/load_from_db_events.php?id=' . urlencode($id) . '&token=' . urlencode(md5($token . date('Y-m-d'))) . '&house_code='.$id;
+// Recupera il JSON dal server (file_get_contents o cURL)
+$options = [
+  "https" => [
+    "method" => "GET",
+    "header" => "Accept: application/json\r\n"
+  ]
+];
+$context = stream_context_create($options);
+$context = @file_get_contents($url, false, $context);
+if (is_string($context) && (json_decode($context) !== null || json_last_error() === JSON_ERROR_NONE)) {
+    // JSON valido
+} else {
+    // non è JSON
+	?>
+	<body>
+    <div style="display:flex;align-items:center;justify-content:center;min-height:200px;padding:16px;">
+	  <div style="max-width:720px;width:100%;background:#fff;border:1px solid #e6e6e6;border-radius:8px;box-shadow:0 6px 18px rgba(20,20,20,0.06);padding:20px;text-align:left;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;color:#263238;">
+		<p style="margin:0 0 8px;font-weight:700;color:#d9534f;">AVVISO:</p>
+		<p style="margin:0;color:#455a64;line-height:1.45;">
+		  <?php echo htmlspecialchars($context, ENT_QUOTES, 'UTF-8'); ?>
+		</p>
+		
+	  </div>
+	</div>
+  </body>
+ </html>
+ <?php
+	
+	exit;
+}
+
+
 $initialDate=(isset($_GET['initialDate']))?$_GET['initialDate']:date('Y-m-d');
 ?>
 

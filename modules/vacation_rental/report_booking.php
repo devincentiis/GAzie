@@ -741,7 +741,13 @@ function point(ref,point,name,idtes,expired,expiry_points_date) {
                 $("#point_exp").html('');
                 $("#dialog_point").dialog("close");
                 window.location.reload(true);
-              }
+              },
+			  error: function(jqXHR, textStatus, errorThrown) {
+				  alert('Errore, response: ' + response);
+				  alert('Errore: ' + textStatus + ' — ' + (errorThrown || 'Nessun dettaglio'));
+				  alert('Status code: ' + jqXHR.status);
+				  alert('Response body: ' + jqXHR.responseText);
+				}
             });
 				}},
 				"Chiudi": function() {
@@ -856,8 +862,28 @@ $(function() {
 						type: 'POST',
 						url: '../vacation_rental/delete.php',
 						success: function(output){
-		                    //alert(output);
+						  try {
+							  if (output === '' || output === null || output === undefined) {
+								// risposta vuota: non fare nulla (o gestire come necessario)
+								var res = { success: true };
+							  } else {
+								var res = (typeof output === 'object') ? output : JSON.parse(output);
+							  }
+							} catch (e) {
+							  console.error('Invalid JSON response', output);
+							  alert('Errore: ' + output);
+							  window.location.replace("./report_booking.php?auxil=<?php echo $tipo;?>");
+							}
+
+						  if (res.success) {
 							window.location.replace("./report_booking.php?auxil=<?php echo $tipo;?>");
+						  } else {
+							alert('Errore: ' + (res.msg || 'Operazione fallita'));
+						  }
+						},						
+						error: function(jqXHR, textStatus, errorThrown) {
+						  console.error('AJAX error', textStatus, errorThrown, jqXHR.status, jqXHR.responseText);
+						  alert('Errore: ' + textStatus + (errorThrown ? ' - ' + errorThrown : ''));
 						}
 					});
 				}},

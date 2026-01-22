@@ -74,15 +74,17 @@ if ($result = mysqli_query($link, $sql)) {
 }else{
 echo "Error: " . $sql . "<br>" . mysqli_error($link);
 }
-
+$lang = 'italian';// default
 $stato = gaz_dbi_get_row($gTables['anagra'], 'id', $id_anagra['id_anagra']);
-if ($stato AND $stato['id_language'] == 1 or $stato['id_language'] == 0){// se è italiano o non è impostato
-    $lang = '';
-} elseif ($stato AND $stato['id_language'] == 2 ) {// se è inglese
-  $lang = 'english';
-}elseif ($stato AND $stato['id_language'] == 3 ) {// se è spagnolo
-  $lang = 'spanish';
+if (is_array($stato) && !empty($stato)){
+	$language = gaz_dbi_get_row($gTables['languages'], 'lang_id', $stato['id_language']);
+	if (is_array($language) && !empty($language)){
+		$lang = $language['title_native'];
+	}else{// se non ho trovato il codice lingua di default è italiano
+		$lang = 'italian';
+	}
 }
+
 if ($tesbro['tipdoc']=='VOR' || $tesbro['tipdoc']=='VOG') {
 	$type=false;
 	$template='Lease';
@@ -96,6 +98,7 @@ if ($tesbro['tipdoc']=='VOR' || $tesbro['tipdoc']=='VOG') {
 		$template='Ticket';
 	}
   $save=(isset($_GET['save']))?true:false;
+ 
   createDocument($tesbro,$template,$gTables,'rigbro',$type,$lang,$genTables,$azTables,$IDaz,'',$id_ag,'it',"",$save);
 } elseif ($tesbro['tipdoc']=='VOW'){
 	$type=false;

@@ -66,7 +66,7 @@ if (!isset($_POST['id_tes'])) { //al primo accesso  faccio le impostazioni ed il
             }
             $form['rows'][$nr]['checkval'] = '';
             if ($totale_ricevibile>=0.00001) {
-                // decommentare sotto in caso si voglia che venga selezionato  tutto di default 
+                // decommentare sotto in caso si voglia che venga selezionato  tutto di default
                 //$form['rows'][$nr]['checkval'] = ' checked ';
             }
             $form['rows'][$nr]['ricevibile'] = $totale_ricevibile;
@@ -98,7 +98,7 @@ if (!isset($_POST['id_tes'])) { //al primo accesso  faccio le impostazioni ed il
     }
 }
 
-if (isset($_POST['subdoc'])) { 
+if (isset($_POST['subdoc'])) {
     if (!isset($form["rows"])) {
         $msg['err'][] = 'norows';
     } else {
@@ -190,7 +190,7 @@ $gForm = new acquisForm();
                     <div class="form-group">
                         <label for="numdoc" class="col-sm-4 control-label">Ordine numero:</label>
                         <div class="col-sm-8"><b><?php echo $form['numdoc']; ?></b> del <?php echo gaz_format_date($form['datemi']); ?>
-						</div>                
+						</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-md-3 col-lg-3">
@@ -200,7 +200,7 @@ $gForm = new acquisForm();
                             <input type="text" class="form-control" id="numddt" name="numddt" value="<?php echo $form['numddt']; ?>">
                         </div>
                     </div>
-                </div>                    
+                </div>
                 <div class="col-sm-6 col-md-3 col-lg-3">
                     <div class="form-group">
                         <label for="datemi" class="col-sm-4 control-label"><?php echo $script_transl['datemi']; ?></label>
@@ -211,39 +211,41 @@ $gForm = new acquisForm();
                 </div>
             </div> <!-- chiude row  -->
         </div><!-- chiude container  -->
-    </div><!-- chiude panel  -->        
-<?php	
+    </div><!-- chiude panel  -->
+<?php
 if (!empty($form['rows'])) {
     $tot = 0;
     foreach ($form['rows'] as $k => $v) {
 		$checkin='';
 		$artico = gaz_dbi_get_row($gTables['artico'], 'codice', $v['codart']);
+    $btn_class = 'btn-success';
+    $btn_title = '';
+    if ($v['tiprig'] == 0) {
+      if ($artico && $artico['good_or_service']>0){
+        $btn_class = 'btn-info';
+        $btn_title = 'Servizio';
+      } else {
         $btn_class = 'btn-success';
-        $btn_title = '';
-        if ($v['tiprig'] == 0) {
-            if ($artico['good_or_service']>0){ 
-				$btn_class = 'btn-info';
-				$btn_title = 'Servizio';
-			} else {
-                $btn_class = 'btn-success';
-				$btn_title = ' titolo';
-            }
+        $btn_title = ' titolo';
+      }
+    }
+    // calcolo importo totale (iva inclusa) del rigo e creazione castelletto IVA
+    if ($v['tiprig'] <= 1) {    //ma solo se del tipo normale o forfait
+        if ($v['tiprig'] == 0) { // tipo normale
+            $tot_row = CalcolaImportoRigo($v['quanti'], $v['prelis'], array($v['sconto'], $form['sconto'], -$v['pervat']));
+        } else {                 // tipo forfait
+            $tot_row = CalcolaImportoRigo(1, $v['prelis'], -$v['pervat']);
         }
-        // calcolo importo totale (iva inclusa) del rigo e creazione castelletto IVA
-        if ($v['tiprig'] <= 1) {    //ma solo se del tipo normale o forfait
-            if ($v['tiprig'] == 0) { // tipo normale
-                $tot_row = CalcolaImportoRigo($v['quanti'], $v['prelis'], array($v['sconto'], $form['sconto'], -$v['pervat']));
-            } else {                 // tipo forfait
-                $tot_row = CalcolaImportoRigo(1, $v['prelis'], -$v['pervat']);
-            }
-            if (!isset($castel[$v['codvat']])) {
-                $castel[$v['codvat']] = 0.00;
-            }
-            $castel[$v['codvat']]+=$tot_row;
-            // calcolo il totale del rigo stornato dell'iva
-            $imprig = round($tot_row / (1 + $v['pervat'] / 100), 2);
-            $tot+=$tot_row;
+        if (!isset($castel[$v['codvat']])) {
+            $castel[$v['codvat']] = 0.00;
         }
+        $castel[$v['codvat']]+=$tot_row;
+        // calcolo il totale del rigo stornato dell'iva
+        $imprig = round($tot_row / (1 + $v['pervat'] / 100), 2);
+        $tot+=$tot_row;
+    } else {
+      $imprig = $tot_row = 0.00;
+    }
 	    // fine calcolo importo rigo, totale e castelletto IVA
         // colonne non editabili
         echo "<input type=\"hidden\" value=\"" . $v['codart'] . "\" name=\"rows[$k][codart]\">\n";
@@ -272,7 +274,7 @@ if (!empty($form['rows'])) {
                             </button>'
             ),
             array('head' => $script_transl["descri"], 'class' => '',
-                'value' =>  $v['descri'] 
+                'value' =>  $v['descri']
             ),
             array('head' => $script_transl["unimis"], 'class' => '',
                 'value' => $v['unimis']
@@ -281,7 +283,7 @@ if (!empty($form['rows'])) {
                 'value' => 'residuo:'.floatval($v['totric']).' <input type="number" step="any" name="rows[' . $k . '][ricevibile]" value="' . $v['ricevibile'] . '" maxlength="11" />'
             ),
             array('head' => $script_transl["prezzo"], 'class' => 'text-right numeric',
-                'value' =>  $v['prelis'] 
+                'value' =>  $v['prelis']
             ),
             array('head' => $script_transl["sconto"], 'class' => 'text-right numeric',
                 'value' => $v['sconto']),
@@ -299,7 +301,7 @@ if (!empty($form['rows'])) {
                 // in caso di rigo forfait non stampo alcune colonne
                 $resprow[$k][3]['value'] = ''; //unimis
                 $resprow[$k][4]['value'] = ''; //quanti
-                // scambio l'input con la colonna dell'importo... 
+                // scambio l'input con la colonna dell'importo...
                 $resprow[$k][7]['value'] = $resprow[$k][5]['value'];
                 // ... e poi non la visualizzo più
                 $resprow[$k][5]['value'] = ''; //prelis
@@ -323,7 +325,7 @@ if (!empty($form['rows'])) {
 <div class="panel panel-info">
     <div class="container-fluid"><div class="col-xs-1 col-md-3 col-lg-5"></div><div class="col-xs-10 col-md-6 col-lg-2"><input class="btn btn-warning col-xs-12" type="submit" name="subdoc" value="<?php echo $script_transl['confirm']; ?>" /></div><div class="col-xs-1 col-md-3 col-lg-5"></div>
     </div><!-- chiude container  -->
-</div><!-- chiude panel  -->        
+</div><!-- chiude panel  -->
 </form>
 <?php
 require("../../library/include/footer.php");

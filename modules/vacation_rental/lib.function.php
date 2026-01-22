@@ -29,6 +29,20 @@
   --------------------------------------------------------------------------
  */
 
+ // creo connessione al DB
+ function db_connect() {
+    $servername = constant("Host");
+    $username   = constant("User");
+    $pass       = constant("Password");
+    $dbname     = constant("Database");
+    $link = mysqli_connect($servername, $username, $pass, $dbname);
+    if (!$link) {
+        die("Connection DB failed: " . mysqli_connect_error());
+    }
+    $link->set_charset("utf8mb4");
+    return $link;
+}
+
 function iCalDecoder($file) {
     $ical = @file_get_contents($file);
 	preg_match_all('/BEGIN:VEVENT(.*?)END:VEVENT/si', $ical, $result, PREG_PATTERN_ORDER);
@@ -210,17 +224,26 @@ function selectFromDBJoin($table, $name, $key, $val, $order = false, $empty = fa
 		}
 }
 function get_string_lang($string, $lang){
-	$string = " ".$string;
-	$ini = strpos($string,"<".$lang.">");
-	if ($ini == 0) return $string;
-	$ini += strlen("<".$lang.">");
-	$len = strpos($string,"</".$lang.">",$ini) - $ini;
-  if (intval($len)>0){// se è stato trovato il tag lingua restituisco filtrato
-    return substr($string,$ini,$len);
-  }else{// altrimenti restituisco come era
+    // se non ci sono tag lingua, restituisco la stringa così com'è
+    if (strpos($string, '<') === false || strpos($string, '>') === false) {
+        return $string;
+    }
+    // cerco se è presente almeno un tag <xx>...</xx>
+    if (!preg_match('/<([a-z]{2})>.*?<\/\1>/is', $string)) {
+        return $string;
+    }
+    // prova a estrarre il tag richiesto
+    if (preg_match('/<' . preg_quote($lang, '/') . '>(.*?)<\/' . preg_quote($lang, '/') . '>/is', $string, $m)) {
+        return $m[1];
+    }
+    // se non trovato, prova a restituire l'inglese se presente
+    if (preg_match('/<en>(.*?)<\/en>/is', $string, $m_en)) {
+        return $m_en[1];
+    }
+    // se ci sono tag lingua ma né la lingua richiesta né "en", restituisco comunque la stringa originale
     return $string;
-  }
 }
+
 function get_lang_translation($ref, $table, $lang_id){// nuovo sistema traduzione tramite tabella body-text
     if ($lang_id>1){// traduco solo se non è la lingua di default
       global $link, $azTables, $gTables;// posso chiamare la funzione con entrambi i metodi
@@ -263,7 +286,7 @@ function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax
       // Tassa valida tutto l'anno: 1 gennaio - 31 dicembre
       $tour_tax_from = "01-01";
       $tour_tax_to   = "31-12";
-      
+
       $startYear = date("Y", strtotime($start));
       $endYear = date("Y", strtotime($end));
 
@@ -288,8 +311,8 @@ function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax
 
 	$tour_tax_from = $from_date->format('Y-m-d');
 	$tour_tax_to   = $to_date->format('Y-m-d');
-	
-	
+
+
 	$night = (new DateTime($start))->diff(new DateTime($end))->days;
     $daytopay = intval($night); // default: tutte le notti si pagano, se non c'è un periodo specifico
 
@@ -311,9 +334,9 @@ function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax
 
         $daytopay = $count; // sovrascrivo solo se c'è un periodo valido
     }
-	
+
 	// ** LOGICA PER IL CALCOLO STATISTICO **
-    // Se viene passato anche il periodo completo locazione, controllo se start e end 
+    // Se viene passato anche il periodo completo locazione, controllo se start e end
     // rientrano nelle prime tour_tax_day notti dalla locazione completa.
     if (strtotime($tour_tax_from) && strtotime($tour_tax_to) && $full_start !== null && $full_end !== null && intval($tour_tax_day) > 0) {
       $full_start_dt = new DateTime($full_start);
@@ -346,7 +369,7 @@ function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax
         $daytopay = 0;
       }
     }
-    // Applico limite massimo di notti da pagare 
+    // Applico limite massimo di notti da pagare
     if (intval($tour_tax_day) > 0 && $daytopay > intval($tour_tax_day)) {
         $daytopay = intval($tour_tax_day);
     }
@@ -354,7 +377,9 @@ function tour_tax_daytopay($start, $end, $tour_tax_from, $tour_tax_to, $tour_tax
 }
 
 
-// calcolo totale della locazione
+// CALCOLO PREZZO TOTALE LOCAZIONE
+//NB: tourist_tax e add_extra funzionano solo con $vat = FALSE
+//NB: Security deposit funziona solo con $vat = TRUE
 function get_totalprice_booking($tesbro, $tourist_tax = TRUE, $vat = FALSE, $preeminent_vat = "", $add_extra = FALSE, $security_deposit = FALSE) {
     if ($tesbro !== '') {
         $tesbro = intval($tesbro);
@@ -407,9 +432,9 @@ function get_totalprice_booking($tesbro, $tourist_tax = TRUE, $vat = FALSE, $pre
             $sql = "SELECT SUM(COALESCE(r.quanti, 0) * COALESCE(r.prelis, 0)) AS totalprice FROM " . $tablerig . " r";
 
             if ($need_artico_join) {
-                $sql .= " LEFT JOIN " . $tableart . " a ON a.codice = CASE 
-                    WHEN r.codart IS NOT NULL AND r.codart != '' THEN r.codart 
-                    WHEN r.codice_fornitore IS NOT NULL AND r.codice_fornitore != '' THEN r.codice_fornitore 
+                $sql .= " LEFT JOIN " . $tableart . " a ON a.codice = CASE
+                    WHEN r.codart IS NOT NULL AND r.codart != '' THEN r.codart
+                    WHEN r.codice_fornitore IS NOT NULL AND r.codice_fornitore != '' THEN r.codice_fornitore
                     ELSE NULL END";
             }
 
@@ -433,21 +458,21 @@ function get_totalprice_booking($tesbro, $tourist_tax = TRUE, $vat = FALSE, $pre
             }
         } else {
             // === VAT TRUE = IVA COMPRESA ===
+			$totalprice = 0;
+            $totalsecdep = 0;
+
             $where = " WHERE (r.id_tes = '" . $tesbro . "' OR (r.id_tes = '" . $tesbro . "' AND r.prelis < 0))";
-            $sql = "SELECT r.quanti, r.prelis, i.aliquo, a.codice 
+            $sql = "SELECT r.quanti, r.prelis, i.aliquo, a.codice
                     FROM " . $tablerig . " r
                     LEFT JOIN " . $tableiva . " i ON i.codice = r.codvat
                     LEFT JOIN " . $tableart . " a ON r.codart = a.codice " . $where;
 
-            $totalprice = 0;
-            $totalsecdep = 0;
-
             if ($result = mysqli_query($link, $sql)) {
+
                 foreach ($result as $res) {
                     $prezzo = ($res['prelis'] * $res['quanti']);
                     $iva = ($prezzo * $res['aliquo']) / 100;
                     $totalprice += $prezzo + $iva;
-
                     if ($security_deposit == TRUE) {
                         $sql = "SELECT custom_field FROM " . $tableart . " WHERE codice = '" . $res['codice'] . "'";
                         if ($result2 = mysqli_query($link, $sql)) {
@@ -888,6 +913,71 @@ function check_availability($start,$end,$house_code, $open_from="", $open_to="")
   return $unavailable;
 }
 
+
+/**
+ * Restituisce la quantità residua disponibile di BED per un alloggio/facility in un determinato periodo
+ *
+ * @param string $house_code Codice dell'alloggio
+ * @param string $facility_group ID del gruppo/facility
+ * @param string $start Data inizio prenotazione (YYYY-MM-DD)
+ * @param string $end Data fine prenotazione (YYYY-MM-DD)
+ * @return int Quantità residua disponibile di BED
+ */
+function getAvailableExtraBeds($link, $azTables, $house_code, $facility_id, $start, $end) {
+    // 1. controllo se esiste un BED extra dalla tabella rental_extra/artico
+    $sql = "SELECT re.codart, re.max_quantity
+            FROM ".$azTables."rental_extra re
+            LEFT JOIN ".$azTables."artico a
+                ON re.codart = a.codice
+            WHERE (
+                    (re.rif_alloggio = '".$house_code."' OR re.rif_alloggio IS NULL OR re.rif_alloggio = '')
+                 AND (FIND_IN_SET('".$facility_id."', re.rif_facility) OR re.rif_facility IS NULL OR re.rif_facility = '')
+                 )
+              AND a.quality = 'BED'
+              AND (a.ordinabile IS NULL OR a.ordinabile = '' OR a.ordinabile = 'S')
+            LIMIT 1";
+
+    if ($result = mysqli_query($link, $sql)) {
+        if ($row_beds = mysqli_fetch_assoc($result)) {
+            $num_beds_toAdd = isset($row_beds['max_quantity']) ? intval($row_beds['max_quantity']) : 1;
+
+            // Caso max_quantity = 0 → senza limiti, restituisco 10 direttamente (numero forfettario)
+            if ($num_beds_toAdd === 0) {
+                return 10;
+            }
+
+            // 2. Calcolo quanti BED sono già prenotati nel periodo
+            $beds_occupied = 0;
+            $sql_occupied = "SELECT SUM(rb.quanti) AS occupied
+                             FROM ".$azTables."rigbro rb
+                             INNER JOIN ".$azTables."rental_events re
+                                ON re.id_rigbro = rb.id_rig
+                             INNER JOIN ".$azTables."tesbro t
+                                ON t.id_tes = rb.id_tes
+                             WHERE rb.codart = '".$row_beds['codart']."'
+                               AND re.start <= '".$end."'
+                               AND re.end >= '".$start."'
+                               AND JSON_UNQUOTE(JSON_EXTRACT(t.custom_field, '$.vacation_rental.status'))
+                                   IN ('PENDING','CONFIRMED','FROZEN')";
+
+            if ($res_occ = mysqli_query($link, $sql_occupied)) {
+                $row_occ = mysqli_fetch_assoc($res_occ);
+                $beds_occupied = intval($row_occ['occupied']);
+            }
+
+            // 3. Calcolo quantità residua disponibile
+            $available_beds = max(0, $num_beds_toAdd - $beds_occupied);
+            return $available_beds;
+        }
+    }
+
+    // 4. Nessun BED trovato → restituisco 0
+    return 0;
+}
+
+
+
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
@@ -1006,7 +1096,7 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
   $datediff = strtotime($end)-strtotime($start);
 	$nights=round($datediff / (60 * 60 * 24));
   $accommodations['msg']=[];
-
+  $accommodations['id_artico_group']=$id_artico_group;
   $accommodations['price']=0;
   $accommodations['codice']=$housecode;
   $accommodations['descri']=$descri;
@@ -1129,4 +1219,102 @@ function delete_id_cards($tesbro) {
         @rmdir($selfieDir); // Cancella la cartella una volta svuotata
     }
 }
+
+function getUserIpAddress() {// ottengo indirizzo IP utente (CDN cloudflare compatibile)
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+        return $_SERVER['HTTP_CF_CONNECTING_IP'];
+    } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // Potrebbe contenere una lista separata da virgole
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        return trim($ipList[0]);
+    } else {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+}
+
+function isIpBanned($ip) {
+
+	/* ****  IMPORTANTE  *****
+	creare il file .htaccess, se non esiste, nella cartella dove si trova banned_ips.txt
+	con questo:
+
+	<Files "banned_ips.txt">
+		Order allow,deny
+		Deny from all
+	</Files>
+
+	Serve per evitare che hacker possano leggere o peggio riscrivere il file
+	*/
+
+    $file = 'banned_ips.txt';
+    if (!file_exists($file)) {
+        // Creo il file con permessi sicuri se non esiste
+        file_put_contents($file, '', LOCK_EX);
+        chmod($file, 0666);
+        return false;
+    }
+
+    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $stillBanned = [];
+    $now = time();
+    $isBanned = false;// NON è bannato
+
+    foreach ($lines as $line) {
+        list($bannedIp, $expiry) = explode('|', $line);
+        if ($now < (int)$expiry) {
+            $stillBanned[] = $line;
+            if ($ip === $bannedIp) {
+                $isBanned = true; // E' bannato
+            }
+        }
+    }
+
+    // Riscrive solo gli IP ancora validi
+    file_put_contents($file, implode(PHP_EOL, $stillBanned) . PHP_EOL, LOCK_EX);
+    chmod($file, 0666); // Assicura permessi corretti
+    return $isBanned;
+}
+
+function banIp($ip, $durationMinutes = 60) {
+    $file = 'banned_ips.txt';
+    $bannedUntil = time() + ($durationMinutes * 60);
+    $entries = [];
+
+    // Gestione casi speciali di IP
+    if ($ip === '127.0.0.1' || $ip === '::1') {
+        $entries = [
+            '127.0.0.1|' . $bannedUntil,
+            '::1|' . $bannedUntil
+        ];
+    } elseif (preg_match('/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/', $ip, $matches)) {
+        $ipv4 = $matches[1];
+        $entries = [
+            $ip . '|' . $bannedUntil,
+            $ipv4 . '|' . $bannedUntil
+        ];
+    } elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        $entries = [$ip . '|' . $bannedUntil];
+    } elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        $entries = [$ip . '|' . $bannedUntil];
+        if (str_starts_with($ip, '::ffff:')) {
+            $ipv4 = substr($ip, 7);
+            if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $entries[] = $ipv4 . '|' . $bannedUntil;
+            }
+        }
+    }
+    // Assicura che il file esista e abbia permessi sicuri
+    if (!file_exists($file)) {
+        file_put_contents($file, '', LOCK_EX);
+        chmod($file, 0666);
+    }
+    // Scrive le nuove entry
+    foreach ($entries as $entry) {
+        file_put_contents($file, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
+    }
+    chmod($file, 0666); // Mantiene permessi corretti
+}
+
 ?>

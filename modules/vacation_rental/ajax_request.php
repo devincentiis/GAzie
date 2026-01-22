@@ -42,20 +42,9 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
-require_once("lib.function.php");
 $admin_aziend=checkAdmin();
 $libFunc = new magazzForm();
 
-include_once("manual_settings.php");
-  $azTables = constant("table_prefix").$idDB;
-  $IDaz=preg_replace("/[^1-9]/", "", $azTables );
-  $servername = constant("Host");
-  $username = constant("User");
-  $pass = constant("Password");
-  $dbname = constant("Database");
-  $genTables = constant("table_prefix")."_";
-
-$genTables = "gaz_";
 if (isset($_GET['term'])) {
     if (isset($_GET['opt'])) {
         $opt = $_GET['opt'];
@@ -184,6 +173,18 @@ if (isset($_GET['term'])) {
             $data['vacation_rental']['points']=(intval($data['vacation_rental']['points'])<0)?0:$data['vacation_rental']['points'];// evito di mandare i punti in negativo
             $custom_field = json_encode($data);
             gaz_dbi_update_anagra(array('id', intval($_GET['ref'])), array('custom_field'=>$custom_field,));
+			
+			$operat = (floatval($_GET['points']) >= 0) ? 1 : -1;
+			$id_anagra = intval($_GET['ref']);
+			$points   = intval($_GET['points']);
+			$id_tesbro= intval($_GET['idtes']);
+			$query = "INSERT INTO " . $gTables['rental_points_mov'] . " (id_anagra, operat, points, id_tesbro) VALUES (" . $id_anagra . ", " . $operat . ", " . $points . ", " . $id_tesbro . ")";
+			if (gaz_dbi_query($query)){	// inserisco movimento punti		
+				// ok			
+			}else{
+				echo "errore DB";
+				return;
+			}
             echo "Punti attribuiti correttamente. Totale attuale: ",$data['vacation_rental']['points'];
             if ($_GET['email']=="true" && (filter_var($result['e_mail'], FILTER_VALIDATE_EMAIL) || filter_var($result['e_mail2'], FILTER_VALIDATE_EMAIL))){
               $language=gaz_dbi_get_row($gTables['languages'], "lang_id", $result['id_language']); // carico la lingua del cliente
@@ -218,7 +219,6 @@ if (isset($_GET['term'])) {
 
               // creo e invio email di conferma
               //Recipients
-              $mail->clearAllRecipients();
               $mail->setFrom($admin_aziend['e_mail'],$admin_aziend['ragso1']." ".$admin_aziend['ragso2']); // sender (e-mail dell'account che sta inviando)
               $mail->addReplyTo($admin_aziend['e_mail']); // reply to sender (e-mail dell'account che sta inviando)
               if (filter_var($result['e_mail'], FILTER_VALIDATE_EMAIL)){
@@ -239,7 +239,7 @@ if (isset($_GET['term'])) {
                 $mail->addCC($admin_aziend['e_mail']); //invio copia a mittente
               }
               $mail->isHTML(true);
-              $mail->Subject = $script_transl['booking']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi']);
+              $mail->Subject = "Fidelity Mon Amour ".$script_transl['booking']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi']);
               $mail->Body    = "<p>".$script_transl['email_give_point']." ".$_GET['points']." ".$script_transl['email_give_point2']." ".$_GET['motive']."</p><p>".$script_transl['email_give_point3']." ".$data['vacation_rental']['points']." ".$script_transl['points']."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
               if($mail->send()) {
                 echo ". E-mail inviata";
@@ -495,7 +495,6 @@ if (isset($_GET['term'])) {
 
           // creo e invio email di conferma
           //Recipients
-          $mail->clearAllRecipients();
           $mail->setFrom($admin_aziend['e_mail'],$admin_aziend['ragso1']." ".$admin_aziend['ragso2']); // sender (e-mail dell'account che sta inviando)
           $mail->addReplyTo($admin_aziend['e_mail']); // reply to sender (e-mail dell'account che sta inviando)
           if (filter_var($result['e_mail'], FILTER_VALIDATE_EMAIL)){
@@ -688,106 +687,8 @@ if (isset($_GET['term'])) {
         return;
       break;
 
-
-
-case 'segnala_problema':
-  // Ottieni il PHPMailer configurato
-  $mail = set_mailer();
-
-  header('Content-Type: application/json');
-
-  $term = trim($_GET['term'] ?? '');
-  $to = $_GET['user_mail'] ?? '';
-
-  // Inizializza la variabile $response
-  $response = [];
-
-  // Validazione input
-  if ($term === '') {
-    $response = ['status' => 'error', 'message' => 'Il messaggio è vuoto.'];
-    echo json_encode($response);
-    exit;
-  }
-
-  if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
-    $response = ['status' => 'error', 'message' => 'Email destinatario non valida.'];
-    echo json_encode($response);
-    exit;
-  }
-
-  $subject = 'Segnalazione problema PRE Check-in';
-  $messageBody = "In merito al tuo PRE check-in, hai ricevuto questa segnalazione:\n\n" . $term;
-
-  try {
-    // Configura PHPMailer
-    $mail->clearAllRecipients();
-    $mail->setFrom($admin_aziend['e_mail'], $admin_aziend['ragso1'] . ' ' . $admin_aziend['ragso2']);
-    $mail->addAddress($to);
-    $mail->Subject = $subject;
-    $mail->Body = $messageBody;
-    $mail->isHTML(false);
-
-    // Invia l'email
-    if (!$mail->send()) {
-      error_log('Mailer Error: ' . $mail->ErrorInfo);  // Aggiungi un log dell'errore
-      $response = ['status' => 'error', 'message' => 'Mailer Error: ' . $mail->ErrorInfo];
-      echo json_encode($response);
-      exit;
-    }
-
-    // Se invio email avvenuto correttamente
-    $response = ['status' => 'success', 'message' => 'Segnalazione inviata con successo.'];
-
-    // Verifica e salva nel caso di IMAP (se configurato)
-    $imap_data = set_imap($_GET['id_anagra']);
-    // Verifica se i dati IMAP sono validi
-
-    if ($imap_data !== false && !empty($imap_data['imap_usr'])) {
-        // Tentativo di apertura IMAP
-        $imap = @imap_open(
-            "{" . $imap_data['imap_server'] . ":" . $imap_data['imap_port'] . "/" . $imap_data['imap_secure'] . "}" . $imap_data['imap_sent_folder'],
-            $imap_data['imap_usr'],
-            $imap_data['imap_pwr']
-        );
-
-        if ($imap === false) {
-            // Ottieni l'errore IMAP dettagliato
-            $error = imap_last_error();
-            error_log('Errore imap_open: ' . $error);  // Log dell'errore IMAP
-
-            // Aggiungi il messaggio di errore IMAP alla risposta
-            $response = ['status' => 'error', 'message' => 'Errore di connessione IMAP: ' . $error];
-            echo json_encode($response); // Restituisci la risposta JSON al client
-            exit;
-        } else {
-            // Prosegui con l'invio del MIME
-            $mimeMessage = $mail->getSentMIMEMessage();
-            if (@imap_append($imap, "{" . $imap_data['imap_server'] . "}" . $imap_data['imap_sent_folder'], $mimeMessage, "\\Seen")) {
-                // Mail salvata con successo
-            } else {
-                // Log di errore per imap_append
-                error_log('Errore imap_append: ' . implode('; ', imap_errors()));
-                $response = ['status' => 'error', 'message' => 'Errore imap_append: ' . implode('; ', imap_errors())];
-                echo json_encode($response); // Restituisci la risposta JSON al client
-                exit;
-            }
-            imap_close($imap);  // Chiudi la connessione IMAP
-        }
-    }
-
-  } catch (Exception $e) {
-    error_log('Mailer Exception: ' . $e->getMessage());  // Aggiungi un log dell'eccezione
-    $response = ['status' => 'error', 'message' => 'Mailer Error: ' . $e->getMessage()];
-  }
-
-  // Restituisci la risposta JSON
-  echo json_encode($response);
-  exit;
-  break;
-
       default:
       return false;
     }
 }
-
 ?>

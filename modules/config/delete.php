@@ -74,7 +74,7 @@ if ((isset($_POST['type']) && isset($_POST['ref'])) || (isset($_POST['type'])&&i
 			gaz_dbi_del_row($gTables['spediz'], 'codice', $i);
     break;
 		case "utente":
-			$i=substr($_POST['ref'],0,15);
+			$i=substr($_POST['ref'],0,64);
       gaz_dbi_del_row($gTables['admin'], "user_name",$i);
       gaz_dbi_del_row($gTables['admin_module'], "adminid",$i);
       gaz_dbi_del_row($gTables['admin_config'], "adminid",$i);

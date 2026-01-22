@@ -54,7 +54,8 @@ $strScript = array(
 		'no_json_anagra'=>'Non hai mai inserito una tua password inseriscine una cliccando su Password dimenticata oppure contatta l\'amministratore.',
         'no_pw_yet'=>'Non hai ancora impostato la tua password: usa \'Password dimenticata\' per inserirla',
         'reset_success'=>'La password è stata impostata; è possibile effettuare l\'accesso con la nuova password.',
-        'dashboard' => 'Pannello di controllo'
+        'dashboard' => 'Pannello di controllo',
+		'banner_search'=>'Cerca disponibilità'
       ),
     "browse_document.php" =>
       array('title' => "Lista dei Documenti/Certificati",
@@ -495,10 +496,13 @@ $strScript = array(
       ),
         'war' => array(
             'ok' => 'ok riempitura array',
-            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
+            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Sarà confermato quanto prima.',
+			'extra_thanks' => 'Grazie, l\'extra è stato correttamente aggiunto.'
 		),
 		'print'=>'Stampa',
     'minors' => 'Minori',
+	'how_age' => "Si deve considerare l'età al momento del check-in.",
+	'minor_rule' => "I minori di anni 18 devono sempre essere accompagnati da un adulto. Qualora l'adulto non sia un genitore, esso dovrà essere munito dell'assenso scritto dei soggetti esercenti la responsabilità genitoriale del minore. NOTA BENE: Ogni minore, anche neonato, dovrà avere un proprio documento di identità, in ogni caso.",
     'adults' => 'Adulti',
     'total_people' => 'Totale persone',
     'people_number_change' => 'Modifica numero persone',
@@ -517,7 +521,7 @@ $strScript = array(
     'date_changing' => 'Modifica giorni',
     'changement_acc' => 'Sostituzione alloggio',
     'new_accommodation' => 'Nuovo alloggio',
-    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta ha valore vincolante ai sensi dell'art. 1326 c.c. e modificherà il relativo contratto da me a suo tempo firmato, solo previa approvazione del proprietario, e che può comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
+    'declaration2' => "Dichiaro di essere il titolare della prenotazione e di richiederne irrevocabilmente la <strong> modifica / cancellazione / sostituzione </strong> come sopra indicato. Sono consapevole che tale richiesta è sottoposta ad approvazione del proprietario, avrà valore vincolante ai sensi dell'art. 1326 c.c., modificherà il relativo contratto da me a suo tempo firmato e potrà comportare costi o penali come da clausole contrattuali. Questa è una firma elettronica conforme al Regolamento (UE) n. 910/2014 elDAS.",
 		'guest'=>'Ospiti',
 		'rules_label'=>'Leggere il contratto di locazione',
 		'privacy_label'=>'Leggere il regolamento sulla privacy',
@@ -601,6 +605,7 @@ $strScript = array(
 		'email_confirm_add_access_url' => 'Troverà la prenotazione nella sua pagina personale utente del sito web (dashboard) dove potrà anche aggiungere extra ed effettuare ulteriori pagamenti.',
 		'email_confirm_add_access_code' => ' e i seguenti codici di accesso: ',
 		'regards' => 'Cordiali saluti',
+		"download_app" => "Scarica l’app Android per gestire facilmente la prenotazione, cercare la tua casa vacanze ideale a Grottammare, ricevere aggiornamenti in tempo reale e usare tutte le funzionalità avanzate:  <a href=\"https://play.google.com/store/apps/details?id=com.agermani.mygmonamour\" target=\"_blank\">Scarica da Google Play</a>",
 		'of' => 'del',
 		'discount_code' => 'Se hai un codice sconto, inseriscilo qui; lo vedrai applicato nel passaggio successivo.',
 		'coupon_apply' => 'Buono sconto da applicare',
@@ -642,6 +647,7 @@ $strScript = array(
 		'more_info' => 'Maggiori info',
 		'booking_status' => 'Stato della prenotazione',
 		'dashboard' => 'Pannello di controllo',
+		'banner_search'=>'Cerca disponibilità',
 		'total_paid' => 'Totale pagato',
 		'transfer_instruction2' => '<b>Effettuare il bonifico bancario alle seguenti coordinate e inviare la copia della ricevuta alla struttura.</b>',
 		'add_extra' => 'Aggiungi un nuovo extra',
@@ -712,6 +718,8 @@ $strScript = array(
 		'mod_prezzo' => 'Modalità applicazione prezzo',
 		'web_multiplier' => 'Moltiplicatore prezzo web',
 		'web_mu' => 'Unità di misura',
+    'ordinabile'=> 'Extra ordinabile',
+    'ordinabile_value' => array ( '' => '----', 'S' => 'Ordinabile', 'N' => 'NON ordinabile' ),
 		'retention_tax' => 'Applica la ritenuta d\'acconto',
         'retention_tax_value' => array(0 => 'No', 1 => 'Si'),
 		'payroll_tax' => 'Genera rigo Cassa Previdenziale',
@@ -804,7 +812,7 @@ $strScript = array(
     'body6' => ' persone, di cui ',
     'body7' => ' adulti e ',
     'body8' => ' minorenni ',
-    'divieto1' => 'E\' vietato Il pernotto, anche occasionale, di un numero di persone superiore a quanto concordato.',
+    'divieto1' => 'È fatto assoluto divieto agli ospiti di far soggiornare o consentire l\’accesso all\’alloggio a persone diverse da quelle indicate nel presente contratto e al momento del check-in.',
     'divieto2' => 'Il conduttore si impegna a concordare con il locatore gli orari previsti di arrivo e partenza con almeno 12 ore di anticipo. Il conduttore si impegna a comunicare al locatore, durante il viaggio, l\'eventuale aggiornamento dell\'orario di arrivo previsto.',
     'divieto3' => 'Con il ritiro delle chiavi, il conduttore accetta e si obbliga di diventare il custode dell\'alloggio per tutta la durata della locazione. Pertanto si assume l\'obbligo di custodirlo con la dovuta diligenza e di non arrecare danni all\'alloggio, al mobilio e agli elettrodomestici, di non apportare alcuna modifica alla disposizione dei mobili e degli oggetti e di non effettuare alcuna riparazione se non preventivamente autorizzata dal locatore.',
     'divieto7' => 'Eventuali guasti o rotture dovranno immediatamente essere comunicati al locatore. Qualora guasti o rotture siano derivati da un corretto e coscenzioso uso del bene essi saranno a carico del locatore altrimenti verranno addebitati al conduttore. I tempi tecnici per la riparazione e/o ripristino saranno determinati di volta in volta da un tecnico competente che verrà incaricato dal locatore. In attesa della riparazione, per il mancato uso del bene guasto il conduttore dichiara sin da ora di rinunciare ad ogni tipo di risarcimento.',

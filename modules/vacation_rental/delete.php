@@ -28,6 +28,9 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
 */
+
+//  ****   CANCELLAZIONI   ****
+
 // prevent direct access
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) AND
         strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
@@ -86,13 +89,14 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 			$result = gaz_dbi_del_row($gTables['rental_extra'], "codart", $i);
 		break;
 		case "booking":
+		
 			//procedo all'eliminazione della testata e dei righi...
 			$tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", intval($_POST['id_tes']));// la testata che andrò ad eliminare
 			//cancello la testata
 			gaz_dbi_del_row($gTables['tesbro'], "id_tes", intval($_POST['id_tes']));
 			//... e i righi
 			$rs_righidel = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes =". intval($_POST['id_tes']),"id_tes DESC");
-			while ($a_row = gaz_dbi_fetch_array($rs_righidel)) {
+			while ($a_row = gaz_dbi_fetch_array($rs_righidel)) { // *** nota bene ***  la cancellazione dei documenti pdf va portata fuori dal ciclo altrimenti prova a cancellare per ogni rigo!
 				gaz_dbi_del_row($gTables['rigbro'], "id_rig", $a_row['id_rig']);
                 if (!empty($admin_aziend['synccommerce_classname']) && class_exists($admin_aziend['synccommerce_classname']) AND $tesbro['tipdoc']!=="VOW"){
                     // aggiorno l'e-commerce ove presente se l'ordine non è web
@@ -101,11 +105,13 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 					if($gSync->api_token){
 						$gSync->SetProductQuantity($a_row['codart']);
 					}
-				}
+				}				
 				gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'rigbro' AND id_ref ",$a_row['id_rig']);
+			}
+				
 				// cancello anche l'evento
 				$rental_events = gaz_dbi_get_row($gTables['rental_events'], "id_tesbro", intval($_POST['id_tes']));
-						gaz_dbi_del_row($gTables['rental_events'], "id_tesbro", $_POST['id_tes']);
+				gaz_dbi_del_row($gTables['rental_events'], "id_tesbro", $_POST['id_tes']);
 				// aggiorno buono sconto se c'è
 				if (isset($rental_events['voucher_id']) && intval($rental_events['voucher_id'])>0){// se era stato usato un buono sconto
 				  $rental_discounts  = gaz_dbi_get_row($gTables['rental_discounts'], "id", intval($rental_events['voucher_id']));
@@ -128,11 +134,92 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) OR (isset($_POST['type'])&&iss
 					$sql = "UPDATE ".$gTables['tesbro']." SET custom_field = '".$custom_field."', datfat = '0000-00-00', numfat = '0' WHERE id_tes = ".intval($prev['id_tes']);
 					$result = gaz_dbi_query($sql);// resetto il preventivo
 				}
-        // Cancello i PDF della prenotazione e del contratto
-        //unlink (DATA_DIR."files/".$admin_aziend['codice']."/pdf_BookingSummary/". $_POST['id_tes'] . ".pdf");
-        @unlink (DATA_DIR."files/".$admin_aziend['codice']."/pdf_Lease/". $_POST['id_tes'] . ".pdf");
-        array_map('unlink', array_filter(glob(dirname(__DIR__).'/vacation_rental/files/' . $admin_aziend['codice'] . '/pdf_Lease/' . intval($_POST['id_tes']) . '*.*'), 'is_file')); // cancello tutti i file che ganno id_tes come iniziale nel nome
-			}
+				// Cancello i PDF della prenotazione e del contratto
+								
+				$file = DATA_DIR . "files/" . $admin_aziend['codice'] . "/pdf_Lease/" . intval($_POST['id_tes']) . ".pdf";
+				if (file_exists($file)) {
+					if (is_writable(dirname($file))) {
+						if (!unlink($file)) {
+							echo json_encode(['success' => false, 'msg' => 'Impossibile cancellare il file: '.$file]);
+							exit;
+						}
+					} else {
+						echo json_encode(['success' => false, 'msg' => 'Permessi non validi (directory non scrivibile): '.dirname($file)]);
+						exit;
+					}
+				}
+
+				// cancellazione multipla
+				$dir = dirname(__DIR__) . '/vacation_rental/files/' . $admin_aziend['codice'] . '/pdf_Lease/';
+				$pattern = $dir . intval($_POST['id_tes']) . '*.*';
+
+				if (is_dir($dir)) {
+					if (!is_readable($dir)) {
+						echo json_encode(['success' => false, 'msg' => 'Directory non leggibile: '.$dir]);
+						exit;
+					}
+					if (!is_writable($dir)) {
+						echo json_encode(['success' => false, 'msg' => 'Directory non scrivibile: '.$dir]);
+						exit;
+					}
+
+					$files = glob($pattern) ?: [];
+					$errors = [];
+					foreach ($files as $f) {
+						if (is_file($f) && !unlink($f)) $errors[] = $f;
+					}
+					if (!empty($errors)) {
+						echo json_encode(['success' => false, 'msg' => 'Alcuni file non cancellati', 'files' => $errors]);
+						exit;
+					}
+				}
+				
+				
+				// Cancello anche gli eventuali addendum
+				$codice = $admin_aziend['codice'] ?? '';
+				$id_tes = intval($_POST['id_tes'] ?? 0);
+
+				// Percorso corretto della directory addendum usando dirname
+				$targetDir =  dirname(__DIR__) . "/vacation_rental/files/" . $codice . "/addendum_pdf/" . $id_tes;
+
+				// Verifica che la directory esista
+				if (!is_dir($targetDir)) {
+					echo json_encode(['success' => true, 'msg' => 'Nessun addendum da cancellare:'.$targetDir, 'path_checked' => $targetDir]);// true  non deve visualizzare perché non tutti hanno gli addendum
+					exit;
+				}
+
+				// Funzione di cancellazione ricorsiva con log errori
+				function rrmdir_with_errors(string $dir, array &$errors = []): bool {
+					$it = new RecursiveIteratorIterator(
+						new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+						RecursiveIteratorIterator::CHILD_FIRST
+					);
+					foreach ($it as $item) {
+						$path = $item->getPathname();
+						if ($item->isDir()) {
+							if (!rmdir($path)) $errors[] = "Impossibile cancellare directory: $path";
+						} else {
+							if (!unlink($path)) $errors[] = "Impossibile cancellare file: $path";
+						}
+					}
+					if (!rmdir($dir)) {
+						$errors[] = "Impossibile cancellare la directory principale: $dir";
+						return false;
+					}
+					return empty($errors);
+				}
+
+				// Eseguo la cancellazione
+				$errors = [];
+				$success = rrmdir_with_errors($targetDir, $errors);
+
+				if ($success) {
+					echo json_encode(['success' => true, 'msg' => 'Addendum cancellati correttamente', 'path' => $targetDir]);// true
+				} else {
+					echo json_encode(['success' => false, 'msg' => 'Errore nella cancellazione degli addendum', 'errors' => $errors, 'path' => $targetDir]);
+				}
+				
+			
 		break;
 		case "ical":
 			// elimino l'Ical dalla tabella ical

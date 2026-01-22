@@ -61,7 +61,7 @@ class DocContabVars {
         }else{
           echo "Error: " . $sql . "<br>" . mysqli_error($link);
         }
-
+		$this->child_age="";
         if ($data_tesbro = json_decode($tesdoc['custom_field'], TRUE)){
           $this->status = $data_tesbro['vacation_rental']['status'];
           $this->security_deposit = (isset($data_tesbro['vacation_rental']['security_deposit']))?$data_tesbro['vacation_rental']['security_deposit']:-1;
@@ -69,8 +69,8 @@ class DocContabVars {
             $ages = array_map('intval', $data_tesbro['vacation_rental']['child_age']); // assicuro interi
             $this->child_age = " (anni: ". implode(", ", $ages). ")";
           }
-
         }
+		
 
         $this->layout_pos_logo_on_doc = $company['val'];
 
@@ -862,11 +862,11 @@ function createDocument($testata, $templateName, $gTables, $rows = 'rigdoc', $de
     echo "Error: " . $sql . "<br>" . mysqli_error($link);
     }
 
-		$docVars->intesta1=$ag_anagra['ragso1']." ".$ag_anagra['ragso2'];
-		$docVars->intesta2=$ag_anagra['indspe']." ".$ag_anagra['capspe']." ".$ag_anagra['citspe']." ".$ag_anagra['prospe'];
-		$docVars->intesta3= "tel.: ".$ag_anagra['telefo']." ";
-		$docVars->intesta4= "e-mail: ".$ag_anagra['e_mail'];
-		$docVars->security_deposit= (isset($testata['security_deposit']))?$testata['security_deposit']:-1;
+	$docVars->intesta1=$ag_anagra['ragso1']." ".$ag_anagra['ragso2'];
+	$docVars->intesta2=$ag_anagra['indspe']." ".$ag_anagra['capspe']." ".$ag_anagra['citspe']." ".$ag_anagra['prospe'];
+	$docVars->intesta3= "tel.: ".$ag_anagra['telefo']." ";
+	$docVars->intesta4= "e-mail: ".$ag_anagra['e_mail'];
+	$docVars->security_deposit= (isset($testata['security_deposit']))?$testata['security_deposit']:-1;
 	}
     $pdf->setVars($docVars, $templateName);
     $pdf->setTesDoc();

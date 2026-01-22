@@ -296,13 +296,20 @@ $(function() {
               type: 'GET',
               url: '../vacation_rental/save_to_db_events.php',
               success: function(output){
-                //alert(output);
+                alert('Success:'+output);
                 //alert('Il periodo è stato limitato');
                 $(".start").empty();
                 $(".end").empty();
                 $("#dialog_limit").dialog("close");
                 window.location.replace("./report_accommodation.php");
-              }
+              },
+			  error: function(jqXHR, textStatus, errorThrown) {
+				var msg = 'Error: ' + (errorThrown || textStatus || 'unknown') +
+				'\nStatus: ' + (jqXHR && jqXHR.status ? jqXHR.status : 'n/a') +
+				'\n\nResponse:\n' + ((jqXHR && jqXHR.responseText) ? jqXHR.responseText : '[vuoto]');
+				if (msg.length > 2000) msg = msg.slice(0, 2000) + '\n\n[...troncato...]';
+				alert('error:'+msg);
+				}
             });
 				}},
 				"Chiudi senza limitare": function() {

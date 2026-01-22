@@ -297,7 +297,11 @@ while ($r1 = gaz_dbi_fetch_array($result)) {
       }
 			$r=array_merge($r1,$r2);
 			$r['accommodation_type'] = "";
-			$class = 'success';
+      if ($r['ordinabile']=="N"){
+        $class = 'danger';
+      }else{
+        $class = 'success';
+      }
 			// contabilizzazione magazzino
 			$com = '';
 			if ($admin_aziend['conmag'] > 0 && $r["good_or_service"] != 1 && $tipo_composti['val']=="STD") {

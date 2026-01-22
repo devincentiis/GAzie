@@ -1118,6 +1118,17 @@ $(document).ready(function(){
                         </div>
                     </div>
                 </div><!-- chiude row  -->
+                 <div id="ordinabile" class="row IERincludeExcludeRow">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ordinabile" class="col-sm-4 control-label"><?php echo $script_transl['ordinabile']; ?></label>
+                            <?php
+                            $gForm->variousSelect('ordinabile', $script_transl['ordinabile_value'], $form['ordinabile'], "col-sm-8", false, '', false, 'style="max-width: 200px;"');
+                            ?>
+                         </div>
+                    </div>
+                </div><!-- chiude row  -->
+
                 <!--+ DC - 06/02/2019 div class="row" --->
   <!--
                 <div id="retentionTax" class="row IERincludeExcludeRow">
@@ -1176,64 +1187,64 @@ $(document).ready(function(){
                 </div><!-- chiude row  -->
               </div><!-- chiude tab-pane  -->
               <div id="chifis" class="tab-pane fade">
-				<div id="icals" class="row IERincludeExcludeRow">
-					<fieldset  style="border:1px solid silver;">
-            <legend style="color:blue; font-size:16px; margin-bottom:4px; text-align: center; border-top: 1px solid silver">Sincronizzazione Icalendar</legend>
-            <div>
-              <table class="Tlarge table table-striped table-bordered table-condensed" >
-                <tr>
-                  <td>
-                    <input  type="text" value="" name="ical"  maxlength="200" placeholder="URL di un ical per sincronizzare le prenotazioni">
-                  </td>
-                  <td>
-                    <input  type="text" value="" name="ical_descri"  maxlength="100" placeholder="Descrizione Icalendar">
-                  <td>
-                    <button class="btn btn-xs btn-default" type="submit" value="ical" name="icalsub" title="Inserisci un nuovo Icalendar">
-                       <span class="glyphicon glyphicon-plus"></span>
-                    </button>
-                  </td>
-                </tr>
-              </table>
-            </div>
-            <div>
-              <table class="Tlarge table table-striped table-bordered table-condensed">
-                <?php
-                if (isset($resical)){
-                  foreach ($resical as $rical){
-                    ?>
-                    <tr>
-                      <td>
-                        <?php echo $rical['id']; ?>
-                      </td>
-                      <td>
-                        <?php echo $rical['url']; ?>
-                      </td>
-                      <td>
-                        <?php echo $rical['ical_descri']; ?>
-                      </td>
-                      <td>
-                        <a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella l'Ical" ref="<?php echo $rical['id'];?>" nome="<?php echo $rical['ical_descri'];?>">
-                          <i class="glyphicon glyphicon-trash"></i>
-                        </a>
-                      </td>
-                    </tr>
-                  <?php
-                  }
-                }
-                ?>
-              </table>
-            </div>
-					</fieldset>
-				</div>
-				<div id="max_quantity" class="row IERincludeExcludeRow">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="max_quantity" class="col-sm-4 control-label">Quantità massima disponibile</label>
-                            <input class="col-sm-2" type="number" value="<?php echo $form['max_quantity']; ?>" name="max_quantity"> 0 (zero) è senza limiti
-                        </div>
+                <div id="icals" class="row IERincludeExcludeRow">
+                  <fieldset  style="border:1px solid silver;">
+                    <legend style="color:blue; font-size:16px; margin-bottom:4px; text-align: center; border-top: 1px solid silver">Sincronizzazione Icalendar</legend>
+                    <div>
+                      <table class="Tlarge table table-striped table-bordered table-condensed" >
+                        <tr>
+                          <td>
+                            <input  type="text" value="" name="ical"  maxlength="200" placeholder="URL di un ical per sincronizzare le prenotazioni">
+                          </td>
+                          <td>
+                            <input  type="text" value="" name="ical_descri"  maxlength="100" placeholder="Descrizione Icalendar">
+                          <td>
+                            <button class="btn btn-xs btn-default" type="submit" value="ical" name="icalsub" title="Inserisci un nuovo Icalendar">
+                               <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                          </td>
+                        </tr>
+                      </table>
                     </div>
-                </div><!-- chiude row  -->
-				<div id="adult" class="row IERincludeExcludeRow">
+                    <div>
+                      <table class="Tlarge table table-striped table-bordered table-condensed">
+                        <?php
+                        if (isset($resical)){
+                          foreach ($resical as $rical){
+                            ?>
+                            <tr>
+                              <td>
+                                <?php echo $rical['id']; ?>
+                              </td>
+                              <td>
+                                <?php echo $rical['url']; ?>
+                              </td>
+                              <td>
+                                <?php echo $rical['ical_descri']; ?>
+                              </td>
+                              <td>
+                                <a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella l'Ical" ref="<?php echo $rical['id'];?>" nome="<?php echo $rical['ical_descri'];?>">
+                                  <i class="glyphicon glyphicon-trash"></i>
+                                </a>
+                              </td>
+                            </tr>
+                          <?php
+                          }
+                        }
+                        ?>
+                      </table>
+                    </div>
+                  </fieldset>
+                </div>
+                <div id="max_quantity" class="row IERincludeExcludeRow">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="max_quantity" class="col-sm-4 control-label">Quantità massima disponibile</label>
+                                    <input class="col-sm-2" type="number" value="<?php echo $form['max_quantity']; ?>" name="max_quantity"> 0 (zero) è senza limiti
+                                </div>
+                            </div>
+                        </div><!-- chiude row  -->
+                <div id="adult" class="row IERincludeExcludeRow">
                     <div class="col-md-12">
                         <div class="form-group">
                             <input class="col-sm-2" type="hidden" value="" name="child">
@@ -1242,12 +1253,21 @@ $(document).ready(function(){
                         </div>
                     </div>
                 </div><!-- chiude row  -->
+                <?php
+                  $current = isset($form['quality']) ? $form['quality'] : '';
+                ?>
                 <div id="quality" class="row IERincludeExcludeRow">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                          <input type="hidden" name="quality" value="" >
-                        </div>
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="qualitySelect" class="control-label col-sm-4">Selezionare se è un posto letto aggiuntivo</label>
+                      <div class="col-sm-8">
+                        <select id="qualitySelect" name="quality" class="form-control">
+                          <option value="" <?= $current === '' ? 'selected' : '' ?>>NO</option>
+                          <option value="BED" <?= $current === 'BED' ? 'selected' : '' ?>>BED</option>
+                        </select>
+                      </div>
                     </div>
+                  </div>
                 </div><!-- chiude row  -->
                 <!--+ DC - 06/02/2019 div class="row" --->
                 <div id="lunghezza" class="row IERincludeExcludeRow">

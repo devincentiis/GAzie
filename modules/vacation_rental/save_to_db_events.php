@@ -3,14 +3,14 @@
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
    --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -30,6 +30,10 @@
 */
 include_once("manual_settings.php");
 if ($_GET['token'] == md5($token.date('Y-m-d'))){
+	if (strtotime($_GET['start']) < time()) {
+		echo "ERRORE: Non puoi bloccare date nel passato";
+		return;
+	}
   if (strtotime($_GET['end']) > strtotime($_GET['start'])){
     require("../../library/include/datlib.inc.php");
      $columns = array('id','title', 'start','end','house_code');
@@ -37,9 +41,14 @@ if ($_GET['token'] == md5($token.date('Y-m-d'))){
        $_GET['end']=$_GET['start'];
      }
      $newValue = array('title'=>substr($_GET['title'],0,128), 'start'=>substr($_GET['start'],0,10),'end'=>substr($_GET['end'],0,10),'house_code'=>substr($_GET['house_code'],0,32));
-     tableInsert('rental_events', $columns, $newValue);
+     $ret = tableInsert('rental_events', $columns, $newValue);
+	if ($ret === false || $ret == 0) {
+		echo "ERROR: insert failed (ret=" . var_export($ret, true) . ")";
+	}else{
+		echo "Perido di blocco inserito. ID:",$ret;
+	}
   }else{
-    echo "errore";
+    echo "errore: La data di inizio non può essere posteriore a quella di fine";
   }
 }
 ?>

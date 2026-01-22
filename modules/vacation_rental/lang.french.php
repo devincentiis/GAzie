@@ -54,7 +54,8 @@ $strScript = array(
         'no_pw_yet'=>'Vous n\'avez pas encore défini votre mot de passe : utilisez la récupération de mot de passe pour le saisir',
 		'no_json_anagra'=>'Vous n\'avez jamais saisi de mot de passe, entrez-en un en cliquant sur Mot de passe oublié ou contactez l\'administrateur.',
         'reset_success'=>'Le mot de passe a été défini ; il est possible de se connecter avec le nouveau mot de passe.',
-        'dashboard' => 'Panneau de commande'
+        'dashboard' => 'Panneau de commande',
+		'banner_search'=>'Rechercher disponibilité'
       ),
     "browse_document.php" =>
       array('title' => "Lista dei Documenti/Certificati",
@@ -73,13 +74,13 @@ $strScript = array(
         'select' => "Sel.",
         'code' => "Codice"),
 	"thanks.php" =>
-      array('title' => 'Vacation rental thank you page',
-        'thanks' => "THANKS!",
-        'booked' => "The reservation has been made.",
-        'instr_sent' => "The summary with all the information has been sent to the e-mail address provided.<br>",
-        'not_received' => "If you have not received the email and have checked your spam folder, contact the site administrator.",
-        'close'=>'This message will close in ',
-      ),
+      array('title' => 'Page de remerciement – Location de vacances',
+		'thanks' => "MERCI !",
+		'booked' => "La réservation a été effectuée.",
+		'instr_sent' => "Le récapitulatif avec toutes les informations a été envoyé à l’adresse e-mail fournie.<br>",
+		'not_received' => "Si vous ne recevez pas l’e-mail et après avoir vérifié dans le dossier spam, veuillez contacter l’administrateur du site.",
+		'close'=>'Ce message se fermera dans ',
+	),
     "report_facility.php" =>
       array('title' => 'Lista deglle strutture ricettive',
         'codice' => "Codice",
@@ -675,39 +676,40 @@ $strScript = array(
         )
     ),
 	"banner_search.php" =>
-    array('title' => 'Iframe total search',
-        'err' => array(
-			'date_uguali'=> 'check-in and check-out dates are identical',
-			'start>end'=> 'Check-in date is after check-out date'
-        ),
-        'war' => array(
-            'ok' => 'ok riempitura array'
+    array('title' => 'Iframe de recherche générale',
+		'err' => array(
+			'date_uguali'=> 'Les dates d’arrivée et de départ sont identiques',
+			'start>end'=> 'La date d’arrivée est postérieure à la date de départ'
 		),
-		'guest'=>'Guests',
-		'look'=>'Look at',
-		'price'=>'Price',
-		'search'=>"Search",
-		'open_calendar'=>"Open total calendar",
-		'imposta'=>"For price or to book, set check-in and check-out date",
-		'risultato'=>"Availability for the dates requested",
-		'book'=>"Book",
-		'nessun_risultato'=>"There is no availability for your requested dates. Try to modify them or look at the total calendar.",
-		'for_night' => 'for night',
-		'nights' => 'nights',
-		'over_guest' => 'Attention: this accommodation is available but it has a max capability of',
-		'persons' => 'persons',
-		'avviso' => 'The minimum stay is',
-		'avviso2' => 'There are increasing discounts for 12, 21 and 28 nights.',
-		'over_max_booking' => 'Some accommodations have the maximum limit of ',
-		'over_max_booking2' => 'Try to reduce the nights in the request.',
-		'no_search_house' => 'The requested accommodation is not available, check availability in your calendar. Or there are these alternatives:',
-		'msg_minstay' => 'This accommodation would be available but the minimum stay is',
-		'msg_minstay2' => 'nights while you requested only',
-		'available' => 'AVAILABLE! Look at it or book it now',
-    'alternative' => 'Alternative availability bookable:'
-    ),
+		'war' => array(
+			'ok' => 'ok – remplissage du tableau'
+		),
+		'guest'=>'Invités',
+		'look'=>'Voir',
+		'price'=>'Prix',
+		'search'=>"Rechercher",
+		'open_calendar'=>"Ouvrir le calendrier général",
+		'imposta'=>"Pour afficher le prix ou réserver, veuillez définir les dates",
+		'risultato'=>"Disponibilité pour ",
+		'book'=>"Réserver",
+		'nessun_risultato'=>"Aucune disponibilité pour la période sélectionnée. Essayez de modifier les dates ou consultez le calendrier général.",
+		'for_night' => 'par nuit',
+		'nights' => 'nuits',
+		'over_guest' => 'Attention : ce logement est disponible mais il a une capacité maximale de',
+		'persons' => 'personnes',
+		'avviso' => 'Le séjour minimum est de',
+		'avviso2' => 'Des réductions progressives sont disponibles pour 12, 21 et 28 nuits.',
+		'over_max_booking' => 'Certains logements ont une limite maximale de ',
+		'over_max_booking2' => 'Essayez de réduire le nombre de nuits dans la demande.',
+		'no_search_house' => 'Le logement demandé n’est pas disponible. Consultez son calendrier ou voyez ces alternatives :',
+		'msg_no_price' => 'Le logement serait disponible mais il n’y a pas de prix pour la journée',
+		'msg_minstay' => 'Ce logement serait disponible mais le séjour minimum est de',
+		'msg_minstay2' => 'nuits alors que seulement',
+		'available' => 'DISPONIBLE ! Voir ou réserver maintenant',
+		'alternative' => 'Disponibilités alternatives réservable :'
+	),
 	"booking_form.php" =>
-    array('title' => 'Booking form',
+    array('title' => 'Formulaire de réservation',
         'err' => array(
 			'date_uguali'=> 'Les dates d\'arrivée et de départ sont les mêmes',
 			'start>end'=> 'La date d\'arrivée est postérieure à la date de départ',
@@ -715,22 +717,25 @@ $strScript = array(
 			'no_ccinfo'=> 'Les données de carte de crédit sont incorrectes ou manquantes',
 			'email-error' => 'Les adresses e-mail que vous avez écrites ne sont pas les mêmes',
 			'email-validate' => 'L\'adresse e-mail que vous avez écrite est erronée',
-			'inexistent_booking' => 'Il n\'y a pas de réservation avec ce numéro',
+			'inexistent_booking' => 'Il n\'y a pas de réservation',
 			'wrong_data' => 'Erreur data',
 			'too_many_error' => 'Trop d\'erreurs. Votre accès est bloqué. Veuillez réessayer plus tard',
 			'text_missing' => 'Le texte du feedback est manquant ou trop court',
 			'err_codfis' => 'Erreur de code fiscal : corrigez-la et réessayez',
 			'coupon_error' => 'Le code de réduction n\'est pas appliqué car il n\'est pas valide',
 			'cliente_anonimo' => 'Ce devis est destiné à un utilisateur anonyme, vous ne pouvez pas l\'utiliser pour réserver. Demandez un devis avec vos coordonnées ou faites une réservation sur le site Web',
-      'accesso_negato' => 'Accès refusé',
-      'errore_proforma' => 'ERRORE nella generazione contratto proforma'
+			'accesso_negato' => 'Accès refusé',
+			'errore_proforma' => 'ERRORE nella generazione contratto proforma'
         ),
         'war' => array(
             'ok' => 'ok riempitura array',
-            'pay_thanks' => 'Grazie, il pagamento è stato inoltrato. Un operatore lo eseguirà quanto prima.'
+            'pay_thanks' => 'Merci, le paiement a été transmis. Il sera confirmé sous peu.',
+			'extra_thanks' => 'Merci, le supplément a été ajouté avec succès.'
 		),
     'print'=>'Imprimer',
     'minors' => 'Mineurs',
+	'how_age' => "Il faut prendere en compte l'âge que le mineur aura au moment du check-in.",
+	'minor_rule' => "Les mineurs de moins de 18 ans doivent toujours être accompagnés d'un adulte. Si l'adulte accompagnant n'est pas un parent, il doit être muni d'une autorisation écrite des personnes exerçant l'autorité parentale sur le mineur. REMARQUE : Tout mineur, même nouveau-né, doit avoir un document d'identité propre dans tous les cas.",
     'adults' => 'Adultes',
     'total_people' => 'Nombre total de personnes',
     'people_number_change' => 'Modifier personnes',
@@ -757,6 +762,7 @@ $strScript = array(
 		'privacy_button'=>'Règles de confidentialité',
 		'title'=>'Formulaire de réservation',
 		'dashboard' => 'Panneau de commande',
+		'banner_search'=>'Rechercher disponibilité',
 		'booking' => 'La réservation',
 		'submit'=>'Aller au sommaire',
 		'return'=>'Retour',
@@ -835,6 +841,7 @@ $strScript = array(
 		'email_confirm_add_access_url' => 'Vous trouverez la réservation sur votre page utilisateur personnelle du site web (tableau de bord), où vous pourrez également ajouter des extras et effectuer des paiements supplémentaires.',
 		'email_confirm_add_access_code' => ' et les codes d\'accès suivants: ',
 		'regards' => 'Meilleures salutations',
+		'download_app' => "Téléchargez l'application Android pour trouver votre maison de vacances idéale à Grottammare, gérer votre réservation, recevoir des mises à jour en temps réel et accéder à toutes les fonctionnalités : <a href=\"https://play.google.com/store/apps/details?id=com.agermani.mygmonamour\" target=\"_blank\">Download from Google Play</a>",
 		'of' => 'sur',
 		'discount_code' => 'Si vous avez un code de réduction, écrivez-le ici ; vous le verrez à l\'étape suivante',
 		'coupon_apply' => 'Coupon de réduction à appliquer',
@@ -873,7 +880,7 @@ $strScript = array(
 		'ask_feedback' => 'Merci d\'être notre voyageur, nous espérons que vous avez apprécié votre séjour. <br> Notre objectif est la satisfaction totale de nos clients. Votre avis est grandement apprécié, il vous suffit de prendre quelques minutes et de laisser un avis, s\'il vous plaît.',
 		'ask_feedback2' => 'Votre jugement est très important pour nous. <br> En espérant vous revoir bientôt <br> Cordialement',
 		'use_access' => 'Pour laisser un avis, vous devez accéder à votre page utilisateur et ouvrir la réservation.',
-		'more_info' => 'Plus d\’infos',
+		'more_info' => 'Plus d’infos',
 		'booking_status' => 'Conditions de réservation',
 		'total_paid' => 'Total payé',
 		'transfer_instruction2' => '<b>Effectuez le virement bancaire aux coordonnées suivantes et envoyez une copie du reçu à l\'établissement touristique.</b>',
@@ -996,7 +1003,7 @@ $strScript = array(
     'body6' => ' people, of which ',
     'body7' => ' adults and ',
     'body8' => ' children under years old ',
-    'divieto1' => 'It is forbidden the overnight stay, even occasional, of a number of people higher than that agreed.',
+    'divieto1' => 'Guests are strictly prohibited from accommodating or allowing access to the property to persons other than those indicated in this contract and at the time of check-in.',
     'divieto2' => 'The tenant undertakes to agree with the landlord the expected arrival and departure times at least 12 hours in advance. The tenant undertakes to notify the landlord, during the trip, of any update of the expected arrival time.',
     'divieto3' => 'With the collection of the keys, the tenant accepts and undertakes to become the keeper of the accommodation for the entire duration of the lease. Therefore, we undertake the obligation to keep it with due diligence and not to cause damage to the accommodation, furniture and appliances, not to make any changes to the arrangement of the furniture and objects and not to carry out any repairs except in advance. authorized by the landlord.',
     'divieto7' => 'Any faults or breakages must be immediately reported to the landlord. If faults or breakages are derived from a correct and conscientious use of the property, they will be charged to the landlord, otherwise they will be charged to the tenant. The technical times for repair and / or restoration will be determined from time to time by a competent technician who will be appointed by the landlord. Pending repair, for the non-use of the faulty asset the tenant declares from now on to renounce any type of compensation.',
@@ -1031,21 +1038,22 @@ $strScript = array(
     'sign' => 'Signed',
     ),
     "review_viewer.php" =>
-    array('title' => 'Reviews viewer',
-        'err' => array(
-			'date_uguali'=> 'Le date di check-in e check-out sono uguali'
-        ),
-        'war' => array(
-          'ok' => 'ok riempitura array'
+    array(
+		'title' => 'Visionneuse d\'avis',
+		'err' => array(
+			'date_uguali'=> 'Les dates d\'arrivée et de départ sont identiques'
 		),
-		'guest'=>'Guests',
-    'opinion' => 'Guest rating',
-    'average' => 'Average rating',
-    'guest_reviews' => 'Guest reviews',
-    'no_review' => 'There are no reviews yet',
-    'prev' => ' Previous ',
-    'next' => ' Next '
-    ),
+		'war' => array(
+			'ok' => 'ok remplissage du tableau'
+		),
+		'guest'=>'Invités',
+		'opinion' => 'Évaluation des invités',
+		'average' => 'Note moyenne',
+		'guest_reviews' => 'Avis des invités',
+		'no_review' => 'Aucun avis pour le moment',
+		'prev' => ' Précédent ',
+		'next' => ' Suivant '
+	),
     "self_checkin.php" =>
     array('title' => 'Gestion des self check-in',
         'choose_sex' => 'Sélectionner le sexe',
