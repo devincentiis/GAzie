@@ -880,7 +880,7 @@ $(function() {
 						  } else {
 							alert('Errore: ' + (res.msg || 'Operazione fallita'));
 						  }
-						},						
+						},
 						error: function(jqXHR, textStatus, errorThrown) {
 						  console.error('AJAX error', textStatus, errorThrown, jqXHR.status, jqXHR.responseText);
 						  alert('Errore: ' + textStatus + (errorThrown ? ' - ' + errorThrown : ''));
@@ -947,51 +947,44 @@ $(function() {
 		$("#dialog_feedback" ).dialog( "open" );
 	});
 
-  $("#dialog_stato_lavorazione").dialog({ autoOpen: false });
-	$('.dialog_stato_lavorazione').click(function() {
-		$("p#id_status").html($(this).attr("refsta"));
-		$("p#de_status").html($(this).attr("prodes"));
-		var refsta = $(this).attr('refsta');
-    var new_stato_lavorazione = $(this).attr("prosta");
-    var cust_mail = $(this).attr("cust_mail");
-    var cust_mail2 = $(this).attr("cust_mail2");
-    $("#sel_stato_lavorazione").val(new_stato_lavorazione);
-    $('#sel_stato_lavorazione').on('change', function () {
-        //ways to retrieve selected option and text outside handler
-        new_stato_lavorazione = this.value;
-    });
-		$( "#dialog_stato_lavorazione" ).dialog({
-			minHeight: 1,
-			width: "auto",
-			modal: "true",
-			show: "blind",
-			hide: "explode",
-			buttons: {
-				delete:{
-					text:'Modifica',
-					'class':'btn btn-danger delete-button',
-					click:function (event, ui) {
-            $("#dialog_stato_lavorazione").css("background", "url("+'spinner.gif'+") center no-repeat");
-            var email=$('#checkbox_email').prop('checked');
-            $.ajax({
-              data: {'type':'set_new_stato_lavorazione','ref':refsta,'new_status':new_stato_lavorazione,email:email,cust_mail:cust_mail,cust_mail2:cust_mail2},
-              type: 'POST',
-              url: 'change_status.php',
-              success: function(output) {
-                 // alert('id:'+refsta+' new:'+new_stato_lavorazione+' email:'+email);
-                 // alert(output);
-                window.location.replace("./report_booking.php?auxil=VOR");
-              }
-            });
-          }},
-        "Non cambiare": function() {
-          $(this).dialog("close");
-          $(this).dialog("destroy");
-				}
-			}
-		});
-		$("#dialog_stato_lavorazione" ).dialog( "open" );
-	});
+$('.dialog_stato_lavorazione').click(function () {
+
+    var dialog = $("#dialog_stato_lavorazione");
+
+    // 👉 aggiorno contenuti fissi del modal
+    $("p#id_status").html($(this).attr("refsta"));
+    $("p#de_status").html($(this).attr("prodes"));
+
+    // 👉 salvo dati per AJAX
+    dialog.data("refsta", $(this).attr("refsta"));
+    dialog.data("cust_mail", $(this).attr("cust_mail"));
+    dialog.data("cust_mail2", $(this).attr("cust_mail2"));
+
+    var stato = $(this).attr("prosta");
+    var issue_date = $(this).attr("issue_date");
+    var issue_des = $(this).attr("issue_des");
+
+    // reset iniziale
+    $("#issue_date").val("");
+    $("#issue_des").val("");
+    $("#box_issue_date").hide();
+
+    $("#sel_stato_lavorazione").val(stato);
+
+    if (stato === "ISSUE") {
+        $("#box_issue_date").show();
+        $("#issue_des").val(issue_des);
+        if (issue_date) {
+          $("#issue_date").val(issue_date);          // imposta input
+          $("#issue_date").datetimepicker('setDate', issue_date);  // imposta picker
+        }
+    }
+
+    dialog.dialog("open");
+});
+
+
+
 
   $.datetimepicker.setLocale('it');
   $("#datepicker").datetimepicker({
@@ -1092,9 +1085,6 @@ $('.dialog_selfcheck').click(function() {
     var imgPath = $(this).attr("data-img-path");  // Ottieni il percorso dell'immagine
 
     $("#sel_stato_self").val(new_stato_lavorazione);
-    $('#sel_stato_self').on('change', function () {
-        new_stato_lavorazione = this.value;
-    });
 
     $('#checkbox_email_self').on('change', function () {
 
@@ -1124,7 +1114,6 @@ $('.dialog_selfcheck').click(function() {
                 "max-height": "90vh",
                 "overflow": "auto"
             });
-
             var fileExtension = imgPath.split('.').pop().toLowerCase(); // Estrai l'estensione del file
             var closeButton = $("<button>").text("Chiudi").addClass("btn btn-danger").click(function() {
                 imageModal.remove();
@@ -1388,9 +1377,16 @@ $ts->output_navbar();
           <option value="PENDING">In attesa di pagamento</option>
           <option value="CONFIRMED">Confermato</option>
           <option value="FROZEN">Congelato, date bloccate</option>
-          <option value="ISSUE">Incontrate difficoltà</option>
+          <option value="ISSUE">Problema da risolvere</option>
           <option value="CANCELLED">Annullato</option>
       </select>
+	  <div id="box_issue_date" style="display:none; margin-top:10px;">
+			<p><label for="issue_date"><b>Data scadenza problema:</b></label><br>
+			<input type="text" id="issue_date" name="issue_date" style="width:200px;"></p>
+      <p><label for="issue_des"><b>Descrizione problema:</b></label><br>
+			<input type="text" id="issue_des" name="issue_des" style="width:200px;"></p>
+		</div>
+
       invia email al cliente<input id="checkbox_email"  type="checkbox" name="checkbox_email" value="1" checked="">
 </div>
 <div style="display:none" id="dialog_check_inout" title="Stato Accettazione">
@@ -1580,9 +1576,32 @@ $ts->output_navbar();
         $ts->getOffset(), $ts->getLimit(),$gTables['rental_events'].".id_tesbro");
         $ctrlprotoc = "";
         while ($r = gaz_dbi_fetch_array($result)) {
+			$add_emoji="";
             if ($datatesbro = json_decode($r['custom_field'], TRUE)) { // se esiste un json nel custom field della testata
+				$device_html='<span title="Unknown device">❓</span>';
+				if (isset($datatesbro['vacation_rental']['device'])){
 
+					switch ($datatesbro['vacation_rental']['device'] ?? 'unknown') {
+						case 'app':
+							$device_html = '<span title="App">📱💎</span>'; // app mobile / webview
+							break;
+						case 'mobile':
+							$device_html = '<span title="Mobile">📱</span>'; // smartphone
+							break;
+						case 'tablet':
+							$device_html = '<span title="Tablet">📲</span>'; // tablet
+							break;
+						case 'desktop':
+							$device_html = '<span title="Desktop">💻</span>'; // computer / laptop
+							break;
+						case 'unknown':
+						default:
+							$device_html = '<span title="Unknown device">❓</span>'; // sconosciuto / bot
+							break;
+					}
+				}
             }
+
             $r['id_agent']=0;
             $row_artico = gaz_dbi_get_row($gTables['artico'], 'codice', $r['house_code']);
             $art_group_custom = gaz_dbi_get_row($gTables['artico_group'], 'id_artico_group', $row_artico['id_artico_group'])['custom_field'];
@@ -1662,6 +1681,11 @@ $ts->output_navbar();
             if ($data = json_decode($r['custom_field'], TRUE)) { // se esiste un json nel custom field della testata
               if (is_array($data['vacation_rental']) && isset($data['vacation_rental']['status'])){
                 $r['status'] = $data['vacation_rental']['status'];
+                $r['issue_date'] = isset($data['vacation_rental']['issue_date']) && $data['vacation_rental']['issue_date'] != ""
+                  ? DateTime::createFromFormat('Y-m-d', $data['vacation_rental']['issue_date'])->format('d/m/Y')
+                  : "";
+                $r['issue_des'] = isset($data['vacation_rental']['issue_des'])?$data['vacation_rental']['issue_des']:"";
+
               } else {
                  $r['status'] = '';
               }
@@ -1783,7 +1807,7 @@ $ts->output_navbar();
               } else {
                   echo "<td><button class=\"btn btn-xs btn-default disabled\">&nbsp;" . substr($r['tipdoc'], 1, 2) . "&nbsp;" . $r['id_tes'] . " </button></td>";
               }
-              echo "<td>" . $r['numdoc'] . " &nbsp;</td>";
+              echo "<td>" . $r['numdoc'] . " ".$device_html." &nbsp;</td>";
               if ( $tipo=="VOG" ) {
                   echo "<td>". getDayNameFromDayNumber($r['weekday_repeat']). " &nbsp;</td>";
               } else {
@@ -1861,7 +1885,7 @@ $ts->output_navbar();
                     echo "<a class=\"btn btn-xs btn-warning\" href=\"../../modules/vendit/select_evaord.php?id_tes=" . $r['id_tes'] . "\">Emetti documento fiscale</a>&nbsp;";
                     }
                   }elseif ($remains_atleastone && $r['status']!=='CANCELLED' && $r['status']!=='ISSUE') {
-                      // l'a prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
+                      // la prenotazione è parzialmente evaso, mostro lista documenti e tasto per evadere rimanenze
                       $ultimo_documento = 0;
                       mostra_documenti_associati( $r['id_tes'], $paid );
                       if ( $tipo == "VOG" ) {
@@ -1889,95 +1913,103 @@ $ts->output_navbar();
               }else{
                 echo "<td></td>";
               }
-              // colonna stato prenotazione
-              // Se la prenotazione e' da evadere , verifica lo status ed eventualmente lo aggiorna.
-              echo "<td style='text-align: left;'>";
-                if(isset($datatesbro['vacation_rental']['man_checkin_status']) && intval($datatesbro['vacation_rental']['man_checkin_status'])==1){
-                  $class_man="btn btn-success";$title_man="title = 'Accettazione effettuata'";
-                }elseif(isset($datatesbro['vacation_rental']['pre_checkin_status']) && intval($datatesbro['vacation_rental']['pre_checkin_status'])==1){
-                  $class_man="btn btn-warning";$title_man="title = 'PRE-checkin effettuato'";
-                }else{
-                  $class_man="";$title_man="title = 'Accettazione NON effettuata'";
-                }
-                  if ( $tipo == "VOG" ) {
-                      echo "<a class=\"btn btn-xs btn-warning\" href=\"select_evaord_gio.php?weekday=".$r['weekday_repeat']."\">evadi</a>";
-                  } elseif ( $tipo == "VPR" ) {
-                    echo "PREVENTIVO";
-                  } else {
-                      if ($ccoff==1 ){// se ci sono dati per il pagamento con carta di credito off line
-                        echo "&nbsp;&nbsp;<a class=\"btn btn-xs btn-default \"";
-                        echo " style=\"cursor:pointer;\" onclick=\"pay('". $r['id'] ."')\"";
-                        echo "><i class=\"glyphicon glyphicon-credit-card\" title=\"Carta di credito\"></i></a>";
-                      }
-                      ?><br><a style="white-space:nowrap;" title="Stato della prenotazione" class="btn btn-xs <?php echo $stato_btn; ?> dialog_stato_lavorazione" refsta="<?php echo $r['id_tes']; ?>" prodes="<?php echo $r['ragso1']," ",$r['ragso2']; ?>" prosta="<?php echo $r['status']; ?>" cust_mail="<?php echo $r['base_mail']; ?>" cust_mail2="<?php echo $r['base_mail2']; ?>">
-                          <i class="glyphicon glyphicon-modal-window">&nbsp;</i><?php echo $r['status']; ?>
-                        </a>
-                        <?php
-                        if ($r['status']=='CONFIRMED'){
-                          ?>
-                          <br><a style="white-space:nowrap;" title="Accettazione: <?php echo $title; ?>" class="btn btn-xs <?php echo $stato_check_btn; ?> dialog_check_inout" refcheck="<?php echo $r['id_tes']; ?>" prodes="<?php echo $r['ragso1']," ",$r['ragso2']; ?>" prostacheck="<?php echo $check_inout; ?>" cust_mail="<?php echo $r['base_mail']; ?>" cust_mail2="<?php echo $r['base_mail2']; ?>" ckdate="<?php echo $ckdate; ?>">
-                            <i class="glyphicon glyphicon-<?php echo $check_icon; ?>">&nbsp;</i><?php echo "CHECK ",$check_inout; ?>
-                          </a>
-                          <button type = "button">
-                            <a class="class1 <?php echo $class_man; ?>" href="MANUAL_checkin.php?tes=<?php echo $r['id_tes']; ?>" <?php echo $title_man; ?> onclick="checkFileExistence(event); return false;">accettazione</a>
-                          </button>
-                          <?php
 
-                          if ($stato_btn_selfcheck!==""){// se c'è il self checkin inserisco icona
-                            $prefix = 'self_'.$r['id_tes'];
-                            $imagePath = getSelfieImagePath($prefix);
-if (!empty($imagePath) && is_string($imagePath)) {
-                            // Percorso relativo da passare al proxy: senza radix, sempre riferito alla root URL
-                            $relativeForProxy = ltrim($imagePath, '/');
-                            if (strpos($relativeForProxy, 'modules/vacation_rental/') !== 0) {
-                                $relativeForProxy = 'modules/vacation_rental/' . $relativeForProxy;
-                            }
+				// colonna stato prenotazione
+				// Se la prenotazione e' da evadere , verifica lo status ed eventualmente lo aggiorna.
+				echo "<td style='text-align: left;'>";
+				if(isset($datatesbro['vacation_rental']['man_checkin_status']) && intval($datatesbro['vacation_rental']['man_checkin_status'])==1){
+					$class_man="btn btn-success";$title_man="title = 'Accettazione effettuata'";
+				}elseif(isset($datatesbro['vacation_rental']['pre_checkin_status']) && intval($datatesbro['vacation_rental']['pre_checkin_status'])==1){
+					$class_man="btn btn-warning";$title_man="title = 'PRE-checkin effettuato'";
+				}else{
+					$class_man="";$title_man="title = 'Accettazione NON effettuata'";
+				}
+				if ( $tipo == "VOG" ) {
+				  echo "<a class=\"btn btn-xs btn-warning\" href=\"select_evaord_gio.php?weekday=".$r['weekday_repeat']."\">evadi</a>";
+				} elseif ( $tipo == "VPR" ) {
+					echo "PREVENTIVO";
+				} else {
+					if ($ccoff==1 ){// se ci sono dati per il pagamento con carta di credito off line
+						echo "&nbsp;&nbsp;<a class=\"btn btn-xs btn-default \"";
+						echo " style=\"cursor:pointer;\" onclick=\"pay('". $r['id'] ."')\"";
+						echo "><i class=\"glyphicon glyphicon-credit-card\" title=\"Carta di credito\"></i></a>";
+					}
+					if(isset($datatesbro['vacation_rental']['rem_issue']) && $datatesbro['vacation_rental']['rem_issue']!==""){
+						if(strpos($datatesbro['vacation_rental']['rem_issue'], 'Avvisato') === 0){
+							$add_emoji = '<span title="' . $datatesbro['vacation_rental']['rem_issue'] . '" style="color:red; font-weight:bold;">🔔</span>';
+						}else{
+							$add_emoji= '<span title="' . $datatesbro['vacation_rental']['rem_issue'] . '">🔔</span>';
+						}
+					}
+					?><br><a style="white-space:nowrap;" title="Stato della prenotazione" class="btn btn-xs <?php echo $stato_btn; ?> dialog_stato_lavorazione" refsta="<?php echo $r['id_tes']; ?>" prodes="<?php echo $r['ragso1']," ",$r['ragso2']; ?>" prosta="<?php echo $r['status']; ?>" issue_date="<?php echo $r['issue_date']; ?>" issue_des="<?php echo $r['issue_des']; ?>" cust_mail="<?php echo $r['base_mail']; ?>" cust_mail2="<?php echo $r['base_mail2']; ?>">
+					  <i class="glyphicon glyphicon-modal-window">&nbsp;</i><?php echo $r['status']; ?>
+					</a><? echo $add_emoji; ?>
+					<?php
+					if ($r['status']=='CONFIRMED'){
+					  ?>
+					  <br><a style="white-space:nowrap;" title="Accettazione: <?php echo $title; ?>" class="btn btn-xs <?php echo $stato_check_btn; ?> dialog_check_inout" refcheck="<?php echo $r['id_tes']; ?>" prodes="<?php echo $r['ragso1']," ",$r['ragso2']; ?>" prostacheck="<?php echo $check_inout; ?>" cust_mail="<?php echo $r['base_mail']; ?>" cust_mail2="<?php echo $r['base_mail2']; ?>" ckdate="<?php echo $ckdate; ?>">
+						<i class="glyphicon glyphicon-<?php echo $check_icon; ?>">&nbsp;</i><?php echo "CHECK ",$check_inout; ?>
+					  </a>
+					  <button type = "button">
+						<a class="class1 <?php echo $class_man; ?>" href="MANUAL_checkin.php?tes=<?php echo $r['id_tes']; ?>" <?php echo $title_man; ?> onclick="checkFileExistence(event); return false;">accettazione</a>
+					  </button>
+					  <?php
 
-                            // Se siamo in localhost, aggiungiamo radix
-                            if ($_SERVER['HTTP_HOST'] === 'localhost') {
-                                $proxyUrl = '/' . $GLOBALS['radix'] . '/modules/vacation_rental/image_proxy.php?image=' . urlencode($relativeForProxy);
-                            } else {
-                                $proxyUrl = '/modules/vacation_rental/image_proxy.php?image=' . urlencode($relativeForProxy);
-                            }
-}else{
-  $proxyUrl=""; // è stato cancellato al check-out
-}
-                            ?>
-                            <a title="<?php echo $title_selfcheck; ?>"
-                               class="btn btn-xs <?php echo $stato_btn_selfcheck; ?> dialog_selfcheck"
-                               ref="<?php echo $r['id_tes']; ?>"
-                               status_now="<?php echo $title_selfcheck; ?>"
-                               proself="<?php echo $data['vacation_rental']['self_checkin_status']; ?>"
-                               cust_mail="<?php echo $r['base_mail']; ?>"
-                               numdoc="<?php echo $r['numdoc']; ?>"
-                               id_anagra="<?php echo $r['id']; ?>"
-                               msgself="<?php echo $data['vacation_rental']['self_checkin_status_msg']; ?>"
-                               data-img-path="<?php echo $proxyUrl; ?>">  <!-- Aggiungi il percorso dell'immagine -->
-                               <i class="glyphicon glyphicon-ok-circle"></i>
-                            </a>
-                            <?php
-                          }
+					  if ($stato_btn_selfcheck!==""){// se c'è il self checkin inserisco icona
+						$prefix = 'self_'.$r['id_tes'];
+						$imagePath = getSelfieImagePath($prefix);
+						if (!empty($imagePath) && is_string($imagePath)) {
+						  // Percorso relativo da passare al proxy: senza radix, sempre riferito alla root URL
+						  $relativeForProxy = ltrim($imagePath, '/');
+						  if (strpos($relativeForProxy, 'modules/vacation_rental/') !== 0) {
+							  $relativeForProxy = 'modules/vacation_rental/' . $relativeForProxy;
+						  }
 
-                          if (isset($r['text'])){// se c'è una recensione inserisco icona
-                           ?>
-                          <a title="Recensione" class="btn btn-xs <?php echo $feed_stato_btn; ?> dialog_feedback" ref="<?php echo $r['id_feedback']; ?>" feed_text="<?php echo $r['text']; ?>" feed_status="<?php echo $r['feed_status']; ?>">
-                            <i class="glyphicon glyphicon-comment"></i>
-                          </a>
-                          <?php
-                          }
+						  // Se siamo in localhost, aggiungiamo radix
+						  if ($_SERVER['HTTP_HOST'] === 'localhost') {
+							  $proxyUrl = '/' . $GLOBALS['radix'] . '/modules/vacation_rental/image_proxy.php?image=' . urlencode($relativeForProxy);
+						  } else {
+							  $proxyUrl = '/modules/vacation_rental/image_proxy.php?image=' . urlencode($relativeForProxy);
+						  }
+					  }else{
+						$proxyUrl=""; // è stato cancellato al check-out
+					  }
+						?>
+						<a title="<?php echo $title_selfcheck; ?>"
+						   class="btn btn-xs <?php echo $stato_btn_selfcheck; ?> dialog_selfcheck"
+						   ref="<?php echo $r['id_tes']; ?>"
+						   status_now="<?php echo $title_selfcheck; ?>"
+						   proself="<?php echo $data['vacation_rental']['self_checkin_status']; ?>"
+						   cust_mail="<?php echo $r['base_mail']; ?>"
+						   numdoc="<?php echo $r['numdoc']; ?>"
+						   id_anagra="<?php echo $r['id']; ?>"
+						   msgself="<?php echo $data['vacation_rental']['self_checkin_status_msg']; ?>"
+						   data-img-path="<?php echo $proxyUrl; ?>">  <!-- Aggiungi il percorso dell'immagine -->
+						   <i class="glyphicon glyphicon-ok-circle"></i>
+						</a>
+						<?php
+					  }
 
-                          if ($polservice && isset($r['status_webservice']) && intval($r['status_webservice'])<2 && $check_inout=="IN"){// se il check-in è fatto, il webservice attivato ma non è stato ancora inviato il file alla Polizia di Stato
-                            ?>
-                            <a href="tour_mov.php" style="text-decoration: none;">
-                              <div title="ATTENZIONE: non sono ancora state inviate le schedine alloggiati alla Polizia di Stato" class="sirena" style="font-size: 4rem; opacity: 1;">🚨</div>
-                            </a>
-                            <?php
-                          }
+					  if (isset($r['text'])){// se c'è una recensione inserisco icona
+					   ?>
+					  <a title="Recensione" class="btn btn-xs <?php echo $feed_stato_btn; ?> dialog_feedback" ref="<?php echo $r['id_feedback']; ?>" feed_text="<?php echo $r['text']; ?>" feed_status="<?php echo $r['feed_status']; ?>">
+						<i class="glyphicon glyphicon-comment"></i>
+					  </a>
+					  <?php
+					  }
 
-                        }
-                  }
+					  if ($polservice && isset($r['status_webservice']) && intval($r['status_webservice'])<2 && $check_inout=="IN"){// se il check-in è fatto, il webservice attivato ma non è stato ancora inviato il file alla Polizia di Stato
+						?>
+						<a href="tour_mov.php" style="text-decoration: none;">
+						  <div title="ATTENZIONE: non sono ancora state inviate le schedine alloggiati alla Polizia di Stato" class="sirena" style="font-size: 4rem; opacity: 1;">🚨</div>
+						</a>
+						<?php
+					  }
 
-              echo "</td>";
+					}
+				}
+
+				echo "</td>";
 
               // stampa
               echo "<td align=\"center\">";
@@ -2148,6 +2180,67 @@ $(document).ready(function() {
             $(this).removeClass('dropup');
         }
     });
+
+	$('#issue_date').datetimepicker({
+    timepicker: false,     // disabilita selezione orario
+    format: 'd/m/Y'        // solo data
+  });
+
+  $("#dialog_stato_lavorazione").dialog({
+      autoOpen: false,
+      minHeight: 1,
+      width: "auto",
+      modal: true,
+      show: "blind",
+      hide: "explode",
+      buttons: {
+          "Modifica": function () {
+
+              var refsta = $(this).data("refsta");
+
+              $("#dialog_stato_lavorazione").css("background", "url(spinner.gif) center no-repeat");
+
+              $.ajax({
+                  type: "POST",
+                  url: "change_status.php",
+                  data: {
+                      type: 'set_new_stato_lavorazione',
+                      ref: refsta,
+                      new_status: $('#sel_stato_lavorazione').val(),
+                      email: $('#checkbox_email').prop('checked'),
+                      cust_mail: $(this).data("cust_mail"),
+                      cust_mail2: $(this).data("cust_mail2"),
+                      issue_date: $('#issue_date').val(),
+                      issue_des: $('#issue_des').val()
+                  },
+                  success: function () {
+                      window.location.replace("./report_booking.php?auxil=VOR");
+                  }
+              });
+          },
+          "Non cambiare": function () {
+              $(this).dialog("close");
+          }
+      },
+      close: function () {
+          $("#issue_des").val("");
+          $("#issue_date").val("");
+          $("#box_issue_date").hide();
+      }
+  });
+
+
+	$('#sel_stato_lavorazione').on('change', function() {
+		//alert('change');
+		if ($(this).val() === 'ISSUE') {
+			$('#box_issue_date').slideDown();
+		} else {
+			$('#box_issue_date').slideUp();
+			$('#issue_date').val('');
+      $('#issue_des').val('');
+		}
+	});
+
 
   });
 </script>

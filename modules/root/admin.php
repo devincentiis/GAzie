@@ -265,8 +265,20 @@ while ( $grr = gaz_dbi_fetch_array($get_widgets) ) {
     $isexcl = ($chkes && isset($chkes->excluded_script))?$chkes->excluded_script:[];
     $okaccess = (in_array(substr($dfn[1],0,-4),$isexcl))?false:true;
     if ($okaccess) {
-      $col_lg=(!empty($grr['grid_class']))?$grr['grid_class']:'';
-      echo '<div class="col-xs-12 col-md-6 '.$col_lg.' text-center" id="position-'.$grr['id_bread'].'">';
+      switch($grr['grid_class']) {
+        case '1' :
+         $grid_class = 'col-md-6 col-lg-3';
+        break;
+        case '2' :
+         $grid_class = 'col-md-6';
+        break;
+        case '4' :
+         $grid_class = '';
+        break;
+        default:
+         $grid_class = 'col-md-6';
+      }
+      echo '<div class="col-xs-12 '.$grid_class.' text-center" id="position-'.$grr['id_bread'].'" grid_class="'.$grr['grid_class'].'">';
       require('../'.$grr['file']);
       echo '</div>';
     }
@@ -283,48 +295,64 @@ echo '</div>';
 $(function() {
 	$("#dialog_grid").dialog({ autoOpen: false });
 	$('.dialog_grid').click(function() {
-		var id = $(this).attr('id_bread');
+		var id_br = $(this).attr('id_bread');
 		$( "#dialog_grid" ).dialog({
 			position: { my:"right top", at:"center center", of: this },
 			minHeight: 1,
 			modal: "true",
 			show: "blind",
 			hide: "explode",
-			buttons: {
-            "1": function (event, ui) {
-			  $.ajax({
-			    data: { id_bread:id,gridlg:'1'},
-				type: 'post',
-				url: './dashboard_update.php',
-				success: function(output){
-					window.location.replace("./admin.php");
-				}
-			  });
-			},
-            "2": function (event, ui) {
-			  $.ajax({
-			    data: { id_bread:id,gridlg:'2'},
-				type: 'post',
-				url: './dashboard_update.php',
-				success: function(output){
-					window.location.replace("./admin.php");
-				}
-			  });
-			},
-            "4": function (event, ui) {
-			  $.ajax({
-			    data: { id_bread:id,gridlg:'4'},
-				type: 'post',
-				url: './dashboard_update.php',
-				success: function(output){
-					window.location.replace("./admin.php");
-				}
-			  });
-			},
-            "Non cambiare": function() {
-				$(this).dialog("close");
-            }
-			}
+			buttons: [ {
+          text: "1",
+          id: "widget-but1-"+id_br,
+          click: function (event, ui) {
+            $.ajax({
+              data: { id_bread:id_br,gridlg:'1'},
+              type: 'post',
+              url: './dashboard_update.php',
+              success: function(output){
+                window.location.replace("./admin.php");
+              }
+            });
+          }
+        },{
+          text: "2",
+          id: "widget-but2-"+id_br,
+          click: function (event, ui) {
+            $.ajax({
+              data: { id_bread:id_br,gridlg:'2'},
+              type: 'post',
+              url: './dashboard_update.php',
+              success: function(output){
+                window.location.replace("./admin.php");
+              }
+            });
+          }
+        },{
+          text: "4",
+          id: "widget-but4-"+id_br,
+          click: function (event, ui) {
+            $.ajax({
+              data: { id_bread:id_br,gridlg:'4'},
+              type: 'post',
+              url: './dashboard_update.php',
+              success: function(output){
+                window.location.replace("./admin.php");
+              }
+            });
+          }
+        },{
+          text: "Non cambiare",
+          click: function() {
+            window.location.replace("./admin.php");
+          }
+        }
+      ],
+      open: function(){
+        var vact = $("#position-"+id_br).attr("grid_class");
+        $("#position-"+id_br)
+        $("#widget-but"+vact+"-"+id_br).focus();
+      }
 		});
 		$("#dialog_grid" ).dialog( "open" );
 	});

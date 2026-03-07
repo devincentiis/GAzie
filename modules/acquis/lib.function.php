@@ -101,7 +101,7 @@ class acquisForm extends GAzieForm {
 		$art = gaz_dbi_get_row($gTables['artico'], 'codice', $val);
 		$acc = '<div class="col-xs-12">';
 		if ($art) {
-			$acc .= '<div class="row bg-info" onclick="this.form.hidden_req.value=\'change_'.$name.'\';" title="Cambia articolo"><div class="btn btn-xs btn-info">'.$val.'</div><input type="submit" class="bg-info" tabindex="999" value="'.$art['descri'].'" name="change"><div>';
+			$acc .= '<div class="row bg-info" onclick="this.form.hidden_req.value=\'change_'.$name.'\';" title="Cambia articolo"><div class="btn btn-xs btn-info">'.$val.'</div><input type="submit" class="bg-info" tabindex="999" value="'.$art['descri'].'" name="change_'.$name.'"><div>';
 			$acc .= '<input type="hidden" name="search_'.$name.'" value="'.$art['descri'].'" />';
 			$acc .= '<input type="hidden" id="'.$name.'" name="'.$name.'" value="'.$val.'">';
 		} elseif($val=='Insert_from_db'){

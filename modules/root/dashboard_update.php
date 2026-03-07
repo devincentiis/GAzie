@@ -39,11 +39,11 @@ if (isset($_POST['position'])) { //	Evitiamo errori se lo script viene chiamato 
 	}
     exit();
 } elseif(isset($_POST['id_bread'])) {
-	$glg='col-lg-6';
+	$glg='2';
 	if ($_POST['gridlg']=='4'){
-		$glg='col-lg-12';
+		$glg='4';
 	}elseif($_POST['gridlg']=='1'){
-		$glg='col-lg-3';
+		$glg='1';
 	}
 	gaz_dbi_put_row($gTables['breadcrumb'], 'id_bread', intval($_POST['id_bread']), 'grid_class', $glg);
 }

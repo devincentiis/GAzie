@@ -35,17 +35,18 @@ require("../../modules/vacation_rental/lib.data.php");
 if (!isset($_POST['access'])){// primo accesso
   $form['start']=date("Y-m-d");
   $form['end']=date('Y-m-d', strtotime($form['start'] . ' +10 day'));
-
+	$stat_start=date("Y") . "-01-01";
+	$stat_end=date("Y") . "-12-31";
 }else{
-  $form['start']=$_POST['start'];
-  $form['end']=$_POST['end'];
+  $form['start']=$stat_start=$_POST['start'];
+  $form['end']=$stat_end=$_POST['end'];
 }
 $checkimp=(isset($_POST['set']) && $_POST['set']=="IMPORTI")?"checked":'';
 if ((isset($_POST['set']) && $_POST['set']=="IMPORTI") ){// se selezionato
   $checkimp="checked";
 }elseif(!isset($_POST['set'])){ // di default
-  $checkimp="checked";
-  $_POST['set']="IMPORTI";
+  $checkocc="checked";
+  $_POST['set']="OCCUPAZIONE";
 }else{
 
   $checkimp="";
@@ -94,7 +95,10 @@ function openframe(url,codice){
       <div class="panel panel-info col-sm-12">
         <div class="box-header company-color">
           <h4 class="box-title"><i class="glyphicon glyphicon-blackboard"></i> Riepilogo Vacation rental</h4>
-          <a class="pull-left" style="cursor:pointer;" onclick="openframe('../../modules/vacation_rental/total_availability_it.php?price','<h3>Calendario generale</h3>')" data-toggle="modal" data-target="#iframe"> <i class="glyphicon glyphicon-calendar" title="Calendario della disponibilità"></i></a>
+          <a class="pull-left" style="cursor:pointer; margin-right:10%;" onclick="openframe('../../modules/vacation_rental/total_availability_it.php?price','<h3>Calendario generale</h3>')" data-toggle="modal" data-target="#iframe"> <i class="glyphicon glyphicon-calendar" title="Calendario della disponibilità"></i></a>
+
+          <a class="pull-left" style="cursor:pointer;" onclick="openframe('../../modules/vacation_rental/dashboard_Android.php','<h3>Dashboard Android</h3>')" data-toggle="modal" data-target="#iframe"> <span title="Dashboard Android">📱</span></a>
+
           <a class="pull-center" href="../vacation_rental/report_booking.php" style="cursor:pointer;"><i class="glyphicon glyphicon-tasks" title="vai alle prenotazioni"></i></a>
 		  <a class="pull-right dialog_grid" id_bread="<?php echo $grr['id_bread']; ?>" style="cursor:pointer;"><i class="glyphicon glyphicon-cog"></i></a>
         </div>
@@ -229,7 +233,7 @@ function openframe(url,codice){
   <div>
   <input type="radio" name="set" onchange="this.form.submit();" value="OCCUPAZIONE" <?php echo $checkocc; ?>>Occupazione
   <input type="radio" name="set" onchange="this.form.submit();" value="IMPORTI" <?php echo $checkimp; ?>>Importi
-   <iframe src="../../modules/vacation_rental/flot_graph.php?start=<?php echo $form['start'];?>&end=<?php echo $form['end'];?>&set=<?php echo $_POST['set'];?>" width="100%" height="800px" title="Grafico statistiche"></iframe>
+   <iframe src="../../modules/vacation_rental/flot_graph.php?start=<?php echo $stat_start;?>&end=<?php echo $stat_end;?>&set=<?php echo $_POST['set'];?>" width="100%" height="800px" title="Grafico statistiche"></iframe>
   </div>
   <?php }else{
     echo "<br>Il grafico interattivo delle statische non è dispobile in questa versione";

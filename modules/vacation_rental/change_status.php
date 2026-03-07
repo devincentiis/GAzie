@@ -41,7 +41,12 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
-
+if (file_exists('./sms_function.php')) {
+    include_once './sms_function.php';
+}
+if (file_exists('./notificheAndroid.php')) {
+    include_once './notificheAndroid.php';
+}
 $admin_aziend = checkAdmin();
 
 if (isset($_POST['type'])&&isset($_POST['ref'])) {
@@ -81,41 +86,90 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
   switch ($_POST['type']) {
 		case "set_new_stato_lavorazione":
 			$i=intval($_POST['ref']); // id_tesbro
-      // ricarico il json custom field tesbro e controllo
-      $tesbro=gaz_dbi_get_row($gTables['tesbro'], "id_tes", $i); // carico la tesbro
-      $clfoco=gaz_dbi_get_row($gTables['clfoco'], "codice", $tesbro['clfoco']);
-      $anagra=gaz_dbi_get_row($gTables['anagra'], "id", $clfoco['id_anagra']); // carico la anagra
-      $language=gaz_dbi_get_row($gTables['languages'], "lang_id", $anagra['id_language']); // carico la lingua
-      if (isset($language['title_native'])){
-        $langarr = explode(" ",$language['title_native']);
-        $lang = strtolower($langarr[0]);
-      }else{
-        $lang='italian';
-      }
-      if (file_exists("lang.".$lang.".php")){// se esiste
-        include "lang.".$lang.".php";// carico il file traduzione lingua
-      }else{// altrimenti carico di default la lingua inglese
-        include "lang.english.php";
-      }
-      $script_transl=$strScript['booking_form.php'];
+			  // ricarico il json custom field tesbro e controllo
+			  $tesbro=gaz_dbi_get_row($gTables['tesbro'], "id_tes", $i); // carico la tesbro
+			  $clfoco=gaz_dbi_get_row($gTables['clfoco'], "codice", $tesbro['clfoco']);
+			  $anagra=gaz_dbi_get_row($gTables['anagra'], "id", $clfoco['id_anagra']); // carico la anagra
+			  $phone=(strlen($anagra['cell'])>5)?$anagra['cell']:$anagra['telefo'];
+			  $language=gaz_dbi_get_row($gTables['languages'], "lang_id", $anagra['id_language']); // carico la lingua
+			  if (isset($language['title_native'])){
+				$langarr = explode(" ",$language['title_native']);
+				$lang = strtolower($langarr[0]);
+			  }else{
+				$lang='italian';
+			  }
+			  if (file_exists("lang.".$lang.".php")){// se esiste
+				include "lang.".$lang.".php";// carico il file traduzione lingua
+			  }else{// altrimenti carico di default la lingua inglese
+				include "lang.english.php";
+			  }
+			  $script_transl=$strScript['booking_form.php'];
+				$add_to_issue="";
+			  if ($data = json_decode($tesbro['custom_field'],true)){// se c'è un json custom field
 
-      if ($data = json_decode($tesbro['custom_field'],true)){// se c'è un json
+					if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
 
-        if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
-          if (substr($_POST['new_status'],0,9)=="CANCELLED"){// se la prenotazione va cancellata azzero anche i reminder
-            $data['vacation_rental']['rem_pag']="";
-            $data['vacation_rental']['rem_checkin']="";
-          }
-          $data['vacation_rental']['status']=substr($_POST['new_status'],0,10);
-          $custom_json = json_encode($data);
-        } else { //se non c'è il modulo "vacation_rental" lo aggiungo
-          $data['vacation_rental']= array('status' => substr($_POST['new_status'],0,10));
-          $custom_json = json_encode($data);
-        }
-      }else { //se non c'è un json creo "vacation_rental"
-          $data['vacation_rental']= array('status' => substr($_POST['new_status'],0,10));
-          $custom_json = json_encode($data);
-      }
+						if (!empty($_POST['issue_date'])) { // se è stata passata una data del problema
+							$d = DateTime::createFromFormat('d/m/Y', $_POST['issue_date']);
+							// verifico che la data sia realmente valida
+							if ($d && $d->format('d/m/Y') === $_POST['issue_date']) {
+								$oldDate = null;
+								if (!empty($data['vacation_rental']['issue_date'])) {
+									$oldDate = new DateTime($data['vacation_rental']['issue_date']);
+								}
+								// confronto solo se esiste una vecchia data
+								if ($oldDate && $oldDate->format('Y-m-d') !== $d->format('Y-m-d')) {// se la nuova data è diversa dalla vechia
+									$data['vacation_rental']['rem_issue'] = "";// resetto il reminder
+								}
+								$data['vacation_rental']['issue_date'] = $d->format('Y-m-d');
+                $add_to_issue = " entro " . $d->format('d-m-Y') ;
+							}
+              $data['vacation_rental']['issue_des']= (!empty($_POST['issue_des']))? htmlspecialchars($_POST['issue_des'], ENT_QUOTES, 'UTF-8'):"";
+              $add_to_issue .= " - ".$data['vacation_rental']['issue_des'];
+						} else {
+							$data['vacation_rental']['issue_date'] = "";
+							$data['vacation_rental']['rem_issue'] = "";
+              $data['vacation_rental']['issue_des']= (!empty($_POST['issue_des']))? htmlspecialchars($_POST['issue_des'], ENT_QUOTES, 'UTF-8'):"";
+              $add_to_issue .= " - ".$data['vacation_rental']['issue_des'];
+						}
+
+						if (substr($_POST['new_status'],0,9)=="CANCELLED"){// se la prenotazione va cancellata azzero anche i reminder e issue date
+							$data['vacation_rental']['rem_pag']="";
+							$data['vacation_rental']['rem_checkin']="";
+							$data['vacation_rental']['issue_date']="";
+              $data['vacation_rental']['issue_des'] = "";
+							$data['vacation_rental']['rem_issue']="";
+						}
+					  $data['vacation_rental']['status']=substr($_POST['new_status'],0,10);
+					  $custom_json = json_encode($data);
+					} else { //se non c'è il modulo "vacation_rental" lo aggiungo
+					  $data['vacation_rental']= array('status' => substr($_POST['new_status'],0,10));
+					  $data['vacation_rental']['issue_date']="";
+            $data['vacation_rental']['issue_des']= (!empty($_POST['issue_des']))? htmlspecialchars($_POST['issue_des'], ENT_QUOTES, 'UTF-8'):"";
+					  if (!empty($_POST['issue_date'])) {
+						  $d = DateTime::createFromFormat('d/m/Y', $_POST['issue_date']);
+						  if ($d && $d->format('d/m/Y') === $_POST['issue_date']) {// data realmente valida
+							  $data['vacation_rental']['issue_date'] = $d->format('Y-m-d');
+							  $add_to_issue = " entro ".$d->format('d-m-Y'); // Aggiungo scadenza
+						  }
+					  }
+            $add_to_issue .= " - ".$data['vacation_rental']['issue_des'];
+					  $custom_json = json_encode($data);
+					}
+			  }else { //se non c'è un json, lo creo e inserisco "vacation_rental"
+				  $data['vacation_rental']= array('status' => substr($_POST['new_status'],0,10));
+				  $data['vacation_rental']['issue_date']="";
+          $data['vacation_rental']['issue_des']= (!empty($_POST['issue_des']))? htmlspecialchars($_POST['issue_des'], ENT_QUOTES, 'UTF-8'):"";
+				  if (!empty($_POST['issue_date'])) {
+					  $d = DateTime::createFromFormat('d/m/Y', $_POST['issue_date']);
+					  if ($d && $d->format('d/m/Y') === $_POST['issue_date']) {// data realmente valida
+						  $data['vacation_rental']['issue_date'] = $d->format('Y-m-d');
+						  $add_to_issue = " entro ".$d->format('d-m-Y'); // Aggiungo scadenza
+					  }
+				  }
+          $add_to_issue .= " - ".$data['vacation_rental']['issue_des'];
+				  $custom_json = json_encode($data);
+			  }
       gaz_dbi_put_row($gTables['tesbro'], 'id_tes', $i, 'custom_field', $custom_json);
       if ($_POST['email']=='true' && strlen($_POST['cust_mail'])>4){// se richiesto invio mail
 
@@ -132,8 +186,12 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         }
         $mail->isHTML(true);
         $mail->Subject = $script_transl['changement']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi']);
-        $mail->Body    = "<p>".$script_transl['change_status'].": ".$script_transl[$_POST['new_status']]."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
-        if($mail->send()) {
+        $mail->Body    = "<p>".$script_transl['change_status'].": ".$script_transl[$_POST['new_status']].$add_to_issue."</p><p><b>".$admin_aziend['ragso1']." ".$admin_aziend['ragso2']."</b></p>";
+
+		$notifTitle = $mail->Subject;
+		$notifBody = $mail->Body;
+
+		if($mail->send()) {
           if ($imap_usr!==''){// se ho un utente imap carico la mail nella sua posta inviata
             if($imap = @imap_open("{".$imap_server.":".$imap_port."/".$imap_secure."}".$imap_sent_folder, $imap_usr, $imap_pwr)){
               if ($append=@imap_append($imap, "{".$imap_server."}".$imap_sent_folder, $mail->getSentMIMEMessage(),"\\seen")){
@@ -158,7 +216,20 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         }else {
           echo "Errore imprevisto nello spedire la mail di modifica status: " . $mail->ErrorInfo;
         }
+
+        if (function_exists('sendNotificationbyID')) {// invio notifica smartphone se ho la funzione
+          $notif_res = sendNotificationbyID($anagra['id'], $notifTitle, $notifBody, 'active');
+          $anySent = is_array($notif_res) && count($notif_res) > 0 && array_reduce($notif_res, fn($carry, $r) => $carry || (isset($r['status']) && $r['status'] === 'SENT'), false);
+
+        }
+        if (!$anySent && function_exists('send_sms_via_fcm')) {// invio SMS se ho la funzione e se non è partita la notifice
+          //$notifBody .= "<br>".$script_transl['notif_call_to_app'];
+          $notifBody = $script_transl['booking_number']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi'])."<br>".$notifBody."<br>".$script_transl['notif_call_to_app'];
+          $SMS_send = send_sms_via_fcm($phone, $notifBody);
+        }
+
       }
+
 		break;
     case "set_new_status_check":
 			$i=intval($_POST['ref']); // id_tesbro
@@ -168,6 +239,7 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
       $tesbro=gaz_dbi_get_row($gTables['tesbro'], "id_tes", $i); // carico la tesbro
       $clfoco=gaz_dbi_get_row($gTables['clfoco'], "codice", $tesbro['clfoco']);
       $anagra=gaz_dbi_get_row($gTables['anagra'], "id", $clfoco['id_anagra']); // carico la anagra
+	  $phone=(strlen($anagra['cell'])>5)?$anagra['cell']:$anagra['telefo'];
       $lan="it";
       $language=gaz_dbi_get_row($gTables['languages'], "lang_id", $anagra['id_language']); // carico la lingua specifica del cliente
       $langarr = explode(" ",$language['title_native']);
@@ -450,9 +522,24 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
                 }
               }
             }
+
           }
         }
+
+		if (function_exists('sendNotificationbyID')) {// invio notifica smartphone se ho la funzione
+		  $notif_res = sendNotificationbyID($anagra['id'], $mail->Subject, $mail->Body, 'active');
+		  $anySent = is_array($notif_res) && count($notif_res) > 0 && array_reduce($notif_res, fn($carry, $r) => $carry || (isset($r['status']) && $r['status'] === 'SENT'), false);
+
+		}
+		if (!$anySent && function_exists('send_sms_via_fcm')) {// invio SMS se ho la funzione
+		  //$mail->Body .= "<br>".$script_transl['notif_call_to_app'];
+		  $mail->Body = $script_transl['booking_number']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi'])."<br>".$mail->Body."<br>".$script_transl['notif_call_to_app'];
+
+		  $SMS_send = send_sms_via_fcm($phone, $mail->Body);
+		}
+
       }
+
 
       if (isset($_POST['email']) && $_POST['email']=='true' && strlen($_POST['cust_mail'])>4 && strlen($vacation_url_user)>4){// se richiesto invio mail di richiesta recensione
 
@@ -525,6 +612,19 @@ if (isset($_POST['type'])&&isset($_POST['ref'])) {
         }else {
           echo "Errore imprevisto nello spedire la mail di modifica status: " . $mail->ErrorInfo;
         }
+
+		if (function_exists('sendNotificationbyID')) {// invio notifica smartphone se ho la funzione
+		  $notif_res = sendNotificationbyID($anagra['id'], $mail->Subject, $mail->Body, 'active');
+		  $anySent = is_array($notif_res) && count($notif_res) > 0 && array_reduce($notif_res, fn($carry, $r) => $carry || (isset($r['status']) && $r['status'] === 'SENT'), false);
+
+		}
+		if (!$anySent && function_exists('send_sms_via_fcm')) {// invio SMS se ho la funzione
+		  //$mail->Body .= "<br>".$script_transl['notif_call_to_app'];
+		  $mail->Body = $script_transl['booking_number']." ".$tesbro['numdoc'].' '.$script_transl['of'].' '.gaz_format_date($tesbro['datemi'])."<br>".$mail->Body."<br>".$script_transl['notif_call_to_app'];
+
+		  $SMS_send = send_sms_via_fcm($phone, $mail->Body);
+		}
+
       }
 		break;
 	}

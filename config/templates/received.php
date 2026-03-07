@@ -37,6 +37,18 @@ require("../../library/include/calsca.inc.php");
 
 class Received extends Template_2xA5
 {
+  public $tesdoc;
+  public $giorno;
+  public $mese;
+  public $anno;
+  public $sconto;
+  public $virtual_taxstamp;
+  public $taxstamp;
+  public $trasporto;
+  public $tottraspo;
+  public $tipdoc;
+  public $totddt;
+
     function setTesDoc()
     {
       $this->tesdoc = $this->docVars->tesdoc;
@@ -94,19 +106,20 @@ class Received extends Template_2xA5
 
     function compose()
     {
-        $lines = $this->docVars->getRigo();
-		foreach ($lines AS $key => $rigo) {
-            if (($this->GetY() >= 122 && $this->taxstamp >= 0.01) ||$this->GetY() >= 146 ) { // mi serve per poter stampare la casella del bollo
+      $lines = $this->docVars->getRigo();
+      foreach ($lines AS $key => $rigo) {
+        $act_y = $this->GetY();
+        if (($this->GetY() >= 122 && $this->taxstamp >= 0.01) ||$this->GetY() >= 146 ) { // mi serve per poter stampare la casella del bollo
                 $this->Cell(133,5,'','T',1);
                 $this->SetFont('helvetica', '', 14);
                 $this->SetY(165);
                 $this->Cell(133,12,'>>> --- SEGUE SU PAGINA SUCCESSIVA --- >>> ',1,0,'R');
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(133,12,'>>> --- SEGUE SU PAGINA SUCCESSIVA --- >>> ',1,1,'R');
                 $this->SetFont('helvetica', '', 8);
                 $this->newPage();
                 $this->Cell(133,5,'<<< --- SEGUE DA PAGINA PRECEDENTE --- <<< ',1,0);
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(133,5,'<<< --- SEGUE DA PAGINA PRECEDENTE --- <<< ',1,1);
             }
                 switch($rigo['tiprig']) { // la larghezza dei righi dev'essere max 145
@@ -123,7 +136,7 @@ class Received extends Template_2xA5
                     }
                     $this->Cell(15,4, gaz_format_number($rigo['importo']),1,0,'R');
                     $this->Cell(6,4, floatval($rigo['pervat']),1,0,'R');
-					$this->Cell(14);
+                    $this->Cell(14);
                     $this->Cell(18,4, $rigo['codart'],1,0,'L', 0, '', 1);
                     $this->Cell(58,4, $rigo['descri'],1,0,'L',0,'',1);
                     $this->Cell(5,4, $rigo['unimis'],1,0,'C');
@@ -142,7 +155,7 @@ class Received extends Template_2xA5
                     $this->Cell(36,4, '',1);
                     $this->Cell(15,4, gaz_format_number($rigo['importo']),1,0,'R');
                     $this->Cell(6,4, floatval($rigo['pervat']),1,0,'R');
-					$this->Cell(14);
+                    $this->Cell(14);
                     $this->Cell(76,4, $rigo['descri'],1,0,'L',0,'',1);
                     $this->Cell(36,4, '',1);
                     $this->Cell(15,4, gaz_format_number($rigo['importo']),1,0,'R');
@@ -150,9 +163,16 @@ class Received extends Template_2xA5
                     break;
                 case "2":
                     $this->Cell(133,4,$rigo['descri'],'LR',0,'L',0,'',1);
-					$this->Cell(14);
+                    $this->Cell(14);
                     $this->Cell(133,4,$rigo['descri'],'LR',1,'L',0,'',1);
                     break;
+                case "6":
+                case "8":
+                  $this->writeHtmlCell(133,4, 10, $act_y, $rigo['descri'],1);
+                  $this->Cell(14);
+                  $this->writeHtmlCell(133,4, $this->GetX(), $act_y, $rigo['descri'], 1, 1);
+                break;
+
 				}
         }
 	}
@@ -197,33 +217,33 @@ class Received extends Template_2xA5
             if ($this->virtual_taxstamp == 2 || $this->virtual_taxstamp == 3) {
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"Bollo assolto ai sensi del","TLR",0,"C");
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"Bollo assolto ai sensi del","TLR",1,"C");
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"decreto MEF 17.06.2014 (art.6)","LR",0,"C");
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"decreto MEF 17.06.2014 (art.6)","LR",1,"C");
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8," € ".gaz_format_number($this->taxstamp),'LR',0,'C');
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8," € ".gaz_format_number($this->taxstamp),'LR',1,'C');
             } else {
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"Bollo applicato","LR",0,"C");
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"Bollo applicato","LR",1,"C");
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"sull'originale","LR",0,"C");
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"sull'originale","LR",1,"C");
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"€ ".gaz_format_number($this->taxstamp),'LR',0,'C');
-				$this->Cell(14);
+                $this->Cell(14);
                 $this->Cell(70,8,'','L',0,0);
                 $this->Cell(63,8,"€ ".gaz_format_number($this->taxstamp),'LR',1,'C');
             }
@@ -236,7 +256,7 @@ class Received extends Template_2xA5
         $this->Cell(40,4, 'Pagamento','LTR',0,'C',1);
         $this->Cell(60,4, 'Castelletto    I.V.A.','LTR',0,'C',1);
         $this->Cell(33,4, 'Totale IVA','LTR',0,'C',1);
-		$this->Cell(14);
+        $this->Cell(14);
         $this->Cell(40,4, 'Pagamento','LTR',0,'C',1);
         $this->Cell(60,4, 'Castelletto    I.V.A.','LTR',0,'C',1);
         $this->Cell(33,4, 'Totale IVA','LTR',1,'C',1);
@@ -245,7 +265,7 @@ class Received extends Template_2xA5
         $this->Cell(30,4, 'Aliquota','LR',0,'C',1);
         $this->Cell(15,4, 'Imposta','LR',0,'C',1);
         $this->Cell(33,4, gaz_format_number($totivafat),'LBR',0,'C');
-		$this->Cell(14);
+        $this->Cell(14);
         $this->Cell(40,4, $this->pagame['descri'],'LR',0,'C',0,'',1);
         $this->Cell(15,4, 'Imponibile','LR',0,'C',1);
         $this->Cell(30,4, 'Aliquota','LR',0,'C',1);
@@ -254,7 +274,7 @@ class Received extends Template_2xA5
         $this->Cell(40,4, 'Bolli(tratte)','LTR',0,'C',1);
         $this->Cell(60,4);
         $this->Cell(33,4,'T O T A L E','LR',0,'C',1);
-		$this->Cell(14);
+        $this->Cell(14);
         $this->Cell(40,4, 'Bolli(tratte)','LTR',0,'C',1);
         $this->Cell(60,4);
         $this->Cell(33,4,'T O T A L E','LR',1,'C',1);
@@ -265,7 +285,7 @@ class Received extends Template_2xA5
         }
         $this->Cell(60,4);
         $this->Cell(33,4,'R I C E V U T A','LR',0,'C',1);
-		$this->Cell(14);
+        $this->Cell(14);
         if ($impbol > 0) {
           $this->Cell(40,4, gaz_format_number($impbol),'LBR', 0,'C');
         } else {
@@ -297,7 +317,7 @@ class Received extends Template_2xA5
         $this->Cell(20, 5,'Spese Incasso','LTR',0,'C',1);
         $this->Cell(20, 5,'Trasporto','LTR',0,'C',1);
         $this->Cell(37, 5,'Tot.Imponibile','LTR',0,'C',1);
-		$this->Cell(14);
+        $this->Cell(14);
         $this->Cell(37, 5,'Tot. Corpo','LTR',0,'C',1);
         $this->Cell(19, 5,'% Sconto','LTR',0,'C',1);
         $this->Cell(20, 5,'Spese Incasso','LTR',0,'C',1);
@@ -328,7 +348,7 @@ class Received extends Template_2xA5
         } else {
            $this->Cell(37, 5,'','LBR');
         }
-		$this->Cell(14);
+        $this->Cell(14);
         if ($totimpmer > 0) {
            $this->Cell(37, 5, gaz_format_number($totimpmer),'LBR',0,'C');
         } else {
@@ -363,7 +383,7 @@ class Received extends Template_2xA5
         } else {
            $this->Cell(33,9,'','LBR',0);
         }
-		$this->Cell(14);
+        $this->Cell(14);
         $this->Cell(100,9,'','LBR');
         if ($this->tesdoc['id_tes'] > 0) {
             $this->SetFont('helvetica','B',14);

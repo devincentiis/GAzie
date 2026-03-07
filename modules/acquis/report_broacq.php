@@ -53,7 +53,7 @@ $search_fields = [
 
 // creo l'array (header => campi) per l'ordinamento dei record
 $sortable_headers = array(
-    "Numero" => "id_tes",
+    "Numero" => "numdoc",
     "Produzione" => "id_orderman",
     "Data" => "datemi",
     "Fornitore" => "",
@@ -70,11 +70,10 @@ $what=$gTables['tesbro'] . " LEFT JOIN " . $gTables['clfoco'] . " ON " . $gTable
 
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('custom/modal_form'));
-
 $ts = new TableSorter(
     !$partner_select && isset($_GET["fornitore"]) ? $tesbro_e_partners : $gTables['tesbro'],
     $passo,
-    ['id_tes' => 'desc'],
+    ['datemi' => 'desc', 'numdoc'=>'desc'],
     ['sezione'=>1, 'flt_tipo'=>$flt_tipo]
 );
 

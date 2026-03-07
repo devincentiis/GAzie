@@ -677,6 +677,7 @@ $strScript = array("admin_client.php" =>
         'type_value' => array('VPR' => 'Quotation',
             'VOR' => 'Order',
             'VOW' => 'Web order'),
+        'order_status' => 'Order status',
         'date' => 'Date',
         'number' => 'Number',
         'status' => 'State',

@@ -682,6 +682,7 @@ $strScript = array("admin_client.php" =>
         'type_value' => array('VPR' => 'Citas',
             'VOR' => 'Pedidos',
             'VOW' => 'Pedidos WEB'),
+        'order_status' => 'Order status',
         'date' => 'Fecha',
         'number' => 'N&uacute;mero',
         'issue' => 'Procesa',

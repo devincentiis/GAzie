@@ -1130,7 +1130,7 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 		} else {
 			$select_artico = new selectartico("codart");
 			$select_artico->addSelected($form['codart']);
-			$select_artico->output(substr($form['cosear'], 0, 20));
+			$select_artico->output(substr($form['cosear'], 0, 32));
 		}
 	}
 	echo '<input type="hidden" name="lot_or_serial" value="' .(($resartico)?$resartico['lot_or_serial']:''). '"/>';

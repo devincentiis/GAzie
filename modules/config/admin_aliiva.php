@@ -46,7 +46,6 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['aliquo'] = floatval($_POST['aliquo']);
     $form['taxstamp'] = intval($_POST['taxstamp']);
     $form['fae_natura'] = substr(trim($_POST['fae_natura']), 0, 4);
-    ;
     $form['annota'] = substr($_POST['annota'], 0, 50);
     if (isset($_POST['Submit'])) { // conferma tutto
         //eseguo i controlli formali
@@ -162,7 +161,7 @@ echo "</td>\n";
 echo "</tr>\n";
 echo "<tr><td class=\"FacetFieldCaptionTD\">" . $script_transl['annota'] . "</td>
      <td class=\"FacetDataTD\">\n";
-echo '<textarea name="sedleg" rows="2" cols="60" maxlength="254" >'. $form['annota'].'</textarea>';
+echo '<textarea name="annota" rows="2" cols="60" maxlength="254" >'. $form['annota'].'</textarea>';
 echo "</td></tr>";
 echo '<tr><td colspan=2 class="FacetFooterTD text-center">';
 echo '<input name="Submit" class="btn btn-warning" title="Accetta tutto e modifica" type="submit" value=' . ucfirst($script_transl['submit']) . '>';

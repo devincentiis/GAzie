@@ -820,6 +820,7 @@ $strScript = array("admin_client.php" =>
             'VOR' => 'Ordine',
             'VOW' => 'Ordine web',
             'VOG' => 'Ordine settimanale del giorno'),
+        'order_status' => 'Situazione ordini',
         'date' => 'Data',
         'number' => 'Numero',
         'issue' => 'Evadi',
@@ -2063,6 +2064,29 @@ $strScript = array("admin_client.php" =>
         'err4'=>"L'immagine non dev'essere pi&ugrave; grande di 64Kb",
         'large_descri'=>"Descrizione estesa",
         'ref_ecommerce_customer_group' => 'Riferimento al gruppo su ecommerce'
-      )
+      ),
+    "select_order_status.php" =>
+      [
+        'doc_name' => ["VOR" => "Ordine","VOW" => "Ordine web"],
+        'title' => 'Visualizza e stampa situazione ordini',
+        'err' =>['norows' => 'Non ci sono righi inevasi','wrongdate' => 'La data di fine non pu&ograve; essere precedente la data di inizio periodo'],
+        'header' => ['ID' => '','Numero' => '', 'Data' => '', 'Cliente/P.I.' => '','Quantità<br/>ordinata'=>'','Quantità<br/>evasa'=>'', 'Valore €<br/>ordinato - evaso' => '', 'Stato' => ''],
+        'seziva' => 'Sezione IVA',
+        'from' => 'da ',
+        'del' => ' del ',
+        'dateini' => "Data inizio periodo",
+        'datefin' => "Data fine periodo",
+        'status' => "Stato",
+        'status_value' => [0=>'Evasi', 1 => 'Solo con residui', 2 => 'Inevasi', 3 => 'Inevasi e residui', 9=>'Tutti'],
+        'id_agente' => 'Agente ',
+        'codart' => 'Codice',
+        'descri' => 'Descrizione',
+        'unimis' => 'U.M.',
+        'quanti' => 'Quantità ',
+        'prezzo' => 'Prezzo',
+        'provvigione' => '%Prov',
+        'amount' => 'Importo',
+        'taxable' => 'Imponibile',
+      ]
 );
 ?>

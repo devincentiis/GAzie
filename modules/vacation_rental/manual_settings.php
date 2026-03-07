@@ -36,12 +36,12 @@ if (count(get_included_files()) ==1 OR basename($_SERVER['PHP_SELF']) == basenam
 }else{
 	$idDB="_001";// ID azienda per stabilire a quale ID azienda del data base dovrà accedere il front-end del sito web
 	$token="yourtokenword"; // inserisci una parola chiave, che verrà usata dagli script, per bloccare gli accessi diretti.
-	$smtp_pass="*****"; // la password e-mail smtp (con la nuova criptazione non posso più prenderla dal DB)
-	$imap_pwr="******";
-	$seziva="1"; // la sezione iva da inserire nelle nuove prenotazioni
+	$smtp_pass="xxxxxx"; // la password e-mail smtp (con la nuova criptazione non posso più prenderla dal DB)
+	$imap_pwr="xxxxxxx";
+	$seziva="2"; // la sezione iva da inserire nelle nuove prenotazioni
 	$stripe_con="597000004"; // numero codice conto prima nota Stripe
 	$return_url="https://gmonamour.it";
-	$return_url_userDashboard="https://gestgazie.lacasettabio.it/modules/vacation_rental/user_dashboard.php?lang=";
+	$return_url_userDashboard="https://gestgazie.lacasettabio.it/modules/vacation_rental/NEWuser_dashboard.php?lang=";
 	$return_url_extra="https://www.gmonamour.it/it/service/grazie-extra";
 }
 ?>

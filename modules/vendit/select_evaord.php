@@ -293,7 +293,7 @@ if (!isset($_POST['id_tes'])) { //al primo accesso  faccio le impostazioni ed il
         $totale_evadibile = $rigo['quanti'];
         if (!in_array(array($rigo['codart'],$rigo['descri']),$codiciarticoli)) {
           $codiciarticoli[]=array($rigo['codart'],$rigo['descri']);
-          $evasi = gaz_dbi_get_single_value($gTables['rigdoc'], "SUM(quanti)", "id_order = ".$form['id_tes']." AND codart='".$rigo['codart']."' AND descri LIKE '".addslashes($rigo['descri'])."%' AND tiprig < 900");
+          $evasi = gaz_dbi_get_single_value($gTables['rigdoc'], "SUM(quanti)", "id_order = ".$form['id_tes']." AND codart='".$rigo['codart']."' AND tiprig < 900");
           $totale_evadibile -= $evasi;
           if ($totale_evadibile == 0 ) {
             $form['righi'][$_POST['num_rigo']]['checkval'] = false;

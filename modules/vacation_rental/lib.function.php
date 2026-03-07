@@ -31,6 +31,10 @@
 
  // creo connessione al DB
  function db_connect() {
+    static $link = null;
+    if ($link !== null && $link->ping()) {
+        return $link; // riusa la connessione già aperta
+    }
     $servername = constant("Host");
     $username   = constant("User");
     $pass       = constant("Password");
@@ -633,41 +637,48 @@ function get_datasets($startprom,$endprom){// STAT graph
 		  $tot_n_event_in_promemo=0;
 		  $start=$row['start'];
 		  $end=$row['end'];
-		  // ciclo i giorni dell'evento
-		  while (strtotime($start) < strtotime($end)) {// per ogni giorno dell'evento
-			$month=date("m",strtotime($start));
-			$year=date("Y",strtotime($start));
-			if ($start >= $startprom AND $start <= date ("Y-m-d", strtotime("-1 days", strtotime($endprom)))) {// se il giorno è dentro l'arco di tempo richiesto (tolgo una giorno a endprom perché devo conteggiare le notti)
-			  //echo "<br>",$start," è dentro";
-			  if (!isset($retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month])){
-				$retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month]=0;
-			  }
-			  if (!isset($retsumdat['IMPORTI'][$year]['TUTTI'][$month])){
-				$retsumdat['IMPORTI'][$year]['TUTTI'][$month]=0;
-			  }
-			  $retsumdat['IMPORTI'][$year][substr($resh['codice'], 0, 32)][$month]+= ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event);// aggiungo il costo della notte nel mese
-			  $retsumdat['IMPORTI'][$year]['TUTTI'][$month]+= ((get_totalprice_booking($row['id_tesbro'],FALSE))/$nights_event);// aggiungo il costo della notte nel mese di tutti
-			  if (!isset($data[$start])){
-				$data[$start]=array();
-			  }
-				if (!in_array($row['house_code'],$data[$start])){// escludendo i giorni che hanno già quell'alloggio
-				  array_push($data[$start],$row['house_code']);// conteggio il giorno per questo alloggio
-				  if (!isset($retsumdat['OCCUPAZIONE'][$year][substr($resh['codice'], 0, 32).'-occupazione'][$month])){
-					$retsumdat['OCCUPAZIONE'][$year][substr($resh['codice'], 0, 32).'-occupazione'][$month]=0;
-				  }
-				  $retsumdat['OCCUPAZIONE'][$year][(substr($resh['codice'], 0, 32)).'-occupazione'][$month] ++;
-				  if (!isset($retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month])){
+		  while (strtotime($start) < strtotime($end)) { // per ogni giorno dell'evento
+			$week = date("W", strtotime($start));   // numero settimana ISO 01-53
+			$year = date("Y", strtotime($start));
 
-					$retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month]=0;
-				  }
-				  $retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$month] ++;
-				  $tot_nights_booked  ++;
-				  $tot_n_event_in_promemo ++;
-			  }
+			if ($start >= $startprom && $start <= date("Y-m-d", strtotime("-1 days", strtotime($endprom)))) {
+
+				// IMPORTI
+				$house = substr($resh['codice'], 0, 32);
+				if (!isset($retsumdat['IMPORTI'][$year][$house][$week])) {
+					$retsumdat['IMPORTI'][$year][$house][$week] = 0;
+				}
+				if (!isset($retsumdat['IMPORTI'][$year]['TUTTI'][$week])) {
+					$retsumdat['IMPORTI'][$year]['TUTTI'][$week] = 0;
+				}
+				$value = get_totalprice_booking($row['id_tesbro'], FALSE) / $nights_event;
+				$retsumdat['IMPORTI'][$year][$house][$week] += $value;
+				$retsumdat['IMPORTI'][$year]['TUTTI'][$week] += $value;
+
+				// OCCUPAZIONE
+				if (!isset($data[$start])) $data[$start] = array();
+				if (!in_array($row['house_code'], $data[$start])) {
+					array_push($data[$start], $row['house_code']);
+
+					if (!isset($retsumdat['OCCUPAZIONE'][$year][$house . '-occupazione'][$week])) {
+						$retsumdat['OCCUPAZIONE'][$year][$house . '-occupazione'][$week] = 0;
+					}
+					$retsumdat['OCCUPAZIONE'][$year][$house . '-occupazione'][$week]++;
+					
+					if (!isset($retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$week])) {
+						$retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$week] = 0;
+					}
+					$retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$week]++;
+
+					$tot_nights_booked++;
+					$tot_n_event_in_promemo++;
+				}
 
 			}
-			$start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
-		  }
+
+			$start = date("Y-m-d", strtotime("+1 days", strtotime($start))); // aumento di un giorno
+		}
+
 		  $ret['totalprice_booking'] += ((get_totalprice_booking($row['id_tesbro'],false,false,"",false,false))/$nights_event)*$tot_n_event_in_promemo;// aggiungo il costo medio della locazione(evento) calcolata sui giorni che rientrano nell'arco di tempo richiesto
 		  //il prezzo è imponibile e senza tassa turistica
 		}
@@ -677,43 +688,68 @@ function get_datasets($startprom,$endprom){// STAT graph
   $ret['tot_nights_bookable']= $num_all * $night_promemo;
   $ret['perc_booked'] = ($ret['tot_nights_bookable']>0)?(($tot_nights_booked/$ret['tot_nights_bookable'])*100):0;
   $ret['tot_nights_booked'] = $tot_nights_booked;
-  // adesso mi creo il dataset
-  $datasets="";
-  if (isset($retsumdat['IMPORTI'])){
-	  $datasets="{";
-	  foreach($retsumdat['IMPORTI'] as $key => $value){
-		foreach($value as $key2 => $value2){// qui ho l'anno e l'alloggio
-		  $datasets .= '"'.$key.'-'.$key2.'": {label: "'.$key.'-'.$key2.'", data: [';
-		  ksort($value2);// ordino in base al mese
-		  foreach ($value2 as $k => $v){// qui ho il mese e il valore
-			$datasets .= '['.$k.', '.$v.'],';
-		  }
-		  $datasets .= ']},';
+  // Costruisco dataset come ARRAY PHP vero
+	$dataret = [];
+
+	// Funzione helper: ritorna timestamp del lunedì della settimana ISO
+	function week_start_timestamp($year, $week) {
+		$dto = new DateTime();
+		$dto->setISODate($year, $week);
+		$dto->setTime(0,0,0); // inizio giorno
+		return $dto->getTimestamp(); // in secondi
+	}
+
+	// --- IMPORTI ---
+	if (isset($retsumdat['IMPORTI'])) {
+		foreach ($retsumdat['IMPORTI'] as $year => $structures) {
+			foreach ($structures as $name => $weeks) {
+				$label = $year . '-' . $name;
+				$dataret['IMPORTI'][$label]['label'] = $label;
+				$dataret['IMPORTI'][$label]['data'] = [];
+				foreach ($weeks as $week => $value) {
+					$ts = week_start_timestamp($year, $week) * 1000; // -> millisecondi
+					$dataret['IMPORTI'][$label]['data'][] = [$week, round((float)$value, 2)]; // 1,2,3...
+				}
+				// ordina per X (timestamp) crescente
+				usort($dataret['IMPORTI'][$label]['data'], fn($a,$b) => $a[0]-$b[0]);
+			}
 		}
-	  }
-	  $datasets.="}";
-  }
-  $dataret['IMPORTI']=$datasets;
-  if (isset($retsumdat['OCCUPAZIONE'])){
-	  $datasets="{";
-	  foreach($retsumdat['OCCUPAZIONE'] as $key => $value){
+	}
 
-		foreach($value as $key2 => $value2){// qui ho l'anno e l'alloggio
-		  $datasets .= '"'.$key.'-'.$key2.'": {label: "'.$key.'-'.$key2.'", data: [';
-		  ksort($value2);// ordino in base al mese
-		  foreach ($value2 as $k => $v){// qui ho il mese e il valore
-			$datasets .= '['.$k.', '.$v.'],';
-		  }
-		  $datasets .= ']},';
-		}
+	// --- OCCUPAZIONE ---
+	if (isset($retsumdat['OCCUPAZIONE'])) {
+    foreach ($retsumdat['OCCUPAZIONE'] as $year => $structures) {
+        foreach ($structures as $name => $weeks) {
+            $label = $year . '-' . $name;
+            $dataret['OCCUPAZIONE'][$label]['label'] = $label;
+            $dataret['OCCUPAZIONE'][$label]['data'] = [];
 
-	  }
-	  $datasets.="}";
-  }
-  $dataret['OCCUPAZIONE']=$datasets;
-  //echo "<pre>",print_r($dataret);die;
+            foreach ($weeks as $week => $value) {
+                // timestamp del lunedì della settimana
+                $ts = week_start_timestamp($year, $week) * 1000;
 
-  return $dataret;
+                $occup_days = (float)$value; // giorni occupati in quella settimana
+
+                // Se è "occup. tutti", divido per num_all*7, altrimenti per 7 giorni
+                if ($name === 'occup. tutti') {
+                    $percent = ($occup_days / ($num_all * 7)) * 100;
+                } else {
+                    $percent = ($occup_days / 7) * 100; // singolo appartamento
+                }
+				$percent = round($percent, 2); // arrotonda a massimo 2 decimali
+                $dataret['OCCUPAZIONE'][$label]['data'][] = [$week, $percent];
+            }
+
+            // ordina per settimana
+            usort($dataret['OCCUPAZIONE'][$label]['data'], fn($a,$b) => $a[0]-$b[0]);
+        }
+    }
+}
+
+
+	return $dataret;
+
+
 }
 
 function get_next_check($startprom,$endprom){
@@ -857,7 +893,7 @@ function check_availability($start,$end,$house_code, $open_from="", $open_to="")
     if ((intval($open_from)>0 && strtotime($open_from."-".substr($start,0,4))<=strtotime($start) && strtotime($open_to."-".substr($start,0,4))>=strtotime($start)) || intval($open_from)==0){
       // Controllo disponibilità dopo aver controllato se è aperto qualora è stato passato open from e to
       $what = "title";
-      $where = "(custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%') AND house_code = '".mysqli_real_escape_string($link,$house_code)."' AND start <= '". $start ."' AND end > '". $start."'";
+      $where = "(custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%' OR custom_field LIKE '%ISSUE%') AND house_code = '".mysqli_real_escape_string($link,$house_code)."' AND start <= '". $start ."' AND end > '". $start."'";
       $sql = "SELECT ".$what." FROM ".$table." LEFT JOIN ".$table_ts." ON ".$table.".id_tesbro = ".$table_ts.".id_tes  WHERE ".$where;
       if ($available = mysqli_query($link, $sql)) {
         $available = mysqli_fetch_array($available);
@@ -936,9 +972,10 @@ function getAvailableExtraBeds($link, $azTables, $house_code, $facility_id, $sta
               AND a.quality = 'BED'
               AND (a.ordinabile IS NULL OR a.ordinabile = '' OR a.ordinabile = 'S')
             LIMIT 1";
-
+  //echo $sql,"<br>";
     if ($result = mysqli_query($link, $sql)) {
         if ($row_beds = mysqli_fetch_assoc($result)) {
+  //print_r($row_beds);
             $num_beds_toAdd = isset($row_beds['max_quantity']) ? intval($row_beds['max_quantity']) : 1;
 
             // Caso max_quantity = 0 → senza limiti, restituisco 10 direttamente (numero forfettario)
@@ -948,7 +985,7 @@ function getAvailableExtraBeds($link, $azTables, $house_code, $facility_id, $sta
 
             // 2. Calcolo quanti BED sono già prenotati nel periodo
             $beds_occupied = 0;
-            $sql_occupied = "SELECT SUM(rb.quanti) AS occupied
+            $sql_occupied = "SELECT IFNULL(SUM(rb.quanti),0) AS occupied
                              FROM ".$azTables."rigbro rb
                              INNER JOIN ".$azTables."rental_events re
                                 ON re.id_rigbro = rb.id_rig
@@ -959,9 +996,10 @@ function getAvailableExtraBeds($link, $azTables, $house_code, $facility_id, $sta
                                AND re.end >= '".$start."'
                                AND JSON_UNQUOTE(JSON_EXTRACT(t.custom_field, '$.vacation_rental.status'))
                                    IN ('PENDING','CONFIRMED','FROZEN')";
-
+  //echo "<br>",$sql_occupied,"<br>";
             if ($res_occ = mysqli_query($link, $sql_occupied)) {
                 $row_occ = mysqli_fetch_assoc($res_occ);
+  // print_r($row_occ);
                 $beds_occupied = intval($row_occ['occupied']);
             }
 
@@ -1315,6 +1353,139 @@ function banIp($ip, $durationMinutes = 60) {
         file_put_contents($file, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
     chmod($file, 0666); // Mantiene permessi corretti
+}
+
+// restituisce il tipo di dispositivo usato dall'utente.
+/*
+app = App Android “AppGmonamour”
+mobile = Smartphone o cookie mobile
+tablet = Tablet o cookie tablet
+desktop = PC/Laptop o cookie desktop
+unknown = Bot, UA non riconosciuto, UA vuoto
+*/
+function detect_device(): string{
+    $server = $_SERVER;
+
+    if (!empty($server['HTTP_USER_AGENT']) &&
+        stripos($server['HTTP_USER_AGENT'], 'AppGmonamour') !== false) {
+        return 'app';
+    }
+
+    $ua = strtolower($server['HTTP_USER_AGENT'] ?? '');
+    if ($ua === '') return 'unknown';
+
+    if (preg_match('/bot|spider|crawl|slurp|facebookexternalhit|mediapartners-google/', $ua)) {
+        return 'unknown';
+    }
+
+    if (strpos($ua, 'iphone') !== false || strpos($ua, 'ipod') !== false) return 'mobile';
+
+    if (strpos($ua, 'ipad') !== false ||
+        (strpos($ua, 'macintosh') !== false &&
+         strpos($ua, 'mobile') === false &&
+         strpos($ua, 'safari') !== false)) return 'tablet';
+
+    if (strpos($ua, 'android') !== false) return (strpos($ua, 'mobile') !== false) ? 'mobile' : 'tablet';
+
+    if (preg_match('/windows phone|iemobile|blackberry|bb10|opera mini|opera mobi/', $ua)) return 'mobile';
+
+    if (preg_match('/windows nt|macintosh|x11|linux|cros/', $ua)) return 'desktop';
+
+    return 'unknown';
+}
+
+//CANCELLA UNA PRENOTAZIONE totalmente con tutti i suoi annessi
+function delete_booking(int $id_tes, array $admin_aziend, array $gTables) {
+/****  DA FARE  NON USARE - NON FUNZIONA    ******/
+    //procedo all'eliminazione della testata e dei righi...
+    $tesbro = gaz_dbi_get_row($gTables['tesbro'], "id_tes", $id_tes);// la testata che andrò ad eliminare
+    //cancello la testata
+    gaz_dbi_del_row($gTables['tesbro'], "id_tes", $id_tes);
+    //... e i righi
+    $rs_righidel = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes =".$id_tes,"id_tes DESC");
+    while ($a_row = gaz_dbi_fetch_array($rs_righidel)) { // *** nota bene ***  la cancellazione dei documenti pdf va portata fuori dal ciclo altrimenti prova a cancellare per ogni rigo!
+        gaz_dbi_del_row($gTables['rigbro'], "id_rig", $a_row['id_rig']);
+        			
+        gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'rigbro' AND id_ref ",$a_row['id_rig']);
+    }
+
+    // cancello anche l'evento
+    $rental_events = gaz_dbi_get_row($gTables['rental_events'], "id_tesbro", $id_tes);
+    gaz_dbi_del_row($gTables['rental_events'], "id_tesbro", $id_tes);
+
+    // aggiorno buono sconto se c'è
+    if (isset($rental_events['voucher_id']) && intval($rental_events['voucher_id'])>0){// se era stato usato un buono sconto
+        $rental_discounts  = gaz_dbi_get_row($gTables['rental_discounts'], "id", intval($rental_events['voucher_id']));
+        if ($rental_discounts['reusable']>0 AND $rental_discounts['STATUS']=="CLOSED"){// se lo sconto era stato chiuso
+            $sql = "UPDATE ".$gTables['rental_discounts']." SET STATUS = 'CREATED' WHERE id = ".intval($rental_events['voucher_id']);
+            $result = gaz_dbi_query($sql);// riapro lo sconto
+        }
+    }
+
+    // cancello anche tutti i pagamenti relativi
+    gaz_dbi_del_row($gTables['rental_payments'], "id_tesbro", $id_tes);
+
+    // vedo se la prenotazione proveniva da un preventivo
+    $prev = gaz_dbi_get_row($gTables['tesbro'], "numfat", $id_tes, " AND datfat = '".$tesbro['datemi']."' AND tipdoc = 'VPR'");
+    if ($prev){// se c'è il preventivo lo svincolo
+        if ($data = json_decode($prev['custom_field'],true)){// se c'è un json in anagra
+            if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
+                $data['vacation_rental']['id_booking']='';
+                $custom_field = json_encode($data);
+            }
+        }
+        $sql = "UPDATE ".$gTables['tesbro']." SET custom_field = '".$custom_field."', datfat = '0000-00-00', numfat = '0' WHERE id_tes = ".intval($prev['id_tes']);
+        $result = gaz_dbi_query($sql);// resetto il preventivo
+    }
+
+    // Cancello i PDF della prenotazione e del contratto					
+    $file = DATA_DIR . "files/" . $admin_aziend['codice'] . "/pdf_Lease/" . $id_tes . ".pdf";
+    if (file_exists($file)) {
+        if (is_writable(dirname($file))) {
+            if (!unlink($file)) {
+                // Se volessi log, qui si potrebbe registrare
+            }
+        }
+    }
+
+    // cancellazione multipla addendum
+    $dir = dirname(__DIR__) . '/vacation_rental/files/' . $admin_aziend['codice'] . '/pdf_Lease/';
+    $pattern = $dir . $id_tes . '*.*';
+
+    if (is_dir($dir)) {
+        $files = glob($pattern) ?: [];
+        $errors = [];
+        foreach ($files as $f) {
+            if (is_file($f) && !unlink($f)) $errors[] = $f;
+        }
+        if (!empty($errors)) {
+            // gestione errori, se serve log
+        }
+    }
+
+    // Cancello anche gli eventuali addendum
+    $codice = $admin_aziend['codice'] ?? '';
+    $targetDir =  dirname(__DIR__) . "/vacation_rental/files/" . $codice . "/addendum_pdf/" . $id_tes;
+
+    if (is_dir($targetDir)) {
+        // Funzione di cancellazione ricorsiva con log errori
+        $errors = [];
+        $it = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($targetDir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($it as $item) {
+            $path = $item->getPathname();
+            if ($item->isDir()) {
+                if (!rmdir($path)) $errors[] = "Impossibile cancellare directory: $path";
+            } else {
+                if (!unlink($path)) $errors[] = "Impossibile cancellare file: $path";
+            }
+        }
+        if (!rmdir($targetDir)) {
+            $errors[] = "Impossibile cancellare la directory principale: $targetDir";
+        }
+    }
 }
 
 ?>

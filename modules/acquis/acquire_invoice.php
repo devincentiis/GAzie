@@ -226,6 +226,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 	$form['curr_doc'] = 0;
 	$form['id_doc'] = 0;
 	$form['incrbenamm'] = 0;
+	$form['excluded_ddt_row'] = '';
 	if (in_array($send_fae_zip_package['val'],$sync_mods)){
 		$res_faesync=gaz_dbi_dyn_query("*", $gTables['files'], "item_ref='faesync' AND status = 0", "table_name_ref", 0);
 	}
@@ -234,6 +235,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 	$form['curr_doc'] = intval($_POST['curr_doc']);
 	$form['id_doc'] = intval($_POST['id_doc']);
 	$form['incrbenamm'] = intval($_POST['incrbenamm']);
+ 	$form['excluded_ddt_row'] = filter_var($_POST['excluded_ddt_row'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);;
 	$form['date_ini_D'] = '01';
 	$form['date_ini_M'] = date('m');
 	$form['date_ini_Y'] = date('Y');
@@ -697,8 +699,9 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					}
 
 					$form['codart_'.$post_nl] = preg_replace("/[^A-Za-z0-9_]i/", '',(isset($_POST['codart_'.$post_nl]))?substr($_POST['codart_'.$post_nl],0,15):'');
-					if ($_POST['hidden_req']=='change_codart_'.$post_nl){
+					if (isset($_POST['change_codart_'.$post_nl])){
 						$form['codart_'.$post_nl] ='';
+            $form['excluded_ddt_row'] .= '-'.$nl;
 					}
 					$form['rows'][$nl]['codart']=$form['codart_'.$post_nl];
 					$form['search_codart_'.$post_nl] = isset($_POST['search_codart_'.$post_nl])?substr($_POST['search_codart_'.$post_nl],0,35):'';
@@ -922,8 +925,9 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
             }
             // provo ad attribuire il codice articolo di questo ad uno dei i righi presenti sull'accumulatore del DdT già inserito basandomi sulla quantità
             if ($vrow['codart']=='' && isset($ddt_accln['rigddt'])) { // non ho trovato il codice articolo tramite codice fornitore oppure il fornitore non li attribuisce univocamente, uso quello sul DdT
+              $excluded_ddt_row = explode('-', $form['excluded_ddt_row']);
               foreach($ddt_accln['rigddt'] as $krddt => $vrddt) { // percorro la matrice con i righi del DdT fino a trovare quello con la stessa quantità
-                if ($vrow['quanti']==$vrddt['quanti']){
+                if ($vrow['quanti']==$vrddt['quanti'] && !in_array($kr,$excluded_ddt_row)){
                   $form['codart_'.($kr-1)]=$krddt;
                   $form['rows'][$kr]['codart']=$krddt;
                   unset($ddt_accln['rigddt'][$krddt]); // quello utilizzato lo tolgo dalla matrice
@@ -1592,6 +1596,7 @@ function prevXML(urlPrintDoc){
 	</div>
     <input type="hidden" name="fattura_elettronica_original_name" value="<?php echo $form['fattura_elettronica_original_name']; ?>">
     <input type="hidden" name="incrbenamm" value="<?php echo $form['incrbenamm']; ?>">
+    <input type="hidden" name="excluded_ddt_row" id="excluded_ddt_row" value="<?php echo $form['excluded_ddt_row']; ?>">
     <input type="hidden" name="curr_doc" value="<?php echo $form['curr_doc']; ?>">
     <input type="hidden" name="id_doc" value="<?php echo $form['id_doc']; ?>">
     <input type="hidden" name="hidden_req" id="hidden_req" value="">

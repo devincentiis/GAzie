@@ -284,7 +284,15 @@ function printPdf(urlPrintDoc){
 	});
 };
 </script>
-<div align="center" class="FacetFormHeaderFont"><?php echo $script_transl['title_value'][substr($tipo,0,2).'R']; ?></div>
+<div class="text-center row">
+  <div class="col-xs-12 col-md-3" style="padding-top: 25px;">
+  <a class="btn btn-default" href="<?= $script_transl['link_value'][substr($tipo,0,2).'R'];?>"><?= $script_transl['link_title'][substr($tipo,0,2).'R']; ?></a>
+  </div>
+  <div class="col-xs-12 col-md-6 text-center"><h1><?= $script_transl['title_value'][substr($tipo,0,2).'R']; ?></h1></div>
+  <div class="col-xs-12 col-md-3">
+  <a class="btn btn-default" href="./select_order_status.php" target="_blank"><?= $script_transl['order_status']; ?></a>
+  </div>
+</div>
 <?php
 $ts->output_navbar();
 ?>
@@ -365,33 +373,39 @@ $ts->output_navbar();
         <td class="FacetFieldCaptionTD">
         <?php gaz_flt_disp_int("reforder", "Rif.ordine cliente"); ?>
         </td>
-        <td class=FacetFieldCaptionTD>
+        <td class="FacetFieldCaptionTD"><div class="col-xs-12 row">
+        <div class="col-xs-9">
         <?php
         gaz_flt_disp_select("destinaz","unita_locale1 AS destinaz",$tesbro_e_destina, $where_select . " AND unita_locale1 IS NOT NULL", "destinaz DESC",  "destinaz");
-        ?>
+        ?></div>
+          <input type="submit" class="btn btn-xs btn-default col-xs-3" name="search" value="<?php echo $script_transl['search']; ?>" tabindex="1"></div>
         </td>
         <td class=FacetFieldCaptionTD style="text-align: center;">
+        <div class="col-xs-12">
+          <a class="btn btn-xs btn-default col-xs-3" href="?auxil=<?php echo $tipo; ?>">Reset</a>
+          <div class="col-xs-9">
+
 				<?php
 				if ($form['swStatus']=="" OR $form['swStatus']=="Tutti"){
 				?>
-					<input type="submit" class="btn btn-sm btn-default" name="inevasi" onClick="chkSubmit();" value="Inevasi">
+					<input type="submit" class="btn btn-xs btn-info" name="inevasi" onClick="chkSubmit();" value="Inevasi">
 				<?php
 				} else {
 				?>
-          <input type="submit" class="btn btn-sm btn-default" name="tutti" onClick="chkSubmit();" value="Tutti" style="text-align: center;">
+          <input type="submit" class="btn btn-xs btn-info" name="tutti" onClick="chkSubmit();" value="Tutti" style="text-align: center;">
 				<?php
 				}
 				?>
-          <input type="hidden" name="swStatus" id="preventDuplicate" value="<?php echo $form['swStatus']; ?>">
+          </div>
+        </div>
         </td>
         <td class=FacetFieldCaptionTD>
+          <input type="hidden" name="swStatus" id="preventDuplicate" value="<?php echo $form['swStatus']; ?>">
         </td>
         <td class="FacetFieldCaptionTD">
-          <input type="submit" class="btn btn-sm btn-default" name="search" value="<?php echo $script_transl['search']; ?>" tabindex="1">
           <?php $ts->output_order_form(); ?>
         </td>
         <td class="FacetFieldCaptionTD">
-          <a class="btn btn-sm btn-default" href="?auxil=<?php echo $tipo; ?>">Reset</a>
         </td>
         <td class="FacetFieldCaptionTD">
         </td>
@@ -411,7 +425,7 @@ $ts->output_navbar();
           $totimpdoc_evaso = 0;
           $remains_atleastone = false; // Almeno un rigo e' rimasto da evadere.
           $processed_atleastone = false; // Almeno un rigo e' gia' stato evaso.
-          $rigbro_result = gaz_dbi_dyn_query('*', $gTables['rigbro'], "id_tes = " . $r['id_tes'] . " AND tiprig <=1 ", 'id_tes DESC');
+          $rigbro_result = gaz_dbi_dyn_query('tiprig,quanti,prelis,sconto', $gTables['rigbro'], "id_tes = " . $r['id_tes'] . " AND tiprig <=1 ", 'id_tes DESC');
           $totquanti_da_evadere=0;
           while ( $rigbro_r = gaz_dbi_fetch_array($rigbro_result) ) {
             if ( $rigbro_r['tiprig']==1 ){
@@ -427,7 +441,7 @@ $ts->output_navbar();
           }
           $totquanti_evaso = 0;
           $totimp_evaso = 0;
-          $rigdoc_result = gaz_dbi_dyn_query('*', $gTables['rigdoc'], "id_order=" . $r['id_tes'] . " AND tiprig <=1 ", 'id_tes DESC');
+          $rigdoc_result = $rigdoc_result = gaz_dbi_dyn_query('tiprig,quanti,prelis,'. $gTables['rigdoc'].'.sconto', $gTables['rigdoc'].' LEFT JOIN '.$gTables['tesdoc'].' ON  ('.$gTables['rigdoc'].'.id_tes = '.$gTables['tesdoc'].'.id_tes AND ('.$gTables['tesdoc'].".tipdoc LIKE 'FA_' OR ".$gTables['tesdoc'].".tipdoc LIKE 'DD_' OR ".$gTables['tesdoc'].".tipdoc LIKE 'V__')) ", "id_order=" . $r['id_tes'] . " AND tiprig <=1 ", $gTables['tesdoc'].'.datemi DESC');
           while ($rigdoc_r = gaz_dbi_fetch_array($rigdoc_result)) {
             $totquanti_evaso += $rigdoc_r['quanti'];
             $processed_atleastone = true;

@@ -348,7 +348,7 @@ if (isset($_GET['XML']) and $msg == "") {
     //echo "<br><br>Ospiti:<pre>",print_r($dati);
     }else{
       echo "<br>ERRORE: manca il file del checkin";exit;
-    }    
+    }
     $testate[]=$row['id_tesbro'];
 	$nall=0; // progressivo questura ospiti in alloggio
     foreach($dati as $guest){// per ogni ospite presente nel file del pre checkin
@@ -386,7 +386,7 @@ if (isset($_GET['XML']) and $msg == "") {
         $luogorilascidoc=$cittadinanza;
       }else{
         $cittadinanza="100000100";// Italia
-		
+
 		if($nall==0){// è il capogruppo
         $name = strtoupper($guest['loccard']);
         $query = "SELECT * FROM " . $gTables['municipalities'] . " WHERE UPPER(name) = '$name' LIMIT 1";
@@ -402,7 +402,7 @@ if (isset($_GET['XML']) and $msg == "") {
         }
 		}else{
 			$luogorilascidoc="";
-		}			
+		}
 
       }
       if ($guest['country']<>"IT"){
@@ -480,7 +480,7 @@ if (isset($_GET['XML']) and $msg == "") {
       $xml_output .= "\t\t\t</arrivo>\n";
       $fileUnico=0;
       if (strlen($id_polstat)>0){// FILE UNICO: se l'alloggio dispone di identificativo polstat lo aggiungo
-        $file_polstat[$n].=str_pad($id_polstat, 6);// id appartamento polstat		
+        $file_polstat[$n].=str_pad($id_polstat, 6);// id appartamento polstat
         $fileUnico=1;
       }
 	 $nall++;
