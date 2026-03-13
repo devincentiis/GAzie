@@ -68,16 +68,14 @@ $aRiportare = array('top' => array(array('lun' => 166, 'nam' => 'da riporto : ')
 );
 $pdf = new Report_template();
 $pdf->setVars($admin_aziend, $title);
-$pdf->setFooterMargin(22);
+$pdf->setFooterMargin(15);
 $pdf->setTopMargin(43);
 $pdf->setRiporti('');
 $pdf->AddPage();
 $paymov = new Schedule;
-if (isset($_GET['clfoco'])){
-	$admin_aziend['mascli']=intval($_GET['clfoco']);
-}
+$mascli = (isset($_GET['clfoco']) && $_GET['clfoco'] > 100 ) ? intval($_GET['clfoco']) : $admin_aziend['mascli'];
 
-$paymov->setScheduledPartner($admin_aziend['mascli']);
+$paymov->setScheduledPartner($mascli);
 if (sizeof($paymov->Partners) > 0) {
     $anagrafica = new Anagrafica();
     $partner_firstline = false;

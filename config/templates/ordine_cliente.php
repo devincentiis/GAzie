@@ -167,7 +167,7 @@ class OrdineCliente extends Template
         break;
         case "26":
           $this->Cell(25, 5, '', 'L');
-          $this->Cell(80, 5, "Lettera intento: " . $rigo['descri']." del ".gaz_format_date($rigo['codart']), 'LR', 0, 'L', 0, '', 1);
+          $this->Cell(80, 5, "Dichiarazione intento: " . $rigo['descri']." del ".gaz_format_date($rigo['codart']), 'LR', 0, 'L', 0, '', 1);
           $this->Cell(81, 5, '', 'R', 1);
         break;
         case "31":

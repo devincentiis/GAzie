@@ -89,10 +89,10 @@ if ($ctrlsaldo != 0) {
 $emissione = 'Debiti verso i fornitori per il periodo '.$day_start.'/'.$month_start.'/'.$year_start.' - '.$day_end.'/'.$month_end.'/'.$year_end;
 
 $title = array('title'=>$emissione,
-               'hile'=>array(array('lun' => 20,'nam'=>'Data'),
+               'hile'=>array(array('lun' => 17,'nam'=>'Data'),
                              array('lun' => 75,'nam'=>'Descrizione'),
-                             array('lun' => 18,'nam'=>'N.Doc.'),
-                             array('lun' => 18,'nam'=>'Data.Doc.'),
+                             array('lun' => 23,'nam'=>'N.Doc.'),
+                             array('lun' => 17,'nam'=>'Data.Doc.'),
                              array('lun' => 18,'nam'=>'Dare'),
                              array('lun' => 18,'nam'=>'Avere'),
                              array('lun' => 20,'nam'=>'Saldo')
@@ -128,8 +128,9 @@ foreach ($conti as $value) {
                                "datreg");
     while ($movimenti = gaz_dbi_fetch_array($result)) {
         if($ctrlfor != $movimenti["codcon"]){
-            $pdf->SetFont('times','B',11);
-            $pdf->Cell(187,6,$movimenti['ragso1'].' Tel. '.$movimenti['telefo'].' cell. '.$movimenti['cell'],1,1,'L',1);
+            $pdf->SetFont('times','B',10);
+            $pdf->Ln(3);
+            $pdf->Cell(132,6,$movimenti['ragso1'].' Tel. '.$movimenti['telefo'].' cell. '.$movimenti['cell'],1,1,'L',1,'',1);
             $pdf->SetFont('helvetica','',8);
             $saldo = 0.00;
         }
@@ -157,14 +158,10 @@ foreach ($conti as $value) {
             $dare = 0;
             $saldo -= $movimenti["import"];
         }
-        $pdf->Cell(20,4,$datamov,1,0,'L');
+        $pdf->Cell(17,4,$datamov,1,0,'C');
         $pdf->Cell(75,4,$movimenti['descri'],1,0,'L',0,'',1);
-        if ($movimenti['numdoc'] > 0) {
-           $pdf->Cell(18,4,$movimenti['numdoc']."/".$movimenti['seziva'],1,0,'C');
-        } else {
-           $pdf->Cell(18,4,'',1);
-        }
-        $pdf->Cell(18,4,$datadoc,1,0,'R');
+        $pdf->Cell(23,4,$movimenti['numdoc'],1,0,'C',0,'',1);
+        $pdf->Cell(17,4,$datadoc,1,0,'R');
         if ($dare != 0) $pdf->Cell(18,4,$dare,1,0,'R'); else $pdf->Cell(18,4,'',1);
         if ($avere != 0) $pdf->Cell(18,4,$avere,1,0,'R'); else $pdf->Cell(18,4,'',1);
         $pdf->Cell(20,4,gaz_format_number(-$saldo),1,1,'R');

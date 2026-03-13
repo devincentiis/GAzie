@@ -67,12 +67,14 @@ if (isset($_GET['id_tes'])) {   //se viene richiesta la stampa di un solo docume
         exit;
     }
 
-    if (!empty($_GET['template'])) {
-        $template = substr($_GET['template'], 0, 25);
+    if (isset($_GET['template'])) {
+      $template = substr($_GET['template'], 0, 25);
     } elseif (!empty($testata['template'])) {
-        $template = $testata['template'];
+      $template = $testata['template'];
+    } elseif (substr($testata['tipdoc'],0,2) == 'DD' || $testata['tipdoc'] == 'FAD' ) {
+      $template = 'DDT';
     } else {
-        $template = 'FatturaImmediata';
+      $template = 'FatturaImmediata';
     }
 
     $lang = get_template_lang($testata['clfoco']);

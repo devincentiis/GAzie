@@ -67,10 +67,26 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         //print_r($form);die;
         if ($msg == "") {// nessun errore
             if ($toDo == 'update') { // e' una modifica
+              $rental_discounts_row=gaz_dbi_get_row($gTables['rental_discounts_row'], "id", $form['id']); // carico il vecchio json custom_field
+              $custom_field=(isset($rental_discounts_row['custom_field']))?$rental_discounts_row['custom_field']:'';
+              if ($custom_field<>'' && $data = json_decode($custom_field,true)){// se c'è un json
+                if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
+                  $data['vacation_rental']['app_name'] = $_POST['app_name'];
+                  $form['custom_field'] = json_encode($data);
+                } else { //se non c'è il modulo "vacation_rental" lo aggiungo
+                  $data['vacation_rental']= array('app_name' => $_POST['app_name']);
+                  $form['custom_field'] = json_encode($data);
+                }
+              }
+
               $where = array("0" => "id", "1" => $form['id']);
               $what = $form;
               gaz_dbi_table_update("rental_discounts",$where, $what);
             } else { // e' un'inserimento
+              if(isset($_POST['app_name']) && strlen($_POST['app_name'])>2){
+                $array= array('vacation_rental'=>array('app_name' => $_POST['app_name']));// creo l'array per il custom field
+                $form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
+              }
                 if ($form['valid_from']==NULL){
                   $form['valid_from']="0000-00-00";
                 }
@@ -87,6 +103,16 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 } elseif ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo accesso per UPDATE
     $disc = gaz_dbi_get_row($gTables['rental_discounts'], "id", intval($_GET['id']));
     $form=$disc;
+    	if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
+        if (is_array($data['vacation_rental'])){
+          $form['app_name'] = isset($data['vacation_rental']['app_name'])?$data['vacation_rental']['app_name']:'';
+        } else {
+          $form['app_name'] = "";
+        }
+      } else {
+        $form['app_name'] = "";
+      }
+
     $form['ritorno'] = $_POST['ritorno'];
 
 } elseif (!isset($_POST['Insert']) && isset($_GET['Insert'])) { //se e' il primo accesso per INSERT
@@ -108,6 +134,8 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['id_anagra']=0;
     $form['reusable']=0;
     $form['level_points']=0;
+    $form['device_disc']=0;
+    $form['app_name']="";
 }
 require("../../library/include/header.php");
 $script_transl = HeadMain(5);
@@ -248,6 +276,27 @@ if ($toDo == 'update') {
       </td>
       </td>
     </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD">Abilita su Dispositivi</td>
+      <td class="FacetDataTD">
+        <select name="device_disc" id="device_select" onchange="toggleAppName()">
+          <option value="0" <?php echo ($form['device_disc'] === '0' || $form['device_disc'] === '') ? 'selected' : ''; ?>>Tutti</option>
+          <option value="1" <?php echo ($form['device_disc'] === '1') ? 'selected' : ''; ?>>App webview</option>
+          <option value="2" <?php echo ($form['device_disc'] === '2') ? 'selected' : ''; ?>>Web</option>
+        </select>
+
+        <input type="text" name="app_name" id="device_app_name" placeholder="Nome dell'App presente nel UA (User Agent webview)"
+               value="<?php echo htmlspecialchars($form['app_name'] ?? ''); ?>"
+               style="display: <?php echo ($form['device_disc'] === '1') ? 'inline-block' : 'none'; ?>; margin-left:10px;">
+      </td>
+    </tr>
+    <script>
+    function toggleAppName() {
+        const select = document.getElementById('device_select');
+        const input = document.getElementById('device_app_name');
+        input.style.display = (select.value === '1') ? 'inline-block' : 'none';
+    }
+    </script>
 
     <tr>
       <td class="FacetFieldCaptionTD"><input type="reset" name="Cancel" value="<?php echo $script_transl['cancel'];?>">
@@ -256,7 +305,8 @@ if ($toDo == 'update') {
         <input type="submit" name="Return" value="<?php echo $script_transl['return'];?>">
         <?php
         if ($toDo == 'update') {
-            print '<input type="submit" accesskey="m" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['update']) . '!"></td></tr><tr></tr>';
+            print '<input type="submit" accesskey="m" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['update']) . '!"></td>
+            </tr><tr></tr>';
         } else {
             print '<input type="submit" accesskey="i" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['insert']) . '!"></td></tr><tr></tr>';
         }

@@ -221,6 +221,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
 
     $form['rows']=[];
     $next_row = 0;
+    $need_intento = false;
     if (isset($_POST['rows'])) {
         foreach ($_POST['rows'] as $next_row => $v) {
             if (isset($_POST["row_$next_row"])) { //se ho un rigo testo
@@ -238,7 +239,30 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
             $form['rows'][$next_row]['prelis'] = number_format(floatval(preg_replace("/\,/", '.', $v['prelis'])), $admin_aziend['decimal_price'], '.', '');
             $form['rows'][$next_row]['sconto'] = floatval(preg_replace("/\,/", '.', $v['sconto']));
             $form['rows'][$next_row]['quanti'] = gaz_format_quantity($v['quanti'], 0, $admin_aziend['decimal_quantity']);
-            $form['rows'][$next_row]['codvat'] = intval($v['codvat']);
+            $codvat = intval($v['codvat']);
+            $form['rows'][$next_row]['codvat'] = $codvat;
+            // inizio controllo se l'aliquota prevede la dichiarazione di intento
+            if ( $need_intento == false && $codvat >= 1 ) {
+              $aliiva = gaz_dbi_get_row($gTables['aliiva'], 'codice', $codvat);
+              if ( $aliiva['fae_natura'] == 'N3.5' ) { // qualora l'aliquota IVA preveda un non imponibile per esportatore abituale
+                $need_intento = true;
+                $rs_intento =  gaz_dbi_dyn_query('*', $gTables['files'], " table_name_ref = 'clfoco' AND  item_ref = 'intento' AND id_ref =" .$form['clfoco']);
+                $data_piu_recente = null;
+                while ($intento = gaz_dbi_fetch_array($rs_intento)) {
+                  $intento_cf = json_decode($intento['custom_field'],true);
+                  $data_corrente = $intento_cf['vendit']['dataintento'] ?? null;
+                  if ($data_corrente){
+                    if ($data_piu_recente === null || $data_corrente > $data_piu_recente) {
+                        $data_piu_recente = $data_corrente;
+                    }
+                  }
+                }
+                if ($data_piu_recente == null || substr($data_piu_recente,0,4) < $form['annemi'] ) {
+                  $msg .= "61+";
+                }
+              }
+            }
+            // fine controllo se l'aliquota prevede la dichiarazione di intento
             $form['rows'][$next_row]['codric'] = intval($v['codric']);
             if (isset($v['provvigione'])) {
                 $form['rows'][$next_row]['provvigione'] = intval($v['provvigione']);
@@ -1207,6 +1231,46 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 $form['rows'][$next_row]['codvat'] = 0;
             }
         }
+        // aggiungo in automatico il tipo rigo 26 se trovo una lettera di intento valida
+        if ( $need_intento == false && $form['rows'][$next_row]['codvat'] >= 1 ) {
+          $aliiva = gaz_dbi_get_row($gTables['aliiva'], 'codice', $form['rows'][$next_row]['codvat']);
+          if ( $aliiva['fae_natura'] == 'N3.5' ) { // qualora l'aliquota IVA preveda un non imponibile per esportatore abituale
+            $need_intento = true;
+            $rs_intento =  gaz_dbi_dyn_query('*', $gTables['files'], " table_name_ref = 'clfoco' AND  item_ref = 'intento' AND id_ref =" .$form['clfoco']);
+            $data_piu_recente = null;
+            $custom_field_recente = null;
+            while ($intento = gaz_dbi_fetch_array($rs_intento)) {
+              $intento_cf = json_decode($intento['custom_field'],true);
+              $data_corrente = $intento_cf['vendit']['dataintento'] ?? null;
+              if ($data_corrente){
+                if ($data_piu_recente === null || $data_corrente > $data_piu_recente) {
+                  $data_piu_recente = $data_corrente;
+                  $custom_field_recente = $intento_cf['vendit'];
+                }
+              }
+            }
+            if ($data_piu_recente == null || substr($data_piu_recente,0,4) < $form['annemi'] ) {
+              $msg .= "61+";
+            } else {
+              // sposto il rigo attuale su uno successivo
+              $form['rows'][($next_row+1)] = $form['rows'][$next_row];
+              // sovrascrivo con un tipo 26 basandomi sul contenuto dell'ultima dichiarazione di intento
+              $form['rows'][$next_row]['descri'] = $custom_field_recente['protocintento'];
+              $form['rows'][$next_row]['tiprig'] = 26;
+              $form['rows'][$next_row]['codart'] = $custom_field_recente['dataintento'];
+              $form['rows'][$next_row]['pervat'] = 0;
+              $form['rows'][$next_row]['tipiva'] = '';
+              $form['rows'][$next_row]['ritenuta'] = 0;
+              $form['rows'][$next_row]['unimis'] = '';
+              $form['rows'][$next_row]['prelis'] = 0;
+              $form['rows'][$next_row]['sconto'] = 0;
+              $form['rows'][$next_row]['quanti'] = 0;
+              $form['rows'][$next_row]['codvat'] = 0;
+              $msg .= "62+";
+              $next_row++;
+            }
+          }
+        }
         // reinizializzo rigo di input tranne che per il tipo rigo e aliquota iva
         $form['in_descri'] = "";
         $form['in_codart'] = "";
@@ -2101,7 +2165,7 @@ if (!empty($msg)) {
     $message = "";
     $rsmsg = array_slice(explode('+', chop($msg)), 0, -1);
     foreach ($rsmsg as $v) {
-        $message .= $script_transl['error'] . "! -> ";
+        $message .= ( $v == 62 ) ? '' : $script_transl['error'] . "! -> ";
         $rsval = explode('-', chop($v));
         foreach ($rsval as $valmsg) {
             $message .= $script_transl[$valmsg] . " ";

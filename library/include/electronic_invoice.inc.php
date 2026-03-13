@@ -1198,6 +1198,16 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
             $el1 = $domDoc->createElement("Natura", $XMLvars->descrifae_natura);
             $el->appendChild($el1);
           }
+					if ( !empty($XMLvars->DatiIntento) && $XMLvars->descrifae_natura=='N3.5' ) {
+						$el1 = $domDoc->createElement("AltriDatiGestionali", '');
+            $el->appendChild($el1);
+						$el2 = $domDoc->createElement("TipoDato", 'INTENTO');
+						$el1->appendChild($el2);
+						$el2 = $domDoc->createElement("RiferimentoTesto",  $XMLvars->DatiIntento['RiferimentoTesto']);
+						$el1->appendChild($el2);
+						$el2 = $domDoc->createElement("RiferimentoData",  $XMLvars->DatiIntento['RiferimentoData']);
+						$el1->appendChild($el2);
+					}
           $benserv->appendChild($el);
           $nl = true;
           break;
@@ -1222,6 +1232,16 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
             $el1 = $domDoc->createElement("Natura", $XMLvars->descrifae_natura);
             $el->appendChild($el1);
           }
+					if ( !empty($XMLvars->DatiIntento) && $XMLvars->descrifae_natura=='N3.5' ) {
+						$el1 = $domDoc->createElement("AltriDatiGestionali", '');
+            $el->appendChild($el1);
+						$el2 = $domDoc->createElement("TipoDato", 'INTENTO');
+						$el1->appendChild($el2);
+						$el2 = $domDoc->createElement("RiferimentoTesto",  $XMLvars->DatiIntento['RiferimentoTesto']);
+						$el1->appendChild($el2);
+						$el2 = $domDoc->createElement("RiferimentoData",  $XMLvars->DatiIntento['RiferimentoData']);
+						$el1->appendChild($el2);
+					}
           $benserv->appendChild($el);
           $nl = true;
           break;
@@ -1244,6 +1264,16 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
             if ($XMLvars->descrifae_vat <= 0) {
               $el1 = $domDoc->createElement("Natura", $XMLvars->descrifae_natura);
               $el->appendChild($el1);
+            }
+            if ( !empty($XMLvars->DatiIntento) && $XMLvars->descrifae_natura=='N3.5' ) {
+              $el1 = $domDoc->createElement("AltriDatiGestionali", '');
+              $el->appendChild($el1);
+              $el2 = $domDoc->createElement("TipoDato", 'INTENTO');
+              $el1->appendChild($el2);
+              $el2 = $domDoc->createElement("RiferimentoTesto",  $XMLvars->DatiIntento['RiferimentoTesto']);
+              $el1->appendChild($el2);
+              $el2 = $domDoc->createElement("RiferimentoData",  $XMLvars->DatiIntento['RiferimentoData']);
+              $el1->appendChild($el2);
             }
             $benserv->appendChild($el);
             if ($XMLvars->ddt_data){

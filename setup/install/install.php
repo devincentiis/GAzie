@@ -56,23 +56,16 @@ if (isset($_SESSION['table_prefix'])) {
 	}
 }
 //
-// controllo directory scrivibili da apache (www-data) ed estensioni del php
-// estensioni richieste da GAzie
-if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-  $usrwww = ['name' => 'web server'];
-} else {
-	$usrid=posix_getuid();
-	$usrwww=posix_getpwuid($usrid);
-}
+// controllo se le directory dati sono scrivibili
 if (!is_writable(DATA_DIR.'files/')) { //questa per archiviare i documenti
-  echo DATA_DIR.'files/ --> '.$usrwww['name'].' permission = '.substr(sprintf('%o', fileperms(DATA_DIR.'files/')),-3).'<br/>';
+  echo DATA_DIR.'files/ --> web server permission = '.substr(sprintf('%o', fileperms(DATA_DIR.'files/')),-3).'<br/>';
   $err[] = 'no_data_files_writable';
 }
 if (!is_writable(K_PATH_CACHE)) { //questa per permettere a TCPDF di inserire le immagini
-  echo K_PATH_CACHE.' --> '.$usrwww['name'].' permission = '.substr(sprintf('%o', fileperms(K_PATH_CACHE)),-3).'<br/>';
+  echo K_PATH_CACHE.' -->  web server permission = '.substr(sprintf('%o', fileperms(K_PATH_CACHE)),-3).'<br/>';
   $err[] = 'no_tcpdf_cache_writable';
 }
-$extreq=['MySQLi','intl','xml','gd','xsl','openssl'];
+$extreq=['mysqli','intl','xml','gd','xsl','openssl'];
 foreach($extreq as $v){
   if(!extension_loaded($v)){
     $err[] = 'Extension <b>php-'.$v.'</b> is required';

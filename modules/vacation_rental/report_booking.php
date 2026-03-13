@@ -27,6 +27,11 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
+
+if (!file_exists('../../library/tcpdf/tcpdf.php')) {
+    // controllo rapido se c'è ancora la libreria tCpdf
+    echo "<script>alert('Attenzione probabilmente la libreria TCPDF è mancante e la creazione di documenti in PDF non potrà funzionare!');</script>";
+}
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $pointenable = gaz_dbi_get_row($gTables['company_config'], 'var', 'pointenable')['val'];
@@ -817,7 +822,7 @@ $(function() {
 			hide: "explode",
 			buttons: {
 				delete:{
-					text:'CREA NUOVO PDF',
+					text:'CREA NUOVO CONTRATTO PDF',
 					'class':'btn btn-danger delete-button',
 					click:function (event, ui) {
 					$.ajax({
@@ -825,7 +830,7 @@ $(function() {
             url: './'+url+'&save=true',
             dataType: 'text',
             beforeSend:function(){
-               return confirm("Sei sicuro di voler generare il contratto? Il cliente ha firmato?");
+               return confirm("Sei sicuro di voler generare un nuovo contratto? Il cliente ha firmato?");
             },
 						success: function(output){
 		                    //alert(output);

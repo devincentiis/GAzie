@@ -267,6 +267,7 @@ if ((isset($_POST['type'])&&isset($_POST['ref'])) || (isset($_POST['type']) && i
 			$paymov->deleteClosedPaymov(intval($_POST['ref']));
 		break;
 		case "mndtritdinf":
+		case "intento":
 			$i=intval($_POST['ref']);
 			$f=gaz_dbi_get_row($gTables['files'], "id_doc", $i);
       unlink(DATA_DIR . "files/" .$admin_aziend['codice']."/doc/". $i. ".".$f['extension']);

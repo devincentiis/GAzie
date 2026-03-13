@@ -24,7 +24,7 @@
  */
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
-$msg = '';
+$msg=['err'=>[],'war'=>[]];
 if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo accesso
     $form = array_merge(gaz_dbi_parse_post('clfoco'), gaz_dbi_parse_post('anagra'));
     $form['ritorno'] = $_POST['ritorno'];
@@ -37,8 +37,10 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
               $_FILES['docfile']['type'] == "image/jpg" ||
               $_FILES['docfile']['type'] == "application/pdf" ||
               $_FILES['docfile']['type'] == "image/gif" ||
-              $_FILES['docfile']['type'] == "image/x-gif")) $msg .= '22+';
-      if ($_FILES['docfile']['size'] > 5000000) $msg .= '23+'; // su MariaDB impostare la direttiva max_allowed_packed ad almeno 8M
+              $_FILES['docfile']['type'] == "image/x-gif"))
+              $msg['err'][]='ext';
+      if ($_FILES['docfile']['size'] > 5000000) // su MariaDB impostare la direttiva max_allowed_packed ad almeno 8M
+        $msg['err'][]='fbig';
       if (empty($msg)) {
         $fileinfo = pathinfo($_FILES['docfile']['name']);
         gaz_dbi_query("INSERT INTO ".$gTables['files']." (table_name_ref, id_ref, content, extension, title, adminid) VALUES ('clfoco_doc', '" .intval($admin_aziend['mascli'] * 1000000 + $_POST['codice']). "', TO_BASE64(AES_ENCRYPT('".bin2hex(file_get_contents($_FILES['docfile']['tmp_name']))."','".$_SESSION['aes_key']."')), '".$fileinfo['extension']."','".$fileinfo['filename']."', '".$_SESSION['user_name']."' )");
@@ -56,16 +58,30 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form['search'][$k] = $v;
     }
     // inizio mandati rid
-    $nd = 0;
+    $n_mandatirid = 0;
     if (isset($_POST['MndtRltdInf'])) {
-      foreach ($_POST['MndtRltdInf'] as $nd => $v) {
-        $form['MndtRltdInf'][$nd]['id_doc'] = intval($v['id_doc']);
-        $form['MndtRltdInf'][$nd]['extension'] = substr($v['extension'], 0, 5);
-        $form['MndtRltdInf'][$nd]['title'] = substr($v['title'], 0, 80);
-        $nd++;
+      foreach ($_POST['MndtRltdInf'] as $n_mandatirid => $v) {
+        $form['MndtRltdInf'][$n_mandatirid]['id_doc'] = intval($v['id_doc']);
+        $form['MndtRltdInf'][$n_mandatirid]['extension'] = substr($v['extension'], 0, 5);
+        $form['MndtRltdInf'][$n_mandatirid]['title'] = substr($v['title'], 0, 80);
+        $form['MndtRltdInf'][$n_mandatirid]['custom_field'] = substr($v['custom_field'], 0, 200);
+        $n_mandatirid++;
       }
     }
     // fine mandati rid
+
+    // inizio lettere intenti
+    $n_intento = 0;
+    if (isset($_POST['intento'])) {
+      foreach ($_POST['intento'] as $n_intento => $v) {
+        $form['intento'][$n_intento]['id_doc'] = intval($v['id_doc']);
+        $form['intento'][$n_intento]['extension'] = substr($v['extension'], 0, 5);
+        $form['intento'][$n_intento]['title'] = substr($v['title'], 0, 80);
+        $form['intento'][$n_intento]['custom_field'] = substr($v['custom_field'], 0, 200);
+        $n_intento++;
+      }
+    }
+    // fine lettere intenti
 
     $toDo = 'update';
     if (isset($_POST['Insert'])) {
@@ -77,28 +93,27 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $form = array_merge($form, $rs_a);
     }
 
-    if (isset($_POST['Conferma'])) { // conferma tutto
-        // inizio controllo campi
+    if (isset($_POST['Upsert'])) { // conferma tutto
+        // inizio controlli
         $real_code = $admin_aziend['mascli'] * 1000000 + $form['codice'];
         $rs_same_code = gaz_dbi_dyn_query('*', $gTables['clfoco'], " codice = " . $real_code, "codice", 0, 1);
         $same_code = gaz_dbi_fetch_array($rs_same_code);
-        if ($same_code && ($toDo == 'insert')) { // c'� gi� uno stesso codice ed e' un inserimento
-            $form['codice'] ++; // lo aumento di 1
-            $msg .= "18+";
+        if ($same_code && ($toDo == 'insert')) { // c'è già uno stesso codice ed e' un inserimento
+          $form['codice'] ++; // lo aumento di 1
+          $msg['err'][]='samecode';
         }
         require("../../library/include/check.inc.php");
         if (strlen($form["ragso1"]) < 3) {
-            if (!empty($form["legrap_pf_nome"]) && !empty($form["legrap_pf_cognome"]) && $form["sexper"] != 'G') {// setto la ragione sociale con l'eventuale legale rappresentante
-                $form["ragso1"] = strtoupper($form["legrap_pf_cognome"] . ' ' . $form["legrap_pf_nome"]);
-            } else { // altrimenti do errore
-                $msg .= '0+';
-            }
+          if (!empty($form["legrap_pf_nome"]) && !empty($form["legrap_pf_cognome"]) && $form["sexper"] != 'G') {// setto la ragione sociale con l'eventuale legale rappresentante
+            $form["ragso1"] = strtoupper($form["legrap_pf_cognome"] . ' ' . $form["legrap_pf_nome"]);
+          } else { // altrimenti do errore
+            $msg['err'][]='ragso1';
+          }
         }
-        if (empty($form["indspe"])) {
-            $msg .= '1+';
+        if (strlen($form["indspe"]) < 3) {
+          $msg['err'][]='indspe';
         }
-        // se il cliente è straniero formatto i campi pariva e codis per poter generare una fattura elettronica corretta
-        if ($form['country']!='IT') {
+        if ($form['country']!='IT') { // se il cliente è straniero formatto i campi pariva e codis per poter generare una fattura elettronica corretta
             if (strlen($form['pariva']) < 5 && strlen($form['codfis']) < 5) { // non ho scelto nulla, uso il codice cliente del piano dei conti per entrambi
                 $form['pariva']=$real_code;
                 $form['codfis']=$real_code;
@@ -108,48 +123,63 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
                 $form['codfis']=$form['pariva'];
             }
         }
-        // faccio i controlli sul codice postale
         $rs_pc = gaz_dbi_get_row($gTables['country'], 'iso', $form["country"]);
         $cap = new postal_code;
         if ( gaz_dbi_get_row($gTables['company_config'], 'var', 'check_cust_address')['val']==1 ) {
             if ($cap->check_postal_code($form["capspe"], $form["country"], $rs_pc['postal_code_length']) && $rs_pc['postal_code_length']>0) {
-                $msg .= '2+';
+              $msg['err'][]='capspe';
             }
             if (empty($form["citspe"])) {
-                $msg .= '3+';
+              $msg['err'][]='citspe';
             }
             if (empty($form["prospe"])) {
-                $msg .= '4+';
+              $msg['err'][]='prospe';
             }
         }
-
         if (empty($form["sexper"])) {
-            $msg .= '5+';
+          $msg['err'][]='sexper';
         }
         $iban = new IBAN;
         if (!empty($form['iban']) && !$iban->checkIBAN($form['iban'])) {
-            $msg .= '6+';
+          $msg['err'][]='iban';
         }
         if (!empty($form['iban']) && (substr($form['iban'], 0, 2) <> $form['country'])) {
-            $msg .= '7+';
+          $msg['err'][]='ibanco';
         }
         $cf_pi = new check_VATno_TAXcode();
         $r_pi = $cf_pi->check_VAT_reg_no($form['pariva'], $form['country']);
         if (strlen(trim($form['codfis']))==11 && $form['codfis']!='00000000000') {
             $r_cf = $cf_pi->check_VAT_reg_no($form['codfis'], $form['country']);
             if ($form['sexper'] != 'G') {
-                $r_cf = 'Codice fiscale sbagliato per una persona fisica';
-                $msg .= '8+';
+              $r_cf = 'Codice fiscale sbagliato per una persona fisica';
+              $msg['err'][]='cfpersfis';
             }
         } else {
             $r_cf = $cf_pi->check_TAXcode($form['codfis'], $form['country']);
         }
-        if (!empty($r_pi) || ( $form['sexper']=='G' && intval(substr($form['codfis'],0,1)) < 8 && $form['country']=='IT' && strlen(trim($form['pariva'])) < 11 )) {
-			// se la partita iva è sbagliata o un cliente persona giuridica senza partita iva e non ha un codice fiscale di una associazione
-            $msg .= "9+";
+        if (!empty($r_pi) || ( $form['sexper']=='G' && intval(substr($form['codfis'],0,1)) < 8 && $form['country']=='IT' && strlen(trim($form['pariva'])) < 11 )) { // se la partita iva è sbagliata o un cliente persona giuridica senza partita iva e non ha un codice fiscale di una associazione
+          $msg['err'][]='pariva';
         }
         if ($form['codpag'] < 1) {
-            $msg .= "17+";
+          $msg['err'][]='codpag';
+        }
+        $aliiva = gaz_dbi_get_row($gTables['aliiva'], 'codice', $form['aliiva']);
+        var_dump($aliiva);
+        if ( $aliiva['fae_natura'] == 'N3.5' ) { // qualora l'aliquota IVA preveda un non imponibile per esportatore abituale
+          $rs_intento =  gaz_dbi_dyn_query('*', $gTables['files'], " table_name_ref = 'clfoco' AND  item_ref = 'intento' AND id_ref =" .$real_code);
+          $data_piu_recente = null;
+          while ($intento = gaz_dbi_fetch_array($rs_intento)) {
+            $intento_cf = json_decode($intento['custom_field'],true);
+            $data_corrente = $intento_cf['vendit']['dataintento'] ?? null;
+            if ($data_corrente){
+              if ($data_piu_recente === null || $data_corrente > $data_piu_recente) {
+                $data_piu_recente = $data_corrente;
+              }
+            }
+          }
+          if ($data_piu_recente == null || substr($data_piu_recente,0,4) < date("Y") ) {
+            $msg['err'][]='intento';
+          }
         }
         $anagrafica = new Anagrafica();
         if ( gaz_dbi_get_row($gTables['company_config'], 'var', 'consenti_nofisc')['val']==0 ) {
@@ -157,59 +187,59 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
                 $partner_with_same_pi = $anagrafica->queryPartners('*', "codice <> " . $real_code . " AND codice BETWEEN " . $admin_aziend['mascli'] . "000000 AND " . $admin_aziend['mascli'] . "999999 AND pariva = '" . addslashes($form['pariva']) . "'", "pariva DESC", 0, 1);
                 if ($partner_with_same_pi) {
                     if ($partner_with_same_pi[0]['fe_cod_univoco'] == $form['fe_cod_univoco']) { // c'� gi� un cliente sul piano dei conti ed � anche lo stesso ufficio ( amministrativo della PA )
-                        $msg .= "10+";
+                      $msg['err'][]='clisamepi';
                     }
                 } elseif ($form['id_anagra'] == 0) { // � un nuovo cliente senza anagrafica
                     $rs_anagra_with_same_pi = gaz_dbi_query_anagra(array("*"), $gTables['anagra'], array("pariva" => "='" . addslashes($form['pariva']) . "'"), array("pariva" => "DESC"), 0, 1);
                     $anagra_with_same_pi = gaz_dbi_fetch_array($rs_anagra_with_same_pi);
-                    if ($anagra_with_same_pi) { // c'� gi� un'anagrafica con la stessa PI non serve reinserirlo ma avverto
-                        // devo attivare tutte le interfacce per la scelta!
-                        $anagra = $anagra_with_same_pi;
-                        $msg .= '15+';
+                    if ($anagra_with_same_pi) { // c'è già un'anagrafica con la stessa PI non serve reinserirlo ma avverto
+                      // devo attivare tutte le interfacce per la scelta!
+                      $anagra = $anagra_with_same_pi;
+                      $msg['err'][]='pianag';
                     }
                 }
             }
 
             if (!empty($r_cf)) {
-                $msg .= "11+";
+              $msg['err'][]='codfis';
             }
             if (!empty($form['codfis']) && !($form['codfis'] == '00000000000')) {
                 $partner_with_same_cf = $anagrafica->queryPartners('*', "codice <> " . $real_code . " AND codice BETWEEN " . $admin_aziend['mascli'] . "000000 AND " . $admin_aziend['mascli'] . "999999 AND codfis = '" . $form['codfis'] . "'", "codfis DESC", 0, 1);
-                if ($partner_with_same_cf) { // c'� gi� un cliente sul piano dei conti
-                    if ($partner_with_same_cf[0]['fe_cod_univoco'] == $form['fe_cod_univoco']) { // c'� gi� un cliente sul piano dei conti ed � anche lo stesso ufficio ( amministrativo della PA )
-                        $msg .= "12+";
-                    }
+                if ($partner_with_same_cf) { // c'è già un cliente sul piano dei conti
+                  if ($partner_with_same_cf[0]['fe_cod_univoco'] == $form['fe_cod_univoco']) { // c'è già un cliente sul piano dei conti ed è anche lo stesso ufficio ( amministrativo della PA )
+                    $msg['err'][]='samecf';
+                  }
                 } elseif ($form['id_anagra'] == 0) { // � un nuovo cliente senza anagrafica
                     $rs_anagra_with_same_cf = gaz_dbi_query_anagra(array("*"), $gTables['anagra'], array("codfis" => "='" . $form['codfis'] . "'"), array("codfis" => "DESC"), 0, 1);
                     $anagra_with_same_cf = gaz_dbi_fetch_array($rs_anagra_with_same_cf);
-                    if ($anagra_with_same_cf) { // c'� gi� un'anagrafica con lo stesso CF non serve reinserirlo ma avverto
-                        // devo attivare tutte le interfacce per la scelta!
-                        $anagra = $anagra_with_same_cf;
-                        $msg .= '16+';
+                    if ($anagra_with_same_cf) { // c'è già un'anagrafica con lo stesso CF non serve reinserirlo ma avverto
+                      // devo attivare tutte le interfacce per la scelta!
+                      $anagra = $anagra_with_same_cf;
+                      $msg['err'][]='cfanag';
                     }
                 }
             }
 
             if (empty($form['codfis'])) {
-                if ($form['sexper'] == 'G') {
-                    $msg .= "13+";
-                    $form['codfis'] = $form['pariva'];
-                } else {
-                    $msg .= "14+";
-                }
+              if ($form['sexper'] == 'G') {
+                $msg['err'][]='cfpiva';
+                $form['codfis'] = $form['pariva'];
+              } else {
+                $msg['err'][]='cfpf';
+              }
             }
 
             $uts_datnas = mktime(0, 0, 0, $form['datnas_M'], $form['datnas_D'], $form['datnas_Y']);
             if (!checkdate($form['datnas_M'], $form['datnas_D'], $form['datnas_Y']) && ($admin_aziend['country'] != $form['country'] )) {
-                $msg .= "19+";
+              $msg['err'][]='datnas';
             }
         }
         if (!filter_var($form['pec_email'], FILTER_VALIDATE_EMAIL) && !empty($form['pec_email'])) {
-            $msg .= "20+";
+          $msg['err'][]='pec_email';
         }
 
         if (!filter_var($form['e_mail'], FILTER_VALIDATE_EMAIL) && !empty($form['e_mail'])) {
-            $msg .= "20+";
+          $msg['err'][]='email';
         }
 		// il codice SIAN deve essere univoco nell'ambito clienti e fornitori
 		if (intval($form['id_SIAN'])>0){
@@ -217,41 +247,42 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
 			$rows=gaz_dbi_num_rows($rs_same_code);
 			if ($rows>0 && ($toDo == 'insert')) { // c'� gi� uno stesso codice
 				$form['id_SIAN'] ++; // lo aumento di 1
-				$msg .= "21+";
+        $msg['err'][]='sian';
 			}
 			if ($toDo == 'update') {
 				foreach ($rs_same_code as $row){
 					if ($row['ragso1']!==$form['ragso1'] AND $row['id_SIAN']==$form['id_SIAN']){
-						$form['id_SIAN'] ++; // c'� gi� uno stesso codice lo aumento di 1
-						$msg .= "21+";
+						$form['id_SIAN'] ++; // c'è già uno stesso codice lo aumento di 1
+            $msg['err'][]='sian';
 					}
 				}
 			}
 		}
+    // fine controlli
 
-        if (empty($msg)) { // nessun errore
-            $form['codice'] = $real_code;
-            $form['datnas'] = date("Ymd", $uts_datnas);
-            if ($toDo == 'insert') {
-                if (!empty($form['fe_cod_univoco']) && $form['fatt_email'] <= 1) { // qui forzo all'utilizzo della PEC i nuovi clienti dalla PA
-                    $form['fatt_email'] = 2;
-                }
-                if ($form['id_anagra'] > 0) {
-                    $form['descri']= $form['ragso1'].' '. $form['ragso2'];
-                    gaz_dbi_table_insert('clfoco', $form);
-                } else {
-                    $anagrafica->insertPartner($form);
-                }
-            } elseif ($toDo == 'update') {
-                $anagrafica->updatePartners($form['codice'], $form);
-            }
-            header("Location: report_client.php?codice=".intval(substr($real_code,-6))."&privacy=" . $form['codice']);
-            exit;
+    if (count($msg['err']) <= 0) { // nessun errore
+      $form['codice'] = $real_code;
+      $form['datnas'] = date("Ymd", $uts_datnas);
+      if ($toDo == 'insert') {
+        if (!empty($form['fe_cod_univoco']) && $form['fatt_email'] <= 1) { // qui forzo all'utilizzo della PEC i nuovi clienti dalla PA
+          $form['fatt_email'] = 2;
         }
-    } elseif (isset($_POST['Return'])) { // torno indietro
-        header("Location: " . $form['ritorno']);
-        exit;
+        if ($form['id_anagra'] > 0) {
+          $form['descri']= $form['ragso1'].' '. $form['ragso2'];
+          gaz_dbi_table_insert('clfoco', $form);
+        } else {
+          $anagrafica->insertPartner($form);
+        }
+      } elseif ($toDo == 'update') {
+        $anagrafica->updatePartners($form['codice'], $form);
+      }
+      header("Location: report_client.php?codice=".intval(substr($real_code,-6))."&privacy=" . $form['codice']);
+      exit;
     }
+  } elseif (isset($_POST['Return'])) { // torno indietro
+    header("Location: " . $form['ritorno']);
+    exit;
+  }
 } elseif (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo accesso per UPDATE
     $anagrafica = new Anagrafica();
     $form = $anagrafica->getPartner(intval($admin_aziend['mascli'] * 1000000 + $_GET['codice']));
@@ -262,24 +293,33 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     }
     $form['codice'] = intval(substr($form['codice'], 3));
     $toDo = 'update';
+    $form['tab'] = isset($_GET['tab']) ? substr((string)$_GET['tab'],0,30) : 'home';
     $form['search']['id_des'] = '';
     $form['search']['fiscal_rapresentative_id'] = '';
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
     $form['hidden_req'] = '';
-    $form['tab'] = 'home';
     if($form['datnas']) {
       $form['datnas_Y'] = substr($form['datnas'], 0, 4); $form['datnas_M'] = substr($form['datnas'], 5, 2); $form['datnas_D'] = substr($form['datnas'], 8, 2);
     } else {
       $form['datnas_D'] = $form['datnas_M'] = 1; $form['datnas_Y'] = '1970';
     }
     // inizio mandati rid
-    $nd = 0;
-    $rs_r = gaz_dbi_dyn_query("*", $gTables['files'], "id_ref = '" . intval($admin_aziend['mascli'] * 1000000 + $_GET['codice']) . "' AND table_name_ref = 'clfoco'", "id_doc DESC");
+    $n_mandatirid = 0;
+    $rs_r = gaz_dbi_dyn_query("*", $gTables['files'], "id_ref = '" . intval($admin_aziend['mascli'] * 1000000 + $_GET['codice']) . "' AND table_name_ref = 'clfoco' AND item_ref = 'mndtritdinf'", "id_doc DESC");
     while ($r = gaz_dbi_fetch_array($rs_r)) {
-        $form['MndtRltdInf'][$nd] = $r;
-        $nd++;
+        $form['MndtRltdInf'][$n_mandatirid] = $r;
+        $n_mandatirid++;
     }
     // fine mandati rid
+
+    // inizio lettere intento
+    $n_intento = 0;
+    $rs_r = gaz_dbi_dyn_query("*", $gTables['files'], "id_ref = '" . intval($admin_aziend['mascli'] * 1000000 + $_GET['codice']) . "' AND table_name_ref = 'clfoco' AND item_ref = 'intento'", "id_doc DESC");
+    while ($r = gaz_dbi_fetch_array($rs_r)) {
+        $form['intento'][$n_intento] = $r;
+        $n_intento++;
+    }
+    // fine lettere intento
 
 } elseif (!isset($_POST['Insert'])) { //se e' il primo accesso per INSERT
   $anagrafica = new Anagrafica();
@@ -307,7 +347,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['hidden_req'] = '';
   $form['visannota'] = 'N';
 	$form['id_SIAN']="";
-	$nd=0;
+	$n_intento=0;
 }
 
 require("../../library/include/header.php");
@@ -326,15 +366,8 @@ if (isset($admin_aziend['lang'])){
 ?>
 <script>
 <?php
-echo "function toggleContent(currentContent) {
-        var thisContent = document.getElementById(currentContent);
-        if ( thisContent.style.display == 'none') {
-           thisContent.style.display = '';
-           return;
-        }
-        thisContent.style.display = 'none';
-      }
-      function selectValue(currentValue) {
+echo "
+function selectValue(currentValue) {
          document.form.id_anagra.value=currentValue;
          document.form.hidden_req.value='toggle';
          document.form.submit();
@@ -376,12 +409,14 @@ $(function() {
 
 	$("#dialog_delete").dialog({ autoOpen: false });
 	$('.dialog_delete').click(function() {
-		$("p#idcodice").html($(this).attr("mndtid"));
-		$("p#iddescri").html($(this).attr("dtofsgntr"));
-		var id_con = $(this).attr('ref');
+		var codice_cliente = $("#codice").val();
+		$("p#datadocumento").html($(this).attr("datadocumento"));
+		$("p#descridocumento").html($(this).attr("descridocumento"));
+		var id_doc = $(this).attr('id_doc');
+		var item_ref = $(this).attr('item_ref');
 		$( "#dialog_delete" ).dialog({
 			minHeight: 1,
-			width: "auto",
+			minWidth: 350,
 			modal: "true",
 			show: "blind",
 			hide: "explode",
@@ -398,12 +433,12 @@ $(function() {
 					'class':'btn btn-danger',
 					click:function (event, ui) {
 					$.ajax({
-						data: {'type':'mndtritdinf',ref:id_con},
+						data: {'type':item_ref,ref:id_doc},
 						type: 'POST',
 						url: '../vendit/delete.php',
 						success: function(output){
-		                    //alert(output);
-							window.location.replace("./report_client.php");
+		          //alert(output);
+							window.location.replace("./admin_client.php?codice=" + codice_cliente + '&Update&tab=commer');
 						}
 					});
 				}}
@@ -504,12 +539,11 @@ function printDoc(urlPrintDoc,nf){
 };
 </script>
 <form method="POST" name="form" enctype="multipart/form-data" id="myform">
-	<div style="display:none" id="dialog_delete" title="Conferma eliminazione Mandato">
-    <p><b>Mandato RID</b></p>
-    <p>Numero:</p>
-    <p class="ui-state-highlight" id="idcodice"></p>
-    <p>Data firma:</p>
-    <p class="ui-state-highlight" id="iddescri"></p>
+	<div style="display:none" id="dialog_delete" title="Conferma eliminazione documento">
+    <p>Descrizione:</p>
+    <p class="ui-state-highlight" id="descridocumento"></p>
+    <p>Data:</p>
+    <p class="ui-state-highlight" id="datadocumento"></p>
 	</div>
 	<div style="display:none" id="dialog_clfoco_doc_del" title="Conferma eliminazione documento">
     <p><b>DOCUMENTO</b></p>
@@ -548,48 +582,44 @@ if ($toDo == 'insert') {
     echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . $script_transl['ins_this'] . ' con ' . $script_transl['codice'] . " n° <input type=\"text\" name=\"codice\" value=\"" . $form['codice'] . "\" align=\"right\" maxlength=\"6\" /></div>\n";
 } else {
     echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . $script_transl['upd_this'] . " '" . $form['codice'] . "'";
-    echo '<input type="hidden" value="' . $form['codice'] .'" name="codice" /></div>';
+    echo '<input type="hidden" value="' . $form['codice'] .'" name="codice" id="codice"/></div>';
 }
 ?>
 <?php
-if (!empty($msg)) {
-    echo '<div align="center"><table>';
+if (count($msg['err']) > 0) {
     if (isset($anagra)) {
-        echo '<tr><td colspan="3" class="FacetDataTDred">' . ((strpos($msg,'15+'))?$script_transl['errors'][15]:''). ((strpos($msg,'16+'))?$script_transl['errors'][16]:''). "</td></tr>\n";
-        echo "<tr>\n";
-        echo "\t <td>\n";
-        echo "\t </td>\n";
-        echo "<td colspan=\"2\"><div onmousedown=\"toggleContent('id_anagra')\" class=\"FacetDataTDred\" style=\"cursor:pointer;\">";
-        echo ' &dArr; ' . $script_transl['link_anagra'] . " &dArr;</div>\n";
-        echo "<div id=\"id_anagra\" onclick=\"selectValue('" . $anagra['id'] . "');\" style=\"cursor: pointer;\">\n";
-        echo "<div class=\"selectHeader\"> ID = " . $anagra['id'] . "</div>\n";
-        echo '<table cellspacing="0" cellpadding="0" width="100%" class="selectTable">';
-        echo "\n<tr class=\"odd\"><td>" . $script_transl['ragso1'] . " </td><td> " . $anagra['ragso1'] . "</td></tr>\n";
-        echo "<tr class=\"even\"><td>" . $script_transl['ragso2'] . " </td><td> " . $anagra['ragso2'] . "</td></tr>\n";
-        echo "<tr class=\"odd\"><td>" . $script_transl['sexper'] . " </td><td> " . $anagra['sexper'] . "</td></tr>\n";
-        echo "<tr class=\"even\"><td>" . $script_transl['indspe'] . " </td><td> " . $anagra['indspe'] . "</td></tr>\n";
-        echo "<tr class=\"odd\"><td>" . $script_transl['capspe'] . " </td><td> " . $anagra['capspe'] . "</td></tr>\n";
-        echo "<tr class=\"even\"><td>" . $script_transl['citspe'] . " </td><td> " . $anagra['citspe'] . " (" . $anagra['prospe'] . ")</td></tr>\n";
-        echo "<tr class=\"odd\"><td>" . $script_transl['telefo'] . " </td><td> " . $anagra['telefo'] . "</td></tr>\n";
-        echo "<tr class=\"even\"><td>" . $script_transl['cell'] . " </td><td> " . $anagra['cell'] . "</td></tr>\n";
-        echo "<tr class=\"odd\"><td>" . $script_transl['fax'] . " </td><td> " . $anagra['fax'] . "</td></tr>\n";
-        echo "</div></table></div>\n";
-        echo "\t </td>\n";
-        echo "</tr>\n";
+      echo '<div align="center" class="container panel panel-danger">';
+      echo '<table class=" class="table-striped table-bordered table-condensed""><tr><td colspan="2" class="FacetDataTDred">' . (isset($msg['err']['pianag'])?$script_transl['err']['pianag']:''). (isset($msg['err']['cfanag'])?$script_transl['err']['cfanag']:''). "</td></tr><tr>";
+      echo '<td colspan=2><div class="btn btn-sm btn-danger" onclick="selectValue(\'' . $anagra['id'] . '\');">' . $script_transl['link_anagra'] . ' &dArr;</div></td></tr>';
+      echo "<tr><td colspan=3><div id=\"id_anagra\"  style=\"cursor: pointer;\">\n";
+      echo "<div class=\"selectHeader\"> ID = " . $anagra['id'] . "</div></td></tr>\n";
+      echo "\n<tr class=\"odd\"><td>" . $script_transl['ragso1'] . " </td><td> " . $anagra['ragso1'] . "</td></tr>\n";
+      echo "<tr class=\"even\"><td>" . $script_transl['ragso2'] . " </td><td> " . $anagra['ragso2'] . "</td></tr>\n";
+      echo "<tr class=\"odd\"><td>" . $script_transl['sexper'] . " </td><td> " . $anagra['sexper'] . "</td></tr>\n";
+      echo "<tr class=\"even\"><td>" . $script_transl['indspe'] . " </td><td> " . $anagra['indspe'] . "</td></tr>\n";
+      echo "<tr class=\"odd\"><td>" . $script_transl['capspe'] . " </td><td> " . $anagra['capspe'] . "</td></tr>\n";
+      echo "<tr class=\"even\"><td>" . $script_transl['citspe'] . " </td><td> " . $anagra['citspe'] . " (" . $anagra['prospe'] . ")</td></tr>\n";
+      echo "<tr class=\"odd\"><td>" . $script_transl['telefo'] . " </td><td> " . $anagra['telefo'] . "</td></tr>\n";
+      echo "<tr class=\"even\"><td>" . $script_transl['cell'] . " </td><td> " . $anagra['cell'] . "</td></tr>\n";
+      echo "<tr class=\"odd\"><td>" . $script_transl['fax'] . " </td><td> " . $anagra['fax'] . "</td></tr>\n";
+      echo "</table>";
+      echo '</div>';
     } else {
-      echo '<tr><td colspan="3" class="FacetDataTDred">' . $gForm->outputErrors($msg, $script_transl['errors']) . "</td></tr>\n";
+      echo '<div><b>';
+      $gForm->gazHeadMessage($msg['err'], $script_transl['err'], 'err');
+      echo "</b></div>\n";
     }
-    echo '</table></div>';
 }
 ?>
 
 <div class="panel panel-default gaz-table-form div-bordered">
+
   <div class="container-fluid">
   <ul class="nav nav-pills">
     <li class="<?php echo $form['tab']=='home'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#home">Anagrafica</a></li>
     <li class="<?php echo $form['tab']=='commer'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#commer">Impostazioni</a></li>
     <li class="<?php echo $form['tab']=='licenses'?'active':''; ?>"><a data-toggle="pill" class="tabtoggle" href="#licenses">Documenti</a></li>
-    <li style="float: right;"><input class="btn btn-warning" name="Conferma" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
+    <li style="float: right;"><input class="btn btn-warning" name="Upsert" type="submit" value="<?php echo ucfirst($script_transl[$toDo]); ?>"></li>
   </ul>
 
   <div class="tab-content">
@@ -878,22 +908,23 @@ $gForm->selectFromDB('customer_group', 'id_customer_group', 'id', $form['id_cust
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="MndtRltdInf" class="col-sm-4 control-label"><?php echo $script_transl['MndtRltdInf']; ?></label>
-<?php if ($nd > 0) { // se ho dei documenti  ?>
+<?php if ($n_mandatirid > 0) { // se ho dei documenti  ?>
                         <div>
                         <?php foreach ($form['MndtRltdInf'] as $k => $val) { ?>
-                                <input type="hidden" value="<?php echo $val['id_doc']; ?>" name="MndtRltdInf[<?php echo $k; ?>][id_doc]">
-                                <input type="hidden" value="<?php echo $val['extension']; ?>" name="MndtRltdInf[<?php echo $k; ?>][extension]">
-                                <input type="hidden" value="<?php echo $val['title']; ?>" name="MndtRltdInf[<?php echo $k; ?>][title]">
-    <?php echo DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/doc/' . $val['id_doc'] . '.' . $val['extension']; ?>
-                                <a href="../root/retrieve.php?id_doc=<?php echo $val["id_doc"]; ?>" title="<?php echo $script_transl['view']; ?>!" class="btn btn-default btn-sm">
+                                <input type="hidden" value="<?= $val['id_doc']; ?>" name="MndtRltdInf[<?= $k; ?>][id_doc]">
+                                <input type="hidden" value="<?= $val['extension']; ?>" name="MndtRltdInf[<?= $k; ?>][extension]">
+                                <input type="hidden" value="<?= $val['title']; ?>" name="MndtRltdInf[<?= $k; ?>][title]">
+                                <input type="hidden" value="<?= $val['custom_field']; ?>" name="MndtRltdInf[<?= $k; ?>][custom_field]">
+    <?= DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/doc/' . $val['id_doc'] . '.' . $val['extension']; ?>
+                                <a href="../root/retrieve.php?id_doc=<?= $val["id_doc"]; ?>" title="<?= $script_transl['view']; ?>!" class="btn btn-default btn-sm">
                                     <i class="glyphicon glyphicon-file"></i>
-                                </a><?php echo $val['title']; ?>
-                                <input type="button" value="<?php echo ucfirst($script_transl['update']); ?>" onclick="location.href = 'admin_mndtritdinf.php?id_doc=<?php echo $val['id_doc']; ?>&Update'" />
-							<a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il mandato" ref="<?php echo $val['id_doc'];?>"
+                                </a><?= $val['title']; ?>
+                                <input type="button" value="<?= ucfirst($script_transl['update']); ?>" onclick="location.href = 'admin_mndtritdinf.php?id_doc=<?= $val['id_doc']; ?>&Update'" />
+							<a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella il mandato" id_doc="<?= $val['id_doc'];?>"
                             <?php
                            	if ($data=json_decode($val['custom_field'],true)){// se c'è un json nel custom_field
-                                if (is_array($data['vendit']) && strlen($data['vendit']['dtofsgntr'])>0) { // se è riferito al modulo vendit e contiene la data di firma del RID
-                                    echo ' dtofsgntr="'.$data['vendit']['dtofsgntr'].'" mndtid="'.$data['vendit']['mndtid'].'"';
+                                if (is_array($data['vendit']) && isset($data['vendit']['dtofsgntr'])) { // se è riferito al modulo vendit e contiene la data di firma del RID
+                                    echo ' datadocumento="'.$data['vendit']['dtofsgntr'].'" descridocumento="Mandato RID '.$data['vendit']['mndtid'].'" item_ref="mndtritdinf"';
                                 }
                             }
                             ?>
@@ -1119,6 +1150,43 @@ $gForm->selectFromDB('aliiva', 'aliiva', 'codice', $form['aliiva'], 'codice', 1,
                 </div>
             </div>
         </div><!-- chiude row  -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="intento" class="col-sm-4 control-label"><?= $script_transl['intento']; ?></label>
+<?php if ($n_intento > 0) { // se ho dei documenti  ?>
+                        <div>
+                        <?php foreach ($form['intento'] as $k => $val) { ?>
+                                <input type="hidden" value="<?= $val['id_doc']; ?>" name="intento[<?= $k; ?>][id_doc]">
+                                <input type="hidden" value="<?= $val['extension']; ?>" name="intento[<?= $k; ?>][extension]">
+                                <input type="hidden" value="<?= $val['title']; ?>" name="intento[<?= $k; ?>][title]">
+                                <input type="hidden" value="<?= $val['custom_field']; ?>" name="intento[<?= $k; ?>][custom_field]">
+    <?= DATA_DIR . 'files/' . $admin_aziend['company_id'] . '/doc/' . $val['id_doc'] . '.' . $val['extension']; ?>
+                                <a href="../root/retrieve.php?id_doc=<?= $val["id_doc"]; ?>" title="<?= $script_transl['view']; ?>!" class="btn btn-default btn-sm">
+                                    <i class="glyphicon glyphicon-file"></i>
+                                </a><?= $val['title']; ?>
+                                <input type="button" value="<?= ucfirst($script_transl['update']); ?>" onclick="location.href = 'admin_intento.php?id_doc=<?= $val['id_doc']; ?>&Update'" />
+							<a class="btn btn-xs  btn-elimina dialog_delete" title="Cancella la dichiarazione di intento" id_doc="<?= $val['id_doc'];?>"
+                            <?php
+                           	if ($data=json_decode($val['custom_field'],true)){// se c'è un json nel custom_field
+                                if (is_array($data['vendit']) && isset($data['vendit']['dataintento'])) { // se è riferito al modulo vendit e contiene la data della dichiarazione
+                                    echo ' datadocumento="'.$data['vendit']['dataintento'].'" descridocumento="Intento prot: '.$data['vendit']['protocintento'].'" item_ref="intento"';
+                                }
+                            }
+                            ?>
+                            >
+								<i class="glyphicon glyphicon-trash"></i>
+							</a>
+
+<?php } ?>
+                            <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_intento.php?id_ref=<?php echo $form['codice']; ?>&Insert'" />
+                        </div>
+                        <?php } else { // non ho documenti  ?>
+                        <input type="button" value="<?php echo ucfirst($script_transl['insert']); ?>" onclick="location.href = 'admin_intento.php?id_ref=<?php echo $form['codice']; ?>&Insert'">
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">

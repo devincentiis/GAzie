@@ -47,6 +47,396 @@
     return $link;
 }
 
+// restituisce il tipo di dispositivo usato dall'utente.
+/*
+app = App Android “AppGmonamour”
+mobile = Smartphone o cookie mobile
+tablet = Tablet o cookie tablet
+desktop = PC/Laptop o cookie desktop
+unknown = Bot, UA non riconosciuto, UA vuoto
+*/
+function detect_device(): string{
+    $server = $_SERVER;
+
+    if (!empty($server['HTTP_USER_AGENT']) &&
+        stripos($server['HTTP_USER_AGENT'], 'AppGmonamour') !== false) {
+        return 'app';
+    }
+
+    $ua = strtolower($server['HTTP_USER_AGENT'] ?? '');
+    if ($ua === '') return 'unknown';
+
+    if (preg_match('/bot|spider|crawl|slurp|facebookexternalhit|mediapartners-google/', $ua)) {
+        return 'unknown';
+    }
+
+    if (strpos($ua, 'iphone') !== false || strpos($ua, 'ipod') !== false) return 'mobile';
+
+    if (strpos($ua, 'ipad') !== false ||
+        (strpos($ua, 'macintosh') !== false &&
+         strpos($ua, 'mobile') === false &&
+         strpos($ua, 'safari') !== false)) return 'tablet';
+
+    if (strpos($ua, 'android') !== false) return (strpos($ua, 'mobile') !== false) ? 'mobile' : 'tablet';
+
+    if (preg_match('/windows phone|iemobile|blackberry|bb10|opera mini|opera mobi/', $ua)) return 'mobile';
+
+    if (preg_match('/windows nt|macintosh|x11|linux|cros/', $ua)) return 'desktop';
+
+    return 'unknown';
+}
+
+function initTrackingState(array &$data) { // true = possiamo tracciare, false = proibito
+    global $link;
+	// percorso file debug
+	$debugFile = __DIR__ . '/tracking_debug.txt';
+	//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState inizio session: " . json_encode($_SESSION) . " - cookie:". json_encode($_COOKIE['tracking_session']) . PHP_EOL, FILE_APPEND);
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();    }
+      //echo "<br>Debug: Inizio initTrackingState";
+    // 🔁 Se già determinato in questa sessione, non rifare query
+    if (isset($_SESSION['can_track']) && !empty($data['user_id'])) {
+        return $_SESSION['can_track'];
+    }
+    $canTrack = false;
+	if (empty($_SESSION['token_Android']) && isset($_COOKIE['tracking_session'])){// se non ho session ma ho cookie
+		$_SESSION['token_Android']=$_COOKIE['tracking_session'];
+		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState metto il cookie in session " . PHP_EOL, FILE_APPEND);
+
+	}
+    // 📱 ANDROID: controllo token dispositivo
+    if (!empty($_SESSION['token_Android'])) {
+        $token = $_SESSION['token_Android'];
+		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState controllo il token: " . $token . PHP_EOL, FILE_APPEND);
+
+        $stmt = $link->prepare("
+			SELECT permission, user_id
+			FROM gaz_android_device_tokens
+			WHERE token = ?
+			LIMIT 1
+		");
+
+		if ($stmt) {
+			$stmt->bind_param("s", $token);
+			$stmt->execute();
+			$stmt->bind_result($permission, $dbUserId);
+            if ($stmt->fetch() && $permission == 1) {
+                $canTrack = true;
+                //echo "<br>Debug: Android consentito";
+				// Se $data['user_id'] non è valorizzato ma il DB ha un valore
+				if (isset($data) && empty($data['user_id']) && !empty($dbUserId)) {
+					$data['user_id'] = intval($dbUserId);
+				}
+				//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - function data: " . json_encode($data) . PHP_EOL, FILE_APPEND);
+            } else {
+                //echo "<br>Debug: Android NON consentito";
+				//file_put_contents($debugFile, date('Y-m-d H:i:s') . " initTrackingState - tracciamento non consentito permission: " . $permission . json_encode($data). PHP_EOL, FILE_APPEND);
+
+            }
+            $stmt->close();
+        }else{
+			//file_put_contents($debugFile, date('Y-m-d H:i:s') . " initTrackingState - dispositivo non trovato token: " . $token . PHP_EOL, FILE_APPEND);
+
+		}
+		
+		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState cantrack: " . $canTrack . " -session Andr:". $_SESSION['token_Android'] . PHP_EOL, FILE_APPEND);
+    }
+    // 🖥 DESKTOP / BROWSER: utente identificato
+    elseif (!empty($_COOKIE['tracking_id']) || !empty($_SESSION['logged'])) {
+        //echo "<br>Debug: utente identificato, controllo consenso";
+        // ✅ Controllo tracking_id
+        if (!empty($_COOKIE['tracking_id'])) {
+            $id = (int)$_COOKIE['tracking_id'];
+            $stmt = $link->prepare("
+                SELECT consent_profiling
+                FROM gaz_marketing_identity
+                WHERE id = ?
+                LIMIT 1
+            ");
+            if ($stmt) {
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                $stmt->bind_result($consent_profiling);
+                if ($stmt->fetch() && $consent_profiling == 1) {
+                    $canTrack = true;
+                    //echo "<br>Debug: tracking_id consentito";
+                } else {
+                    //echo "<br>Debug: tracking_id NON consentito";
+                }
+                $stmt->close();
+            }
+        }
+        // ✅ Controllo user_id
+        if (!$canTrack && !empty($_SESSION['logged'])) {
+			$user_id = hex2bin($_SESSION['logged']);
+
+			$stmt = $link->prepare("
+				SELECT id, consent_profiling
+				FROM gaz_marketing_identity
+				WHERE user_id = ?
+				LIMIT 1
+			");
+
+			$canTrack = false; // valore di default
+
+			if ($stmt) {
+				$stmt->bind_param("s", $user_id);
+				$stmt->execute();
+
+				// bind sia l'id che il consent_profiling
+				$stmt->bind_result($id, $consent_profiling);
+
+				if ($stmt->fetch()) {
+					// record trovato
+					if ($consent_profiling == 1) {
+						$canTrack = true;
+						// rinfresco cookie tecnico 1 anno
+						setcookie('tracking_id', $id, time() + 31536000, "/", "", false, true); // 1 anno
+						//echo "<br>Debug: user_id consentito";
+					} else {
+						// echo "<br>Debug: user_id NON consentito";
+						// $canTrack resta false
+					}
+				} else {
+					// record NON trovato → consideriamo come consenso dato
+					$canTrack = true;
+					// Non abbiamo un $id dal DB, quindi non possiamo settare il cookie
+					// (facoltativo: puoi generare un ID tecnico random se vuoi il cookie)
+				}
+
+				$stmt->close();
+			}
+		}
+        if (!$canTrack) {
+            //echo "<br>Debug: utente identificato senza consenso, blocco tracciamento";
+        }
+    }
+    // 🌐 Sessione anonima pura: niente tracking_id, niente user_id
+    if (!$canTrack && empty($_COOKIE['tracking_id']) && empty($_SESSION['logged'])) {
+        $canTrack = true;
+        //echo "<br>Debug: sessione anonima, tracciamento consentito";
+    }
+    $_SESSION['can_track'] = $canTrack;
+    //echo "<br>Debug: fine controllo, canTrack = " . ($canTrack ? 'true' : 'false');
+    return $canTrack;
+}
+
+/**
+ * Traccia evento utente per app o sito
+ */
+function trackUserEvent(array $data){
+    global $link, $azTables;
+
+    $debugFile = __DIR__ . '/tracking_debug.txt';
+    file_put_contents($debugFile, date('Y-m-d H:i:s') . " - trackUserEvent RECEIVED: " . json_encode($data) . PHP_EOL, FILE_APPEND);
+
+    // 1️⃣ Gestione anonimizzazione
+    if (!initTrackingState($data)) {
+        $data['user_id'] = null;
+        $data['device_uuid'] = null;
+        $data['session_id'] = session_id();
+    }
+    file_put_contents($debugFile, date('Y-m-d H:i:s') . " - trackUserEvent dopo initTrackingState: " . json_encode($data) . PHP_EOL, FILE_APPEND);
+
+    // 2️⃣ Identificazione device / sessione
+    $ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
+    $device = $data['device_uuid'] ?? 'unknown';
+    $session = $data['session_id'] ?? '';
+    $user_id = isset($data['user_id']) ? intval($data['user_id']) : null;
+    $ip_hash = sha1($_SERVER['REMOTE_ADDR']);
+    $user_agent = $data['user_agent'] ?? $ua;
+    $cookie_session = $_COOKIE['tracking_session'] ?? null;
+	$today = date('Y-m-d'); // giorno corrente
+	
+    if (!$device && !$session && !is_numeric($user_id)) return false;
+
+    // 3️⃣ Escape una volta sola
+    $device_esc = $link->real_escape_string($device);
+    $session_esc = $link->real_escape_string($session);
+    $user_agent_esc = $link->real_escape_string($user_agent);
+    $ip_hash_esc = $link->real_escape_string($ip_hash);
+    $tracking_session = $data['tracking_session'] ?? $cookie_session;
+    $tracking_session_esc = $tracking_session ? $link->real_escape_string($tracking_session) : null;
+	$data['tracking_session'] = (isset($tracking_session_esc)) ? $tracking_session_esc: $cookie_session;
+	
+    // 4️⃣ Costruzione WHERE per hard match (versione corretta)
+	$where = [];
+
+	// Match su device_uuid, se presente
+	if (!empty($device_esc)) {
+		$where[] = "device_uuid='$device_esc'";
+	}
+
+	// Match su user_id, se presente
+	if (is_numeric($user_id)) {
+		$where[] = "user_id=$user_id";
+	}
+
+	// Match combinato su session_id + tracking_session
+	if (!empty($session_esc) && !empty($tracking_session_esc)) {
+		$where[] = "(session_id='$session_esc' AND tracking_session='$tracking_session_esc')";
+	} elseif (!empty($session_esc)) {
+		$where[] = "session_id='$session_esc'";
+	} elseif (!empty($tracking_session_esc)) {
+		$where[] = "tracking_session='$tracking_session_esc'";
+	}
+
+	// Filtro sulla data di oggi
+	//$where[] = "DATE(created_at) = '$today'";
+	
+    // 5️⃣ Trova ultima riga
+    $last_row = null;
+    if (!empty($where)) {
+        $where_sql = implode(' OR ', $where); // OR perché basta che una condizione coincida
+        $res = $link->query("SELECT * FROM gaz_track_events WHERE $where_sql ORDER BY created_at DESC LIMIT 1");
+        if ($res && $res->num_rows) $last_row = $res->fetch_assoc();
+    }
+
+    // 6️⃣ Soft match (solo se non device_uuid)
+    if (!$last_row && empty($device_esc)) {
+        $time_window = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+        $query = "
+            SELECT *
+            FROM gaz_track_events
+            WHERE user_id IS NULL
+              AND ip_hash='$ip_hash_esc'
+              AND user_agent='$user_agent_esc'
+              AND created_at >= '$time_window'
+            ORDER BY created_at DESC
+            LIMIT 1
+        ";
+        $res = $link->query($query);
+        if ($res && $res->num_rows) $last_row = $res->fetch_assoc();
+    }
+
+    // 7️⃣ Prepara valori SQL
+    $search_location = isset($data['search_location']) ? $link->real_escape_string($data['search_location']) : null;
+    $search_start_date = isset($data['search_start_date']) ? date('Y-m-d', strtotime($data['search_start_date'])) : null;
+    $search_end_date = isset($data['search_end_date']) ? date('Y-m-d', strtotime($data['search_end_date'])) : null;
+    $guests = isset($data['guests']) ? intval($data['guests']) : null;
+    $room_type = isset($data['room_type']) ? $link->real_escape_string($data['room_type']) : null;
+    $property_id = isset($data['property_id']) ? intval($data['property_id']) : null;
+    $booking_value = isset($data['booking_value']) ? floatval($data['booking_value']) : null;
+    $valid_status = ['started','completed','abandoned'];
+    $booking_status = (isset($data['booking_status']) && in_array($data['booking_status'],$valid_status)) ? $link->real_escape_string($data['booking_status']) : null;
+    $first_booking_at = isset($data['first_booking_at']) ? $link->real_escape_string($data['first_booking_at']) : null;
+    $last_property_viewed = isset($data['last_property_viewed']) ? intval($data['last_property_viewed']) : null;
+    $source = isset($data['source']) ? $link->real_escape_string($data['source']) : null;
+    $campaign = isset($data['campaign']) ? $link->real_escape_string($data['campaign']) : null;
+    $app_version = isset($data['app_version']) ? $link->real_escape_string($data['app_version']) : null;
+    $platform = detect_device();
+    $lang = isset($data['lang']) ? $link->real_escape_string($data['lang']) : null;
+	
+    $isSearch = $search_start_date && $search_end_date;
+
+    // 8️⃣ Costruisci evento figlio
+    $child_event = [];
+    foreach ($data as $k=>$v){
+        if (in_array($k,['device_uuid','session_id','user_id','user_agent','ip_hash'])) continue;
+        if ($v === null || $v === '') continue;
+        if (in_array($k,['property_id','guests','last_property_viewed'])) $v = intval($v);
+        if ($k === 'booking_value') $v = floatval($v);
+        $child_event[$k]=$v;
+    }
+    $child_event['timestamp'] = date('Y-m-d H:i:s');
+
+    // Funzione helper per merge payload
+    $mergePayload = function($last_row, $child_event) use($link){
+        $existing = $last_row['event_payload'] ? json_decode($last_row['event_payload'], true) : [];
+        $existing[] = $child_event;
+        return $link->real_escape_string(json_encode($existing, JSON_UNESCAPED_UNICODE));
+    };
+
+    // 9️⃣ Se ultima riga esiste → UPDATE
+    if ($last_row){
+        $lastWasSearch = $last_row['search_start_date'] && $last_row['search_end_date'];
+        $appendChild = true;
+
+        if ($isSearch && !$lastWasSearch) {
+            // Trasforma ultima riga in ricerca
+            $last_row['search_start_date'] = $search_start_date;
+            $last_row['search_end_date'] = $search_end_date;
+        } elseif ($isSearch && $lastWasSearch &&
+                  $last_row['search_start_date']==$search_start_date &&
+                  $last_row['search_end_date']==$search_end_date){
+            // Stesso search → append child
+        } else {
+            // Altro evento → append child
+        }
+
+        $merged_payload_json = $mergePayload($last_row, $child_event);
+        $update_user = ($last_row['user_id']===null && is_numeric($user_id)) ? ", user_id=$user_id" : "";
+
+        $sql = "
+            UPDATE gaz_track_events SET
+                tracking_session = ".($tracking_session_esc ? "'$tracking_session_esc'" : 'NULL').",
+                search_location = ".($search_location ? "'$search_location'" : 'NULL').",
+                search_start_date = ".($last_row['search_start_date'] ? "'".$last_row['search_start_date']."'" : 'NULL').",
+                search_end_date   = ".($last_row['search_end_date']   ? "'".$last_row['search_end_date']."'"   : 'NULL').",
+                guests = ".($guests!==null ? $guests : 'NULL').",
+                room_type = ".($room_type ? "'$room_type'" : 'NULL').",
+                property_id = ".($property_id!==null ? $property_id : 'NULL').",
+                booking_value = ".($booking_value!==null ? $booking_value : 'NULL').",
+                booking_status = ".($booking_status ? "'$booking_status'" : 'NULL').",
+                first_booking_at = ".($booking_status ? "NOW()" : ($first_booking_at ? "'$first_booking_at'" : 'NULL')).",
+                last_property_viewed = ".($last_property_viewed!==null ? $last_property_viewed : 'NULL').",
+                source = ".($source ? "'$source'" : 'NULL').",
+                campaign = ".($campaign ? "'$campaign'" : 'NULL').",
+                platform = ".($platform ? "'".$link->real_escape_string($platform)."'" : 'NULL').",
+                ip_hash = '$ip_hash_esc',
+                user_agent = '$user_agent_esc',
+                lang = ".($lang ? "'$lang'" : 'NULL').",
+                event_payload = '$merged_payload_json',
+                last_event_at = NOW()
+                $update_user
+            WHERE id=".$last_row['id']."
+        ";
+        return $link->query($sql);
+    }
+
+    //  🔟 Nessuna riga → INSERT
+    $event_payload = json_encode([$child_event], JSON_UNESCAPED_UNICODE);
+
+    $sql = "
+        INSERT INTO gaz_track_events (
+            device_uuid, session_id, user_id,
+            tracking_session,
+            event_payload,
+            search_location, search_start_date, search_end_date, guests, room_type, property_id,
+            booking_value, booking_status, first_booking_at,
+            last_property_viewed,
+            source, campaign,
+            platform, ip_hash, user_agent,
+            lang
+        ) VALUES (
+            '$device_esc',
+            ".($session ? "'$session_esc'" : 'NULL').",
+            ".(is_numeric($user_id)?$user_id:'NULL').",
+            ".($tracking_session_esc?"'$tracking_session_esc'":'NULL').",
+            '".$link->real_escape_string($event_payload)."',
+            ".($search_location?"'$search_location'":'NULL').",
+            ".($search_start_date?"'$search_start_date'":'NULL').",
+            ".($search_end_date?"'$search_end_date'":'NULL').",
+            ".($guests!==null?$guests:'NULL').",
+            ".($room_type?"'$room_type'":'NULL').",
+            ".($property_id!==null?$property_id:'NULL').",
+            ".($booking_value!==null?$booking_value:'NULL').",
+            ".($booking_status?"'$booking_status'":'NULL').",
+            ".($first_booking_at?"'$first_booking_at'":'NULL').",
+            ".($last_property_viewed!==null?$last_property_viewed:'NULL').",
+            ".($source?"'$source'":'NULL').",
+            ".($campaign?"'$campaign'":'NULL').",
+            ".($platform?"'".$link->real_escape_string($platform)."'":'NULL').",
+            '$ip_hash_esc',
+            '$user_agent_esc',
+            ".($lang?"'$lang'":'NULL')."
+        )
+    ";
+    return $link->query($sql);
+}
+
+
+
 function iCalDecoder($file) {
     $ical = @file_get_contents($file);
 	preg_match_all('/BEGIN:VEVENT(.*?)END:VEVENT/si', $ical, $result, PREG_PATTERN_ORDER);
@@ -664,7 +1054,7 @@ function get_datasets($startprom,$endprom){// STAT graph
 						$retsumdat['OCCUPAZIONE'][$year][$house . '-occupazione'][$week] = 0;
 					}
 					$retsumdat['OCCUPAZIONE'][$year][$house . '-occupazione'][$week]++;
-					
+
 					if (!isset($retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$week])) {
 						$retsumdat['OCCUPAZIONE'][$year]['occup. tutti'][$week] = 0;
 					}
@@ -874,79 +1264,115 @@ function get_user_points_level($id_anagra, $point=false){// determina il livello
   }
 }
 
-function check_availability($start,$end,$house_code, $open_from="", $open_to=""){// controllo disponibilità
-  global $link, $azTables, $gTables, $genTables;// posso chiamare la funzione con entrambi i metodi
-  $check_in=$start;
-  $unavailable=1;
-  if ($azTables){
-    $table = $azTables."rental_events";
-    $table_ts = $azTables."tesbro";
-    $table_gr= $azTables."artico_group";
-    $table_ar= $azTables."artico";
-  }else{
-    $table = $gTables['rental_events'];
-    $table_ts = $gTables['tesbro'];
-    $table_gr= $gTables['artico_group'];
-    $table_ar= $gTables['artico'];
-  }
-  while (strtotime($start) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
-    if ((intval($open_from)>0 && strtotime($open_from."-".substr($start,0,4))<=strtotime($start) && strtotime($open_to."-".substr($start,0,4))>=strtotime($start)) || intval($open_from)==0){
-      // Controllo disponibilità dopo aver controllato se è aperto qualora è stato passato open from e to
-      $what = "title";
-      $where = "(custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%' OR custom_field LIKE '%ISSUE%') AND house_code = '".mysqli_real_escape_string($link,$house_code)."' AND start <= '". $start ."' AND end > '". $start."'";
-      $sql = "SELECT ".$what." FROM ".$table." LEFT JOIN ".$table_ts." ON ".$table.".id_tesbro = ".$table_ts.".id_tes  WHERE ".$where;
-      if ($available = mysqli_query($link, $sql)) {
-        $available = mysqli_fetch_array($available);
-      }else {
-       echo "Error: " . $sql . "<br>" . mysqli_error($link);
-      }
-    }else{
-      $available="chiuso";
-    }
-    //echo "<br>",$sql;
-    if (isset($available)){
-      // NON disponibile
-      $unavailable=0;
-      //echo "<br>NON disponibile...",print_r($available);
-      break;
-    }
-    $start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
-  }
+function check_availability($start, $end, $house_code, $open_from = "", $open_to = "") {
+    global $link, $azTables, $gTables;
 
-  if ($unavailable==1){  // quì, se disponibile, controllo se ci sono limitazioni nel giorno di entrata e di uscita
-    $sql = "SELECT ".$table_gr.".custom_field FROM ".$table_gr." LEFT JOIN ".$table_ar." ON ".$table_gr.".id_artico_group = ".$table_ar.".id_artico_group  WHERE ".$table_ar.".codice = '".mysqli_real_escape_string($link,$house_code)."'";
-    if ($res_cust = mysqli_query($link, $sql)) {
-      $row = mysqli_fetch_array($res_cust);
-      if (isset($row['custom_field']) && ($data = json_decode($row['custom_field'],true))){// se c'è un json in artico_group
-        if ((isset($data['vacation_rental']['week_check_in'])&& strlen($data['vacation_rental']['week_check_in'])>0 )|| (isset($data['vacation_rental']['week_check_out'])&& strlen($data['vacation_rental']['week_check_out'])>0 )){
-          // controllo il check-in
-          $in=explode(",", $data['vacation_rental']['week_check_in']);
-          $unavailable=2;
-          foreach ($in as $inday){
-            if (date('w', strtotime($check_in))== intval($inday)){
-              $unavailable=1; // disponibile per giorno check-in
-              break;
-            }
-          }
-          if ($unavailable==1){ // controllo il check-out
-            $out=explode(",", $data['vacation_rental']['week_check_out']);
-            $unavailable=3;
-            foreach ($out as $outday){
-              if (date('w', strtotime($end))== intval($outday)){
-                $unavailable=1; // disponibile per giorno check-out
+    static $house_cache = []; // caching dei custom_field artico_group
+    static $availability_cache = []; // memoization per stesso periodo
 
-                break;
-              }
-            }
-          }
+    $cache_key = $house_code . "|" . $start . "|" . $end . "|" . $open_from . "|" . $open_to;
+    if (isset($availability_cache[$cache_key])) {
+        return $availability_cache[$cache_key];
+    }
+
+    $unavailable = 1; // default disponibile
+    $check_in = $start;
+
+    // tabelle
+    if ($azTables) {
+        $table = $azTables . "rental_events";
+        $table_ts = $azTables . "tesbro";
+        $table_gr = $azTables . "artico_group";
+        $table_ar = $azTables . "artico";
+    } else {
+        $table = $gTables['rental_events'];
+        $table_ts = $gTables['tesbro'];
+        $table_gr = $gTables['artico_group'];
+        $table_ar = $gTables['artico'];
+    }
+
+    $start_ts = strtotime($start);
+    $end_ts = strtotime($end);
+
+    // --- 1) controllo apertura
+    $check_open = true;
+    if (intval($open_from) > 0) {
+        $open_from_ts = strtotime($open_from . "-" . date("Y", $start_ts));
+        $open_to_ts = strtotime($open_to . "-" . date("Y", $start_ts));
+        if ($start_ts < $open_from_ts || $start_ts > $open_to_ts) {
+            $check_open = false;
         }
-      }
-    }else {
-     echo "Error: " . $sql . "<br>" . mysqli_error($link);
     }
-  }
 
-  return $unavailable;
+    if ($check_open) {
+        // --- 2) batch query eventi
+        $sql = "SELECT start, end, custom_field 
+                FROM $table 
+                LEFT JOIN $table_ts ON $table.id_tesbro = $table_ts.id_tes 
+                WHERE house_code='" . mysqli_real_escape_string($link, $house_code) . "' 
+                AND ((start <= '$end' AND end > '$start')) 
+                AND (custom_field IS NULL 
+                    OR custom_field LIKE '%PENDING%' 
+                    OR custom_field LIKE '%CONFIRMED%' 
+                    OR custom_field LIKE '%FROZEN%' 
+                    OR custom_field LIKE '%ISSUE%')";
+        $res = mysqli_query($link, $sql);
+        if ($res) {
+            while ($row = mysqli_fetch_assoc($res)) {
+                $event_start = strtotime($row['start']);
+                $event_end = strtotime($row['end']);
+                if ($start_ts < $event_end && $end_ts > $event_start) {
+                    $availability_cache[$cache_key] = 0;
+                    return 0; // NON disponibile
+                }
+            }
+        } else {
+            echo "Error: $sql<br>" . mysqli_error($link);
+        }
+    } else {
+        $availability_cache[$cache_key] = 0;
+        return 0; // NON disponibile perché chiuso
+    }
+
+    // --- 3) controllo limitazioni settimanali (artico_group)
+    if (!isset($house_cache[$house_code])) {
+        $sql = "SELECT $table_gr.custom_field 
+                FROM $table_gr 
+                LEFT JOIN $table_ar ON $table_gr.id_artico_group = $table_ar.id_artico_group 
+                WHERE $table_ar.codice='" . mysqli_real_escape_string($link, $house_code) . "'";
+        $res = mysqli_query($link, $sql);
+        if ($res) {
+            $row = mysqli_fetch_assoc($res);
+            $house_cache[$house_code] = isset($row['custom_field']) ? json_decode($row['custom_field'], true) : [];
+        } else {
+            echo "Error: $sql<br>" . mysqli_error($link);
+            $house_cache[$house_code] = [];
+        }
+    }
+
+    $data = $house_cache[$house_code];
+    if (isset($data['vacation_rental'])) {
+        // check-in settimanale
+        if (!empty($data['vacation_rental']['week_check_in'])) {
+            $in_days = array_map('intval', explode(",", $data['vacation_rental']['week_check_in']));
+            if (!in_array(date('w', $start_ts), $in_days)) {
+                $availability_cache[$cache_key] = 0;
+                return 0;
+            }
+        }
+        // check-out settimanale
+        if (!empty($data['vacation_rental']['week_check_out'])) {
+            $out_days = array_map('intval', explode(",", $data['vacation_rental']['week_check_out']));
+            if (!in_array(date('w', $end_ts), $out_days)) {
+                $availability_cache[$cache_key] = 0;
+                return 0;
+            }
+        }
+    }
+
+    // --- 4) tutto ok, disponibile
+    $availability_cache[$cache_key] = 1;
+    return 1;
 }
 
 
@@ -1141,40 +1567,63 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
   $accommodations['web_url']=get_string_lang($web_url, $lang);// se ci sono i tag lingua restituisco l'url nella lingua appropriata
   $accommodations['aliquo']=$aliquo;
   $startw=$start;
-  while (strtotime($startw) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
-    //Calcolo del prezzo locazione
-    $what = "price, minstay";
-    $where = "start <= '". $startw ."' AND end >= '". $startw."' AND house_code ='".mysqli_real_escape_string($link,$housecode)."'";
-    $sql = "SELECT ".$what." FROM ".$azTables."rental_prices"." WHERE ".$where;
-    if ($result = mysqli_query($link, $sql)) {
-      $prezzo = mysqli_fetch_array($result);
-    }
+ // Recupero tutti i prezzi del periodo con UNA SOLA query
+$prezzi_periodo = [];
 
-    if (isset($prezzo['minstay']) && intval($prezzo['minstay'])>0 && intval($nights) < intval($prezzo['minstay'])){// se richiesto controllo se non si è raggiunto il soggiorno minimo giornaliero del prezzo
-      if (intval($prezzo['minstay'])>$minstay_memo){
-        $minstay_memo=intval($prezzo['minstay']);
-        $accommodations['msg'][]=$script_transl['msg_minstay']." ".$prezzo['minstay']." ".$script_transl['nights']; //." ".$script_transl['msg_minstay2']." ".$nights;
-        //echo "<br>",$housecode," Questo alloggio sarebbe disponibile ma il soggiorno minimo è di ",$prezzo['minstay']," notti mentre sono state richieste solo ",$nights, "notti";
-        //break;
-      }
-    }
+$housecode_safe = mysqli_real_escape_string($link,$housecode);
 
-    // NB: il prezzo mostrato al pubblico deve essere sempre IVA compresa
-    if (isset($prezzo)){// se c'è un prezzo nel calendario lo uso
-      if ($ivac=="si"){
-        $accommodations['price'] += floatval($prezzo['price']);// aggiungo il prezzo giornaliero torvato
-      }else{
-        $accommodations['price'] += floatval($prezzo['price'])+((floatval($prezzo['price'])*floatval($aliquo))/100);// aggiungo il prezzo e aggiungo l'iva
-      }
-    } elseif(floatval($web_price)>0){// altrimenti uso il prezzo base al quale devo sempre aggiungere l'iva
-      $accommodations['price'] += floatval($web_price)+((floatval($web_price)*floatval($aliquo))/100);
+$sql = "SELECT start, end, price, minstay 
+        FROM ".$azTables."rental_prices
+        WHERE house_code = '".$housecode_safe."'
+        AND start <= '".$end."'
+        AND end >= '".$start."'";
 
-    }else{// se non c'è alcun prezzo non posso prenotare e metto non prenotabile
-      unset ($accommodations);
-      return false;
-    }
-    $startw = date ("Y-m-d", strtotime("+1 days", strtotime($startw)));// aumento di un giorno il ciclo
+if ($result = mysqli_query($link,$sql)){
+  while($row = mysqli_fetch_assoc($result)){
+    $prezzi_periodo[] = $row;
   }
+}
+
+while (strtotime($startw) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
+
+  $prezzo = null;
+
+  // cerco il prezzo valido per il giorno corrente tra quelli caricati
+  foreach($prezzi_periodo as $p){
+    if ($p['start'] <= $startw && $p['end'] >= $startw){
+      $prezzo = $p;
+      break;
+    }
+  }
+
+  if (isset($prezzo['minstay']) && intval($prezzo['minstay'])>0 && intval($nights) < intval($prezzo['minstay'])){// se richiesto controllo se non si è raggiunto il soggiorno minimo giornaliero del prezzo
+    if (intval($prezzo['minstay'])>$minstay_memo){
+      $minstay_memo=intval($prezzo['minstay']);
+      $accommodations['msg'][]=$script_transl['msg_minstay']." ".$prezzo['minstay']." ".$script_transl['nights'];
+    }
+  }
+
+  // NB: il prezzo mostrato al pubblico deve essere sempre IVA compresa
+  if (isset($prezzo)){// se c'è un prezzo nel calendario lo uso
+    if ($ivac=="si"){
+      $accommodations['price'] += floatval($prezzo['price']);
+    }else{
+      $accommodations['price'] += floatval($prezzo['price'])+((floatval($prezzo['price'])*floatval($aliquo))/100);
+    }
+
+  } elseif(floatval($web_price)>0){// altrimenti uso il prezzo base al quale devo sempre aggiungere l'iva
+
+    $accommodations['price'] += floatval($web_price)+((floatval($web_price)*floatval($aliquo))/100);
+
+  }else{// se non c'è alcun prezzo non posso prenotare e metto non prenotabile
+
+    unset ($accommodations);
+    return false;
+
+  }
+
+  $startw = date("Y-m-d", strtotime($startw) + 86400);// aumento di un giorno il ciclo
+}
   // Se ho trovato prezzo disponibile procedo con il calcolo sconti
   $accommodations['fixquote'] = floatval($in_fixquote)+((floatval($in_fixquote)*floatval($aliquo))/100);// inizializzo eventuale quota fissa e aggiungo IVA
   $accommodations['price'] += $accommodations['fixquote'];
@@ -1355,44 +1804,7 @@ function banIp($ip, $durationMinutes = 60) {
     chmod($file, 0666); // Mantiene permessi corretti
 }
 
-// restituisce il tipo di dispositivo usato dall'utente.
-/*
-app = App Android “AppGmonamour”
-mobile = Smartphone o cookie mobile
-tablet = Tablet o cookie tablet
-desktop = PC/Laptop o cookie desktop
-unknown = Bot, UA non riconosciuto, UA vuoto
-*/
-function detect_device(): string{
-    $server = $_SERVER;
 
-    if (!empty($server['HTTP_USER_AGENT']) &&
-        stripos($server['HTTP_USER_AGENT'], 'AppGmonamour') !== false) {
-        return 'app';
-    }
-
-    $ua = strtolower($server['HTTP_USER_AGENT'] ?? '');
-    if ($ua === '') return 'unknown';
-
-    if (preg_match('/bot|spider|crawl|slurp|facebookexternalhit|mediapartners-google/', $ua)) {
-        return 'unknown';
-    }
-
-    if (strpos($ua, 'iphone') !== false || strpos($ua, 'ipod') !== false) return 'mobile';
-
-    if (strpos($ua, 'ipad') !== false ||
-        (strpos($ua, 'macintosh') !== false &&
-         strpos($ua, 'mobile') === false &&
-         strpos($ua, 'safari') !== false)) return 'tablet';
-
-    if (strpos($ua, 'android') !== false) return (strpos($ua, 'mobile') !== false) ? 'mobile' : 'tablet';
-
-    if (preg_match('/windows phone|iemobile|blackberry|bb10|opera mini|opera mobi/', $ua)) return 'mobile';
-
-    if (preg_match('/windows nt|macintosh|x11|linux|cros/', $ua)) return 'desktop';
-
-    return 'unknown';
-}
 
 //CANCELLA UNA PRENOTAZIONE totalmente con tutti i suoi annessi
 function delete_booking(int $id_tes, array $admin_aziend, array $gTables) {
@@ -1405,7 +1817,7 @@ function delete_booking(int $id_tes, array $admin_aziend, array $gTables) {
     $rs_righidel = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes =".$id_tes,"id_tes DESC");
     while ($a_row = gaz_dbi_fetch_array($rs_righidel)) { // *** nota bene ***  la cancellazione dei documenti pdf va portata fuori dal ciclo altrimenti prova a cancellare per ogni rigo!
         gaz_dbi_del_row($gTables['rigbro'], "id_rig", $a_row['id_rig']);
-        			
+
         gaz_dbi_del_row($gTables['body_text'], "table_name_ref = 'rigbro' AND id_ref ",$a_row['id_rig']);
     }
 
@@ -1438,7 +1850,7 @@ function delete_booking(int $id_tes, array $admin_aziend, array $gTables) {
         $result = gaz_dbi_query($sql);// resetto il preventivo
     }
 
-    // Cancello i PDF della prenotazione e del contratto					
+    // Cancello i PDF della prenotazione e del contratto
     $file = DATA_DIR . "files/" . $admin_aziend['codice'] . "/pdf_Lease/" . $id_tes . ".pdf";
     if (file_exists($file)) {
         if (is_writable(dirname($file))) {

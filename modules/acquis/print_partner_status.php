@@ -72,10 +72,8 @@ $pdf->setTopMargin(43);
 $pdf->setRiporti('');
 $pdf->AddPage();
 $paymov = new Schedule;
-if (isset($_GET['clfoco'])&& $_GET['clfoco']>100000000 ){
-	$admin_aziend['masfor']=intval($_GET['clfoco']);
-}
-$paymov->setScheduledPartner($admin_aziend['masfor']);
+$masfor =	(isset($_GET['clfoco'])&& $_GET['clfoco'] > 200 ) ? intval($_GET['clfoco']) : $admin_aziend['masfor'];
+$paymov->setScheduledPartner($masfor);
 if (sizeof($paymov->Partners) > 0) {
   $anagrafica = new Anagrafica();
   foreach ($paymov->Partners as $p) {
