@@ -95,15 +95,36 @@ class acquisForm extends GAzieForm {
         echo "\t </select>\n";
     }
 
-	function concileArtico($name,$search,$val) {
+	function concileArtico($name,$search,$val,$k,$identifier='',$expiry='') {
 		global $gTables;
 		$selopt=[''=>['bgc'=>'ffffff','des'=>'NON IN MAGAZZINO'],'Insert_from_db'=>['bgc'=>'adf04e','des'=>'CERCA ARTICOLO MAGAZZINO'],'Insert_New'=>['bgc'=>'f0ad4e','des'=>'INSERISCI COME NUOVO'],'Insert_W_lot'=>['bgc'=>'5bc0de','des'=>'INSERISCI NUOVO C/LOTTO'],'Insert_W_matr'=>['bgc'=>'f04ead','des'=>'INSERISCI NUOVO C/MATRICOLA']];
 		$art = gaz_dbi_get_row($gTables['artico'], 'codice', $val);
 		$acc = '<div class="col-xs-12">';
+    $acc_lm = '';
 		if ($art) {
-			$acc .= '<div class="row bg-info" onclick="this.form.hidden_req.value=\'change_'.$name.'\';" title="Cambia articolo"><div class="btn btn-xs btn-info">'.$val.'</div><input type="submit" class="bg-info" tabindex="999" value="'.$art['descri'].'" name="change_'.$name.'"><div>';
+			$acc .= '<div class="row bg-info">
+                <input type="submit" class="btn btn-xs btn-info" tabindex="999" value="'.$val.'" name="change_'.$name.'" title="Cambia articolo" />
+                <div class=" bg-info">'.$art['descri'].'</div>
+              <div>';
 			$acc .= '<input type="hidden" name="search_'.$name.'" value="'.$art['descri'].'" />';
 			$acc .= '<input type="hidden" id="'.$name.'" name="'.$name.'" value="'.$val.'">';
+      if ($art['lot_or_serial'] >= 1){
+        $acc_lm .='<div id="lm_dialog' . $k . '" class="collapse" >
+          <div class="form-group">
+					<div>';
+        $acc_lm .='<label>Lot/serial:</label><input type="text" name="identifier_' . $k . '" value="' . $identifier . '" ><br>
+          <label>Scadenza:</label><input class="lm_expiry" type="text" name="expiry_' . $k . '"  value="' . $expiry . '" >
+          </div>
+          </div>
+          </div>';
+        if (empty($identifier)) {
+          $acc_lm .='<div><button class="btn btn-xs btn-danger" type="image" data-toggle="collapse" href="#lm_dialog' . $k . '">Lot/Sn: <i class="glyphicon glyphicon-tag"></i></button></div>';
+        } else {
+          $acc_lm .='<div><button class="btn btn-xs btn-success" type="image" data-toggle="collapse" href="#lm_dialog' . $k . '">'
+          . "Lot/Sn: " .$identifier . ' - '. $expiry .' <i class="glyphicon glyphicon-tag"></i>'
+          . '</button></div>';
+        }
+      }
 		} elseif($val=='Insert_from_db'){
 			$acc .= '<input type="text" name="search_'.$name.'" artref="'.$name.'" class="search_artico" placeholder="Cerca articolo" value="' . $search . '"  maxlength="16" />';
 			$acc .= '<input type="hidden" id="'.$name.'" name="'.$name.'" value="'.$val.'">';
@@ -116,7 +137,7 @@ class acquisForm extends GAzieForm {
 			$acc .= '</select>';
 		}
 		$acc .= '</div>';
-		return $acc;
+		return $acc.$acc_lm;
 	}
 
 

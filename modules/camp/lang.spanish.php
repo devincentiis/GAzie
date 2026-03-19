@@ -408,7 +408,7 @@ $strScript = array("browse_document.php" =>
         'browse_for_file' => 'Seleccionar un archivo',
         'id_anagra' => 'Fornitore',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
         )
     )

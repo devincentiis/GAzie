@@ -171,11 +171,11 @@ class DocContabVars {
       $this->perbollo = 0;
       $this->iva_bollo = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['taxstamp_vat']);
       $this->client = $anagrafica->getPartner($tesdoc['clfoco']);
+      if(!$this->client){
+        $this->client=['ragso1'=>': ','ragso2'=>'','pec_email'=>'','fe_cod_univoco'=>'','fe_cod_univoco'=>'','indspe'=>'','citspe'=>'','country'=>'IT','capspe'=>'','prospe'=>'','pariva'=>'','pariva'=>'','codfis'=>'','sedleg'=>'','fiscal_rapresentative_id'=>'','stapre'=>'','id_currency'=>$admin_aziend['id_currency'],'id_language'=>1];
+      }
       $this->client['id_language'] = $this->client['id_language'] < 1 ? 1 : $this->client['id_language'];
       $this->client['language_svg_flag']  = gaz_dbi_get_row($gTables['languages'], "lang_id",$this->client['id_language'])['image_svg'];
-      if(!$this->client){
-        $this->client=['ragso1'=>': ','ragso2'=>'','pec_email'=>'','fe_cod_univoco'=>'','fe_cod_univoco'=>'','indspe'=>'','citspe'=>'','country'=>'IT','capspe'=>'','prospe'=>'','pariva'=>'','pariva'=>'','codfis'=>'','sedleg'=>'','fiscal_rapresentative_id'=>'','stapre'=>'','id_currency'=>$admin_aziend['id_currency']];
-      }
       if ($this->client['id_currency'] < 1 ) { $this->client['id_currency'] = 1; }
       $this->currency = gaz_dbi_get_row($gTables['currencies'], "id", $this->client['id_currency']);
       $this->descri_partner =($this->client['country']=="IT")?'Cliente':'Customer';

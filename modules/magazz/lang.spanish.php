@@ -446,7 +446,7 @@ $strScript = array("browse_document.php" =>
 		'movimentabile' => 'Artículo movible',
 		'ordinabile' => 'Artículo ordenable',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
         )
     ),

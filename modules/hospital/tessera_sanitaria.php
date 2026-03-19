@@ -37,7 +37,7 @@ if (isset($_GET['back'])){
   $black = imagecolorallocate($pngimg,0,0,0);
   $white = imagecolorallocate($pngimg,255,255,255);
   // Set Path to Font File
-  $font = 'SansB.ttf';
+  $font = './SansB.ttf';
   // Print Text On Image
   imagettftext($pngimg,20,0,40,345, $black, $font, $r['last_name']);
   imagettftext($pngimg,20,0,40,405, $black, $font, $r['first_name']);
@@ -56,7 +56,7 @@ if (isset($_GET['back'])){
   $black = imagecolorallocate($pngimg,0,0,0);
   $white = imagecolorallocate($pngimg,255,255,255);
   // Set Path to Font File
-  $font = 'SansB.ttf';
+  $font = './SansB.ttf';
   // Print Text On Image
   imagettftext($pngimg,24,0,380,210, $black, $font, $r['tax_code']);
   imagettftext($pngimg,20,0,10,435, $black, $font, $r['doc_expiry']);

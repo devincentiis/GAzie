@@ -39,7 +39,7 @@ $strScript = array(
     "admin_letter.php" =>
     array('title' => " Lettera ",
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia anagrafica'),
         array("LET" => " Normale ", "DIC" => "Dichiarazione", "SOL" => " Sollecito ", "PRE" => " Preventivo ", "SMS" => " Messaggio di testo " ),
         " del ",

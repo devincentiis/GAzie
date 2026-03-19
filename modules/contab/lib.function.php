@@ -337,13 +337,10 @@ class contabForm extends GAzieForm {
                 echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
             }
             if( !strstr($val,'id') && $val<=100000000){
-              echo "\t<input type=\"text\" id=\"search_$name\" name=\"search[$name]\" value=\"" . $strSearch . "\" maxlength=\"16\" size=\"10\" class=\"FacetInput\">\n";
-            }
-            if (isset($msg)) {
-              echo "<input type=\"text\" style=\"color: red; font-weight: bold;\" size=\"" . strlen($msg) . "\" disabled value=\"$msg\">\n";
+              echo '<input type="text" id="search_'.$name.'" name="search['.$name.']" value="' . $strSearch .'" maxlength=16 placeholder="'.(isset($msg)?$msg.' 🔍' : '').'" >';
             }
             if( !strstr($val,'id') && $val<=100000000){
-               echo '<button type="submit" class="btn btn-default btn-sm" name="search_str"><i class="glyphicon glyphicon-search"></i></button>';
+              echo '<button type="submit" name="search_str"> 🔍 </button>';
             }
           }
         } else {   // altri sottoconti

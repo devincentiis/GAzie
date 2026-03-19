@@ -252,7 +252,7 @@ $strScript = array(
       array(0 => 'Stampa schedari di magazzino',
         'title' => 'Selezione per la visualizzazione e/o la stampa delle schede di magazzino',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -286,7 +286,7 @@ $strScript = array(
     "select_deplia.php" =>
       array('title' => 'Selezione per la stampa del catalogo',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -307,7 +307,7 @@ $strScript = array(
     "select_listin.php" =>
       array('title' => 'Selezione per la stampa dei listini',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -334,7 +334,7 @@ $strScript = array(
     "update_vatrate.php" =>
       array('title' => 'Modifica aliquota IVA degli articoli',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('Errore nullo',
@@ -354,7 +354,7 @@ $strScript = array(
     "update_prezzi.php" =>
       array('title' => 'Modifica prezzi di listino',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('Valore "0" inaccettabile in questa modalit&agrave; di Modifica',
@@ -479,7 +479,7 @@ $strScript = array(
         'warranty_days' => 'Giorni di garanzia',
         'unita_durability' => array('' => '', '>' => '>', '<' => '<', 'H' => 'H', 'D' => 'D', 'M' => 'M'),
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
         )
     ),
@@ -590,7 +590,7 @@ $strScript = array(
       'codice_fornitore' => 'Codice del fornitore',
       'ordinabile' => 'Articolo ordinabile',
       'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
       )
     ),
@@ -614,7 +614,7 @@ $strScript = array(
       array(0 => 'Cambia codici articoli di magazzino',
         'title' => 'Cambio codici articoli di magazzino',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'err' => ['noold'=>'Codice attuale dell\'articolo non selezionato','nonew'=>'Nuovo codice non selezionato','codexist'=>'Il nuovo codice esiste già se si tratta dello stesso prodotti clicca su: <input type="submit" class="btn btn-xs btn-default" name="mergecodart" value="Unisci in codice esistente">'],

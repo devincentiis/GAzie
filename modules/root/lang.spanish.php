@@ -207,7 +207,7 @@ if (!defined("MESSAGE_WELCOME")) {
     define("WORDING_REGISTER_NEW_ADMIN", "Sono un nuovo utente");
     define("WORDING_REGISTRATION_CAPTCHA", "Inserisci i caratteri che vedi nell'immagine di sopra");
     define("WORDING_REGISTRATION_EMAIL", "Email (Attenzione! Inserisci un indirizzo valido per poter ricevere la mail con il link per la verifica)");
-    define("WORDING_REGISTRATION_PASSWORD", "Password (minimo 8 caratteri!)");
+    define("WORDING_REGISTRATION_PASSWORD", "Password (minimo 8 caratteri)");
     define("WORDING_REGISTRATION_PASSWORD_REPEAT", "Ripeti la password");
     define("WORDING_REGISTRATION_USERNAME", "Username per il login (nickname fatto di lettere e numeri, min.8 max.64)");
     define("WORDING_REMEMBER_ME", "Ricordamelo per 2 settimane");

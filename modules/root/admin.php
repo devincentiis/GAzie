@@ -28,8 +28,8 @@ require( "../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $rescomp=gaz_dbi_get_row($gTables['config'], 'variable', 'users_noadmin_all_company');
 $company_choice = ($rescomp)?$rescomp['cvalue']:'';
-require( "../../modules/vendit/lib.function.php");
-$lm = new lotmag;
+//require( "../../modules/vendit/lib.function.php");
+//$lm = new lotmag;
 
 if (!isset($_POST['hidden_req'])) {
   $form['hidden_req'] = '';

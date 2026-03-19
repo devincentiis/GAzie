@@ -28,9 +28,8 @@ class ComposerStaticInit783a7e6f30b1179982f49db97e0f90ee
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
-            'Psr\\Http\\Message\\' => 17,
-            'Psr\\Http\\Client\\' => 16,
             'PhpOffice\\PhpSpreadsheet\\' => 25,
+            'ParagonIE\\Sodium\\' => 17,
             'ParagonIE\\ConstantTime\\' => 23,
             'ParagonIE\\CipherSweet\\' => 22,
             'PHPMailer\\PHPMailer\\' => 20,
@@ -67,18 +66,13 @@ class ComposerStaticInit783a7e6f30b1179982f49db97e0f90ee
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
         ),
-        'Psr\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
-        ),
-        'Psr\\Http\\Client\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-client/src',
-        ),
         'PhpOffice\\PhpSpreadsheet\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
+        ),
+        'ParagonIE\\Sodium\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/sodium_compat/namespaced',
         ),
         'ParagonIE\\ConstantTime\\' => 
         array (

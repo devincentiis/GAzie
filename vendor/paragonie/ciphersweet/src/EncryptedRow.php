@@ -498,6 +498,26 @@ class EncryptedRow
     }
 
     /**
+     * Override this in inherited classes.
+     *
+     * @param array $row
+     * @param string $field
+     * @return SymmetricKey|null
+     * @throws CipherSweetException
+     * @throws CryptoOperationException
+     */
+    protected function getFieldSymmetricKey(array $row, string $field): ?SymmetricKey
+    {
+        if (!array_key_exists($field, $row)) {
+            return null;
+        }
+        return $this->engine->getFieldSymmetricKey(
+            $this->tableName,
+            $field
+        );
+    }
+
+    /**
      * Decrypt any of the appropriate fields in the given array.
      *
      * If any columns are defined in this object to be decrypted, the value
@@ -511,6 +531,7 @@ class EncryptedRow
      * @throws InvalidCiphertextException
      * @throws SodiumException
      *
+     * @psalm-suppress DocblockTypeContradiction
      * @psalm-suppress InvalidReturnStatement
      */
     public function decryptRow(
@@ -526,11 +547,8 @@ class EncryptedRow
             $this->engine->setActiveTenant($tenant);
         }
         foreach ($this->fieldsToEncrypt as $field => $type) {
-            $key = $this->engine->getFieldSymmetricKey(
-                $this->tableName,
-                $field
-            );
-            if (!array_key_exists($field, $row)) {
+            $key = $this->getFieldSymmetricKey($row, $field);
+            if (is_null($key)) {
                 if (!$this->permitEmpty) {
                     throw new EmptyFieldException('Field is not defined in row: ' . $field);
                 }
@@ -598,10 +616,10 @@ class EncryptedRow
                     ' on array, nothing given.'
                 );
             }
-            $key = $this->engine->getFieldSymmetricKey(
-                $this->tableName,
-                $field
-            );
+            $key = $this->getFieldSymmetricKey($row, $field);
+            if (is_null($key)) {
+                continue;
+            }
             $aad = $this->canonicalizeAADForField($field, $row);
             if (in_array($type, Constants::TYPES_JSON, true) && !empty($this->jsonMaps[$field])) {
                 // JSON is a special case
@@ -627,6 +645,10 @@ class EncryptedRow
                 $plaintext = $this->convertToString($row[$field], Constants::TYPE_BOOLEAN);
                 $return[$field] = $backend->encrypt($plaintext, $key, $aad);
                 continue;
+            }
+
+            if ($row[$field] instanceof \UnitEnum) {
+                $row[$field] = self::enumToScalar($row[$field]);
             }
 
             // All others must be scalar
@@ -843,6 +865,9 @@ class EncryptedRow
 
         /** @var string|bool|int|float|null $unconverted */
         $unconverted = $row[$column];
+        if ($unconverted instanceof \UnitEnum) {
+            $unconverted = self::enumToScalar($unconverted);
+        }
 
         $plaintext = $index->getTransformed(
             $this->convertToString($unconverted, $fieldType)
@@ -1090,11 +1115,8 @@ class EncryptedRow
      */
     protected function canonicalizeAADForField(string $field, array $row): string
     {
-        if (empty($this->aadSourceField[$field])) {
+        if (!array_key_exists($field, $this->aadSourceField)) {
             return '';
-        }
-        if (is_string($this->aadSourceField[$field])) {
-            return $this->aadSourceField[$field];;
         }
         if (array_intersect(
             array_keys($this->fieldsToEncrypt),
@@ -1132,5 +1154,17 @@ class EncryptedRow
                 'Primary key must bot be encrypted'
             );
         }
+    }
+
+    /**
+     * @param \UnitEnum $enum
+     * @return string|int
+     */
+    public static function enumToScalar(\UnitEnum $enum): string|int
+    {
+        return match(true) {
+            $enum instanceof \BackedEnum => $enum->value,
+            default => $enum->name,
+        };
     }
 }

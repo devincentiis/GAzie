@@ -35,10 +35,10 @@ if (isset($_SESSION['print_request'])) {
          echo "<HTML><HEAD><TITLE>Wait for PDF</TITLE>\n";
          echo "<script type=\"text/javascript\">\n";
          $_SESSION['script_ref'] = $_SERVER['HTTP_REFERER'];
-         echo "setTimeout(\"window.location='stampa_docven.php?td=".$id_tes['tipdoc']."&si=".$id_tes['seziva']."&cl=".$id_tes['codcli'].
+         echo "setTimeout(\"window.location='stampa_docacq.php?td=".$id_tes['tipdoc']."&si=".$id_tes['seziva']."&cl=".$id_tes['codcli'].
                                                              "&di=".$id_tes['datini']."&df=".$id_tes['datfin'].
                                                              "&pi=".$id_tes['proini']."&pf=".$id_tes['profin'].
-                                                             "&ni=".$id_tes['numini']."&nf=".$id_tes['numfin']."'\",1000)\n";
+                                                             "'\",1000)\n";
          echo "</script></HEAD>\n<BODY><DIV align=\"center\">Wait for PDF</DIV><DIV align=\"center\">Aspetta il PDF</DIV></BODY></HTML>";
    } else {
          $result = gaz_dbi_dyn_query("*", $gTables['tesdoc'], "id_tes = $id_tes","id_tes desc",0,1);
@@ -59,13 +59,6 @@ if (isset($_SESSION['print_request'])) {
             exit;
          }
    }
-} else {
-    $locazione = 'docume_acquis.php';
-    if (isset($_SESSION['script_ref'])) {
-        $locazione = $_SESSION['script_ref'];
-        unset ($_SESSION['script_ref']);
-    }
-    header("Location: ".$locazione);
-    exit;
-}
+} 
+
 ?>

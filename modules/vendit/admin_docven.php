@@ -2634,15 +2634,15 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
 if ($form['id_tes'] > 0) { // è una modifica
     $title = ucfirst($script_transl[$toDo] . $script_transl['doc_name'][$form['tipdoc']]) . " n." . $form['numdoc'];
     echo "<input type=\"hidden\" value=\"" . $form['tipdoc'] . "\" name=\"tipdoc\">\n";
-    echo "<div align=\"center\" class=\"FacetFormHeaderFont\">$title ";
+    echo '<div class="FacetFormHeaderFont">'.$title;
 } else { // è un inserimento
     $tidoc_selectable = array_intersect_key($script_transl['doc_name'], array('DDT'=>'','FAI'=>'','FAP'=>'','FAQ'=>'','FAA'=>'','FAF'=>'','FNC'=>'','FND'=>'','DDV'=>'','RPL'=>'','RDV'=>'','DDY'=>'','DDS'=>'','VRI'=>'','CMR'=>'','XFA'=>'','DDX' =>'','DDZ' =>'','DDW' =>'','DDD' =>'','DDJ' =>'','DDC' =>'','DDM' =>'','DDO' =>'' ));
-    echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . ucfirst($script_transl[$toDo]) . $script_transl['tipdoc'];
+    echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . ucfirst($script_transl[$toDo]);
     $gForm->variousSelect('tipdoc', $tidoc_selectable, $form['tipdoc'], 'FacetFormHeaderFont', true, 'tipdoc');
 }
 
 if ($form['tipdoc'] == 'FAI') {
-    echo "<select name=\"template\" class=\"FacetSelect\">\n";
+    echo " <select name=\"template\" class=\"FacetSelect\">\n";
     echo "<option value=\"FatturaImmediata\" ";
     if ($form['template'] == "FatturaImmediata") {
         echo " selected";
@@ -2656,7 +2656,7 @@ if ($form['tipdoc'] == 'FAI') {
 } else {
     echo "<input type=\"hidden\" value=\"" . $form['template'] . "\" name=\"template\">\n";
 }
-echo " :";
+echo " a:";
 
 $select_cliente = new selectPartner('clfoco');
 $select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli']);

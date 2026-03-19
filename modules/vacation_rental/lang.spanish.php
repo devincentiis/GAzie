@@ -196,7 +196,7 @@ $strScript = array(
     "admin_booking.php" =>
     array(array("VPR" => "PREVENTIVO prenotazione", "VOR" => "Prenotazione diretta", "VOW" => "Prenotazione dal Web", "VOG" => "Ordine settimanale del giorno"),
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente'),
         'title' => 'Prenotazioni',
         " Prenotazione ",
@@ -404,7 +404,7 @@ $strScript = array(
         'deposit_type_value' => array(0 => 'a valore', '1' => 'a percentuale sul totale'),
         'tur_tax_value' => array(0 => 'a persona', '1' => 'a persona escluso i minori', '2' => 'a notte e a persona', '3' => 'a notte escluso i minori', '4' => 'a soggiorno'),
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
         )
     ),
@@ -760,7 +760,7 @@ $strScript = array(
 		"codice alloggio",
 		'typerow_price' => array(0 => 'a prenotazione', 1 => 'a persona', 2 => 'a notte', 3 => 'a persona e a notte', 4 => 'cadauno'),
 		'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
       ),
     'err' => array(

@@ -257,7 +257,7 @@ if (!isset($_POST['id_tes'])) { //al primo accesso  faccio le impostazioni ed il
       $form['units'] = $testate['units'];
       $form['volume'] = $testate['volume'];
       $rs_righi = gaz_dbi_dyn_query("*", $gTables['rigbro'], "id_tes = " . $form['id_tes'], "id_rig asc");
-      $codiciarticoli=[];
+      $progressivo_quanti_articolo=[];
       while ($rigo = gaz_dbi_fetch_array($rs_righi)) {
         if ( $rigo['tiprig'] == 910 ) { // gli annullati non li propongo più
           continue;
@@ -290,13 +290,20 @@ if (!isset($_POST['id_tes'])) { //al primo accesso  faccio le impostazioni ed il
         } else {
           $form['righi'][$_POST['num_rigo']]['confezione'] = 0;
         }
-        $totale_evadibile = $rigo['quanti'];
-        if (!in_array(array($rigo['codart'],$rigo['descri']),$codiciarticoli)) {
-          $codiciarticoli[]=array($rigo['codart'],$rigo['descri']);
-          $evasi = gaz_dbi_get_single_value($gTables['rigdoc'], "SUM(quanti)", "id_order = ".$form['id_tes']." AND codart='".$rigo['codart']."' AND tiprig < 900");
-          $totale_evadibile -= $evasi;
-          if ($totale_evadibile == 0 ) {
-            $form['righi'][$_POST['num_rigo']]['checkval'] = false;
+        $form['righi'][$_POST['num_rigo']]['checkval'] = false;
+        $totale_evadibile = 0.0;
+        if ( strlen($rigo['codart']) >= 1){
+          if (!isset($progressivo_quanti_articolo[$rigo['codart']]) ) { // controllo il totale evadibile per singolo articolo ogni volta che ne incontro uno nuovo
+            $totale_evasi = gaz_dbi_get_single_value($gTables['rigdoc'], "SUM(quanti)", "id_order = ".$form['id_tes']." AND codart='".$rigo['codart']."' AND tiprig < 900");
+            $progressivo_quanti_articolo[$rigo['codart']]['evadibile'] = $rigo['quanti'];
+            $progressivo_quanti_articolo[$rigo['codart']]['evaso'] = $totale_evasi;
+          } else {
+            $progressivo_quanti_articolo[$rigo['codart']]['evadibile'] += $rigo['quanti'];
+          }
+          if ($progressivo_quanti_articolo[$rigo['codart']]['evadibile'] >= $progressivo_quanti_articolo[$rigo['codart']]['evaso'] ) {
+            $totale_evadibile = $progressivo_quanti_articolo[$rigo['codart']]['evadibile'] - $progressivo_quanti_articolo[$rigo['codart']]['evaso'];
+            $progressivo_quanti_articolo[$rigo['codart']]['evaso'] += $totale_evadibile;
+            $form['righi'][$_POST['num_rigo']]['checkval'] = true;
           }
         }
         // Antonio Germani - controllo la giacenza in magazzino e gli ordini già ricevuti

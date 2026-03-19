@@ -67,7 +67,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         //print_r($form);die;
         if ($msg == "") {// nessun errore
             if ($toDo == 'update') { // e' una modifica
-              $rental_discounts_row=gaz_dbi_get_row($gTables['rental_discounts_row'], "id", $form['id']); // carico il vecchio json custom_field
+              $rental_discounts_row=gaz_dbi_get_row($gTables['rental_discounts'], "id", $form['id']); // carico il vecchio json custom_field
               $custom_field=(isset($rental_discounts_row['custom_field']))?$rental_discounts_row['custom_field']:'';
               if ($custom_field<>'' && $data = json_decode($custom_field,true)){// se c'è un json
                 if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
@@ -285,7 +285,7 @@ if ($toDo == 'update') {
           <option value="2" <?php echo ($form['device_disc'] === '2') ? 'selected' : ''; ?>>Web</option>
         </select>
 
-        <input type="text" name="app_name" id="device_app_name" placeholder="Nome dell'App presente nel UA (User Agent webview)"
+        <input title="Nome identificativo dell'App webview presente nell'User Agent" type="text" name="app_name" id="device_app_name" placeholder="Nome in UA (User Agent webview)"
                value="<?php echo htmlspecialchars($form['app_name'] ?? ''); ?>"
                style="display: <?php echo ($form['device_disc'] === '1') ? 'inline-block' : 'none'; ?>; margin-left:10px;">
       </td>

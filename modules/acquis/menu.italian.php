@@ -57,7 +57,8 @@ $transl['acquis'] = array('name' => " Acquisti",
         19 => array("Acquisisci fattura elettronica", "Acquisisci fattura elettronica"),
         20 => array("Ricevuto DdT ritorno da lavorazione", "Ricevuto DdT ritorno da lavorazione"),
         21 => array("Genera XML-CBI bonifico", "Genera XML-CBI bonifico"),
-        22 => array("Impacchetta fatture per consulente", "Impacchetta fatture per consulente")
+        22 => array("Impacchetta fatture per consulente", "Impacchetta fatture per consulente"),
+        23 => array("Stampa documenti gi&agrave; emessi", "Ristampa Documenti")
     )
 );
 ?>

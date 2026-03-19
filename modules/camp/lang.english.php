@@ -216,7 +216,7 @@ $strScript = array("browse_document.php" =>
     array(0 => 'Stampa schedari di magazzino',
         'title' => 'Selection for view and/or print the warehouse item reports',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -254,7 +254,7 @@ $strScript = array("browse_document.php" =>
     "select_deplia.php" =>
     array('title' => 'Selezione per la stampa del catalogo',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Change item'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -274,7 +274,7 @@ $strScript = array("browse_document.php" =>
     "select_listin.php" =>
     array('title' => 'Selezione per la stampa dei listini',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Change item'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -292,7 +292,7 @@ $strScript = array("browse_document.php" =>
     "update_prezzi.php" =>
     array('title' => 'Update item prices',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Change item'
         ),
         'errors' => array('Valore "0" inaccettabile in questa modalit&agrave; di Modifica',
@@ -407,7 +407,7 @@ $strScript = array("browse_document.php" =>
         'browse_for_file' => 'Browse',
         'id_anagra' => 'Supplier',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
         )
     )

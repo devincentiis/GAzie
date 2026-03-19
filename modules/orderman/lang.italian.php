@@ -29,7 +29,7 @@ $strScript = array("admin_orderman.php" =>
         'ins_this' => 'Inserisci una nuova produzione',
         'upd_this' => 'Aggiorna la produzione',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!'),
+            'almeno 2 caratteri'),
         'errors' => array(),
 		'cod_operaz_value' => array(0 => '', 1 => 'L - Confezionamento con etichettatura', 2 => 'L1 - Confezionamento senza etichettatura',3 => 'L2 - Etichettatura',4 => 'X - Svuotamento di olio confezionato',5 => 'M1 - Movimentazione interna olio sfuso (senza cambio origine)'),
 		"ID ",
@@ -86,12 +86,12 @@ $strScript = array("admin_orderman.php" =>
 	"orderman_report.php" =>
 		array('title' => 'Produzioni/commesse',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!')
+            'almeno 2 caratteri')
 			),
 	"admin_luoghi.php" =>
 	array('title' => 'Siti di produzione',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!'),
+            'almeno 2 caratteri'),
 		"Id",
 		"Descrizione",
 		"Immagine (jpg,png,gif) max 300kb: ",

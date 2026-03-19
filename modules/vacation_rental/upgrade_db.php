@@ -79,6 +79,6 @@ $upgrade_db[161][]="ALTER TABLE `".$table_prefix."_XXXrental_events` ADD INDEX(`
 $upgrade_db[161][]="ALTER TABLE `".$table_prefix."_XXXrental_events` ADD `status_webservice` INT(1) NOT NULL DEFAULT '0' COMMENT 'Stato dell\'invio file ai webservice 0=nessun invio' AFTER `type`;";
 $upgrade_db[161][]="ALTER TABLE `".$table_prefix."_XXXrental_events` ADD `ex_adults` INT(2) NOT NULL DEFAULT '0' COMMENT 'Numero di adulti esonerati dal pagamento della tassa di soggiorno turistica' AFTER `child`, ADD `ex_minors` INT(2) NOT NULL DEFAULT '-1' COMMENT 'Numero di minori esonerati dal pagamento della tassa di soggiorno turistica: -1 = dato non gestito, 0 = nessun minore esente, > 0 = numero di minori esenti' AFTER `ex_adults`; ";
 $upgrade_db[162][]="ALTER TABLE `".$table_prefix."_XXXrental_extra` ADD `sort_index` INT NOT NULL DEFAULT '0' AFTER `rif_facility`; ";
-$upgrade_db[162][]="ALTER TABLE `".$table_prefix."_XXXrental_discounts` ADD `device_disc` TINYINT(1) NOT NULL COMMENT 'Attribuisce lo sconto ad un determinato device' AFTER `level_points`;";
+$upgrade_db[162][]="ALTER TABLE `".$table_prefix."_XXXrental_discounts` ADD `device_disc` TINYINT(1) NOT NULL COMMENT 'Attribuisce lo sconto ad un determinato device' AFTER `level_points`, ADD `booking_from` DATE NULL DEFAULT NULL COMMENT 'Limita lo sconto ad un determinato periodo di prenotazione' AFTER `valid_to`, ADD `booking_to` DATE NULL DEFAULT NULL COMMENT 'Limita lo sconto ad un determinato periodo di prenotazione' AFTER `booking_from`;";
 
 ?>

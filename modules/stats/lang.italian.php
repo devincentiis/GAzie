@@ -106,7 +106,7 @@ $strScript = array("docume_stats.php" =>
         'errors' => array('Inserire il cliente'
         ),
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente',
         ),
         'header' => array('Cod. fornitore' => '', 'Fornitore' => '', 'Fatturato' => '', 'Costi' => '',
@@ -126,7 +126,7 @@ $strScript = array("docume_stats.php" =>
         'errors' => array('Inserire il cliente'
         ),
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente',
         ),
         'header' => array('Cod. fornitore' => '', 'Fornitore' => '', 'Acquistato' => '', 'Venduto' => '',

@@ -30,13 +30,13 @@ $strScript =
         'ins_this' => 'Inserisci una nuova produzione',
         'upd_this' => 'Aggiorna la produzione',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!'),
+            'almeno 2 caratteri'),
         'errors' => array()
 		),
 	array("orderman_report.php" =>
 		array('title' => 'Lista delle produzioni',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!')
+            'almeno 2 caratteri')
 			)
 		)
 );

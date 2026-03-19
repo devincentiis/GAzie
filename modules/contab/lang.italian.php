@@ -79,7 +79,7 @@ $strScript = array("select_liqiva.php" =>
     "select_partit.php" =>
     array('title' => 'Selezione per la visualizzazione e/o la stampa dei partitari',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente/fornitore'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -109,7 +109,7 @@ $strScript = array("select_liqiva.php" =>
         'ins_this' => 'Inserisci una nuova causale contabile ',
         'upd_this' => 'Modifica della causale contabile',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente/fornitore'
         ),
         'err' => array('codice_emp' => 'Inserire un codice valido!',
@@ -166,7 +166,7 @@ $strScript = array("select_liqiva.php" =>
         'ins_this' => 'Inserisci un nuovo movimento contabile ',
         'upd_this' => 'Modifica il movimento contabile',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente/fornitore'
         ),
         'errors' => array('Almeno un rigo non ha conti!',
@@ -384,7 +384,7 @@ $strScript = array("select_liqiva.php" =>
         'aperte_tutte' => 'Cosa Stampare',
         'id_agente' => 'Agente',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia anagrafica'),
         'errors' => array('La data  non &egrave; corretta!',
             'Non sono stati trovati movimenti!'
@@ -404,7 +404,7 @@ $strScript = array("select_liqiva.php" =>
         'aperte_tutte' => 'Cosa Stampare',
         'id_agente' => 'Agente',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia anagrafica'),
         'errors' => array('La data  non &egrave; corretta!',
             'Non sono stati trovati movimenti!'

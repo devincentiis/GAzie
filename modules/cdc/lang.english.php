@@ -28,7 +28,7 @@ $strScript = array(
     "select_schedule.php" =>
     array('title' => 'Selezione delle fatture da mandare in compensazione',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 2 caratteri!',
+            'almeno 2 caratteri',
             'Cambia cliente/fornitore'
         ),
         'errors' => array('La data  non &egrave; corretta!',

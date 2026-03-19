@@ -931,13 +931,10 @@ class selectPartner extends SelectBox {
         echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
       }
       if( !strstr($val,'id') && $val<=100000000){
-        echo "\t<input type=\"text\" $tab2 id=\"search_$name\" name=\"search[$name]\" value=\"" . $strSearch . "\" maxlength=\"16\" size=\"10\" class=\"FacetInput\">\n";
-      }
-      if (isset($msg)) {
-          echo "<input type=\"text\" style=\"color: red; font-weight: bold;\" size=\"" . strlen($msg) . "\" disabled value=\"$msg\">\n";
+        echo '<input type="text" '.$tab2.' id="search_'.$name.'" name="search['.$name.']" value="' . $strSearch .'" placeholder="'.(isset($msg)?$msg.' 🔍' : '').'" >';
       }
       if( !strstr($val,'id') && $val<=100000000){
-        echo '<button type="submit" class="btn btn-default btn-sm" name="search_str" ' . $tab3 . '><i class="glyphicon glyphicon-search"> </i></button>';
+        echo '<button type="submit" name="search_str" ' . $tab3 . '> 🔍 </button>';
       }
     }
   }
@@ -1127,7 +1124,7 @@ class selectorder extends SelectBox
                 echo '<input type="hidden" name="' . $this->name . '" value="" />';
             }
         } else {
-            $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . '!';
+            $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . ' 🔍';
             echo '<input type="hidden" name="' . $this->name . '" value="" />';
         }
 
@@ -1179,7 +1176,7 @@ class selectPosition extends SelectBox
           echo '<input type="hidden" name="' . $this->name . '" value="" />';
         }
       } else {
-        $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . '!';
+        $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . ' 🔍';
         echo '<input type="hidden" name="' . $this->name . '" value="" />';
       }
       echo '&nbsp;<input type="text" class="' . $class . '" name="'.$name.'" id="search_position" value="' . $cerca . '" ' . $tabula . ' maxlength="32" placeholder="'.$msg.'" />';
@@ -1190,7 +1187,7 @@ class selectPosition extends SelectBox
 class selectproduction extends SelectBox {
   public $selected;
   public $name;
-     function output($cerca, $without_closed = true, $class = 'FacetSelect',$sele=1, $msg = "") {
+     function output($cerca, $without_closed = true, $class = 'col-xs-12',$sele=1, $msg = "") {
         global $gTables, $script_transl;
         $opera = "%'";
         if (strlen($cerca) >= 1) {
@@ -1217,7 +1214,7 @@ class selectproduction extends SelectBox {
                 echo '<input type="hidden" name="' . $this->name . '"  id="'. $this->name.'" />';
             }
         } else {
-            $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . '!';
+            $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . ' 🔍';
             echo '<input type="hidden" name="' . $this->name . '"  id="'. $this->name.'" />';
         }
         echo '&nbsp;<input type="text" class="' . $class . '" name="coseprod" placeholder="'.$msg.'" id="search_production" value="' . $cerca . '" maxlength="16" />';
@@ -1228,7 +1225,7 @@ class selectproduction extends SelectBox {
 class selectcontract extends SelectBox {
   public $selected;
   public $name;
-  function output($cerca,$clfoco,$class = 'FacetSelect') {
+  function output($cerca,$clfoco,$class = 'col-xs-12') {
     global $gTables, $script_transl;
     $msg = "";
     $opera = "%'";
@@ -1260,7 +1257,7 @@ class selectcontract extends SelectBox {
         echo '<input type="hidden" name="' . $this->name . '" id="'. $this->name.'" />';
       }
     } else {
-      $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . '!';
+      $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . ' 🔍';
       echo '<input type="hidden" name="' . $this->name . '" id="'. $this->name.'" />';
     }
     echo '&nbsp;<input type="text" class="' . $class . '" name="cosecont" placeholder="'.$msg.'" id="search_contract" value="' . $cerca . '" maxlength="16" />';
@@ -1308,7 +1305,7 @@ class selectartico extends SelectBox {
                 echo '<input type="hidden" name="' . $this->name . '" value="" />';
             }
         } else {
-            $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . '!';
+            $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . ' 🔍';
             echo '<input type="hidden" name="' . $this->name . '" value="" />';
         }
         echo '&nbsp;<input type="text" class="' . $class . '" name="cosear" id="search_cosear" placeholder="'.$msg.'" value="' . $cerca . '" ' . $tabula . ' maxlength="32" />';

@@ -508,7 +508,6 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 			$nomefornitore=($xpath->query("//FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/Anagrafica/Denominazione")->length>=1)?$xpath->query("//FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/Anagrafica/Denominazione")->item(0)->nodeValue:$xpath->query("//FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/Anagrafica/Cognome")->item(0)->nodeValue.' '.$xpath->query("//FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/Anagrafica/Nome")->item(0)->nodeValue;
 			$r_invoice=gaz_dbi_dyn_query("*", $gTables['tesdoc']. " LEFT JOIN " . $gTables['clfoco'] . " ON " . $gTables['tesdoc'] . ".clfoco = " . $gTables['clfoco'] . ".codice LEFT JOIN " . $gTables['anagra'] . " ON " . $gTables['clfoco'] . ".id_anagra = " . $gTables['anagra'] . ".id", "tipdoc LIKE '".substr($tipdoc,0,2)."_' AND (pariva = '".$codiva."' OR codfis = '".$codfis."') AND datfat='".$datdoc."' AND numfat='".addslashes($numdoc)."'", "id_tes", 0, 1);
 			$exist_invoice=gaz_dbi_fetch_array($r_invoice);
-      //var_dump($tipdoc,$codiva,$datdoc,$numdoc);
 			if ($exist_invoice) { // esiste un file che pur avendo un nome diverso è già stato acquisito ed ha lo stesso numero e data
 				$msg['err'][] = 'same_content';
 				$f_ex=false; // non è visualizzabile
@@ -713,6 +712,10 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					$form['warehouse_'.$post_nl] = (isset($_POST['warehouse_'.$post_nl]))?intval($_POST['warehouse_'.$post_nl]):0;
 					$form['rows'][$nl]['warehouse']=$form['warehouse_'.$post_nl];
 					$form['codvat_'.$post_nl] = (isset($_POST['codvat_'.$post_nl]))?intval($_POST['codvat_'.$post_nl]):'';
+          // inizio lotmag
+					$form['identifier_'.$post_nl] = isset($_POST['identifier_'.$post_nl])?substr($_POST['identifier_'.$post_nl],0,35):'';
+					$form['expiry_'.$post_nl] = isset($_POST['expiry_'.$post_nl])?substr($_POST['expiry_'.$post_nl],0,10):'';
+          // fine lotmag
 				} else {
 					if (isset( $form['rows'][$nl]['codart'])){
 						$form['codart_'.$post_nl] = $form['rows'][$nl]['codart'];
@@ -726,6 +729,21 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 						$form['rows'][$nl]['search_codart'] = '';
 						$form['search_codart_'.$post_nl] ='';
 					}
+          // inizio lotmag
+					if ( isset( $form['rows'][$nl]['identifier'] ) && strlen($form['rows'][$nl]['identifier']) > 0 ) {
+						$form['identifier_'.$post_nl] = $form['rows'][$nl]['identifier'];
+					} else {
+						$form['rows'][$nl]['identifier'] = '';
+						$form['identifier_'.$post_nl] ='';
+					}
+					if ( isset( $form['rows'][$nl]['expiry'] ) && strlen($form['rows'][$nl]['expiry']) > 0 ) {
+						$form['expiry_'.$post_nl] = $form['rows'][$nl]['expiry'];
+					} else {
+						$form['rows'][$nl]['expiry'] = '';
+						$form['expiry_'.$post_nl] ='';
+					}
+          // fine lotmag
+
 					/* al primo accesso dopo l'upload del file propongo:
 					   - la prima data di registrazione utile considerando quella di questa fattura e l'ultima registrazione
 					   - i costi sulle linee (righe) in base al fornitore
@@ -981,6 +999,8 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					$form['codric_'.$post_nl] = intval($_POST['codric_'.$post_nl]);
 					$form['warehouse_'.$post_nl] = intval($_POST['warehouse_'.$post_nl]);
 					$form['codvat_'.$post_nl] = intval($_POST['codvat_'.$post_nl]);
+					$form['identifier_'.$post_nl] = substr($_POST['identifier_'.$post_nl],0,35);
+					$form['expiry_'.$post_nl] = substr($_POST['expiry_'.$post_nl],0,10);
 				} else {
 					if (isset( $form['rows'][$nl]['codart'])){
 						$form['codart_'.$post_nl] = $form['rows'][$nl]['codart'];
@@ -994,6 +1014,20 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 						$form['rows'][$nl]['search_codart'] = '';
 						$form['search_codart_'.$post_nl] ='';
 					}
+          // inizio lotmag
+					if (isset( $form['rows'][$nl]['identifier'])){
+						$form['identifier_'.$post_nl] = $form['rows'][$nl]['identifier'];
+					} else {
+						$form['rows'][$nl]['identifier'] = '';
+						$form['identifier_'.$post_nl] ='';
+					}
+					if (isset( $form['rows'][$nl]['expiry'])){
+						$form['expiry_'.$post_nl] = $form['rows'][$nl]['expiry'];
+					} else {
+						$form['rows'][$nl]['expiry'] = '0000-00-00 00:00:00';
+						$form['expiry_'.$post_nl] ='';
+					}
+          // fine lotmag
 
 					// al primo accesso dopo l'upload del file propongo:
 				  // - i costi sulle linee (righe) in base al fornitore
@@ -1318,6 +1352,8 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					$form['rows'][$j]['codric'] = intval($_POST['codric_'.$i]);
 					$form['rows'][$j]['warehouse'] = intval($_POST['warehouse_'.$i]);
 					$form['rows'][$j]['codvat'] = intval($_POST['codvat_'.$i]);
+					$form['rows'][$j]['identifier'] = isset($_POST['identifier_'.$i]) ? preg_replace("/[^A-Za-z0-9_]i/",'',$_POST['identifier_'.$i]) : '';
+					$form['rows'][$j]['expiry'] = isset($_POST['expiry_'.$i]) ? substr($_POST['expiry_'.$i],0,10) : '';
           $i++;
         }
 
@@ -1328,6 +1364,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
         }
 				$movmag_prev=array();
 				foreach ($form['rows'] as $i => $v) { // inserisco i righi
+          $data_artico = false;
           $form['rows'][$i]['status'] = ( substr($v['codric'],0,3) == $admin_aziend['mas_fixed_assets'] ) ? 'ASS10':'';
 					if (abs($v['prelis']) < 0.00000001 && abs(floatval($v['quanti'])) < 0.000000001 ) { // siccome il prezzo e la quantità sono a zero mi trovo di fronte ad un rigo di tipo descrittivo
 						$form['rows'][$i]['tiprig']=2;
@@ -1375,14 +1412,10 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
               }
 						}
 						$ctrl_ddt=$v['NumeroDDT'];
-
 					}
-          //echo"<pre>",print_r($movmag_prev);die;
 					$form['rows'][$i]['id_tes'] = $ultimo_id;
 					$aliiva=$form['rows'][$i]['codvat'];
-          //if($naturaN6){
-            $form['rows'][$i]['pervat']=gaz_dbi_get_row($gTables['aliiva'], 'codice', $aliiva)['aliquo'];
-          //}
+          $form['rows'][$i]['pervat']=gaz_dbi_get_row($gTables['aliiva'], 'codice', $aliiva)['aliquo'];
 					$exist_new_codart=gaz_dbi_get_row($gTables['artico'], "codice", $new_codart);
 					if ($exist_new_codart && substr($v['codart'],0,6)!='Insert') { // il codice esiste lo uso, ma prima controllo se l'ho volutamente cambiato sul form
 						if( $exist_new_codart['codice'] != $form['rows'][$i]['codart'] ){ // ho scelto un codice diverso
@@ -1422,7 +1455,8 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 								gaz_dbi_table_insert('artico', $artico);
 								$form['rows'][$i]['codart'] = $new_codart;
 								break;
-								default: //  negli altri casi controllo se devo inserire il riferimento ad una bolla
+								default: //  negli altri casi riprendo i dati dell'articolo scelto e se previsto aggiornerò il magazzino (vedi sotto)
+                $data_artico= gaz_dbi_get_row($gTables['artico'], "codice", $v['codart']);
 							}
 						}
 					}
@@ -1454,15 +1488,28 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 							"desdoc"=>"D.d.t. di acquisto n.".$v['NumeroDDT']."/".$form['seziva']." prot. ".$form['protoc']."/".$form['seziva'],
 							"datdoc"=>$form['datemi'],"clfoco"=>$form['clfoco'],"id_rif"=>$id_rif,"artico"=>$form['rows'][$i]['codart'],"id_warehouse"=>$form['rows'][$i]['warehouse'],"quanti"=>$form['rows'][$i]['quanti'],
 							"prezzo"=>$form['rows'][$i]['prelis'],"scorig"=>$form['rows'][$i]['sconto'],'synccommerce_classname'=>$admin_aziend['synccommerce_classname'],'id_lotmag'=>$idlotmag);
+              $id_mag=movmagInsert($rowmag);
 						} else { // se non c'è DDT
-							$rowmag=array("caumag"=>$form['caumag'],"type_mov"=>"0","operat"=>"1","datreg"=>$movmag_datreg,"tipdoc"=>"ADT",
-							"desdoc"=>"Fattura di acquisto n.".$form['numfat']."/".$form['seziva']." prot. ".$form['protoc']."/".$form['seziva'],
-							"datdoc"=>$form['datfat'],"clfoco"=>$form['clfoco'],"id_rif"=>$id_rif,"artico"=>$form['rows'][$i]['codart'],"id_warehouse"=>$form['rows'][$i]['warehouse'],"quanti"=>$form['rows'][$i]['quanti'],
-							"prezzo"=>$form['rows'][$i]['prelis'],"scorig"=>$form['rows'][$i]['sconto'],'synccommerce_classname'=>$admin_aziend['synccommerce_classname']);
+              if ($admin_aziend['conmag']==2 && $data_artico && $data_artico['movimentabile'] <> 'N'){ // aggiungo un rigo su movmag ed uno su lotmag solo qualora l'articolo lo preveda
+                $rowmag=array("caumag"=>$form['caumag'],"type_mov"=>"0","operat"=>"1","datreg"=>$movmag_datreg,"tipdoc"=>"ADT",
+                "desdoc"=>"Fattura di acquisto n.".$form['numfat']."/".$form['seziva']." prot. ".$form['protoc']."/".$form['seziva'],
+                "datdoc"=>$form['datfat'],"clfoco"=>$form['clfoco'],"id_rif"=>$id_rif,"artico"=>$form['rows'][$i]['codart'],"id_warehouse"=>$form['rows'][$i]['warehouse'],"quanti"=>$form['rows'][$i]['quanti'],
+                "prezzo"=>$form['rows'][$i]['prelis'],"scorig"=>$form['rows'][$i]['sconto'],'synccommerce_classname'=>$admin_aziend['synccommerce_classname']);
+                $id_mag=movmagInsert($rowmag);
+                if ($data_artico['lot_or_serial'] >=1 ){
+                  $form['rows'][$i]['id_rigdoc'] = $id_rif;
+                  $form['rows'][$i]['id_movmag'] = $id_mag;
+                  $form['rows'][$i]['expiry'] = gaz_format_date($form['rows'][$i]['expiry'], true);
+                  if (empty(trim($form['rows'][$i]['identifier']))) {
+                    // creo un identificativo del lotto/matricola interno
+                    $form['rows'][$i]['identifier'] = $form['datemi'] . '_' . $form['rows'][$i]['id_rigdoc'];
+                  }
+                  $last_lotmag_id = lotmagInsert($form['rows'][$i]);
+                  // inserisco il riferimento anche sul relativo movimento di magazzino
+                  gaz_dbi_put_row($gTables['movmag'], 'id_mov', $id_mag, 'id_lotmag', $last_lotmag_id);
+                }
+              }
 						}
-
-						$id_mag=movmagInsert($rowmag);
-
 						// aggiorno idmag nel rigdoc
 						gaz_dbi_query("UPDATE " . $gTables['rigdoc'] . " SET id_mag = " . $id_mag . " WHERE `id_rig` = $id_rif ");
             if (isset($idlotmag) && intval($idlotmag)>0){// aggiorno lotmag
@@ -1550,7 +1597,7 @@ function setDate(name) {
 ?>
 <script type="text/javascript">
 $(function(){
-    $("#datreg").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
+    $("#datreg,.lm_expiry").datepicker({showButtonPanel: true, showOtherMonths: true, selectOtherMonths: true});
     $("#datreg,#new_acconcile").change(function () {
         this.form.submit();
     });
@@ -1779,7 +1826,7 @@ if ($toDo=='insert' || $toDo=='update' ) {
 				$codric_dropdown = $gForm->selectAccount('codric_'.$k, $form['codric_'.$k], array('sub',1,3), '', false, "col-sm-12 small",'style="max-width: 350px;"', false, true);
 				$whareh_dropdown = $magazz->selectIdWarehouse('warehouse_'.$k,(isset($form['warehouse_'.$k]))?$form['warehouse_'.$k]:0,true,'col-xs-12',$form['codart_'.$k],$datdoc,($docOperat[$tipdoc]*-floatval($v['quanti'])));
 				$codvat_dropdown = $gForm->selectFromDB('aliiva', 'codvat_'.$k, 'codice', $form['codvat_'.$k], 'aliquo', true, '-', 'descri', '', 'col-sm-12 small', null, 'style="max-width: 350px;"', false, true);
-				$codart_select = $gForm->concileArtico('codart_'.$k,(isset($form['search_codart_'.$k]))?$form['search_codart_'.$k]:'',$form['codart_'.$k]);
+				$codart_select = $gForm->concileArtico('codart_'.$k,(isset($form['search_codart_'.$k]))?$form['search_codart_'.$k]:'',$form['codart_'.$k],$k,$form['identifier_'.$k],$form['expiry_'.$k]);
 				//forzo i valori diversi dalla descrizione a vuoti se è descrittivo
 				if (abs($v['prelis'])<0.00000001 && abs(floatval($v['quanti'])) < 0.000000001 ){ // siccome il prezzo e la quantità sono a zero mi trovo di fronte ad un rigo di tipo descrittivo
 					$v['codice_fornitore'] = '';

@@ -28,15 +28,21 @@ if (isset($_POST['gohome'])) {
   exit;
 }
 $r = gaz_dbi_get_row($gTables['admin'],"user_name",$_SESSION["user_name"]);
-require("./lang.".$r['lang'].".php");
-echo '<form method="post">';
-echo '<div class="error_box">';
-if (isset($_GET['module'])) {
-  echo $errors['access_module'].' <span class="error">'.$_GET['module'].'</span> ---> ';
-} else {
-  echo $errors['access_script'].' <span class="error">'.$_GET['script'].'.php</span> ';
+if ($r) {
+  require("./lang.".$r['lang'].".php");
+  echo '<form method="post">';
+  echo '<div class="error_box">';
+  if (isset($_GET['module'])) {
+    echo $errors['access_module'].' <span class="error">'.$_GET['module'].'</span> ---> ';
+  } else {
+    echo $errors['access_script'].' <span class="error">'.$_GET['script'].'.php</span> ';
+  }
+  echo ' <button onclick="history.back()">'.$errors['back'].'</button>  ---> <button type="submit" name="gohome">Home page</button>';
+  echo '</div>';
+} else { // user_name not exist
+  session_destroy();
+  header("Location: admin.php");
+  exit;
 }
-echo ' <button onclick="history.back()">'.$errors['back'].'</button>  ---> <button type="submit" name="gohome">Home page</button>';
-echo '</div>';
 ?>
 </form>

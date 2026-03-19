@@ -269,7 +269,7 @@ $strScript = [
     'warranty_days' => 'Giorni di garanzia',
     'unita_durability' => array('' => '', '>' => '>', '<' => '<', 'H' => 'H', 'D' => 'D', 'M' => 'M'),
     'mesg' => ['La ricerca non ha dato risultati!',
-        'Inserire almeno 1 carattere!',
+        'almeno 1 carattere!',
         'Cambia fornitore'
       ]
   ],
@@ -343,7 +343,7 @@ $strScript = [
   "admin_admission.php" =>
   [
     'mesg' => ['La ricerca non ha dato risultati!',
-        'Inserire almeno 2 caratteri!',
+        'almeno 2 caratteri',
         'Cambia cliente/fornitore'],
     'err' =>[
         'id_con' => 'paziente non selezionato',

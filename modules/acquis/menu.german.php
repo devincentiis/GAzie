@@ -33,7 +33,7 @@ $transl['acquis'] = array('name' => "Käufe",
                                          5 =>array("Lieferanten-Management","Lieferanten"),
                                          6 =>array("Einzugsermächtigung anzeigen und ausdrucken Bericht","Debit-Bericht"),
                                          7 =>array("Print Kraftstoff beachten","Fuel beachten")
-                                       ),
+                                      ),
                           'm3' => array( 1 =>array("Fordern Sie ein Angebot an den Lieferanten","Fragen Sie einen Kostenvoranschlag"),
                                          2 =>array("Auftrag an Lieferant "," Bestellung an den Lieferanten"),
                                          3 =>array("Fragen Lieferscheine als Lieferant","Lieferscheine zu werden"),
@@ -43,7 +43,8 @@ $transl['acquis'] = array('name' => "Käufe",
                                          7 =>array("Buchhaltung von Eingangsrechnungen","Accounting Rechnungen"),
                                          8 =>array("Legen Sie neue Lieferanten","Neuer Lieferant"),
                                          9 =>array("List D.d.T. Einsparungen beim Einkauf","Bericht von Lieferscheinen"),
-                                         10=>array("DDT erhielt vom Lieferanten","New Lieferscheine")
-                                       )
+                                         10=>array("DDT erhielt vom Lieferanten","New Lieferscheine"),
+                                          23 => array("Stampa documenti gi&agrave; emessi", "Ristampa Documenti")
+                                      )
                           );
 ?>

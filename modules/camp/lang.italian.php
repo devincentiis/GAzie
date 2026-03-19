@@ -400,7 +400,7 @@ $strScript = array("camp_browse_document.php" =>
     array(0 => 'Stampa schedari di magazzino',
         'title' => 'Selezione per la visualizzazione e/o la stampa delle schede di magazzino',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -437,7 +437,7 @@ $strScript = array("camp_browse_document.php" =>
     "select_deplia.php" =>
     array('title' => 'Selezione per la stampa del catalogo',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -457,7 +457,7 @@ $strScript = array("camp_browse_document.php" =>
     "select_listin.php" =>
     array('title' => 'Selezione per la stampa dei listini',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('La data  non &egrave; corretta!',
@@ -484,7 +484,7 @@ $strScript = array("camp_browse_document.php" =>
     "update_vatrate.php" =>
     array('title' => 'Modifica aliquota IVA degli articoli',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('Errore nullo',
@@ -504,7 +504,7 @@ $strScript = array("camp_browse_document.php" =>
     "update_prezzi.php" =>
     array('title' => 'Modifica prezzi di listino',
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia articolo'
         ),
         'errors' => array('Valore "0" inaccettabile in questa modalit&agrave; di Modifica',
@@ -627,7 +627,7 @@ $strScript = array("camp_browse_document.php" =>
         'id_anagra' => 'Fornitore',
         'rame_metallico' => "Rame metallo Kg/1Kg",
         'mesg' => array('La ricerca non ha dato risultati!',
-            'Inserire almeno 1 carattere!',
+            'almeno 1 carattere!',
             'Cambia fornitore'
         ),
     )
