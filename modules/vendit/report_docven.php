@@ -57,7 +57,7 @@ $sortable_headers = array(
     "Data" => "datfat",
     "Cliente" => "",
     "Info" => "",
-    "Stampa" => "",
+    "Stampa<br/>Duplica" => "",
     "FAE" => "",
     "Mail" => "",
     "Origine" => "",
@@ -764,9 +764,10 @@ function printPdf(urlPrintDoc){
 
                 // Colonna protocollo
                 if (!empty($modifi)) {
-                  echo "<td class=\"text-center\"><a href=\"" . $modifi . "\" class=\"btn btn-xs " . $classe_btn . "\" title=\"Modifica " . $tipodoc . " \">" . $r["protoc"] . "&nbsp;" . $r["tipdoc"] . "&nbsp;<i class=\"glyphicon glyphicon-edit\"></i></a></td>";
+                  echo '<td class="text-right">';
+                  echo "<a href=\"" . $modifi . "\" class=\"btn btn-xs " . $classe_btn . "\" title=\"Modifica " . $tipodoc . " \">" . $r["protoc"] . "&nbsp;" . $r["tipdoc"] . "&nbsp;<i class=\"glyphicon glyphicon-edit\"></i></a></td>";
                 } else {
-                  echo "<td class=\"text-center\"><button class=\"btn btn-xs " . $classe_btn . " disabled\" title=\"Per poter modificare questa " . $tipodoc . " devi modificare i DdT in essa contenuti!\">" . $r["protoc"] . "&nbsp;" . $r["tipdoc"] . " &nbsp;<i class=\"glyphicon glyphicon-edit\"></i></button></td>";
+                  echo "<td class=\"text-right\"><button class=\"btn btn-xs " . $classe_btn . " disabled\" title=\"Per poter modificare questa " . $tipodoc . " devi modificare i DdT in essa contenuti!\">" . $r["protoc"] . "&nbsp;" . $r["tipdoc"] . " &nbsp;<i class=\"glyphicon glyphicon-edit\"></i></button></td>";
                 }
                 // Colonna numero documento
                 echo "<td align=\"center\">" . $r["numfat"] . " &nbsp;</td>";
@@ -790,9 +791,12 @@ function printPdf(urlPrintDoc){
                   echo "<a href=\"admin_client.php?codice=".substr($r['clfoco'],3,6)."&Update\" target=\"_blank\" class=\"btn btn-100 btn-xs btn-danger\" title=\"Per poter contabilizzare questa " . $tipodoc . " devi modificare i dati del cliente!\">".$script_transl['consentivisua']."</a>";
                 }
                 echo "</td>";
-                // Colonna "Stampa"
+                // Colonna Stampa / Duplica
                 $targetPrintDoc = ($pdf_to_modal==0)?'href="'.$modulo.'" target="_blank" ':"onclick=\"printPdf('".$modulo."')\"";
-                echo "<td align=\"center\"><a class=\"btn btn-xs btn-default\" style=\"cursor:pointer;\" ".$targetPrintDoc." \"><i class=\"glyphicon glyphicon-print\" title=\"Stampa documento PDF\"></i></a>";
+                echo '<td class="text-center"><a class="btn btn-xs btn-default" style="cursor:pointer;" '.$targetPrintDoc.'"><i class="glyphicon glyphicon-print" title="Stampa documento PDF"></i></a>';
+                if ( $r['tipdoc']== 'FAA' || $r['tipdoc']== 'FAI' ) {
+                  echo '<a class="btn btn-xs btn-success" href="admin_docven.php?Duplicate&id_tes=' . $r["id_tes"] . '" style="float: right;" title="Duplica"><i class="glyphicon glyphicon-duplicate"></i> </a>';
+                }
                 echo "</td>";
                 // Colonna "Fattura elettronica"
                 if (substr($r['tipdoc'], 0, 1) == 'F') {

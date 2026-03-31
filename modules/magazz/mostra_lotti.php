@@ -224,8 +224,7 @@ include "../../library/theme/g7/header.php";
 			</div>
 		</div>
 		<?php
-
-		if ($resorf->num_rows>0){
+		if (isset($first_lot_date) && gaz_dbi_num_rows($resorf) > 0){
 		?>
 		<div class="panel panel-default gaz-table-form">
 			<div class="container-fluid">
@@ -238,7 +237,7 @@ include "../../library/theme/g7/header.php";
 					</div>
 				</div><!-- chiude row  -->
 				<?php
-				foreach($resorf as $orf){
+        while ($orf = gaz_dbi_fetch_array($resorf)) {
 					?>
 					<div class="row">
 						<div class="form-group">

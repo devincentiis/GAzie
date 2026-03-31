@@ -2151,17 +2151,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $form['seziva'] = $tesdoc['seziva'];
   $form['tipdoc'] = $tesdoc['tipdoc'];
   $form['id_doc_ritorno'] = $tesdoc['id_doc_ritorno'];
-  if ($tesdoc['tipdoc'] == 'FAD') {
-      // se non è attiva la possibilità di modifica della fattura differita visualizzo il messaggio
-      if ( !$modifica_fatture_ddt ) {
-          $msg['err'][] = "57";
-      }
-  }
-  if ($tesdoc['id_con'] > 0) {
-      $msg['err'][] = "58";
-  }
   if ($form['tipdoc'] == 'FNC') { // nel caso che si tratti di nota di credito
-      $form['in_codric'] = $admin_aziend['sales_return'];
+    $form['in_codric'] = $admin_aziend['sales_return'];
   }
   $form['template'] = $tesdoc['template'];
   $form['datemi'] = gaz_format_date($tesdoc['datemi'],false,true);
@@ -2220,6 +2211,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $form['round_stamp'] = $tesdoc['round_stamp'];
   $form['cauven'] = $tesdoc['cauven'];
   $form['caucon'] = $tesdoc['caucon'];
+  $form['id_con'] = $tesdoc['id_con'];
   $form['caumag'] = $tesdoc['caumag'];
   $form['caucon'] = $tesdoc['caucon'];
   $form['sconto'] = $tesdoc['sconto'];
@@ -2327,12 +2319,21 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       $next_row++;
   }
   if (isset($_GET['Duplicate'])) {  // duplicate: devo reinizializzare i campi come per la insert
-      $form['id_doc_ritorno'] = 0;
-      $form['id_tes'] = "";
-      $form['datemi'] = date("d/m/Y");
-      $form['initra'] = date("d/m/Y");
-      $form['oratra'] = date("H");
-      $form['mintra'] = date("i");
+    $form['id_doc_ritorno'] = 0;
+    $form['id_tes'] = 0;
+    $form['id_con'] = 0;
+    $form['datemi'] = date("d/m/Y");
+    $form['initra'] = date("d/m/Y");
+    $form['oratra'] = date("H");
+    $form['mintra'] = date("i");
+  }
+  if ($form['tipdoc'] == 'FAD') {
+    if ( !$modifica_fatture_ddt ) { // se non è attiva la possibilità di modifica della fattura differita visualizzo il messaggio
+      $msg['err'][] = "57";
+    }
+  }
+  if ($form['id_con'] > 0) {
+    $msg['err'][] = "58";
   }
 } elseif (!isset($_POST['Insert'])) { //se e' il primo accesso per INSERT
 	if (!empty($admin_aziend['synccommerce_classname']) && class_exists($admin_aziend['synccommerce_classname'])){

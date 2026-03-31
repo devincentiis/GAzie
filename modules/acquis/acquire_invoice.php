@@ -484,9 +484,13 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 		libxml_clear_errors();
 		if (empty($val_err)){
 			// INIZIO CONTROLLO NUMERO DATA, ovvero se nonostante il nome del file sia diverso il suo contenuto è già stato importato e già c'è uno con lo stesso tipo_documento-numero_documento-anno-fornitore
-			$tipdoc=$tipdoc_conv[$xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento")->item(0)->nodeValue];
+      $TipoDocumento = $xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento")->item(0)->nodeValue;
+			$tipdoc=$tipdoc_conv[$TipoDocumento];
       if (substr($tipdoc,0,2)=='XF') {
         // $msg['err'][] = 'reverse_charge'; // PROMEMORIA: commentato e cambiati TD16,TD17,TD18,TD19 di $tipdoc_conv DA XFA in AFA perché l'errore bloccava l'acquisizione (es. fatture Amazon)
+      }
+      if ($TipoDocumento == 'TD18' || $TipoDocumento == 'TD19') {
+        $msg['err'][] = 'reverse_charge';
       }
 			$datdoc=$xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]/DatiGenerali/DatiGeneraliDocumento/Data")->item(0)->nodeValue;
 			$numdoc=$xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]/DatiGenerali/DatiGeneraliDocumento/Numero")->item(0)->nodeValue;

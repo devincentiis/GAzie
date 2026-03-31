@@ -150,12 +150,13 @@ class FatturaSemplice extends Template {
         $act_y = $this->GetY();
         if (($act_y >= 166 && $this->docVars->taxstamp >= 0.01 ) || $act_y >= 195 || (strlen($this->descriptive_last_row)>300 && $act_y >= 186)) { // mi serve per poter stampare la casella del bollo
           $this->Cell(186, 6, '', 'T', 1);
-          $this->SetFont('helvetica', '', 20);
+          $this->SetFont('helvetica', '', 14);
           $this->SetY(225);
-          $this->Cell(186, 12, '>>> --- FOLLOWS ON NEXT PAGE --- >>> ', 1, 1, 'R');
-          $this->SetFont('helvetica', '', 9);
+          $this->Cell(186, 8, '>>> --- FOLLOWS ON NEXT PAGE --- >>> ', 1, 1, 'R');
           $this->newPage();
-          $this->Cell(186, 5, '<<< --- FOLLOWS FROM PREVIOUS PAGE --- <<< ', 0, 1);
+          $this->SetFont('helvetica', '', 14);
+          $this->Cell(186, 8, '<<< --- FOLLOWS FROM PREVIOUS PAGE --- <<< ', 0, 1);
+          $this->SetFont('helvetica', '', 8);
         }
         if (isset ($rigo['identifier']) && strlen ($rigo['identifier'])>0){
             if (intval ($rigo['expiry'])>0){
@@ -322,6 +323,16 @@ class FatturaSemplice extends Template {
             $this->Cell(12, 5, '', 1, 1, 'R');
         }
         $prevTiprig=$rigo['tiprig'];
+      }
+      if ( ($rigo['tiprig'] >= 6 && $rigo['tiprig'] <= 8) && $this->GetY() >= 186 ) { // se l'ultimo rigo stampato è un testo potrebbe essere necessario aggiungere una pagina
+        $this->Cell(186, 6, '', 'T', 1);
+        $this->SetFont('helvetica', '', 14);
+        $this->SetY(225);
+        $this->Cell(186, 8, '>>> --- FOLLOWS ON NEXT PAGE --- >>> ', 1, 1, 'R');
+        $this->newPage();
+        $this->SetFont('helvetica', '', 14);
+        $this->Cell(186, 8, '<<< --- FOLLOWS FROM PREVIOUS PAGE --- <<< ', 0, 1);
+        $this->SetFont('helvetica', '', 8);
       }
     }
 

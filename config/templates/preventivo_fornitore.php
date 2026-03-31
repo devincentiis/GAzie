@@ -158,6 +158,7 @@ class PreventivoFornitore extends Template
 					$this->Rect($px,$py,8,6,'DF');
 					$this->TextField('sconto'.$key, 8, 6);
 					$this->TextField('importo'.$key, 15, 6);
+          $this->Cell(1, 6,'',0,1);
         break;
         case "1":
           $this->Cell(125, 6, $rigo['descri'],'LBR',0,'L',0,'',1);
