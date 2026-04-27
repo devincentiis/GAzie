@@ -6,7 +6,7 @@ html body.adminlte-gazie.sidebar-mini.sidebar-collapse form div.wrapper header.m
     width: 65px;
 }
 input, select, textarea {
-	border: 1px solid #bbb;
+	border: 1px solid;
   border-radius: 3px;
 }
 input[type="number"] {
@@ -38,9 +38,6 @@ input[type="number"] {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 2px;
-}
-.adminlte-gazie .main-sidebar {
-	background: linear-gradient(to left,#0b0b0bc4,#060606e6 20%);
 }
 .adminlte-gazie .sidebar-form .btn {
   border-top-left-radius: 0;
@@ -169,9 +166,6 @@ div.panel.panel-default div.container-fluid div.form-row div.form-group.col-md-6
 .navbar-nav > .notifications-menu > .dropdown-menu > li .menu, .navbar-nav > .messages-menu > .dropdown-menu > li .menu, .navbar-nav > .tasks-menu > .dropdown-menu > li .menu {
     max-height: 500px;
 }
-.navbar-static-top {
-	border-bottom: 1px solid #000 !important;
-}
 .content-wrapper {
     min-width: 300px;
 }
@@ -255,7 +249,8 @@ section.content {
   margin-bottom: 5px;
 }
 .FacetFormTABLE,table.Tmiddle,table.Tsmall {
-	border: 1px solid #87b8d0;
+	border-color: #888;
+	border: 1px solid;
 	border-radius: 4px;
 	border-collapse: unset;
   margin-left: auto;
@@ -300,9 +295,7 @@ table.Tmiddle tr>td, table.Tsmall tr>td {
   font-weight: bold;
 }
 input[id^="search_"].ui-autocomplete-input::placeholder {
-	color: #800;
 	font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-	opacity: 0.6;
 }
 html body.adminlte-gazie form div.wrapper div.content-wrapper section.content form div.FacetFormHeaderFont input#search_clfoco.ui-autocomplete-input
 
@@ -590,4 +583,27 @@ section.content-header div h1 {
 }
 .lang-select {
   padding:8px; height: 42px;
+}
+li.blink{
+  animation:blink 700ms infinite alternate;
+  padding-top:10px;
+}
+li.blink>a.btn{
+  padding:5px;
+}
+@keyframes blink {
+  from { opacity:1; } to { opacity:0; }
+}
+.ui-dialog-buttonset>button.btn.btn-confirm:first-child {
+    background-color: #f9b54d;
+}
+.dropdown-menu > li.user-body > a {
+  white-space: normal;
+}
+a.logo.company-color-logo span img {
+  height: auto;
+  width: auto;
+  max-width: 50px;
+  max-height: 50px;
+  padding: 1px;
 }

@@ -26,8 +26,14 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $pdf_to_modal = gaz_dbi_get_row($gTables['company_config'], 'var', 'pdf_reports_send_to_modal')['val'];
 $partner_select = !gaz_dbi_get_row($gTables['company_config'], 'var', 'partner_select_mode')['val'];
-$tesdoc_e_partners = $gTables['tesdoc'] . " LEFT JOIN " . $gTables['clfoco'] . " ON " . $gTables['tesdoc'] . ".clfoco = " . $gTables['clfoco'] . ".codice LEFT JOIN " . $gTables['anagra'] . ' ON ' . $gTables['clfoco'] . '.id_anagra = ' . $gTables['anagra'] . '.id';
-
+$table_join = $gTables['tesdoc']." AS dtesdoc".
+                     " INNER JOIN {$gTables['clfoco']}" .
+                     " ON dtesdoc.clfoco = {$gTables['clfoco']}.codice " .
+                     " LEFT JOIN {$gTables['anagra']}" .
+                     " ON {$gTables['clfoco']}.id_anagra = {$gTables['anagra']}.id".
+                     " LEFT JOIN ( SELECT {$gTables['rigdoc']}.id_tes, MAX({$gTables['rigdoc']}.id_orderman) AS id_orderman FROM {$gTables['rigdoc']} WHERE {$gTables['rigdoc']}.id_orderman >= 1 GROUP BY {$gTables['rigdoc']}.id_tes ) AS rd ON dtesdoc.id_tes = rd.id_tes".
+                     " LEFT JOIN {$gTables['orderman']}" .
+                     " ON rd.id_orderman = {$gTables['orderman']}.id";
 
 // funzione di utilità generale, adatta a mysqli.inc.php
 function cols_from($table_name, ...$col_names) {
@@ -37,20 +43,14 @@ function cols_from($table_name, ...$col_names) {
 
 // campi ammissibili per la ricerca
 $search_fields = [
-    'sezione'
-    => "seziva = %d",
-    'id_tes'
-    => "id_tes = %d",
-    'tipoddt'
-    => " tipdoc = '%s' ",
-    'tipo'
-    => " ( tipdoc LIKE '%s' OR tipdoc = 'FAD' OR tipdoc = 'RPL') ",
-    'numero'
-    => "numdoc LIKE '%%%s%%'",
-    'anno'
-    => "YEAR(datemi) = %d",
-    'cliente'
-    => $partner_select ? "clfoco = %s" : "ragso1 LIKE '%%%s%%'"
+    'sezione' => "seziva = %d",
+    'id_tes' => "id_tes = %d",
+    'tipoddt' => " tipdoc = '%s' ",
+    'tipo' => " ( tipdoc LIKE '%s' OR tipdoc = 'FAD' OR tipdoc = 'RPL') ",
+    'numero' => "numdoc LIKE '%%%s%%'",
+    'anno' => "YEAR(datemi) = %d",
+    'omdescri'  => "CONCAT({$gTables['orderman']}.id, {$gTables['orderman']}.description) LIKE '%%%s%%'",
+    'cliente' => $partner_select ? "clfoco = %s" : "ragso1 LIKE '%%%s%%'"
 ];
 
 // creo l'array (header => campi) per l'ordinamento dei record
@@ -59,7 +59,7 @@ $sortable_headers = array(
     "Numero" => "numdoc",
     "Data" => "datemi",
     "Cliente" => "",
-    "Destinazione" => "",
+    "Produzione/Commessa" => "",
     "Status" => "",
     "Stampa" => "",
     "Mail" => "",
@@ -85,7 +85,7 @@ if (!isset($_GET['sezione'])) {
 	$default_where=['sezione' => intval($_GET['sezione']), 'tipo' => 'DD_'];
 }
 $ts = new TableSorter(
-    $tesdoc_e_partners,
+    $table_join,
     $passo,
     ['datemi' => 'desc', 'numdoc' => 'desc'],
     $default_where
@@ -252,20 +252,24 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                     <?php gaz_flt_disp_int("numero", "Numero DdT"); ?>
                 </td>
                 <td class="FacetFieldCaptionTD">
-					<?php gaz_flt_disp_select("tipoddt", "tipdoc AS tipoddt", $tesdoc_e_partners,  $where_select.((isset($_GET['anno']) && intval($_GET['anno']) >= 2000)?' AND YEAR(datemi)='.intval($_GET['anno']):''),'tipoddt'); ?>
+					<?php gaz_flt_disp_select("tipoddt", "tipdoc AS tipoddt", $table_join,  $where_select.((isset($_GET['anno']) && intval($_GET['anno']) >= 2000)?' AND YEAR(datemi)='.intval($_GET['anno']):''),'tipoddt'); ?>
                 </td>
                 <td class="FacetFieldCaptionTD">
                     <?php gaz_flt_disp_select("anno", "YEAR(datemi) as anno", $gTables["tesdoc"], $where_select, "anno DESC"); ?>
                 </td>
-                <td class="FacetFieldCaptionTD" colspan=2>
+                <td class="FacetFieldCaptionTD">
 		    <?php
                     if ($partner_select) {
-                        gaz_flt_disp_select("cliente", "clfoco AS cliente, ragso1 as nome",$tesdoc_e_partners, $where_select.((isset($_GET['anno']) && intval($_GET['anno']) >= 2000)?' AND YEAR(datemi)='.intval($_GET['anno']):''), "nome ASC", "nome");
+                        gaz_flt_disp_select("cliente", "clfoco AS cliente, ragso1 as nome",$table_join, $where_select.((isset($_GET['anno']) && intval($_GET['anno']) >= 2000)?' AND YEAR(datemi)='.intval($_GET['anno']):''), "nome ASC", "nome");
                     } else {
                         gaz_flt_disp_int("cliente", "Cliente");
                     }
 		    ?>
                 </td>
+                <td class="FacetFieldCaptionTD">
+                  <?php gaz_flt_disp_int("omdescri", "Commessa/produzione"); ?>
+                </td>
+
                 <td class="FacetFieldCaptionTD text-center">
                     <input type="submit" class="btn btn-sm btn-default btn-50" name="search" value="Cerca" tabindex="1">
                     <?php $ts->output_order_form(); ?>
@@ -281,7 +285,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
             <tr>
                 <?php
                 $linkHeaders = new linkHeaders($script_transl['header']);
-                $linkHeaders->setAlign(array('left', 'left', 'center', 'center', 'left', 'left', 'center', 'center', 'center', 'center', 'center', 'center'));
+                $linkHeaders->setAlign(array('left', 'left', 'center', 'center', 'left', 'center', 'center', 'center', 'center', 'center', 'center', 'center'));
                 $linkHeaders->output();
                 ?>
             </tr>
@@ -294,11 +298,13 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
             else
                 $ultimoddt = 1;
 //recupero le testate in base alle scelte impostate
-            $result = gaz_dbi_dyn_query("*", $tesdoc_e_partners, $ts->where, $ts->orderby, $ts->getOffset(), $ts->getLimit());
+            $result = gaz_dbi_dyn_query(
+              cols_from("dtesdoc","id_tes","tipdoc","ddt_type","seziva","protoc","clfoco","datemi","numdoc","numfat","datfat","id_con","status").", ".
+              cols_from($gTables['orderman'],"id AS omid ","description AS omdescri").", ".
+              cols_from($gTables['anagra'],"fe_cod_univoco","pec_email","ragso1","ragso2","e_mail")
+              , $table_join, $ts->where, $ts->orderby, $ts->getOffset(), $ts->getLimit());
             while ($r = gaz_dbi_fetch_array($result)) {
-                $destina = gaz_dbi_get_row($gTables['destina'], 'codice', $r['id_des_same_company']);
-                if(!$destina) $destina=['codice'=>'','unita_locale1'=>''];
-                    switch ($r['tipdoc']) {
+                   switch ($r['tipdoc']) {
                         case "RPL":
                         case "DDT":
                         case "DDV":
@@ -330,7 +336,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                                 </a>
                             </td>
                             <td>
-                                <?php echo "<a href=\"admin_destinazioni.php?codice=".$destina["codice"]."&Update\">".$destina["unita_locale1"]."</a>"; ?>
+                                <?= substr($r["omid"].' '.$r["omdescri"],0,30); ?>
                             </td>
                             <?php
                             // Colonna status
@@ -435,7 +441,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                                 </a>
                             </td>
                             <td>
-                                <?php echo "<a href=\"admin_destinazioni.php?codice=".$destina["codice"]."&Update\">".$destina["unita_locale1"]."</a>"; ?>
+                                <?= substr($r["omid"].' '.$r["omdescri"],0,30); ?>
                             </td>
                             <?php
                             echo "<td><div class=\"btn btn-xs btn-".$btnclass."\">" . $script_transl['from_suppl'] . "</div></td>";
@@ -510,7 +516,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                                 </a>
                             </td>
                             <td>
-                                <?php echo "<a href=\"admin_destinazioni.php?codice=".$destina["codice"]."&Update\">".$destina["unita_locale1"]."</a>"; ?>
+                                <?= substr($r["omid"].' '.$r["omdescri"],0,30); ?>
                             </td>
                             <?php
                             // Colonna Stato

@@ -158,7 +158,8 @@ function getLastProtocol($type, $year, $sezione) {
             $lastDatreg = $ultimo_tesmov['datreg'];
         }
     }
-    return array('last_protoc'=>$lastProtocol + 1,'last_datreg'=>$lastDatreg);
+    $abs_first = $ultimo_tesmov || $ultimo_tesdoc ? false : true;
+    return array('last_protoc'=>$lastProtocol + 1,'last_datreg'=>$lastDatreg, 'abs_first'=>$abs_first);
 }
 
 function encondeFornitorePrefix($clfoco,$b=36) {
@@ -582,13 +583,13 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
       $curr_doc_cont = $xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]");
       $df = $xpath->query("//FatturaElettronicaBody[".$form['curr_doc']."]/DatiGenerali/DatiGeneraliDocumento/Data")->item(0)->nodeValue;
       // trovo l'ultima data di registrazione
-      $lr = getLastProtocol('AF_',substr($df,0,4),1)['last_datreg'];
-      if ($lr > $df && !isset($_POST['datreg'])) { // solo al primo accesso propongo l'ultima data di registrazione
-        $form['datreg'] = gaz_format_date($lr, false, true);
+      $lpr = getLastProtocol('AF_',substr($df,0,4),1);
+      if ($lpr['last_datreg'] > $df && !isset($_POST['datreg'])) { // solo al primo accesso propongo l'ultima data di registrazione
+        $form['datreg'] = gaz_format_date($lpr['last_datreg'], false, true);
       }
       $date_post = gaz_format_date($form['datreg'], true);
-      if ($lr > $date_post) { // solo se scelgo una data inferiore all'ultima registrazione la forzo
-        $form['datreg'] = gaz_format_date($lr, false, true);
+      if ($lpr['last_datreg'] > $date_post && !$lpr['abs_first']) { // solo se scelgo una data inferiore all'ultima registrazione e non è la prima dell'anno la forzo
+        $form['datreg'] = gaz_format_date($lpr['last_datreg'], false, true);
       }
       // controllo se ho uno split payment
       $yes_split = false;

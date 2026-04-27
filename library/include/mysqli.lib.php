@@ -979,6 +979,20 @@ function bodytextUpdate ($codice, $newValue)
   tableUpdate($table, $columns, $codice, $newValue);
 }
 
+function custom_field_jsonUpsert($table, $refcolname, $refcolval, $newval)
+{
+  $oldjson = gaz_dbi_get_row($table,$refcolname,$refcolval)['custom_field'];
+  $oldjson = $oldjson ? json_decode($oldjson ?? '', true):[];
+  if ($oldjson === null) $oldjson = [];
+  // Eseguo l'UPSERT in PHP (Unione degli array), array_replace sovrascrive le chiavi esistenti e aggiunge le nuove
+  if (!is_array($newval)) { // se non passo direttamente un array allora lo devo decodificare dal json
+    $newval = $newval ? json_decode($newval ?? '', true):[];
+    if ($newval === null) $newval = [];
+  }
+  $finaljson = array_replace($oldjson, $newval);
+  gaz_dbi_put_row($table, $refcolname, $refcolval, 'custom_field', json_encode($finaljson));
+}
+
 //===============================================================
 // Gestione Access Rights
 //===============================================================

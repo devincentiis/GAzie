@@ -6,6 +6,9 @@ body {
 .help {
     margin-bottom: 20px;
 }
+input, select, textarea {
+	border-color: #444;
+}
 .contenuto-help {
    background-color: #001;
 }
@@ -16,8 +19,7 @@ body {
     border-color: #fff;
 }
 .FacetFieldCaptionTD, label.control-label {
-    background-color: #1d1c2d99;
-    color: #fff;
+  color: #c7c7c7;
 }
 th {
     background-color: #201e1d;
@@ -36,7 +38,8 @@ button, optgroup, select {
 }
 input, textarea {
 	background-color: #121a1a;
-	border: 1px solid #888;
+	border: 1px solid #444;
+  color: #fff;
 }
 .FacetColumnTD {
   background-color: #4d121d;
@@ -73,9 +76,7 @@ div.th {
 }
 .FacetDataTDred
 {
-  color: #f00;
-  font-weight: bold;
-  background-color: #c4c7ca;
+  color: #f88;
   margin-bottom: 10px;
 }
 .adminlte-gazie .main-header {
@@ -121,6 +122,9 @@ div.th {
 .adminlte-gazie .user-panel > .info,
 .adminlte-gazie .user-panel > .info > a {
   color: #fff;
+}
+.adminlte-gazie .main-sidebar {
+	background: linear-gradient(to left,#0b0b0bc4,#060606e6 20%);
 }
 .adminlte-gazie .sidebar-menu > li.header {
   color: #4b646f;
@@ -181,24 +185,27 @@ div.th {
   color : #fff;
 }
 .gaz-attivo {
-  background-color: #E3F5FF;
-  color : #2d15d2;
+  background-color: #171429dd;
+  color : #E3F5FF;
 }
 .gaz-passivo {
-  background-color: #FFF6EF;
-  color : #a65601;
+  background-color: #251e16dd;
+  color : #FFF6EF;
 }
 .gaz-costi {
-  background-color: #FDD;
-  color : #912626;
+  background-color: #0f0404;
+  color : #FDD;
 }
 .gaz-ricavi {
-  background-color: #EEFDED;
-  color : #045102;
+  background-color: #030b03;
+  color : #EEFDED;
 }
 .gaz-transitori {
-  background-color: #F4D5FF;
-  color : #72019b;
+  background-color: #0a010d;
+  color : #F4D5FF;
+}
+.text-primary, .text-success, .text-info, .text-warning, .text-danger {
+  filter: brightness(2);
 }
 td.ui-datepicker-other-month>a.ui-state-default.ui-priority-secondary{
 	color: #034802;
@@ -212,15 +219,37 @@ td.ui-datepicker-other-month>a.ui-state-default.ui-priority-secondary{
 .navbar-nav > .user-menu > .dropdown-menu > .user-footer {
 	background-color: #a1a29f;
 }
-.btn-edit {
-	background-color: #449d44;
-	color: #FFFFFF;
-	box-shadow: 1px 1px 1px 1px gray;
-}
 .btn-default {
-	background-color: #ddd;
-	color: #000;
-	box-shadow: 1px 1px 1px 1px gray;
+	background-color: #444;
+	color: #fff;
+}
+.btn-warning {
+	background-color: #5b3c0c;
+	color: #fff;
+	border-color: transparent;
+}
+.btn-danger {
+	background-color: #5b100c;
+	color: #fff;
+	border-color: transparent;
+}
+.btn-info {
+	background-color: #18273f;
+	color: #fff;
+	border-color: transparent;
+}
+.btn-success, .btn-edit {
+	background-color: #3f5f3f;
+	color: #fff;
+	border-color: transparent;
+}
+.btn.focus, .btn:focus, .btn:hover {
+	color: #fff;
+  background-color: #000;
+}
+.btn-default.disabled, .btn-default.disabled.active, .btn-default.disabled.focus, .btn-default.disabled:active, .btn-default.disabled:focus, .btn-default.disabled:hover, .btn-default[disabled], .btn-default[disabled].active, .btn-default[disabled].focus, .btn-default[disabled]:active, .btn-default[disabled]:focus, .btn-default[disabled]:hover, fieldset[disabled] .btn-default, fieldset[disabled] .btn-default.active, fieldset[disabled] .btn-default.focus, fieldset[disabled] .btn-default:active, fieldset[disabled] .btn-default:focus, fieldset[disabled] .btn-default:hover {
+	background-color: #666;
+	border-color: #ccc;
 }
 .panel {
   background-color: #3c3937
@@ -275,10 +304,12 @@ a, .panel-info {
 }
 .Tlarge.table-bordered {
 	border: 2px solid #444;
-  box-shadow: 1px 1px 1px rgba(1,1,1,.5);
+}
+.FacetFormTABLE, table.Tmiddle, table.Tsmall {
+	border-color: #666;
 }
 .tab-content{
-  background-color:#000;
+  background-color:#252525;
 }
 .tab-content > .tab-pane > div.row:nth-of-type(odd),
 .gaz-table-form div.container-fluid div.row:nth-of-type(odd) {
@@ -289,7 +320,6 @@ div.table-responsive table.Tlarge tbody tr:hover,
 div.table-responsive table.dataTable tbody tr:hover,
 div.box-body table.dataTable tbody tr:hover {
 	background: linear-gradient(180deg, #ffffff20,#060606,#ffffff20);
-  font-weight: 600;
 }
 .table-striped > tbody > tr:nth-of-type(odd) {
   background-color: #292929;
@@ -307,16 +337,18 @@ div.box-body table.dataTable tbody tr:hover {
 	color: #fbfafa;
 	background-color: #151414;
 }
+
+input[id^="search_"].ui-autocomplete-input::placeholder {
+	color: #F88;
+}
 .FacetFooterTD {
 	background-color: #484b77;
 }
-.table > tbody > tr > td,
-.table > tbody > tr > th,
-.table > tfoot > tr > td,
-.table > tfoot > tr > th,
-.table > thead > tr > td,
+.table > tbody > tr > td,.table > tbody > tr > th,.table > tfoot > tr > td,.table > tfoot > tr > th,.table > thead > tr > td,.table > thead > tr > th {
+	border-top-color: #444;
+}
 .table > thead > tr > th {
-	border-top-color: #252a48;
+	border-bottom-color: #444;
 }
 .ui-dialog-content.ui-widget-content table#tblAppendGrid.table thead.thead-light tr th{
   background-color: #46464d;
@@ -350,6 +382,7 @@ nav.navbar.navbar-static-top.company-color-bright:hover {
 	color: #fdf0f0;
   border: 2px;
 	border-style: solid;
+  background-color: #0673ff08;
 }
 
 .table > tbody > tr.info > td, .table > tbody > tr.info > th, .table > tbody > tr > td.info, .table > tbody > tr > th.info, .table > tfoot > tr.info > td, .table > tfoot > tr.info > th, .table > tfoot > tr > td.info, .table > tfoot > tr > th.info, .table > thead > tr.info > td, .table > thead > tr.info > th, .table > thead > tr > td.info, .table > thead > tr > th.info {
@@ -402,6 +435,13 @@ ul.distintabase,
 .ui-widget-header .ui-state-active {
 	color: #000;
 }
+.ui-state-highlight,
+.ui-widget-content .ui-state-highlight,
+.ui-widget-header .ui-state-highlight,
+.ui-widget-header .ui-icon {
+  background-color: #a90;
+}
+
 .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited, a.ui-button, a:link.ui-button, a:visited.ui-button, .ui-button {
 	color: #fff;
 }

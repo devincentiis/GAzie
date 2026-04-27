@@ -170,7 +170,7 @@ while ($r=gaz_dbi_fetch_row($rs)) {
             while ($r = gaz_dbi_fetch_array($result)) {
                 echo "<tr>";
                 // Colonna codice staffe
-                echo "<td align=\"center\"><a class=\"btn btn-xs btn-edit\" href=\"admin_staff.php?codice=" . substr($r["id_clfoco"], 3) . "&Update\"><i class=\"glyphicon glyphicon-edit\"></i>&nbsp;" . intval($r["id_contract"]) . "</a> &nbsp</td>";
+                echo "<td align=\"center\"><a class=\"btn btn-xs btn-edit\" href=\"admin_staff.php?codice=" . substr($r["id_clfoco"], 3) . "&Update\"><i class=\"glyphicon glyphicon-edit\"></i>&nbsp;" . $r["id_contract"] . "</a> &nbsp</td>";
                 // Colonna cognome
                 echo "<td>" . $r["ragso1"] . " &nbsp;</td>";
                 // Colonna nome

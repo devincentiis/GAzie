@@ -237,7 +237,7 @@ class OrdineCliente extends Template
     $this->Cell(68,6, 'Castelletto I.V.A.',1,0,'C',1);
     $this->Cell(56,6, 'T O T A L E',1,1,'C',1);
     $this->SetFont('helvetica', '', 8);
-    $this->Cell(62,6, $this->pagame['descri'],1,0,'C');
+    $this->Cell(62,6, $this->pagame['descri'],1,0,'C',0,'',1);
     $this->Cell(25,4, 'Imponibile',1,0,'C',1);
     $this->Cell(18,4, 'Aliquota',1,0,'C',1);
     $this->Cell(25,4, 'Imposta',1,1,'C',1);
@@ -246,7 +246,7 @@ class OrdineCliente extends Template
       foreach ($this->docVars->cast as $key => $value) {
         $this->Cell(62);
         $this->Cell(18, 4, gaz_format_number($value['impcast']).' ', 0, 0, 'R');
-        $this->Cell(32, 4, $value['descriz'],0,0,'C');
+        $this->Cell(32, 4, $value['descriz'],0,0,'C',0,'',1);
         $this->Cell(18, 4, gaz_format_number($value['ivacast']).' ',0,1,'R');
       }
     }

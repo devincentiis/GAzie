@@ -801,13 +801,13 @@ function printPdf(urlPrintDoc){
                 // Colonna "Fattura elettronica"
                 if (substr($r['tipdoc'], 0, 1) == 'F') {
                   if($r['fattura_elettronica_original_name'] !== null && strlen($r['fattura_elettronica_original_name'])>10){ // ho un file importato dall'esterno
-                    echo '<td><a class="btn btn-xs btn-warning" target="_blank" href="../acquis/view_fae.php?id_tes=' . $r["id_tes"] . '">File importato<i class="glyphicon glyphicon-eye-open"></i></a>'.'<a class="btn btn-xs btn-edit" title="Scarica il file XML originale" href="download_zip_package.php?fn='.$r['fattura_elettronica_original_name'].'">xml <i class="glyphicon glyphicon-download"></i> </a></td>';
+                    echo '<td><a class="btn btn-xs btn-warning" target="_blank" href="../acquis/view_fae.php?id_tes=' . $r["id_tes"] . '">File importato<i class="glyphicon glyphicon-eye-open"></i></a> <a class="btn btn-xs btn-edit" title="Scarica il file XML originale" href="download_zip_package.php?fn='.$r['fattura_elettronica_original_name'].'">xml <i class="glyphicon glyphicon-download"></i> </a></td>';
                   } else { // il file è generato al volo dal database
                     echo '<td align="center"';
                     if($zipped){ // se è contenuto in un pacchetto di file permetterà sia il download del singolo XML che del pacchetto in cui è contenuto
                       echo ' style="white-space:unset;">';
                       if ($r['fattura_elettronica_reinvii']==0) {
-                        echo '<a class="btn btn-xs btn-success" title="Pacchetto di fatture elettroniche in cui &egrave; contenuta questa fattura" href="download_zip_package.php?fn='.$r['fattura_elettronica_zip_package'].'">'.$zipped.'.zip<i class="glyphicon glyphicon-compressed"></i> </a>';
+                        echo ' <a class="btn btn-xs btn-success" title="Pacchetto di fatture elettroniche in cui &egrave; contenuta questa fattura" href="download_zip_package.php?fn='.$r['fattura_elettronica_zip_package'].'">'.$zipped.'.zip<i class="glyphicon glyphicon-compressed"></i> </a>';
                       }
                     } elseif (strlen($r['pec_email'])<5 && strlen(trim($r['fe_cod_univoco']))<6) { //se il cliente non ha codice univoco o pec tolgo il link e do la possibilità di richiederli via mail o carta
                       $d_title = 'Invia richiesta PEC e/o codice SdI all\'indirizzo: '.$r['e_mail'];
@@ -816,7 +816,7 @@ function printPdf(urlPrintDoc){
                         $dest = '';
                         $d_title = 'Stampa richiesta cartacea (cliente senza mail)';
                       }
-                      echo '><button onclick="confirPecSdi(this);return false;" id="doc3_' . $r['clfoco'] . '" url="stampa_richiesta_pecsdi.php?codice='.$r['clfoco'].$dest.'" href="#" title="'. $d_title . '" mail="' . $r['e_mail'] . '" namedoc="Richiesta codice SdI o indirizzo PEC"  class="btn btn-xs  btn-elimina"><i class="glyphicon glyphicon-tag"></i></button>';
+                      echo '><button onclick="confirPecSdi(this);return false;" id="doc3_' . $r['clfoco'] . '" url="stampa_richiesta_pecsdi.php?codice='.$r['clfoco'].$dest.'" href="#" title="'. $d_title . '" mail="' . $r['e_mail'] . '" namedoc="Richiesta codice SdI o indirizzo PEC"  class="btn btn-xs btn-elimina" style="float: left;"><i class="glyphicon glyphicon-tag"></i></button>';
                     } else { // quando ho pec e/o codice univoco ma non ho creato pacchetti zip
                       echo ">\n";
                     }
@@ -893,7 +893,7 @@ function printPdf(urlPrintDoc){
                       $sdititle = 'genera il file '.$r['fae_attuale'].' o fai il '.intval($r['fattura_elettronica_reinvii']+1).'° reinvio ';
                       break;
                     }
-                    echo (empty($sdilabel)?'':'<a class="btn btn-xs btn-'.$sdihilight.' btn-xml" onclick="confirFae(this);return false;" id="doc1_'.$r['id_tes'].'" dialog_fae_reinvio="'.$r['fae_reinvio'].'" dialog_flux_descri="'.htmlentities($r['flux_descri']?$r['flux_descri']:'').'" dialog_fae_sdiflux="'.$sdi_flux.'" dialog_fae_filename="'.$r['fae_attuale'].'" dialog_fae_numrei="'.$r['fattura_elettronica_reinvii'].'" dialog_fae_numfat="'. $r['tipdoc'].' '. $r['numfat'].'/'. $r['seziva'].'" dialog_flux_status="'. $last_flux_status.'" target="_blank" href="'.$modulo_fae.'" zip_ref="'.$zip_ref.'" title="'.$sdititle.'"> '.strtoupper($sdilabel).' </a>').'<a class="btn btn-xs btn-default" title="Visualizza in stile" href="electronic_invoice.php?id_tes='.$r['id_tes'].'&viewxml" target="_blank"><i class="glyphicon glyphicon-eye-open"></i> </a>';
+                    echo (empty($sdilabel)?'':' <a class="btn btn-xs btn-'.$sdihilight.' btn-xml" onclick="confirFae(this);return false;" id="doc1_'.$r['id_tes'].'" dialog_fae_reinvio="'.$r['fae_reinvio'].'" dialog_flux_descri="'.htmlentities($r['flux_descri']?$r['flux_descri']:'').'" dialog_fae_sdiflux="'.$sdi_flux.'" dialog_fae_filename="'.$r['fae_attuale'].'" dialog_fae_numrei="'.$r['fattura_elettronica_reinvii'].'" dialog_fae_numfat="'. $r['tipdoc'].' '. $r['numfat'].'/'. $r['seziva'].'" dialog_flux_status="'. $last_flux_status.'" target="_blank" href="'.$modulo_fae.'" zip_ref="'.$zip_ref.'" title="'.$sdititle.'"> '.strtoupper($sdilabel).' </a>').' <a class="btn btn-xs btn-default" title="Visualizza in stile" href="electronic_invoice.php?id_tes='.$r['id_tes'].'&viewxml" target="_blank"><i class="glyphicon glyphicon-eye-open"></i> </a>';
                     if ($r['fattura_elettronica_reinvii'] > 0) {
                       echo '<br/><small>' . $r['fattura_elettronica_reinvii'] . ($r['fattura_elettronica_reinvii']==1 ? ' reinvio' : ' reinvii') . '</small><br/>';
                     }
@@ -912,7 +912,7 @@ function printPdf(urlPrintDoc){
                       $classe_mail = "btn-success";
                       $title="Ultimo invio: ".$gaz_custom_data['email']['fat'];
                   }
-                  echo '<a class="btn btn-xs '.$classe_mail.' btn-email" onclick="confirMail(this,' . $r["clfoco"] . ',' . $r["id_tes"] . ',false);return false;" id="doc_' . $r["id_tes"] . '" url="' . $modulo . '" href="#" title="' . $title . '" mail="' . $r["e_mail"] . '" namedoc="' . $tipodoc . ' n.' . $r["numfat"] . ' del ' . gaz_format_date($r["datfat"]) . '"><i class="glyphicon glyphicon-envelope"></i></a>';
+                  echo ' <a class="btn btn-xs '.$classe_mail.' btn-email" onclick="confirMail(this,' . $r["clfoco"] . ',' . $r["id_tes"] . ',false);return false;" id="doc_' . $r["id_tes"] . '" url="' . $modulo . '" href="#" title="' . $title . '" mail="' . $r["e_mail"] . '" namedoc="' . $tipodoc . ' n.' . $r["numfat"] . ' del ' . gaz_format_date($r["datfat"]) . '"><i class="glyphicon glyphicon-envelope"></i></a>';
                 } else {
                   if ($r["tipdoc"] == 'XFA'){// se è reverse charge questo è un fornitore
                     echo '<a title="Non hai memorizzato l\'email per questo fornitore, inseriscila ora" href="../acquis/admin_fornit.php?codice=' . substr($r['clfoco'], 3) . '&Update#email"><i class="glyphicon glyphicon-edit"></i></a>';

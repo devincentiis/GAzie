@@ -31,13 +31,14 @@ $tipdoc_filter = "('DDL', 'RDL', 'DDR','ADT', 'AFT')";
 
 $partner_select = !gaz_dbi_get_row($gTables['company_config'], 'var', 'partner_select_mode')['val'];
 
-$tesdoc = "(SELECT * FROM {$gTables['tesdoc']} WHERE tipdoc IN $tipdoc_filter) as dtesdoc";
-$tesdoc_e_partners = "{$gTables['tesdoc']} " .
-                     "INNER JOIN {$gTables['clfoco']}" .
-                     " ON ({$gTables['tesdoc']}.clfoco = {$gTables['clfoco']}.codice " .
-                     " AND tipdoc IN $tipdoc_filter) " .
-                     "LEFT JOIN {$gTables['anagra']}" .
-                     " ON {$gTables['clfoco']}.id_anagra = {$gTables['anagra']}.id";
+$table_join = $gTables['tesdoc']." AS dtesdoc".
+                     " INNER JOIN {$gTables['clfoco']}" .
+                     " ON dtesdoc.clfoco = {$gTables['clfoco']}.codice " .
+                     " LEFT JOIN {$gTables['anagra']}" .
+                     " ON {$gTables['clfoco']}.id_anagra = {$gTables['anagra']}.id".
+                     " LEFT JOIN ( SELECT {$gTables['rigdoc']}.id_tes, MAX({$gTables['rigdoc']}.id_orderman) AS id_orderman FROM {$gTables['rigdoc']} WHERE {$gTables['rigdoc']}.id_orderman >= 1 GROUP BY {$gTables['rigdoc']}.id_tes ) AS rd ON dtesdoc.id_tes = rd.id_tes".
+                     " LEFT JOIN {$gTables['orderman']}" .
+                     " ON rd.id_orderman = {$gTables['orderman']}.id";
 
 // funzione di utilità generale, adatta a mysqli.inc.php
 function cols_from($table_name, ...$col_names) {
@@ -51,6 +52,7 @@ $search_fields = [
     'numdoc'  => "numdoc = %d",
     'tipo'    => "tipdoc LIKE '%s'",
     'numero'  => "numfat LIKE '%%%s%%'",
+    'omdescri'  => "CONCAT({$gTables['orderman']}.id, {$gTables['orderman']}.description) LIKE '%%%s%%'",
     'anno'    => "YEAR(datemi) = %d",
     'fornitore'=> $partner_select ? "clfoco = '%s'" : "ragso1 LIKE '%%%s%%'"
 ];
@@ -62,6 +64,7 @@ $sortable_headers = array(
     "Numero" => "numdoc",
     "Data" => "datemi",
     "Fornitore" => "",
+    "Produzione<br/>commessa" => "id_orderman",
     "Status" => "",
     "Stampa" => "",
     "Cancella" => ""
@@ -69,12 +72,32 @@ $sortable_headers = array(
 
 require("../../library/include/header.php");
 $script_transl = HeadMain();
+
+if (!isset($_GET['sezione'])) {
+	$rs_last = gaz_dbi_dyn_query('YEAR(datemi) AS yearde', $gTables['tesdoc'], "tipdoc IN $tipdoc_filter", 'datemi DESC, id_tes DESC', 0, 1);
+	$last = gaz_dbi_fetch_array($rs_last);
+	if ($last) {
+    $_GET['anno'] = $last['yearde'];
+  } else {
+    $_GET['anno'] = date('Y');
+  }
+  $default_where = ['sezione' => 1,'anno'=>$_GET['anno']];
+} else {
+  $default_where = ['sezione'=> intval($_GET['sezione'])];
+}
+
 $ts = new TableSorter(
-    !$partner_select && isset($_GET["fornitore"]) ? $tesdoc_e_partners : $tesdoc,
+    $table_join,
     $passo,
-    ['id_tes' => 'desc'],
-    ['sezione'=>1]
+    ['datemi' => 'desc'],
+    $default_where,
+    [],
+    'tipdoc IN '.$tipdoc_filter
 );
+
+# le <select> spaziano solo tra i documenti di vendita del sezionale corrente
+$where_select = sprintf(" ( tipdoc IN $tipdoc_filter) AND seziva = %d", $sezione);
+
 ?>
 <script>
 $(function() {
@@ -164,34 +187,33 @@ function printPdf(urlPrintDoc){
           <td class="FacetFieldCaptionTD">
           </td>
           <td class="FacetFieldCaptionTD">
-              <?php  gaz_flt_disp_select("tipo", "tipdoc as tipo", $tesdoc_e_partners, $ts->where, "tipdoc ASC"); ?>
+            <?php gaz_flt_disp_select("tipo", "tipdoc as tipo", $table_join, $ts->where, "tipdoc ASC"); ?>
           </td>
           <td class="FacetFieldCaptionTD">
-                  <?php gaz_flt_disp_int("numdoc", "Numero"); ?>
+            <?php gaz_flt_disp_int("numdoc", "Numero"); ?>
           </td>
           <td  class="FacetFieldCaptionTD">
-              <?php  gaz_flt_disp_select("anno", "YEAR(datemi) as anno", $tesdoc_e_partners, $ts->where, "anno DESC"); ?>
+              <?php gaz_flt_disp_select("anno", "YEAR(datemi) as anno", $table_join, $where_select, "anno DESC"); ?>
           </td>
           <td class="FacetFieldCaptionTD">
           <?php
           if ($partner_select) {
-            gaz_flt_disp_select("fornitore", "clfoco AS fornitore, ragso1 as nome",
-            $tesdoc_e_partners,
-            $ts->where, "nome ASC", "nome");
+            gaz_flt_disp_select("fornitore", "clfoco AS fornitore, ragso1 as nome", $table_join, $ts->where, "nome ASC", "nome");
           } else {
             gaz_flt_disp_int("fornitore", "Fornitore");
           }
           ?>
           </td>
           <td class="FacetFieldCaptionTD">
+            <?php gaz_flt_disp_int("omdescri", "Commessa/produzione"); ?>
           </td>
-          <td class="FacetFieldCaptionTD">
+          <td>
+            <input type="submit" class="btn btn-sm btn-default" name="search" value="<?php echo $script_transl['search'];?>" onClick="javascript:document.report.all.value=1;">
           </td>
           <td  class="FacetFieldCaptionTD">
-            <input type="submit" class="btn btn-sm btn-default" name="search" value="<?php echo $script_transl['search'];?>" onClick="javascript:document.report.all.value=1;">
-            <a class="btn btn-sm btn-default" href="?">Reset</a>
-            <?php  $ts->output_order_form(); ?>
-            </td>
+            <a class="btn btn-sm btn-default" href="?">Reset</a> </td>
+          <td>
+          </td>
         </tr>
         <tr>
           <?php
@@ -202,6 +224,7 @@ function printPdf(urlPrintDoc){
               "Numero" => "numdoc",
               "Data" => "datemi",
               "Fornitore (cod.)" => "clfoco",
+              "Produzione<br/>commessa>" => "id_orderman",
               "Status" => "",
               "Stampa" => "",
               "Cancella" => ""
@@ -214,15 +237,11 @@ function printPdf(urlPrintDoc){
           ?>
         </tr>
         <?php
-        $result = gaz_dbi_dyn_query(cols_from($gTables['tesdoc'],
-						  "id_tes","tipdoc","ddt_type","seziva","datemi","numdoc","numfat","datfat","status") . ", " .
-              cols_from($gTables['anagra'],
-						  "fe_cod_univoco",
-						  "pec_email",
-						  "ragso1",
-						  "ragso2",
-						  "e_mail"),
-              $tesdoc_e_partners,
+        $result = gaz_dbi_dyn_query(
+              cols_from("dtesdoc","id_tes","tipdoc","ddt_type","seziva","datemi","numdoc","numfat","datfat","status").", ".
+              cols_from($gTables['orderman'],"id AS omid ","description AS omdescri").", ".
+              cols_from($gTables['anagra'],"fe_cod_univoco","pec_email","ragso1","ragso2","e_mail"),
+              $table_join,
               $ts->where,
               $ts->orderby,
               $ts->getOffset(),
@@ -280,6 +299,7 @@ function printPdf(urlPrintDoc){
           echo '<td class="text-center">'. $r["numdoc"] . ' '.$ddtanomalo.'</td>';
           echo '<td class="text-center">'. gaz_format_date($r["datemi"]). " &nbsp;</td>";
           echo "<td>" . $r["ragso1"] . "&nbsp;</td>";
+          echo "<td>" .substr($r["omid"].' '.$r["omdescri"],0,50) . "&nbsp;</td>";
           if (intval(preg_replace("/[^0-9]/","",$r['numfat']))>=1){
             echo "<td align=\"center\"><a class=\"btn btn-xs btn-default\" style=\"cursor:pointer;\" ".($pdf_to_modal==0?'href="stampa_docacq.php?id_tes=' . $r["id_tes"] .'&template=FatturaAcquisto" target="_blank"':"onclick=\"printPdf('stampa_docacq.php?id_tes=" . $r["id_tes"] ."')\"")."><i class=\"glyphicon glyphicon-print\" title=\"Stampa fattura n. " . $r["numfat"] . " PDF\"></i> fatt. n. " . $r["numfat"] . "</a></td>";
           } else {

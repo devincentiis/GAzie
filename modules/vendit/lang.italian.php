@@ -1340,7 +1340,7 @@ $strScript = array("admin_client.php" =>
             "Tipo" => 'ddt_type',
             "Data" => "datemi",
             "Cliente" => "",
-            "Destinazione" => "",
+            "Produzione<br/>Commessa" => "",
             "Status" => "",
             "Stampa" => "",
             "Mail" => "",

@@ -66,7 +66,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
         $msg.='0+';
     }
     if ( gaz_dbi_get_row($gTables['company_config'], 'var', 'consenti_nofisc')['val']==0 ) { // se la configurazione avanzata azienda è molto permissiva non eseguo i controlli sui dati fiscali
-      $rs_same_id_contract = gaz_dbi_dyn_query('*', $gTables['staff'], " id_contract = " . $form['id_contract']." AND id_clfoco <> ".$real_code , "id_staff", 0, 1);
+      $rs_same_id_contract = gaz_dbi_dyn_query('*', $gTables['staff'], " id_contract = '" . $form['id_contract']."' AND id_clfoco <> ".$real_code , "id_staff", 0, 1);
       $same_id_contract = gaz_dbi_fetch_array($rs_same_id_contract);
       if ($same_id_contract) { // matricola esistente
           $msg .= "22+";

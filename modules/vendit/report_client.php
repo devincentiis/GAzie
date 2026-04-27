@@ -209,7 +209,7 @@ while ($r = gaz_dbi_fetch_array($result)) {
   $google_string = str_replace(" ", "+", $r["indspe"]) . "," . str_replace(" ", "+", $r["capspe"]) . "," . str_replace(" ", "+", $r["citspe"]) . "," . str_replace(" ", "+", $r["prospe"]);
   echo "<td title=\"" . $r["capspe"] . " " . $r["indspe"] . "\">";
   echo "<a class=\"btn btn-xs btn-default\" rel=\"noreferrer\" target=\"_blank\" href=\"https://www.google.it/maps/place/" . $google_string . "\">" . $r["citspe"] . " (" . $r["prospe"] . ")&nbsp;<i class=\"glyphicon glyphicon-map-marker\"></i></a>";
-  echo "<a class=\"btn btn-xs btn-default\" rel=\"noreferrer\" target=\"_blank\" href=\"https://www.google.it/maps/dir/" . $admin_aziend['latitude'] . "," . $admin_aziend['longitude'] . "/" . $google_string . "\">  <i class=\"glyphicon glyphicon-random\"></i></a>";
+  echo " <a class=\"btn btn-xs btn-default\" rel=\"noreferrer\" target=\"_blank\" href=\"https://www.google.it/maps/dir/" . $admin_aziend['latitude'] . "," . $admin_aziend['longitude'] . "/" . $google_string . "\">  <i class=\"glyphicon glyphicon-random\"></i></a>";
   echo "</td>";
   // composizione telefono
   $title = "";
@@ -250,7 +250,7 @@ while ($r = gaz_dbi_fetch_array($result)) {
       echo "<td class=\"FacetDataTDred\" align=\"center\"> * NO * </td>";
   }
   // colonna stampa privacy
-  echo "<td align=\"center\"><a title=\"stampa informativa sulla privacy\" class=\"btn btn-xs btn-default\" href=\"stampa_privacy.php?codice=" . $r["codice"] . "\" target=\"_blank\"><i class=\"glyphicon glyphicon-eye-close\"></i></a><a title=\"stampa richiesta codice sdi o pec\" class=\"btn btn-xs btn-default\" href=\"stampa_richiesta_pecsdi.php?codice=" . $r["codice"] . "\" target=\"_blank\"><i class=\"glyphicon glyphicon-inbox\"></i></a></td>";
+  echo "<td align=\"center\"><a title=\"stampa informativa sulla privacy\" class=\"btn btn-xs btn-default\" href=\"stampa_privacy.php?codice=" . $r["codice"] . "\" target=\"_blank\"><i class=\"glyphicon glyphicon-eye-close\"></i></a> <a title=\"stampa richiesta codice sdi o pec\" class=\"btn btn-xs btn-default\" href=\"stampa_richiesta_pecsdi.php?codice=" . $r["codice"] . "\" target=\"_blank\"><i class=\"glyphicon glyphicon-inbox\"></i></a></td>";
   echo "<td title=\"Effettuato un pagamento da " . $r["ragso1"] . "\" align=\"center\"><a class=\"btn btn-xs btn-default btn-pagamento\" href=\"customer_payment.php?partner=" . $r["codice"] . "\"><i class=\"glyphicon glyphicon-euro\"></i></a></td>";
   echo "<td title=\"Visualizza e stampa il partitario\" align=\"center\">  <a class=\"btn btn-xs btn-default\" href=\"report_contcli.php?id=".$r["codice"]."\"  target=\"_blank\"><i class=\"glyphicon glyphicon-list-alt\"></i></a> <a class=\"btn btn-xs btn-default\" href=\"../contab/select_partit.php?id=".$r["codice"]."\" target=\"_blank\"><i class=\"glyphicon glyphicon-check\"></i>&nbsp;<i class=\"glyphicon glyphicon-print\"></a></td>";
   echo "<td align=\"center\">";

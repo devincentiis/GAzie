@@ -33,7 +33,7 @@ if ($admin_aziend['Abilit'] >= 8) {
 	<div class="panel panel-info col-sm-12" >
           <div class="box-header company-color">
             <div class="box-title"><b><?php echo $script_transl['sca_scacli']; ?></b> -> data di riferimento:
-			<?php echo '<input type="text" value="'.$form['datref_cli'].'" id="datref_cli" name="datref_cli" readonly>'; ?><small>(6 mesi prima e 6 dopo)</small>
+			<?php echo '<input class="text-center" type="text" value="'.$form['datref_cli'].'" id="datref_cli" name="datref_cli" readonly>'; ?><small>(6 mesi prima e 6 dopo)</small>
 			</div>
 			<a class="pull-right dialog_grid" id_bread="<?php echo $grr['id_bread']; ?>" style="cursor:pointer;"><i class="glyphicon glyphicon-cog"></i></a>
           </div>
