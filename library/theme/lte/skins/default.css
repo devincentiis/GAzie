@@ -73,9 +73,7 @@ div.th {
 .FacetDataTDred
 {
   color: #f00;
-  font-weight: bold;
-  background-color: #c4c7ca;
-  margin-bottom: 10px;
+  background-color: #f001;
 }
 .FacetFooterTD {
 	background-color : #ece3dc;

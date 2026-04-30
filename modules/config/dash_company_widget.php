@@ -148,7 +148,7 @@ function selectCompany($name, $val, $strSearch = '', $val_hiddenReq = '', $mesg=
 	background-color: #FCFCFC;
 	color: white;
 	transform: rotateY(180deg);
-	border-radius: 20px;
+	border-radius: 10px;
 	box-shadow: 0 0 5px #<?php echo $admin_aziend['colore']; ?>;
 }
 .flip-image-back>a {

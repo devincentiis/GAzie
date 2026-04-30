@@ -541,7 +541,7 @@ $(function(){
           display: "Script",
           type: "text",
           ctrlAttr: { 'readonly': 'readonly' },
-          ctrlCss: {'font-size': '12px'}
+          ctrlCss: {'font-size': '12px', 'color': '#000'}
         },
         {
           name: "chk_script",
@@ -943,14 +943,14 @@ if ($user_data["Abilit"] == 9) {
           echo "  <td colspan=2><input type=radio name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"3\"></td>";
           echo "  <td><input type=radio checked name=\"" . $co_id . "nusr_" . $mod['name'] . "\" value=\"0\"></td>";
         } else { // se l'amministratore che sta operando sul proprio profilo può attivare un nuovo modulo e creare il relativo menù
-          echo "  <td class=\"FacetDataTDred\" colspan=2><input class=\"btn btn-warning\" type=radio name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"3\">Modulo attivabile</td>";
+          echo "  <td class=\"FacetDataTDred\" colspan=2><input class=\"btn btn-warning\" type=radio name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"3\"> Modulo attivabile</td>";
           echo "  <td class=\"FacetDataTDred\"><input type=radio checked name=\"" . $co_id . "new_" . $mod['name'] . "\" value=\"0\"></td>";
         }
       } elseif ($mod['access'] == 0) { // il modulo è attivato, quindi propongo i valori precedenti
         echo "  <td colspan=2><input type=radio name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"3\"></td>";
         echo "  <td><input type=radio checked name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"0\"></td>";
       } else {
-        echo '<td><input type=radio checked name="'. $co_id . 'acc_' . $mod['moduleid'] . '" value="3"> </td><td><a class="btn btn-xs dialog_module_card" module="'.$mod['name'].'" adminid="'.$form['user_name'].'" transl_name="'.$mod['transl_name'].'"><i class="glyphicon glyphicon-edit"></i>'.((count($mod['excluded_script'])>=1)?'<p class="text-left">'.implode('.php</p><p class="text-left">',$mod['excluded_script']).'.php</p>':'nessuno</p>').'</a></td>';
+        echo '<td><input type=radio checked name="'. $co_id . 'acc_' . $mod['moduleid'] . '" value="3"> </td><td class="text-center"><a class="btn btn-xs dialog_module_card" module="'.$mod['name'].'" adminid="'.$form['user_name'].'" transl_name="'.$mod['transl_name'].'"><i class="glyphicon glyphicon-edit"></i>'.((count($mod['excluded_script'])>=1)?'<p class="text-left">'.implode('.php</p><p class="text-left">',$mod['excluded_script']).'.php</p>':'nessuno</p>').'</a></td>';
         echo "  <td><input type=radio name=\"" . $co_id . "acc_" . $mod['moduleid'] . "\" value=\"0\"></td>";
       }
       echo "</tr>\n";
