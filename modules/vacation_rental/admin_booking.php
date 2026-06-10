@@ -33,7 +33,11 @@ require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
 require("../../modules/vendit/lib.function.php");
 require("../../modules/acquis/lib.data.php");
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 
 $admin_aziend = checkAdmin();
 $min_stay = gaz_dbi_get_row($gTables['company_config'], 'var', 'vacation_minnights')['val'];

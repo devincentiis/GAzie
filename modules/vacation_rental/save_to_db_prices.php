@@ -3,14 +3,14 @@
   --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
    --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -28,7 +28,11 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
 */
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 if ($_GET['token'] == md5($token.date('Y-m-d'))){
   require("../../library/include/datlib.inc.php");
   if ( is_numeric($_GET['title']) ) {
@@ -38,6 +42,7 @@ if ($_GET['token'] == md5($token.date('Y-m-d'))){
     $start=substr($_GET['start'],0,10);
     $end=substr($_GET['end'],0,10);
     $err='';
+	/*
     while (strtotime($start) <= strtotime($end)) {// ciclo il periodo giorno per giorno per vedere se c'è già un prezzo
       $what = "title";
       $table = $gTables['rental_prices'];
@@ -50,6 +55,34 @@ if ($_GET['token'] == md5($token.date('Y-m-d'))){
       }
       $start = date ("Y-m-d", strtotime("+1 days", strtotime($start)));// aumento di un giorno il ciclo
     }
+	*/
+	
+	// permetto inserimento prezzi multipli nello stesso giorno a patto che il minstay sia diverso
+	$minstay_new = intval($_GET['minstay']);
+	$house_code_safe = substr($_GET['house_code'], 0, 32);
+
+	while (strtotime($start) <= strtotime($end)) {
+		$what  = "minstay";
+		$table = $gTables['rental_prices'];
+		// prendo tutti i prezzi che coprono il giorno $start
+		$where = "house_code = '".$house_code_safe."' AND start <= '".$start."' AND end >= '".$start."'";
+		$result = gaz_dbi_dyn_query($what, $table, $where);
+		$found_same_minstay = false;
+		if ($result) {
+			while ($row = gaz_dbi_fetch_array($result)) {
+				if (intval($row['minstay']) === $minstay_new) {
+					$found_same_minstay = true;
+					break;
+				}
+			}
+		}
+		if ($found_same_minstay) {
+			$err = "prezzo già inserito con lo stesso minstay per il giorno ".$start;
+			break;
+		}
+		$start = date("Y-m-d", strtotime("+1 day", strtotime($start)));// aumento di un giorno il ciclo
+	}
+	
     if ($err==''){// se posso inserisco il prezzo
 
       $columns = array('id','title', 'start','end','house_code','price','minstay');

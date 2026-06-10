@@ -27,7 +27,7 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $msg = "";
 
-function getMovements($account_ini, $account_fin, $date_ini, $date_fin) {
+function getMovements($account_ini, $account_fin, $date_ini, $date_fin, $id_customer_group=0) {
     global $gTables, $admin_aziend;
     if ($account_ini == $account_fin || $account_fin == 0) { // i conti coincidono
         if ($account_fin == 0) {
@@ -37,7 +37,7 @@ function getMovements($account_ini, $account_fin, $date_ini, $date_fin) {
         $orderby = " datreg, id_tes ASC ";
         $select = $gTables['tesmov'] . ".id_tes," .$gTables['tesmov'] . ".caucon," .$gTables['tesmov'] . ".clfoco AS codpart," . $gTables['tesmov'] . ".descri AS tesdes,datreg,codice,protoc,numdoc,datdoc," . $gTables['clfoco'] . ".descri,import*(darave='D') AS dare,import*(darave='A') AS avere";
     } else {
-        $where = $gTables['clfoco'] . ".codice BETWEEN $account_ini AND $account_fin AND datreg BETWEEN $date_ini AND $date_fin GROUP BY " . $gTables['clfoco'] . ".codice";
+        $where = ($id_customer_group >= 1 ? $gTables['clfoco'] . ".id_customer_group = ".$id_customer_group." AND " : '' ).$gTables['clfoco'] . ".codice BETWEEN $account_ini AND $account_fin AND datreg BETWEEN $date_ini AND $date_fin GROUP BY " . $gTables['clfoco'] . ".codice";
         $orderby = " codice ASC ";
         $select = $gTables['tesmov'] . ".id_tes,".$gTables['tesmov'] . ".clfoco AS codpart," . "codice," . $gTables['clfoco'] . ".descri AS tesdes, COUNT(id_rig) AS `rows`, SUM(import*(darave='D')) AS dare, SUM(import*(darave='A')) AS avere";
     }
@@ -50,7 +50,7 @@ function getMovements($account_ini, $account_fin, $date_ini, $date_fin) {
     while ($r = gaz_dbi_fetch_array($rs)) {
         $r['tt'] = '';
         if ($account_ini == $account_fin || $account_fin == 0) {
-            // INIZIO crezione tabella per la visualizzazione sul tootip di tutto il movimento e facccio la somma del totale movimento
+            // INIZIO crezione tabella per la visualizzazione sul tootip di tutto il movimento e faccio la somma del totale movimento
             $res_rig = gaz_dbi_dyn_query("*", $gTables['rigmoc'], 'id_tes=' . $r["id_tes"], 'id_rig');
             $r['tt'] = '<p class=\'bg-info text-primary\'><b>' . $r['tesdes'] . '</b></p>';
             $tot = 0.00;
@@ -145,6 +145,7 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     }
     $form['search']['account_ini'] = '';
     $form['search']['account_fin'] = '';
+    $form['id_customer_group'] = 0;
 } else { // accessi successivi
     $form['hidden_req'] = htmlentities($_POST['hidden_req']);
     $form['ritorno'] = $_POST['ritorno'];
@@ -161,6 +162,7 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     $form['account_ini'] = intval($_POST['account_ini']);
     $form['master_fin'] = intval($_POST['master_fin']);
     $form['account_fin'] = isset($_POST['account_fin']) ? intval($_POST['account_fin']) : 0;
+    $form['id_customer_group'] = intval($_POST['id_customer_group']);
     foreach ($_POST['search'] as $k => $v) {
         $form['search'][$k] = $v;
     }
@@ -184,7 +186,6 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
         $rs_extreme_accont = gaz_dbi_query($query);
         $extreme_account = gaz_dbi_fetch_array($rs_extreme_accont);
         if ($extreme_account) {
-
             $form['account_ini'] = $extreme_account['min'];
             $form['search']['account_ini'] = $extreme_account['descri'];
         }
@@ -194,10 +195,21 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
       $form['account_fin'] =$form['account_ini'];
       $form['search']['account_fin'] = $form['search']['account_ini'];
     }
-
     if (isset($_POST['selfin'])) {
+      $form['master_fin'] = $form['master_ini'];
+      $form['account_fin'] = $form['account_ini'];
+    }
+    if (isset($_POST['allpartner'])) {
+      $ci = substr($form['master_ini'],0,3).'000001';
+      $cf = substr($form['master_ini'],0,3).'999999';
+      $query = 'SELECT MAX(codice) AS max, MIN(codice) AS min FROM '.$gTables['clfoco']." WHERE codice BETWEEN ".$ci.' AND '.$cf;
+      $rs_extreme_accont = gaz_dbi_query($query);
+      $extreme_account = gaz_dbi_fetch_array($rs_extreme_accont);
+      if ($extreme_account) {
         $form['master_fin'] = $form['master_ini'];
-        $form['account_fin'] = $form['account_ini'];
+        $form['account_ini'] = $extreme_account['min'];
+        $form['account_fin'] = $extreme_account['max'];
+      }
     }
     if (isset($_POST['return'])) {
         header("Location: " . $form['ritorno']);
@@ -245,13 +257,7 @@ if (isset($_POST['print']) && $msg == '') {
     if ($form['account_fin'] == 0) {
         $form['account_fin'] == $form['account_ini'];
     }
-    $_SESSION['print_request'] = array('script_name' => 'stampa_partit',
-        'codice' => $form['account_ini'],
-        'codfin' => $form['account_fin'],
-        'regini' => date("dmY", $utsini),
-        'regfin' => date("dmY", $utsfin),
-        'ds' => date("dmY", $utsexe)
-    );
+    $_SESSION['print_request'] = ['script_name' => 'stampa_partit', 'codice' => $form['account_ini'], 'codfin' => $form['account_fin'], 'regini' => date("dmY", $utsini),'regfin' => date("dmY", $utsfin), 'ds' => date("dmY", $utsexe), 'idg'=>$form['id_customer_group']];
     header("Location: sent_print.php");
     exit;
 }
@@ -327,6 +333,19 @@ $gForm->selSubAccount('account_fin', $form['account_fin'], $form['search']['acco
 echo ' <button type="submit" class="btn btn-default btn-sm" name="push_sbm" ><i class="glyphicon glyphicon-fast-forward"></i></button>';
 echo "</td>\n";
 echo "</tr>\n";
+if (substr($form['master_fin'],0,3) == $admin_aziend['mascli'] && substr($form['master_ini'],0,3) == $admin_aziend['mascli'] ){
+  echo '<tr><td class="FacetFieldCaptionTD">Gruppo clienti</td><td class="bg-warning">';
+  $gForm->selectFromDB('customer_group', 'id_customer_group', 'id', $form['id_customer_group'], 'id', true, ' ', 'descri');
+  echo '</td><td>';
+  echo '<button type="submit" name="allpartner">Tutti i clienti </button>';
+  echo '</td></tr>';
+} elseif (substr($form['master_fin'],0,3) == $admin_aziend['masfor'] && substr($form['master_ini'],0,3) == $admin_aziend['masfor'] ){
+  echo '<tr><td class="FacetFieldCaptionTD"><input type="hidden" value="'.$form['id_customer_group'].'" name="id_customer_group" /></td><td class="bg-warning"></td><td>';
+  echo '<button type="submit" name="allpartner">Tutti i fornitori </button>';
+  echo '</td></tr>';
+} else {
+  echo '<input type="hidden" value="'.$form['id_customer_group'].'" name="id_customer_group" />';
+}
 echo "<tr>\n";
 echo "<td class=\"FacetFieldCaptionTD\">" . $script_transl['date_ini'] . "</td><td colspan=\"2\">\n";
 $gForm->CalendarPopup('date_ini', $form['date_ini_D'], $form['date_ini_M'], $form['date_ini_Y'], 'FacetSelect', 1);
@@ -352,7 +371,7 @@ if (isset($_POST['preview']) and $msg == '') {
   $totdare = 0.00;
   $totavere = 0.00;
   $saldo = $saldo_precedente;
-  $m = getMovements($form['account_ini'], $form['account_fin'], $date_ini, $date_fin);
+  $m = getMovements($form['account_ini'], $form['account_fin'], $date_ini, $date_fin, $form['id_customer_group'] );
   echo "<div class=\"table-responsive\"><table class=\"Tlarge table table-striped\">";
   if (sizeof($m) > 0) {
     if ($form['account_ini'] < $form['account_fin']) {

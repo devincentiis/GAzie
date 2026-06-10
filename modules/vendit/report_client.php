@@ -47,7 +47,7 @@ $sortable_headers = array(
   "Telefono" => "telefo",
   "P.IVA - C.F." => "",
   "Privacy" => "",
-  "Riscuoti" => "",
+  "Scadenzario" => "",
   "Visualizza <br /> e/o stampa" => "",
   "Cancella" => ""
 );
@@ -251,7 +251,9 @@ while ($r = gaz_dbi_fetch_array($result)) {
   }
   // colonna stampa privacy
   echo "<td align=\"center\"><a title=\"stampa informativa sulla privacy\" class=\"btn btn-xs btn-default\" href=\"stampa_privacy.php?codice=" . $r["codice"] . "\" target=\"_blank\"><i class=\"glyphicon glyphicon-eye-close\"></i></a> <a title=\"stampa richiesta codice sdi o pec\" class=\"btn btn-xs btn-default\" href=\"stampa_richiesta_pecsdi.php?codice=" . $r["codice"] . "\" target=\"_blank\"><i class=\"glyphicon glyphicon-inbox\"></i></a></td>";
-  echo "<td title=\"Effettuato un pagamento da " . $r["ragso1"] . "\" align=\"center\"><a class=\"btn btn-xs btn-default btn-pagamento\" href=\"customer_payment.php?partner=" . $r["codice"] . "\"><i class=\"glyphicon glyphicon-euro\"></i></a></td>";
+  echo '<td class="text-center">
+  <a class="btn btn-xs btn-default btn-pagamento" href="customer_payment.php?partner=' . $r["codice"] . '"><i title="Riscuoti da: ' . $r["ragso1"] . '" class="glyphicon glyphicon-euro"></i></a>
+  <a class="btn btn-xs btn-warning" href="select_partner_status.php?id=' . $r["codice"] . '" target="_blank"><i title="Stato delle scadenze di ' . $r["ragso1"] . '" class="glyphicon glyphicon glyphicon-time"></i></a></td>';
   echo "<td title=\"Visualizza e stampa il partitario\" align=\"center\">  <a class=\"btn btn-xs btn-default\" href=\"report_contcli.php?id=".$r["codice"]."\"  target=\"_blank\"><i class=\"glyphicon glyphicon-list-alt\"></i></a> <a class=\"btn btn-xs btn-default\" href=\"../contab/select_partit.php?id=".$r["codice"]."\" target=\"_blank\"><i class=\"glyphicon glyphicon-check\"></i>&nbsp;<i class=\"glyphicon glyphicon-print\"></a></td>";
   echo "<td align=\"center\">";
   if (isset($accmov[$r["codice"]])){

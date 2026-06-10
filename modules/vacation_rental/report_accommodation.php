@@ -29,7 +29,11 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
 $admin_aziend=checkAdmin();

@@ -42,25 +42,19 @@ if (!$isAjax) {
 require("../../library/include/datlib.inc.php");
 //require_once("lib.function.php");
 
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 $azTables = constant("table_prefix").$idDB;
 $IDaz=preg_replace("/[^1-9]/", "", $azTables );
 
-$servername = constant("Host");
-$username = constant("User");
-$pass = constant("Password");
-$dbname = constant("Database");
 $genTables = constant("table_prefix")."_";
 
 $admin_aziend = checkAdmin();
 
-// Create connection
-$link = mysqli_connect($servername, $username, $pass, $dbname);
-// Check connection
-if (!$link) {
-    die("Connection DB failed: " . mysqli_connect_error());
-}
-$link -> set_charset("utf8");
+$link=db_connect();// Create connection
 
 if (isset($_POST['type']) && isset($_POST['ref']) && isset($_POST['payment_gross']) && floatval($_POST['payment_gross'])<>0 ) {
 

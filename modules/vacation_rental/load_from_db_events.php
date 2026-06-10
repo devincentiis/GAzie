@@ -28,12 +28,15 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 if ($_GET['token'] == md5($token.date('Y-m-d'))){
   //require("../../library/include/datlib.inc.php");
   include ("../../config/config/gconfig.myconf.php");
 
-  include_once("manual_settings.php");
   $azTables = constant("table_prefix").$idDB;
   $IDaz=preg_replace("/[^1-9]/", "", $azTables );
 
@@ -80,7 +83,7 @@ if ($_GET['token'] == md5($token.date('Y-m-d'))){
   $data = array();
 
   if(isset($_GET['id'])){
-    $sql = "SELECT * FROM ".$azTables."rental_events LEFT JOIN ".$azTables."tesbro ON  ".$azTables."rental_events.id_tesbro = ".$azTables."tesbro.id_tes WHERE (custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%') AND house_code='".substr(mysqli_escape_string($link,$_GET['id']), 0, 32)."' AND (start >= '".date('Y-m-d')."' OR end >= '".date('Y-m-d')."') ORDER BY id ASC";
+    $sql = "SELECT * FROM ".$azTables."rental_events LEFT JOIN ".$azTables."tesbro ON  ".$azTables."rental_events.id_tesbro = ".$azTables."tesbro.id_tes WHERE (custom_field IS NULL OR custom_field LIKE '%PENDING%' OR custom_field LIKE '%CONFIRMED%' OR custom_field LIKE '%FROZEN%' OR custom_field LIKE '%\"ISSUE\"%') AND house_code='".substr(mysqli_escape_string($link,$_GET['id']), 0, 32)."' AND (start >= '".date('Y-m-d')."' OR end >= '".date('Y-m-d')."') ORDER BY id ASC";
     $result = mysqli_query($link, $sql);
     if (isset($result)){
     foreach($result as $row){

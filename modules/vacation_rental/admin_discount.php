@@ -93,6 +93,12 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 if ($form['valid_to']==NULL){
                   $form['valid_to']="0000-00-00";
                 }
+                if ($form['booking_from']==NULL){
+                  $form['booking_from']="0000-00-00";
+                }
+                if ($form['booking_to']==NULL){
+                  $form['booking_to']="0000-00-00";
+                }
                 $form['STATUS']="CREATED";
                 gaz_dbi_table_insert('rental_discounts', $form);
             }
@@ -124,6 +130,8 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['facility_id']="";
     $form['valid_from']="0000-00-00";
     $form['valid_to']="0000-00-00";
+    $form['booking_from']="0000-00-00";
+    $form['booking_to']="0000-00-00";
     $form['value']="";
     $form['discount_voucher_code']="";
     $form['is_percent']="";
@@ -131,7 +139,7 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['last_min']=0;
     $form['priority']=0;
     $form['stop_further_processing']=0;
-    $form['id_anagra']=0;
+    $form['id_anagra']=0;// Ancora da fare
     $form['reusable']=0;
     $form['level_points']=0;
     $form['device_disc']=0;
@@ -204,6 +212,13 @@ if ($toDo == 'update') {
       </td>
     </tr>
     <tr>
+      <td class="FacetFieldCaptionTD"><?php echo "Riservato ad un utente (inserire id anagrafica). DA FARE, predisposto ma non funziona"; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="number" name="id_anagra" value="<?php echo $form['id_anagra'];?>" maxlength="10" disabled />
+      </td>
+    </tr>
+    <tr>
       <td class="FacetFieldCaptionTD"><?php echo $script_transl['last_min']; ?>
       </td>
       <td class="FacetDataTD">
@@ -222,6 +237,20 @@ if ($toDo == 'update') {
       </td>
       <td class="FacetDataTD">
         <input type="date" name="valid_to" value="<?php echo $form['valid_to'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo "Prenotazioni dal"; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="date" name="booking_from" value="<?php echo $form['booking_from'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo "Prenotazioni al"; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="date" name="booking_to" value="<?php echo $form['booking_to'];?>" maxlength="50"/>
       </td>
     </tr>
     <tr>

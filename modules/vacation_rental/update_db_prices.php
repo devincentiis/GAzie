@@ -3,14 +3,14 @@
  --------------------------------------------------------------------------
   GAzie - MODULO 'VACATION RENTAL'
   Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
-  (https://www.programmisitiweb.lacasettabio.it)
+  (http://www.programmisitiweb.lacasettabio.it)
 
   --------------------------------------------------------------------------
     --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
-  (https://www.devincentiis.it)
-  <https://gazie.sourceforge.net>
+  Copyright (C) 2004-2023 - Antonio De Vincentiis Montesilvano (PE)
+  (http://www.devincentiis.it)
+  <http://gazie.sourceforge.net>
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
@@ -28,16 +28,29 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
 */
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 if ($_GET['token'] == md5($token.date('Y-m-d'))){
   require("../../library/include/datlib.inc.php");
-  $start=substr(date('Y-m-d', strtotime($_GET['start']. ' + 1 hour')),0,10);
+		$what = "minstay";
+      $table = $gTables['rental_prices'];
+      $where = "id = ".intval($_GET['id']);
+	  $res = gaz_dbi_dyn_query($what, $table, $where, "id", 0, 1);
+	 
+	  $row = mysqli_fetch_assoc($res);
+	  //file_put_contents(__DIR__.'/debug.log', date('c')." row minstay:". $row['minstay'] ."\n", FILE_APPEND | LOCK_EX);
+
+	  $minstay= intval($row['minstay']); // recupero il minstay 
+	$start=substr(date('Y-m-d', strtotime($_GET['start']. ' + 1 hour')),0,10);
     $end=substr(date('Y-m-d', strtotime($_GET['end'])),0,10);
     $err='';
-    while (strtotime($start) <= strtotime($end)) {// ciclo il periodo giorno per giorno per vedere se c'è già un prezzo
+    while (strtotime($start) <= strtotime($end)) {// ciclo il periodo giorno per giorno per vedere se c'è già un prezzo nello stesso giorno e con lo stesso minstay
       $what = "title";
       $table = $gTables['rental_prices'];
-      $where = "house_code = '".substr($_GET['house_code'],0,32)."' AND start < '". $start ."' AND end >= '". $start."' AND id <> ".intval($_GET['id'])."";
+      $where = "house_code = '".substr($_GET['house_code'],0,32)."' AND start < '". $start ."' AND end >= '". $start."' AND id <> ".intval($_GET['id'])." AND minstay = ".intval($minstay);
       $result = gaz_dbi_dyn_query($what, $table, $where);
       $available = gaz_dbi_fetch_array($result);
       if (isset($available)){

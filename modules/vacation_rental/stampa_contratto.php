@@ -30,7 +30,11 @@
 */
 require("../../library/include/datlib.inc.php");
 
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 $genTables = constant("table_prefix")."_";
 $azTables = constant("table_prefix").$idDB;
 $IDaz=preg_replace("/[^1-9]/", "", $azTables );

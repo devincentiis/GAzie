@@ -146,7 +146,11 @@ function mostra_addendum($id_tes, $IDaz) {
 function mostra_documenti_associati($ordine, $paid) {
     global $gTables;
     $admin_aziend = checkAdmin();
-    include("./manual_settings.php");
+    $config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
     // seleziono i documenti evasi che contengono gli articoli di questo ordine
     $rigdoc_result = gaz_dbi_dyn_query('DISTINCT id_tes', $gTables['rigdoc'], "id_order = " . $ordine, 'id_tes ASC');
     while ( $rigdoc = gaz_dbi_fetch_array($rigdoc_result) ) {

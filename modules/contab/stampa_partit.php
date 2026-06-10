@@ -65,7 +65,8 @@ if (isset($_GET['ds'])) {
 } else {
   $luogo_data .=ucwords($gazTimeFormatter->format(new DateTime()));
 }
-$where = " codcon BETWEEN ".$_GET['codice']." AND ".$_GET['codfin']." AND".
+$where = (intval($_GET['idg']) >= 1 ? $gTables['clfoco'] . ".id_customer_group = ".intval($_GET['idg'])." AND " : '' ).
+        " codcon BETWEEN ".intval($_GET['codice'])." AND ".intval($_GET['codfin'])." AND".
          " datreg BETWEEN '".$dataini."' AND '".$datafin."'";
 $what = $gTables['rigmoc'].".*, ".$gTables['tesmov'].".id_tes, ".
         $gTables['tesmov'].".descri AS tesdes, ".$gTables['tesmov'].".caucon, ".$gTables['tesmov'].".datreg, ".$gTables['tesmov'].".seziva, ".

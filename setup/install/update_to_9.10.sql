@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `gaz_banned_ip` (
   `ipv6` varchar(45) DEFAULT NULL,
   `last_url` varchar(200) NOT NULL DEFAULT '',
   `attempts` int NOT NULL,
-  `last_attempt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+  `last_attempt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `ipv4` (`ipv4`),
   KEY `ipv6` (`ipv6`),

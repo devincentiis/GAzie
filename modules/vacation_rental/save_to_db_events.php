@@ -28,7 +28,11 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
 */
-include_once("manual_settings.php");
+$config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+if (!file_exists($config)) {
+    $config = __DIR__ . '/manual_settings.php';
+}
+require_once $config;
 if ($_GET['token'] == md5($token.date('Y-m-d'))){
 	if (strtotime($_GET['start']) < time()) {
 		echo "ERRORE: Non puoi bloccare date nel passato";

@@ -19,6 +19,12 @@ input[type="number"] {
 .sidebar-menu .treeview-menu .treeview-menu {
 	padding-left: 2px;
 }
+
+.adminlte-gazie .treeview-menu > li.active > a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .adminlte-gazie .sidebar-form {
   border-radius: 3px;
   border: 1px solid #374850;

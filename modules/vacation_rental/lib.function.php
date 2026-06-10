@@ -47,6 +47,39 @@
     return $link;
 }
 
+function user_has_booked($id_anagra){
+    global $link;
+
+    $id_anagra = (int)$id_anagra;
+
+     $sql = "
+        SELECT EXISTS(
+            SELECT 1
+            FROM gaz_002clfoco c
+            JOIN gaz_002tesbro t ON t.clfoco = c.codice
+            WHERE c.id_anagra = $id_anagra
+              AND JSON_UNQUOTE(JSON_EXTRACT(t.custom_field, '$.vacation_rental.status')) = 'CONFIRMED'
+              AND EXISTS (
+                    SELECT 1
+                    FROM gaz_002rental_events r
+                    WHERE r.id_tesbro = t.id_tes
+                      AND r.type = 'ALLOGGIO'
+                      AND (
+                            r.checked_out_date IS NULL 
+                            OR r.checked_out_date = '0000-00-00'
+                      )
+              )
+            LIMIT 1
+        ) AS has_booking
+    ";
+
+    $res = mysqli_query($link, $sql);
+    if (!$res) return false;
+
+    $row = mysqli_fetch_assoc($res);
+    return !empty($row['has_booking']);
+}
+
 // restituisce il tipo di dispositivo usato dall'utente.
 /*
 app = App Android “AppGmonamour”
@@ -57,10 +90,22 @@ unknown = Bot, UA non riconosciuto, UA vuoto
 */
 function detect_device($app_name=''): string{
     $server = $_SERVER;
-    if (!empty($app_name)){
+	// percorso file debug
+	$debugFile = __DIR__ . '/tracking_debug.txt';
+    if (empty($app_name)) {
+        $app_name = 'AppGmonamour';
+    }
+	//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - detect device cookie: ".json_encode($_COOKIE) . PHP_EOL, FILE_APPEND);
 
-    }else{
-      $app_name = 'AppGmonamour';
+	 // ✅ 1. Controllo cookie (priorità alta)
+    if (!empty($_COOKIE['source']) && $_COOKIE['source'] === 'app') {
+        return 'app';
+    }
+
+    // ✅ 2. Controllo User Agent app
+    if (!empty($server['HTTP_USER_AGENT']) &&
+        stripos($server['HTTP_USER_AGENT'], $app_name) !== false) {
+        return 'app';
     }
 
     if (!empty($server['HTTP_USER_AGENT']) &&
@@ -100,19 +145,21 @@ function initTrackingState(array &$data) { // true = possiamo tracciare, false =
         session_start();    }
       //echo "<br>Debug: Inizio initTrackingState";
     // 🔁 Se già determinato in questa sessione, non rifare query
-    if (isset($_SESSION['can_track']) && !empty($data['user_id'])) {
+    if (!empty($_SESSION['can_track']) && !empty($data['user_id'])) {
+		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState ESCO session can track già impostato: ".$_SESSION['can_track'] . PHP_EOL, FILE_APPEND);
+
         return $_SESSION['can_track'];
     }
     $canTrack = false;
 	if (empty($_SESSION['token_Android']) && isset($_COOKIE['tracking_session'])){// se non ho session ma ho cookie
-		$_SESSION['token_Android']=$_COOKIE['tracking_session'];
+		//$_SESSION['token_Android']=$_COOKIE['tracking_session'];
 		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState metto il cookie in session " . PHP_EOL, FILE_APPEND);
 
 	}
     // 📱 ANDROID: controllo token dispositivo
     if (!empty($_SESSION['token_Android'])) {
         $token = $_SESSION['token_Android'];
-		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState controllo il token: " . $token . PHP_EOL, FILE_APPEND);
+		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState controllo il token Android: " . $token . PHP_EOL, FILE_APPEND);
 
         $stmt = $link->prepare("
 			SELECT permission, user_id
@@ -145,9 +192,8 @@ function initTrackingState(array &$data) { // true = possiamo tracciare, false =
 		}
 
 		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - initTrackingState cantrack: " . $canTrack . " -session Andr:". $_SESSION['token_Android'] . PHP_EOL, FILE_APPEND);
-    }
-    // 🖥 DESKTOP / BROWSER: utente identificato
-    elseif (!empty($_COOKIE['tracking_id']) || !empty($_SESSION['logged'])) {
+		
+    } elseif (!empty($_COOKIE['tracking_id']) || !empty($_SESSION['logged'])) { // 🖥 DESKTOP / BROWSER: utente identificato
         //echo "<br>Debug: utente identificato, controllo consenso";
         // ✅ Controllo tracking_id
         if (!empty($_COOKIE['tracking_id'])) {
@@ -277,12 +323,11 @@ function trackUserEvent(array $data){
 		$where[] = "user_id=$user_id";
 	}
 
-	// Match combinato su session_id + tracking_session
-	if (!empty($session_esc) && !empty($tracking_session_esc)) {
-		$where[] = "(session_id='$session_esc' AND tracking_session='$tracking_session_esc')";
-	} elseif (!empty($session_esc)) {
+	// Match  su session_id  o tracking_session
+	if (!empty($session_esc)) {
 		$where[] = "session_id='$session_esc'";
-	} elseif (!empty($tracking_session_esc)) {
+	} 
+	if (!empty($tracking_session_esc)) {
 		$where[] = "tracking_session='$tracking_session_esc'";
 	}
 
@@ -293,6 +338,8 @@ function trackUserEvent(array $data){
     $last_row = null;
     if (!empty($where)) {
         $where_sql = implode(' OR ', $where); // OR perché basta che una condizione coincida
+		//file_put_contents($debugFile, date('Y-m-d H:i:s') . " - trackUserEvent trova se riga esistente WHERE: " . $where_sql . PHP_EOL, FILE_APPEND);
+
         $res = $link->query("SELECT * FROM gaz_track_events WHERE $where_sql ORDER BY created_at DESC LIMIT 1");
         if ($res && $res->num_rows) $last_row = $res->fetch_assoc();
     }
@@ -505,25 +552,25 @@ function searchdiscount($house="",$facility="",$start="",$end="",$stay=0,$anagra
     $where .= $and." facility_id = ". intval($facility) ." OR facility_id = 0)";
     $and=" AND (";
   }
+  $startDate = date("Y-m-d", strtotime($start));
+  $endDate = date("Y-m-d", strtotime($end));
   if (intval($start)>0){
-    $where .= $and." valid_from <= '".date("Y-m-d", strtotime($start))."' OR valid_from = '0000-00-00')";
+    $where .= $and." valid_from <= '".$startDate."' OR valid_from = '0000-00-00')";
     $and=" AND (";
   }
   if (intval($end)>0){
-    $where .= $and." valid_to >= '".date("Y-m-d", strtotime($end))."' OR valid_to = '0000-00-00')";
+    $where .= $and." valid_to >= '".$endDate."' OR valid_to = '0000-00-00')";
     $and=" AND (";
   }
-  if (!empty($booking_start) && !empty($booking_end)) {
-    $startDate = date("Y-m-d", strtotime($booking_start));
-    $endDate = date("Y-m-d", strtotime($booking_end));
-
+  if (intval($start)>0 && intval($end)>0) {
     $where .= $and."
-        (booking_start <= '".$startDate."' OR booking_start = '0000-00-00')
+        (booking_from <= '".$startDate."' OR booking_from = '0000-00-00' OR booking_from IS NULL)
         AND
-        (booking_end >= '".$endDate."' OR booking_end = '0000-00-00')
+        (booking_to >= '".$endDate."' OR booking_to = '0000-00-00' OR booking_to IS NULL)
       )";
     $and = " AND (";
   }
+  
   if (intval($stay)>0){
     $where .= $and." min_stay <= ".intval($stay)." OR min_stay = 0)";
     $and=" AND (";
@@ -539,7 +586,7 @@ function searchdiscount($house="",$facility="",$start="",$end="",$stay=0,$anagra
   if ($result = mysqli_query($link, $sql)) {
     return ($result);
   }else {
-     echo "Error: " . $sql . "<br>" . mysqli_error($link);
+     //echo "Error: " . $sql . "<br>" . mysqli_error($link);
   }
 }
 
@@ -582,7 +629,7 @@ function search_near_discount($house="",$facility="",$start="",$end="",$stay=0,$
   if ($result = mysqli_query($link, $sql)) {
     return ($result);
   }else {
-     echo "Error: " . $sql . "<br>" . mysqli_error($link);
+     //echo "Error: " . $sql . "<br>" . mysqli_error($link);
   }
 }
 
@@ -668,7 +715,7 @@ function get_lang_translation($ref, $table, $lang_id){// nuovo sistema traduzion
       if ($result = mysqli_query($link, $sql)) {
         $bodytextlang = mysqli_fetch_assoc($result);
       }else{
-        echo "Error: " . $sql . "<br>" . mysqli_error($link);
+        //echo "Error: " . $sql . "<br>" . mysqli_error($link);
       }
       if (is_array($bodytextlang)){
       $ret=array();
@@ -862,10 +909,10 @@ function get_totalprice_booking($tesbro, $tourist_tax = TRUE, $vat = FALSE, $pre
                     $totalprice = $row['totalprice'] + $rowtes['speban'];
                     return $totalprice;
                 } else {
-                    echo "Error: " . $sql . "<br>" . mysqli_error($link);
+                    //echo "Error: " . $sql . "<br>" . mysqli_error($link);
                 }
             } else {
-                echo "Error: " . $sql . "<br>" . mysqli_error($link);
+                //echo "Error: " . $sql . "<br>" . mysqli_error($link);
             }
         } else {
             // === VAT TRUE = IVA COMPRESA ===
@@ -910,7 +957,7 @@ function get_totalprice_booking($tesbro, $tourist_tax = TRUE, $vat = FALSE, $pre
                         $row = mysqli_fetch_assoc($result);
                         $spevat = $row['aliquo'];
                     } else {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($link);
+                        //echo "Error: " . $sql . "<br>" . mysqli_error($link);
                     }
                 } else {
                     $spevat = 0;
@@ -923,7 +970,7 @@ function get_totalprice_booking($tesbro, $tourist_tax = TRUE, $vat = FALSE, $pre
                     $rowtes['speban'] += ($rowtes['speban'] * $spevat) / 100;
                     $totalprice += $rowtes['speban'];
                 } else {
-                    echo "Error: " . $sql . "<br>" . mysqli_error($link);
+                    //echo "Error: " . $sql . "<br>" . mysqli_error($link);
                     die;
                 }
 
@@ -1323,29 +1370,32 @@ function check_availability($start, $end, $house_code, $open_from = "", $open_to
 
     if ($check_open) {
         // --- 2) batch query eventi
-        $sql = "SELECT start, end, custom_field
-                FROM $table
-                LEFT JOIN $table_ts ON $table.id_tesbro = $table_ts.id_tes
-                WHERE house_code='" . mysqli_real_escape_string($link, $house_code) . "'
-                AND ((start <= '$end' AND end > '$start'))
-                AND (custom_field IS NULL
-                    OR custom_field LIKE '%PENDING%'
-                    OR custom_field LIKE '%CONFIRMED%'
-                    OR custom_field LIKE '%FROZEN%'
-                    OR custom_field LIKE '%ISSUE%')";
-        $res = mysqli_query($link, $sql);
-        if ($res) {
-            while ($row = mysqli_fetch_assoc($res)) {
-                $event_start = strtotime($row['start']);
-                $event_end = strtotime($row['end']);
-                if ($start_ts < $event_end && $end_ts > $event_start) {
-                    $availability_cache[$cache_key] = 0;
-                    return 0; // NON disponibile
-                }
-            }
-        } else {
-            echo "Error: $sql<br>" . mysqli_error($link);
-        }
+       $sql = "SELECT start, end, custom_field
+				FROM $table
+				LEFT JOIN $table_ts ON $table.id_tesbro = $table_ts.id_tes
+				WHERE house_code='" . mysqli_real_escape_string($link, $house_code) . "'
+				  AND ((start <= '$end' AND end > '$start'))
+				  AND (custom_field IS NULL
+					   OR custom_field LIKE '%PENDING%'
+					   OR custom_field LIKE '%CONFIRMED%'
+					   OR custom_field LIKE '%FROZEN%'
+					   OR custom_field LIKE '%ISSUE%')
+				ORDER BY start ASC
+				LIMIT 1";
+		$res = mysqli_query($link, $sql);
+		if ($res) {
+			while ($row = mysqli_fetch_assoc($res)) {
+				$event_start = strtotime($row['start']);
+				$event_end = strtotime($row['end']);
+				if ($start_ts < $event_end && $end_ts > $event_start) {
+					$availability_cache[$cache_key] = 0;
+					return 0; // NON disponibile
+				}
+			}
+		} else {
+			echo "Error: $sql<br>" . mysqli_error($link);
+		}
+
     } else {
         $availability_cache[$cache_key] = 0;
         return 0; // NON disponibile perché chiuso
@@ -1464,8 +1514,8 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 use Ddeboer\Imap\Server;
 function set_mailer() {
-  global $gTables;  // Accedi alla variabile globale gTables
-
+    // Accedi alla variabile globale gTables
+	global $gTables, $fromAddress, $fromName, $mail_DKIM_domain, $mail_DKIM_selector, $mail_DKIM_private;
   // Impostazioni per PHPMailer
   $host = gaz_dbi_get_row($gTables['company_config'], 'var', 'smtp_server')['val'];
   $usr = gaz_dbi_get_row($gTables['company_config'], 'var', 'smtp_user')['val'];
@@ -1481,19 +1531,30 @@ function set_mailer() {
   $mail->CharSet = 'UTF-8';
   $mail->isSMTP();  // Usa SMTP
   $mail->Host = $host;  // Server SMTP
+  $mail->Hostname = $host;
   $mail->SMTPAuth = true;  // Abilita l'autenticazione SMTP
   $mail->Username = $usr;  // Nome utente SMTP
   $mail->Password = $psw;  // Password SMTP
   $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  // TLS/SSL
   $mail->Port = $port;  // Porta SMTP
-  $mail->Timeout = 10;  // Timeout in secondi
+  $mail->Timeout = 15;  // Timeout in secondi
+  // mittente
+	$mail->setFrom($fromAddress, $fromName);
+	$mail->DKIM_domain = $mail_DKIM_domain;
+	$mail->DKIM_selector = $mail_DKIM_selector;
+	$mail->DKIM_private = $mail_DKIM_private;
+	$mail->DKIM_identity = $fromAddress;
 
   return $mail;  // Restituisce l'oggetto PHPMailer
 }
 
 function set_imap($id_anagra){// restituisce le impostazioni imap in un array
   global $genTables,$azTables,$link,$IDaz;
-  include("./manual_settings.php");
+  $config = dirname(__DIR__, 3) . '/config/vacation_rental_settings.php';
+	if (!file_exists($config)) {
+		$config = __DIR__ . '/manual_settings.php';
+	}
+	include $config;
   if (intval($id_anagra)>0){
     $sql = "SELECT ".$genTables."anagra.custom_field, codice FROM ".$genTables."anagra"." LEFT JOIN ".$azTables."clfoco"." ON ".$azTables."clfoco".".id_anagra = ".$id_anagra." WHERE id = ".$id_anagra." AND codice LIKE '2%' LIMIT 1";
     if ($result = mysqli_query($link, $sql)) { // prendo il custom field del proprietario
@@ -1571,7 +1632,7 @@ function set_imap($id_anagra){// restituisce le impostazioni imap in un array
 
 // Calcolo prezzo con sconti e controllo la prenotabilità in base min stay giornaliero del prezzo
 function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web_url,$descri,$lang,$in_fixquote,$id_artico_group){
-	;
+	
   global $genTables,$azTables,$link,$IDaz,$script_transl,$admin_aziend;
   $minstay_memo=0;
   $accommodations=array();
@@ -1590,70 +1651,137 @@ function get_price_bookable($start,$end,$housecode,$aliquo,$ivac,$web_price,$web
  // Recupero tutti i prezzi del periodo con UNA SOLA query
   $prezzi_periodo = [];
 
-  $housecode_safe = mysqli_real_escape_string($link,$housecode);
+	$sql = "SELECT `start`,`end`,`price`,`minstay`
+        FROM ".$azTables."rental_prices
+        WHERE house_code = ?
+          AND start <= ?
+          AND end >= ?
+        ORDER BY ((minstay = 0) OR (minstay <= ?)) DESC, minstay ASC, price ASC, start DESC";
 
-  $sql = "SELECT start, end, price, minstay
-          FROM ".$azTables."rental_prices
-          WHERE house_code = '".$housecode_safe."'
-          AND start <= '".$end."'
-          AND end >= '".$start."'";
+	$prezzi_periodo = [];
+	if ($stmt = mysqli_prepare($link, $sql)) {
+		mysqli_stmt_bind_param($stmt, "sssi", $housecode, $end, $start, $nights);
+		mysqli_stmt_execute($stmt);
+		$res = mysqli_stmt_get_result($stmt);
+		if ($res) {
+			while ($row = mysqli_fetch_assoc($res)) {
+				$prezzi_periodo[] = $row;
+			}
+			mysqli_free_result($res);
+		}
+		mysqli_stmt_close($stmt);
+	} else {
+		error_log("prepare failed: ".mysqli_error($link));
+	}  
 
-  if ($result = mysqli_query($link,$sql)){
-    while($row = mysqli_fetch_assoc($result)){
-      $prezzi_periodo[] = $row;
-    }
-  }
+	while (strtotime($startw) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
 
-  while (strtotime($startw) < strtotime($end)) {// ciclo il periodo della locazione richiesta giorno per giorno
+		$prezzo = null;
+		
+		// cerca tutti i prezzi che coprono $startw e siano compatibili col minstay; scegli il prezzo minimo
+		$candidates = [];
+		$covering = [];
+		$minstay_found = 0;
+		/*
+		foreach($prezzi_periodo as $p){
+		  if ($p['start'] <= $startw && $p['end'] >= $startw){
+			$covering[] = $p;
+			$ms = intval($p['minstay'] ?? 0);
+			if ($ms > 0 && $ms > $minstay_found) $minstay_found = $ms;
+			if ($ms == 0 || $ms <= intval($nights)){
+			  $candidates[] = $p;
+			}
+		  }
+		}
+		*/
+		foreach($prezzi_periodo as $p){
+		  if ($p['start'] <= $startw && $p['end'] >= $startw){
+			$covering[] = $p;
+			// normalizza minstay: NULL/'' -> 0 (nessun vincolo), altrimenti intero
+			$ms_raw = $p['minstay'] ?? null;
+			
+			if ($minstay_memo>0){// se ho già segnalato che siamo fuori minstay 
+				$ms_raw=$minstay_memo; // forzo il calcolo per il minstay disponibile
+				/*NOTA BENE anzichè fare questo, bisognerebbe ricalcolare tutto il prezzo usando come minstay il $minstay_memo */
+				// Oppure azzerare il prezzo e uscire dal conteggio quando c'è segnalazione di un minstay non raggiunto:
+				// l'utente vedrebbe l'alloggio con la segnalzione ma non vedrebbe il prezzo, forse è anche meglio.
+			}			
+			
+			$ms = (is_null($ms_raw) || trim((string)$ms_raw) === '') ? 0 : intval($ms_raw);
+			// memorizza il minstay > 0 più alto per i messaggi
+			if ($ms > 0 && $ms > $minstay_found) $minstay_found = $ms;
+			// candidato valido se nessun vincolo (ms==0) o ms <= nights
+			if ($ms === 0 || $ms <= intval($nights)){
+			  $candidates[] = $p;
+			}
+		  }
+		}
 
-    $prezzo = null;
+		// se ho candidati compatibili scelgo il prezzo minimo tra questi
+		if (!empty($candidates)){
+		  $best = null;
+		  foreach($candidates as $c){
+			if ($best === null || floatval($c['price']) < floatval($best['price'])){
+			  $best = $c;
+			}
+		  }
+		  $prezzo = $best;
+		} elseif (!empty($covering)){// nessun candidato compatibile ma esistono prezzi che coprono il giorno:		  
+		  // scegli il prezzo minimo tra quelli coprenti (retrocompatibilità) e segnala minstay
+		  //echo"<br>",print_r($covering);
+		  $best = null;
+		  foreach($covering as $c){
+			if ($best === null || floatval($c['price']) < floatval($best['price'])){
+			  $best = $c; 
+			  //echo "<br>best is: ",print_r($best);
+			}
+		  }
+		  $prezzo = $best;
+		  if ($minstay_found > 0 && intval($nights) < $minstay_found){
+			if ($minstay_found > $minstay_memo){
+			  $minstay_memo = $minstay_found;
+			  $accommodations['msg'][] = $script_transl['msg_minstay']." ".$minstay_found." ".$script_transl['nights'];
+			  //echo"<br>minstay non raggiunto, prezzo:",print_r($prezzo);
+			}
+		  }
+		} else {
+		  // nessun prezzo che copre il giorno
+		  $prezzo = null;
+		}
 
-    // cerco il prezzo valido per il giorno corrente tra quelli caricati
-    foreach($prezzi_periodo as $p){
-      if ($p['start'] <= $startw && $p['end'] >= $startw){
-        $prezzo = $p;
-        break;
-      }
-    }
+		// NB: il prezzo mostrato al pubblico deve essere sempre IVA compresa
+		if (isset($prezzo)){// se c'è un prezzo nel calendario lo uso
+		  if ($ivac=="si"){
+			$accommodations['price'] += floatval($prezzo['price']);
+			//echo "<br>Aggiungo:",$prezzo['price'];
+		  }else{
+			$accommodations['price'] += floatval($prezzo['price'])+((floatval($prezzo['price'])*floatval($aliquo))/100);
+		  }
 
-    if (isset($prezzo['minstay']) && intval($prezzo['minstay'])>0 && intval($nights) < intval($prezzo['minstay'])){// se richiesto controllo se non si è raggiunto il soggiorno minimo giornaliero del prezzo
-      if (intval($prezzo['minstay'])>$minstay_memo){
-        $minstay_memo=intval($prezzo['minstay']);
-        $accommodations['msg'][]=$script_transl['msg_minstay']." ".$prezzo['minstay']." ".$script_transl['nights'];
-      }
-    }
+		} elseif(floatval($web_price)>0){// altrimenti uso il prezzo base al quale devo sempre aggiungere l'iva
 
-    // NB: il prezzo mostrato al pubblico deve essere sempre IVA compresa
-    if (isset($prezzo)){// se c'è un prezzo nel calendario lo uso
-      if ($ivac=="si"){
-        $accommodations['price'] += floatval($prezzo['price']);
-      }else{
-        $accommodations['price'] += floatval($prezzo['price'])+((floatval($prezzo['price'])*floatval($aliquo))/100);
-      }
+		  $accommodations['price'] += floatval($web_price)+((floatval($web_price)*floatval($aliquo))/100);
 
-    } elseif(floatval($web_price)>0){// altrimenti uso il prezzo base al quale devo sempre aggiungere l'iva
+		}else{// se non c'è alcun prezzo non posso prenotare e metto non prenotabile
 
-      $accommodations['price'] += floatval($web_price)+((floatval($web_price)*floatval($aliquo))/100);
+		  unset ($accommodations);
+		  return false;
 
-    }else{// se non c'è alcun prezzo non posso prenotare e metto non prenotabile
+		}
 
-      unset ($accommodations);
-      return false;
+		// ✅ incremento corretto di un giorno
+		$startw = date("Y-m-d", strtotime($startw . " +1 day"));  
+	}
 
-    }
+	
 
-	// ✅ incremento corretto di un giorno
-    $startw = date("Y-m-d", strtotime($startw . " +1 day"));  
-}
   // Se ho trovato prezzo disponibile procedo con il calcolo sconti
   $accommodations['fixquote'] = floatval($in_fixquote)+((floatval($in_fixquote)*floatval($aliquo))/100);// inizializzo eventuale quota fissa e aggiungo IVA
   $accommodations['price'] += $accommodations['fixquote'];
 
   // calcolo gli sconti
   $discounts=searchdiscount($housecode,$id_artico_group,$start,$end,$nights,$anagra=0);
-  
-
-  
+    
   $accommodations['discount']=0;
   $accommodations['descri_discount']="";
 

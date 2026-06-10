@@ -58,7 +58,7 @@ $month_start = str_pad($month_start, 2, "0", STR_PAD_LEFT);
 $sqlquery= "SELECT codcon, SUM(import) AS somma, darave FROM ".$gTables['rigmoc'].
            " LEFT JOIN ".$gTables['tesmov']." ON ".$gTables['rigmoc'].".id_tes = ".$gTables['tesmov'].".id_tes LEFT JOIN ".
             $gTables['clfoco']." ON ".$gTables['rigmoc'].".codcon = ".$gTables['clfoco'].".codice LEFT JOIN ".
-            $gTables['anagra']." ON ".$gTables['anagra'].".id = ".$gTables['clfoco'].".id_anagra WHERE datreg between ".
+            $gTables['anagra']." ON ".$gTables['anagra'].".id = ".$gTables['clfoco'].".id_anagra WHERE ".(intval($_GET['idg']) >= 1 ? $gTables['clfoco'] . ".id_customer_group = ".intval($_GET['idg'])." AND " : '' )."datreg BETWEEN ".
             $year_start.$month_start.$day_start." AND ".$year_end.$month_end.$day_end." AND codcon LIKE '".$admin_aziend['mascli']."%' AND caucon <> 'CHI' AND caucon <> 'APE' OR (caucon = 'APE' AND codcon LIKE '".$admin_aziend['mascli']."%' AND datreg LIKE '".$year_start.
             "%') GROUP BY codcon, darave ORDER BY ragso1, codcon, darave";
 $rs_castel = gaz_dbi_query($sqlquery);
@@ -158,7 +158,7 @@ foreach ($conti as $value) {
             $saldo -= $movimenti["import"];
         }
         $pdf->Cell(20,4,$datamov,1,0,'L');
-        $pdf->Cell(75,4,$movimenti['descri'],1,0,'L');
+        $pdf->Cell(75,4,$movimenti['descri'],1,0,'L',0,'',1);
         if ($movimenti['numdoc'] > 0) {
            $pdf->Cell(18,4,$movimenti['numdoc']."/".$movimenti['seziva'],1,0,'C');
         } else {

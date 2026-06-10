@@ -149,6 +149,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             }
             th a, .breadcrumb li a, a i.glyphicon-cog {
               color: #<?= $admin_aziend['colore'] ?>;
+              text-shadow: 1px 1px 2px #000;
             }
             .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
               background-color: #<?= $admin_aziend['colore'] ?>;
@@ -175,12 +176,14 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             }
             .sidebar a, treeview-menu > li > a {
               color: color-mix(in srgb, #<?= $admin_aziend['colore'] ?>, black 70%);
+              filter: grayscale(70%);
             }
             .sidebar-menu .treeview-menu.menu-open > li {
               border-left: 2px solid #<?= $admin_aziend['colore'] ?>;
             }
             .content-wrapper {
               background-image: url("data:image/x-icon;base64,<?= $sfondo; ?>");
+              filter: brightness(1.07);
             }
             th a, .breadcrumb li a, a i.glyphicon-cog {
               color: #<?= $admin_aziend['colore'] ?>;

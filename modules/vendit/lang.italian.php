@@ -1552,9 +1552,7 @@ $strScript = array("admin_client.php" =>
     "select_partner_status.php" =>
     array('title' => 'Selezione per la visualizzazione e/o la stampa dello scadenzario dei clienti',
         'print_title' => 'SCADENZARIO CLIENTI ',
-        'errors' => array('La data  non &egrave; corretta!',
-            'err' => 'Ci sono degli errori che impediscono la stampa'
-        ),
+        'errors' => ['noone'=>'Non è stata trovata nessuna partita nello scadenzario di questo cliente'],
         'date_ini' => 'Data di riferimento ',
         'header' => array('ID' => '', 'Importo apertura' => '', 'Data Scadenza' => '', 'Importo chiusura' => ''
             , 'Data chiusura' => '', 'Giorni esposizione' => '', 'Stato' => ''
@@ -1565,8 +1563,7 @@ $strScript = array("admin_client.php" =>
             'almeno 2 caratteri',
             'Cambia fornitore'
         ),
-        'customer'=>'Tutti o cliente',
-
+        'customer'=>'Tutti o cliente'
     ),
     "customer_payment.php" =>
     array('title' => 'Riscossione credito da cliente (chiusura partita/e)',

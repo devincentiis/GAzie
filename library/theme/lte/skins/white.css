@@ -160,7 +160,7 @@ td.ui-datepicker-other-month>a.ui-state-default.ui-priority-secondary{
   color: #fff;
 }
 .adminlte-gazie .main-sidebar {
-	background: linear-gradient(to left,#afafafc4,#dfdfdfe5 20%);
+	background: linear-gradient(to left,transparent,#fffe 15%);
 }
 .adminlte-gazie .sidebar-menu > li.header {
   color: #4b646f;
@@ -186,7 +186,7 @@ td.ui-datepicker-other-month>a.ui-state-default.ui-priority-secondary{
   background: linear-gradient(180deg,#4444,#fffa,#4444);
 }
 .sidebar-menu .treeview-menu.menu-open {
-	background-color: #dddb;
+	background-color: #ddd4;
 }
 .adminlte-gazie .sidebar-form input[type="text"],
 .adminlte-gazie .sidebar-form .btn {

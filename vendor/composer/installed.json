@@ -841,17 +841,17 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.30.4",
-            "version_normalized": "1.30.4.0",
+            "version": "1.30.5",
+            "version_normalized": "1.30.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "02970383cc12e7bf0bc0707ea6e2e8ed23a7aec9"
+                "reference": "97bcabd32a64924688487dcd64aceaf158affb5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/02970383cc12e7bf0bc0707ea6e2e8ed23a7aec9",
-                "reference": "02970383cc12e7bf0bc0707ea6e2e8ed23a7aec9",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/97bcabd32a64924688487dcd64aceaf158affb5c",
+                "reference": "97bcabd32a64924688487dcd64aceaf158affb5c",
                 "shasum": ""
             },
             "require": {
@@ -897,7 +897,7 @@
                 "mpdf/mpdf": "Option for rendering PDF with PDF Writer",
                 "tecnickcom/tcpdf": "Option for rendering PDF with PDF Writer"
             },
-            "time": "2026-04-19T06:00:39+00:00",
+            "time": "2026-05-31T05:13:11+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -946,7 +946,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.4"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.5"
             },
             "install-path": "../phpoffice/phpspreadsheet"
         },
@@ -1119,17 +1119,17 @@
         },
         {
             "name": "setasign/fpdi",
-            "version": "v2.6.6",
-            "version_normalized": "2.6.6.0",
+            "version": "v2.6.7",
+            "version_normalized": "2.6.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Setasign/FPDI.git",
-                "reference": "de0cf35911be3e9ea63b48e0f307883b1c7c48ac"
+                "reference": "388c51e69982a3fc16698710b763e8107a49f510"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Setasign/FPDI/zipball/de0cf35911be3e9ea63b48e0f307883b1c7c48ac",
-                "reference": "de0cf35911be3e9ea63b48e0f307883b1c7c48ac",
+                "url": "https://api.github.com/repos/Setasign/FPDI/zipball/388c51e69982a3fc16698710b763e8107a49f510",
+                "reference": "388c51e69982a3fc16698710b763e8107a49f510",
                 "shasum": ""
             },
             "require": {
@@ -1149,7 +1149,7 @@
             "suggest": {
                 "setasign/fpdf": "FPDI will extend this class but as it is also possible to use TCPDF or tFPDF as an alternative. There's no fixed dependency configured."
             },
-            "time": "2026-03-13T08:38:20+00:00",
+            "time": "2026-05-13T10:16:22+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1182,7 +1182,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Setasign/FPDI/issues",
-                "source": "https://github.com/Setasign/FPDI/tree/v2.6.6"
+                "source": "https://github.com/Setasign/FPDI/tree/v2.6.7"
             },
             "funding": [
                 {

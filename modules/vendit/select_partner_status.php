@@ -33,13 +33,18 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     $form['date_ini_D'] = date("d");
     $form['date_ini_M'] = date("m");
     $form['date_ini_Y'] = date("Y");
-    $form['search']['account'] = '';
-    if (isset($_GET['id'])) {
-        $form['account'] = intval($_GET['id']);
-    } else {
-        $form['account'] = 0;
+    $form['search']['clfoco'] = '';
+    if (isset($_GET['id']) ) {
+      $anagrafica = new Anagrafica();
+      $clfoco=intval($_GET['id']);
+      if ( $clfoco > 100000000 ) {
+        $cliente = gaz_dbi_get_row($gTables['clfoco'], 'codice',$clfoco);
+        $cliente = $anagrafica->getPartnerData($cliente['id_anagra'],1);
+      }
+      $form['search']['clfoco'] = $cliente['ragso1'];
+      $form['clfoco'] = $clfoco;
+      $_POST['preview']='';
     }
-    $form['orderby'] = 0;
 } else { // accessi successivi
     $form['hidden_req'] = htmlentities($_POST['hidden_req']);
     $form['ritorno'] = $_POST['ritorno'];
@@ -57,9 +62,9 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     if ($_POST['hidden_req'] == 'clfoco') {
         $anagrafica = new Anagrafica();
         if (preg_match("/^id_([0-9]+)$/", $form['clfoco'], $match)) {
-            $fornitore = $anagrafica->getPartnerData($match[1], 1);
+            $cliente = $anagrafica->getPartnerData($match[1], 1);
         } else {
-            $fornitore = $anagrafica->getPartner($form['clfoco']);
+            $cliente = $anagrafica->getPartner($form['clfoco']);
         }
         $form['hidden_req'] = '';
     }
@@ -76,7 +81,6 @@ if (isset($_POST['print']) && $msg == '') {
   header("Location: sent_print.php");
   exit;
 }
-
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup',
     'custom/autocomplete'));
@@ -111,8 +115,8 @@ if (!empty($msg)) {
 }
 echo "<tr>\n";
 echo "<td class=\"FacetFieldCaptionTD\">" . $script_transl['customer'] . "</td><td colspan=\"3\" class=\"FacetDataTD\">\n";
-$select_fornitore = new selectPartner("clfoco");
-$select_fornitore->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli']);
+$select_cliente = new selectPartner("clfoco");
+$select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli']);
 echo "</td>\n";
 echo "</tr>\n";
 echo "<tr>\n";
@@ -238,12 +242,9 @@ if (isset($_POST['preview'])) {
         echo "<td class=\"text-right\" colspan='2'><a title=\"Elimina tutte le partite chiuse di tutti i clienti\" class=\"btn btn-xs  btn-elimina\" href=\"delete_schedule.php?all\"><i class=\"glyphicon glyphicon-trash\"></i> &nbsp;" . $script_transl['remove'] .  " TUTTI!!!</a></td>";
         echo "\t </tr>\n";
     } else {
-        echo "<tr><td class=\"FacetDataTDred\" align=\"center\">" . $script_transl['errors'][1] . "</td></tr>\n";
+        echo "<tr><td class=\"FacetDataTDred\" align=\"center\">" . $script_transl['errors']['noone'] . "</td></tr>\n";
     }
     echo "</table></form>";
 }
-?>
-<?php
-
 require("../../library/include/footer.php");
 ?>

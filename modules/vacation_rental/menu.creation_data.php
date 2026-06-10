@@ -104,4 +104,5 @@ $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_events` ADD `ex_adults` I
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_extra` ADD `sort_index` INT NOT NULL DEFAULT '0' AFTER `rif_facility`; ";
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_discounts` ADD `device_disc` TINYINT(1) NOT NULL COMMENT 'Attribuisce lo sconto ad un determinato device' AFTER `level_points`;";
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_discounts` ADD `booking_from` DATE NULL DEFAULT NULL COMMENT 'Limita lo sconto ad un determinato periodo di prenotazione' AFTER `valid_to`, ADD `booking_to` DATE NULL DEFAULT NULL COMMENT 'Limita lo sconto ad un determinato periodo di prenotazione' AFTER `booking_from`;";
+$update_db[]="ALTER TABLE `".$table_prefix."_XXXclfoco` ADD INDEX(`id_anagra`);";
 ?>

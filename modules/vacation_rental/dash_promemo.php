@@ -95,9 +95,10 @@ function openframe(url,codice){
       <div class="panel panel-info col-sm-12">
         <div class="box-header company-color">
           <h4 class="box-title"><i class="glyphicon glyphicon-blackboard"></i> Riepilogo Vacation rental</h4>
-          <a class="pull-left" style="cursor:pointer; margin-right:10%;" onclick="openframe('../../modules/vacation_rental/total_availability_it.php?price','<h3>Calendario generale</h3>')" data-toggle="modal" data-target="#iframe"> <i class="glyphicon glyphicon-calendar" title="Calendario della disponibilità"></i></a>
+          <a class="pull-left" style="cursor:pointer; margin-right:10%;" onclick="openframe('../../modules/vacation_rental/MyCalendar.php?price','<h3>Calendario generale</h3>')" data-toggle="modal" data-target="#iframe"> <i class="glyphicon glyphicon-calendar" title="Calendario della disponibilità"></i></a>
+          <a class="pull-left" style="cursor:pointer;" onclick="openframe('../../modules/vacation_rental/dashboard_Android.php','<h3>Dashboard Android</h3>')" data-toggle="modal" data-target="#iframe"> <span title="Dashboard Android">📱</span></a>&nbsp;&nbsp;&nbsp;
 
-          <a class="pull-left" style="cursor:pointer;" onclick="openframe('../../modules/vacation_rental/dashboard_Android.php','<h3>Dashboard Android</h3>')" data-toggle="modal" data-target="#iframe"> <span title="Dashboard Android">📱</span></a>
+          <a class="pull-left" style="cursor:pointer; margin-left:10px;" onclick="openframe('../../modules/vacation_rental/Dashboard_User_Tracking.php','<h3>Dashboard Users Tracking</h3>')" data-toggle="modal" data-target="#iframe"> <span title="Dashboard Users Tracking">📈</span></a>
 
           <a class="pull-center" href="../vacation_rental/report_booking.php" style="cursor:pointer;"><i class="glyphicon glyphicon-tasks" title="vai alle prenotazioni"></i></a>
 		  <a class="pull-right dialog_grid" id_bread="<?php echo $grr['id_bread']; ?>" style="cursor:pointer;"><i class="glyphicon glyphicon-cog"></i></a>

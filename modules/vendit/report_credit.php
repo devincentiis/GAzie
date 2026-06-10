@@ -25,14 +25,18 @@
 require("../../library/include/datlib.inc.php");
 
 $admin_aziend=checkAdmin();
-if(!isset($_GET["annfin"])) {
-    $giornfin = intval(date("d"));
-    $mesfin = intval(date("m"));
-    $annfin = intval(date("Y"));
+if(!isset($_GET['hidden_req'])) {
+  $giornfin = intval(date("d"));
+  $mesfin = intval(date("m"));
+  $annfin = intval(date("Y"));
+  $form['hidden_req']='';
+  $form['id_customer_group']=0;
 } else {
-    $giornfin = intval($_GET["giornfin"]);
-    $mesfin = intval($_GET["mesfin"]);
-    $annfin = intval($_GET["annfin"]);
+  $giornfin = intval($_GET["giornfin"]);
+  $mesfin = intval($_GET["mesfin"]);
+  $annfin = intval($_GET["annfin"]);
+  $form['hidden_req']=substr($_GET['hidden_req'],0,20);
+  $form['id_customer_group']=intval($_GET['id_customer_group']);
 }
 if(!isset($_GET["annini"])) {
 	// controllo l'ultima apertura conti disponibile
@@ -70,28 +74,18 @@ $mesini = str_pad($mesini, 2, "0", STR_PAD_LEFT);
 
 $message = "";
 if (isset($_GET['stampa']) and $message == "") {
-        //Mando in stampa i movimenti contabili generati
-        $locazione = "Location: stampa_liscre.php?annini=".$annini."&mesini=".$mesini."&giornini=".$giornini."&annfin=".$annfin."&mesfin=".$mesfin."&giornfin=".$giornfin;
-        header($locazione);
-        exit;
-}
-if (isset($_GET['partaperte']) and $message == "") {
-        //Mando in stampa il riepilogo dei movimenti contabili non saldati elencati per data
-        $locazione = "Location: print_schedule.php?orderby=2&annini=".$annini."&mesini=".$mesini."&giornini=".$giornini."&annfin=".$annfin."&mesfin=".$mesfin."&giornfin=".$giornfin;
-        header($locazione);
-        exit;
-}
-if (isset($_GET['Return'])) {
-        header("Location:docume_vendit.php");
-        exit;
+  $locazione = "Location: stampa_liscre.php?annini=".$annini."&mesini=".$mesini."&giornini=".$giornini."&annfin=".$annfin."&mesfin=".$mesfin."&giornfin=".$giornfin."&idg=".$form['id_customer_group'];
+  header($locazione);
+  exit;
 }
 
-$sqlquery= "SELECT COUNT(DISTINCT ".$gTables['rigmoc'].".id_tes) as nummov,codcon, ragso1, e_mail, telefo,".$gTables['clfoco'].".codice, sum(import*(darave='D')) as dare,sum(import*(darave='A')) as avere, sum(import*(darave='D') - import*(darave='A')) as saldo, darave FROM ".$gTables['rigmoc']." LEFT JOIN ".$gTables['tesmov']." ON ".$gTables['rigmoc'].".id_tes = ".$gTables['tesmov'].".id_tes LEFT JOIN ".$gTables['clfoco']." ON ".$gTables['rigmoc'].".codcon = ".$gTables['clfoco'].".codice LEFT JOIN ".$gTables['anagra']." ON ".$gTables['anagra'].".id = ".$gTables['clfoco'].".id_anagra WHERE datreg between ".$annini.$mesini.$giornini." and ".$annfin.$mesfin.$giornfin." and codcon like '".$admin_aziend['mascli']."%' and caucon <> 'CHI' and caucon <> 'APE' or (caucon = 'APE' and codcon like '".$admin_aziend['mascli']."%' and datreg like '".$annini."%') GROUP BY codcon ORDER BY ragso1, darave";
+$sqlquery= "SELECT COUNT(DISTINCT ".$gTables['rigmoc'].".id_tes) as nummov,codcon, ragso1, e_mail, telefo,".$gTables['clfoco'].".codice, sum(import*(darave='D')) as dare,sum(import*(darave='A')) as avere, sum(import*(darave='D') - import*(darave='A')) as saldo, darave FROM ".$gTables['rigmoc']." LEFT JOIN ".$gTables['tesmov']." ON ".$gTables['rigmoc'].".id_tes = ".$gTables['tesmov'].".id_tes LEFT JOIN ".$gTables['clfoco']." ON ".$gTables['rigmoc'].".codcon = ".$gTables['clfoco'].".codice LEFT JOIN ".$gTables['anagra']." ON ".$gTables['anagra'].".id = ".$gTables['clfoco'].".id_anagra WHERE ".($form['id_customer_group'] >= 1 ? $gTables['clfoco'] . ".id_customer_group = ".$form['id_customer_group']." AND " : '' )." datreg between ".$annini.$mesini.$giornini." and ".$annfin.$mesfin.$giornfin." and codcon like '".$admin_aziend['mascli']."%' and caucon <> 'CHI' and caucon <> 'APE' or (caucon = 'APE' and codcon like '".$admin_aziend['mascli']."%' and datreg like '".$annini."%') GROUP BY codcon ORDER BY ragso1, darave";
 $rs_castel = gaz_dbi_query($sqlquery);
 require("../../library/include/header.php");
 $script_transl=HeadMain(0,array('custom/modal_form'));
-
-?><script>
+$gForm = new venditForm();
+?>
+<script>
 
 $(function() {
     $( "#dialog" ).dialog({ autoOpen: false });
@@ -125,6 +119,7 @@ $(function() {
       <p class="ui-state-highlight" id="mail_attc"></p>
 </div>
 <form method="GET">
+<input type="hidden" value="<?= $form['hidden_req'] ?>" name="hidden_req" />
 <div align="center" class="FacetFormHeaderFont">Crediti verso Clienti</div>
 <table class="FacetFormTABLE" align="center">
 <?php
@@ -209,14 +204,16 @@ for( $counter = date("Y")-10 ; $counter <= date("Y")+2; $counter++ ) {
 </td>
 </tr>
 <tr>
-<td class="FacetFieldCaptionTD"></td>
-<td colspan="3" align="right" nowrap class="FacetFooterTD">
-<input type="submit" name="Return" value="Indietro">
+<td class="FacetFieldCaptionTD">Gruppo</td><td>
 <?php
-echo "<input type=\"submit\" name=\"stampa\" value=\"".$script_transl['print']." !\">&nbsp;";
-echo "<br /><br />";
-echo "<input type=\"submit\" name=\"partaperte\" value=\" ! PARTITE APERTE !\"><br /><br />";
+  $gForm->selectFromDB('customer_group', 'id_customer_group', 'id', $form['id_customer_group'], 'id', true, ' ', 'descri','customer_group');
 ?>
+</td>
+</td>
+</tr>
+<tr>
+<td class="FacetFieldCaptionTD"></td>
+<td colspan="3" class="FacetFooterTD text-center"><input class="btn btn-warning" type="submit" name="stampa" value="<?= $script_transl['print']; ?>"></td>
 </td>
 </tr>
 </table>
