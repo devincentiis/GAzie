@@ -1,0 +1,33 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+<title>REDIRECT SU PROCEDURA DI INSTALLAZIONE O AGGIORNAMENTO DI GAZIE</title>
+<script type="text/javascript">
+function checkHttp(){
+	protoc= window.location.protocol;
+	if ( protoc == "file:" ){
+		document.getElementById('msg_ok').style.visibility="hidden";
+		document.getElementById('msg_err').style.visibility="visible";
+		
+	}
+	else {
+		setTimeout("window.location='setup/install/install.php'",15000);
+	}
+}
+</script>
+</head>
+<body background="library/images/sfondo.png" onload="checkHttp()">
+<img src="library/images/gazie.gif" border="0">
+<div id="msg_ok">
+Se hai configuranto bene il tuo server web, tra 15 secondi sarai reindirizzato alla pagina relativa allo script di istallazione/aggiornamento (install.php) che si trova sulla directory /setup, per eseguire l'installazione di GAzie e del suo database oppure l'aggiornamento del solo database. Se ci&ograve; non dovesse avvenire segui il link:
+<blockquote>
+<a href="setup/install/install.php">INSTALLAZIONE O AGGIORNAMENTO DI GAZIE</a>
+</blockquote>
+</div>
+<div id="msg_err" style="visibility:hidden">
+Per poter utilizzare GAzie occorre installarlo ed eseguirlo tramite protocollo <b> http://</b><br /> Al momento invece stai navigando tramite protocollo <b>file://</b><br /> Se stai lavorando sulla macchina server ed hai copiato questi file sulla sua directory radice <br />potrebbe essere sufficiente cliccare questo indirizzo: <br /><br /><a href="http://localhost/gazie/setup/install/install.php">"http://localhost/gazie/setup/install/install.php"</a><br /><br /> se hai copiato GAzie su un alias prova a modificare "localhost" con il giusto indirizzo.<br /><br /> Se non hai successo segui le indicazioni sul file<blockquote><a href="doc/INSTALL.html"> INSTALL.html </a></blockquote>presente nella directory /doc
+</div>
+</body>
+</html>
+
+ 	  	 

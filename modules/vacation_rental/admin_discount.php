@@ -1,0 +1,349 @@
+<?php
+/*
+   --------------------------------------------------------------------------
+  GAzie - MODULO 'VACATION RENTAL'
+  Copyright (C) 2022-2023 - Antonio Germani, Massignano (AP)
+  (https://www.programmisitiweb.lacasettabio.it)
+
+  --------------------------------------------------------------------------
+  --------------------------------------------------------------------------
+  GAzie - Gestione Azienda
+  Copyright (C) 2004-2022 - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
+  --------------------------------------------------------------------------
+  Questo programma e` free software;   e` lecito redistribuirlo  e/o
+  modificarlo secondo i  termini della Licenza Pubblica Generica GNU
+  come e` pubblicata dalla Free Software Foundation; o la versione 2
+  della licenza o (a propria scelta) una versione successiva.
+
+  Questo programma  e` distribuito nella speranza  che sia utile, ma
+  SENZA   ALCUNA GARANZIA; senza  neppure  la  garanzia implicita di
+  NEGOZIABILITA` o di  APPLICABILITA` PER UN  PARTICOLARE SCOPO.  Si
+  veda la Licenza Pubblica Generica GNU per avere maggiori dettagli.
+
+  Ognuno dovrebbe avere   ricevuto una copia  della Licenza Pubblica
+  Generica GNU insieme a   questo programma; in caso  contrario,  si
+  scriva   alla   Free  Software Foundation, 51 Franklin Street,
+  Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
+  --------------------------------------------------------------------------
+ */
+require("../../library/include/datlib.inc.php");
+require("../../modules/magazz/lib.function.php");
+$admin_aziend = checkAdmin();
+$msg = "";
+$gForm = new magazzForm();
+
+if ((isset($_POST['Update'])) or ( isset($_GET['Update']))) {
+    $toDo = 'update';
+} else {
+    $toDo = 'insert';
+}
+
+if (!isset($_POST['ritorno'])) {
+    $_POST['ritorno'] = $_SERVER['HTTP_REFERER'];
+}
+
+if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il primo accesso
+	if (isset($_POST['Return'])) {
+		header("Location: " . $_POST['ritorno']);
+		exit;
+	}
+  $form = $_POST;
+    // Se viene inviata la richiesta di conferma totale ...
+    if (isset($_POST['ins'])) {
+        if ($toDo == 'insert' && strlen($form['discount_voucher_code'])>0) { // e' un inserimento, controllo se il codice buono sconto esiste già
+            $rs_ctrl = gaz_dbi_get_row($gTables['rental_discounts'], "discount_voucher_code", $form['discount_voucher_code']);
+            if ($rs_ctrl) {
+                $msg .= "buono_esiste+";
+            }
+        }
+        if (empty($form['description'])) {  //descrizione vuota
+            $msg .= "manca_descri+";
+        }
+        if ($form['value'] < 1) {  //valore vuoto
+            $msg .= "valore_vuoto+";
+        }
+        //print_r($form);die;
+        if ($msg == "") {// nessun errore
+            if ($toDo == 'update') { // e' una modifica
+              $rental_discounts_row=gaz_dbi_get_row($gTables['rental_discounts'], "id", $form['id']); // carico il vecchio json custom_field
+              $custom_field=(isset($rental_discounts_row['custom_field']))?$rental_discounts_row['custom_field']:'';
+              if ($custom_field<>'' && $data = json_decode($custom_field,true)){// se c'è un json
+                if (is_array($data['vacation_rental'])){ // se c'è il modulo "vacation rental" lo aggiorno
+                  $data['vacation_rental']['app_name'] = $_POST['app_name'];
+                  $form['custom_field'] = json_encode($data);
+                } else { //se non c'è il modulo "vacation_rental" lo aggiungo
+                  $data['vacation_rental']= array('app_name' => $_POST['app_name']);
+                  $form['custom_field'] = json_encode($data);
+                }
+              }
+
+              $where = array("0" => "id", "1" => $form['id']);
+              $what = $form;
+              gaz_dbi_table_update("rental_discounts",$where, $what);
+            } else { // e' un'inserimento
+              if(isset($_POST['app_name']) && strlen($_POST['app_name'])>2){
+                $array= array('vacation_rental'=>array('app_name' => $_POST['app_name']));// creo l'array per il custom field
+                $form['custom_field'] = json_encode($array);// codifico in json  e lo inserisco nel form
+              }
+                if ($form['valid_from']==NULL){
+                  $form['valid_from']="0000-00-00";
+                }
+                if ($form['valid_to']==NULL){
+                  $form['valid_to']="0000-00-00";
+                }
+                if ($form['booking_from']==NULL){
+                  $form['booking_from']="0000-00-00";
+                }
+                if ($form['booking_to']==NULL){
+                  $form['booking_to']="0000-00-00";
+                }
+                $form['STATUS']="CREATED";
+                gaz_dbi_table_insert('rental_discounts', $form);
+            }
+            header("Location: report_discount.php");
+            exit;
+        }
+    }
+} elseif ((!isset($_POST['Update'])) and ( isset($_GET['Update']))) { //se e' il primo accesso per UPDATE
+    $disc = gaz_dbi_get_row($gTables['rental_discounts'], "id", intval($_GET['id']));
+    $form=$disc;
+    	if ($data = json_decode($form['custom_field'], TRUE)) { // se esiste un json nel custom field
+        if (is_array($data['vacation_rental'])){
+          $form['app_name'] = isset($data['vacation_rental']['app_name'])?$data['vacation_rental']['app_name']:'';
+        } else {
+          $form['app_name'] = "";
+        }
+      } else {
+        $form['app_name'] = "";
+      }
+
+    $form['ritorno'] = $_POST['ritorno'];
+
+} elseif (!isset($_POST['Insert']) && isset($_GET['Insert'])) { //se e' il primo accesso per INSERT
+    $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+    $form['id']=0;
+    $form['title']="";
+    $form['description']="";
+    $form['accommodation_code']="";
+    $form['facility_id']="";
+    $form['valid_from']="0000-00-00";
+    $form['valid_to']="0000-00-00";
+    $form['booking_from']="0000-00-00";
+    $form['booking_to']="0000-00-00";
+    $form['value']="";
+    $form['discount_voucher_code']="";
+    $form['is_percent']="";
+    $form['min_stay']=0;
+    $form['last_min']=0;
+    $form['priority']=0;
+    $form['stop_further_processing']=0;
+    $form['id_anagra']=0;// Ancora da fare
+    $form['reusable']=0;
+    $form['level_points']=0;
+    $form['device_disc']=0;
+    $form['app_name']="";
+}
+require("../../library/include/header.php");
+$script_transl = HeadMain(5);
+if ($toDo == 'update') {
+    $title = ucwords($script_transl[$toDo] . $script_transl['sconto']) . " n." . $form['id'];
+} else {
+    $title = ucwords($script_transl[$toDo] . $script_transl['sconto']);
+}
+?>
+<form method="POST">
+  <input type="hidden" name="<?php echo ucfirst($toDo); ?>" value="">
+  <input type="hidden" value="<?php echo $_POST['ritorno']; ?>" name="ritorno">
+  <div class="text-center"><h3><?php echo $title; ?></h3></div>
+  <table border="0" cellpadding="3" cellspacing="1" class="FacetFormTABLE" align="center">
+    <?php
+    if (!empty($msg)) {
+        $message = "";
+        $rsmsg = array_slice(explode('+', chop($msg)), 0, -1);
+        foreach ($rsmsg as $value) {
+            $message .= $script_transl['error'] . "! -> ";
+            $rsval = explode('-', chop($value));
+            foreach ($rsval as $valmsg) {
+                $message .= $script_transl[$valmsg] . " ";
+            }
+            $message .= "<br />";
+        }
+        echo '<tr><td colspan="5" class="FacetDataTDred">' . $message . "</td></tr>\n";
+    }
+    if ($toDo == 'update') {
+        print "<tr><td class=\"FacetFieldCaptionTD\">ID</td><td class=\"FacetDataTD\"><input type=\"hidden\" name=\"id\" value=\"" . $form['id'] . "\" />" . $form['id'] . "</td></tr>\n";
+    }
+    ?>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['discount_voucher_code']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="text" name="discount_voucher_code" value="<?php echo $form['discount_voucher_code'];?>" maxlength="50" placeholder="Se è un buono sconto, scrivere il codice altrimenti lasciare bianco"/>
+      </td>
+    </tr>
+     <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['title_dis']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="text" name="title" value="<?php echo $form['title'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['descri']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="text" name="description" value="<?php echo $form['description'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['facility_id']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <?php $gForm->selectFromDB('artico_group', 'facility_id', 'id_artico_group', $form['facility_id'], false, true, ' - ', 'descri', '', 'col-sm-8', null, 'style="max-width: 250px;"','custom_field REGEXP \'vacation_rental\'');?>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['accommodation_code']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <?php $gForm->selectFromDB('artico', 'accommodation_code', 'codice', $form['accommodation_code'], false, true, ' - ', 'descri', '', 'col-sm-8', null, 'style="max-width: 250px;"','custom_field REGEXP \'accommodation_type\'');?>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo "Riservato ad un utente (inserire id anagrafica). DA FARE, predisposto ma non funziona"; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="number" name="id_anagra" value="<?php echo $form['id_anagra'];?>" maxlength="10" disabled />
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['last_min']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="number" name="last_min" value="<?php echo $form['last_min'];?>" maxlength="10"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['valid_from']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="date" name="valid_from" value="<?php echo $form['valid_from'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['valid_to']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="date" name="valid_to" value="<?php echo $form['valid_to'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo "Prenotazioni dal"; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="date" name="booking_from" value="<?php echo $form['booking_from'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo "Prenotazioni al"; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="date" name="booking_to" value="<?php echo $form['booking_to'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['value']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="text" name="value" value="<?php echo $form['value'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['is_percent']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <?php $gForm->variousSelect('is_percent', $script_transl['is_percent_value'], $form['is_percent'], "col-sm-8", true, '', false, 'style="max-width: 100px;"');?>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['min_stay']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="number" name="min_stay" value="<?php echo $form['min_stay'];?>" maxlength="10"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['priority']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <input type="text" name="priority" value="<?php echo $form['priority'];?>" maxlength="50"/>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['stop_further_processing']; ?>
+      </td>
+      <td class="FacetDataTD">
+        <?php $gForm->variousSelect('stop_further_processing', $script_transl['is_percent_value'], $form['stop_further_processing'], "col-sm-8", true, '', false, 'style="max-width: 100px;"');?>
+      </td>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['reusable']; ?>
+      </td>
+      <td class="FacetDataTD">
+      <input type="text" name="reusable" value="<?php echo $form['reusable'];?>" maxlength="3"/>
+      </td>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD"><?php echo $script_transl['level_points']; ?>
+      </td>
+      <td class="FacetDataTD">
+      <input type="number" name="level_points" value="<?php echo $form['level_points'];?>" max="3"/>
+      </td>
+      </td>
+    </tr>
+    <tr>
+      <td class="FacetFieldCaptionTD">Abilita su Dispositivi</td>
+      <td class="FacetDataTD">
+        <select name="device_disc" id="device_select" onchange="toggleAppName()">
+          <option value="0" <?php echo ($form['device_disc'] === '0' || $form['device_disc'] === '') ? 'selected' : ''; ?>>Tutti</option>
+          <option value="1" <?php echo ($form['device_disc'] === '1') ? 'selected' : ''; ?>>App webview</option>
+          <option value="2" <?php echo ($form['device_disc'] === '2') ? 'selected' : ''; ?>>Web</option>
+        </select>
+
+        <input title="Nome identificativo dell'App webview presente nell'User Agent" type="text" name="app_name" id="device_app_name" placeholder="Nome in UA (User Agent webview)"
+               value="<?php echo htmlspecialchars($form['app_name'] ?? ''); ?>"
+               style="display: <?php echo ($form['device_disc'] === '1') ? 'inline-block' : 'none'; ?>; margin-left:10px;">
+      </td>
+    </tr>
+    <script>
+    function toggleAppName() {
+        const select = document.getElementById('device_select');
+        const input = document.getElementById('device_app_name');
+        input.style.display = (select.value === '1') ? 'inline-block' : 'none';
+    }
+    </script>
+
+    <tr>
+      <td class="FacetFieldCaptionTD"><input type="reset" name="Cancel" value="<?php echo $script_transl['cancel'];?>">
+      </td>
+      <td class="FacetDataTD" align="right">
+        <input type="submit" name="Return" value="<?php echo $script_transl['return'];?>">
+        <?php
+        if ($toDo == 'update') {
+            print '<input type="submit" accesskey="m" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['update']) . '!"></td>
+            </tr><tr></tr>';
+        } else {
+            print '<input type="submit" accesskey="i" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['insert']) . '!"></td></tr><tr></tr>';
+        }
+        ?>
+      </td>
+    </tr>
+  </table>
+</form>
+<?php
+require("../../library/include/footer.php");
+?>

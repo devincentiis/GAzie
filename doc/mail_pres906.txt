@@ -1,0 +1,9 @@
+Titolo: Aurora aurum in ore habet.
+
+Presentazione:
+Sono qui a rilasciare la versione 9.06 a quasi un anno di distanza per non mancare alla consuetudine dell'occasione del compleanno del gestionale, il ventesimo.
+Averlo scritto per il web ha certamente contribuito alla longevità del progetto, nonostante le difficoltà dovute ad una ingegnerizzazione di altri tempi e a dispetto delle critiche iniziali, alcuni lustri fa un gestionale per il web non era ben visto, adesso rappresenta uno standard de facto ed un obbiettivo per chi non lo è.
+La cronica mancanza di tempo da dedicare al ramo libero è stata compensata dalla notevole stabilità raggiunta che ci ha consentito di diradare notevolmente i rilasci pur assicurando un'ottima resilienza e retrocompatibilità con le vostre personalizzazioni.
+In dieci mesi, con molta fatica, e grazie all'apporto di Antonio Germani si è potuto tagliare il traguardo delle due decadi.
+Per curiosare cosa è stato modificato, corretto, aggiunto, e da chi, potrà consultare i commit in Changelog di Code -> Browse commits da [r6307] a [r6658]
+Antonio de Vincentiis, Montesilvano, 27 gennaio 2024

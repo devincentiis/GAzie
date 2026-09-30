@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+     xmlns:tns="http://www.html.it/php_ws_soap" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"  
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/" 
+     targetNamespace="http://www.devincentiis.it/php_ws_soap">
+	<types>
+		<xs:schema targetNamespace="http://www.devincentiis.it/php_ws_soap">
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="weburl" type="xs:string"/>
+		</xs:schema>
+	</types>
+	<message name="getWelcome">
+		<part name="name" type="xs:string"/>
+	</message>
+	<message name="returnWelcome">
+		<part name="weburl" type="xs:string"/>
+	</message>
+	<portType name="WebServiceTest">
+		<operation name="getWelcome">
+			<input message="tns:getWelcome"/>
+			<output message="tns:returnWelcome"/>
+		</operation>
+	</portType>
+	<binding name="WebServiceSOAPBinding" type="tns:WebServiceTest">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" type="rpc"/>
+		<operation name="getWelcome">
+                        <!-- Localizzazione del service deployato sul server. -->
+			<soap:operation 
+                             soapAction="http://localhost/gazie/library/soap/server/server.php/getWelcome"/>
+			<input>
+				<soap:body use="encoded" 
+                                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                                     namespace="http://www.devincentiis.it/php_ws_soap"/>
+			</input>
+			<output>
+				<soap:body use="encoded" 
+                                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                                     namespace="http://www.devincentiis.it/php_ws_soap"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="GetWelcome">
+		<port name="WebUrl" binding="tns:WebServiceSOAPBinding">
+			<soap:address location="http://localhost/gazie/library/soap/server/server.php"/>
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,47 @@
+/*
+Il presente CSS permette di gestire la i datatable presenti
+in home page relativi allo scadenziario clienti e fornitori
+*/
+
+/**************************************
+ namespace per id/classi IER
+***************************************/
+
+#clienti {
+	transition-duration: 1s;
+	opacity: 0;
+	max-height: 200px;
+	float: left;
+}
+
+#fornitori {
+	transition-duration: 1s;
+	opacity: 0;
+	max-height: 200px;
+	float: left;
+}
+
+.wheel_load::before {
+	content: "\e019";
+	font-family: "Glyphicons Halflings";
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	font-size: 30px;
+	text-align: center;
+	animation: wheel_load 1s linear infinite;
+	float: left;
+	color: #3c8dbc;
+	margin: 30% 50%;
+	position:absolute;
+}
+
+@keyframes wheel_load {
+  0% {
+     transform: rotate(0deg);
+  }
+ 
+  100% {
+     transform: rotate(360deg);
+  }
+}

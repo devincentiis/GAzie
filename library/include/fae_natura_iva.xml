@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="natura_N1" model="">
+        <field name="code">N1</field>
+        <field name="name">Escluse ex art.15</field>
+    </record>
+    <record id="natura_N2" model="">
+        <field name="code">N2</field>
+        <field name="name">Non soggette</field>
+    </record>
+    <record id="natura_N2.1" model="">
+        <field name="code">N2.1</field>
+        <field name="name">Non soggette artt. da 7 a 7-septies</field>
+    </record>
+    <record id="natura_N2.2" model="">
+        <field name="code">N2.2</field>
+        <field name="name">Non soggette altri casi</field>
+    </record>
+    <record id="natura_N3" model="">
+        <field name="code">N3</field>
+        <field name="name">Non imponibili</field>
+    </record>
+    <record id="natura_N3.1" model="">
+        <field name="code">N3.1</field>
+        <field name="name">Non imponibili esportazioni</field>
+    </record>
+    <record id="natura_N3.2" model="">
+        <field name="code">N3.2</field>
+        <field name="name">Non imponibili cessioni intracomunitarie</field>
+    </record>
+    <record id="natura_N3.3" model="">
+        <field name="code">N3.3</field>
+        <field name="name">Non imponibili cessioni verso San Marino</field>
+    </record>
+    <record id="natura_N3.4" model="">
+        <field name="code">N3.4</field>
+        <field name="name">Non imponibili assimilati a esportazioni</field>
+    </record>
+    <record id="natura_N3.5" model="">
+        <field name="code">N3.5</field>
+        <field name="name">Non imponibili con dichiarazioni intento</field>
+    </record>
+    <record id="natura_N3.6" model="">
+        <field name="code">N3.6</field>
+        <field name="name">Non imponibili oper non formanti plafond</field>
+    </record>
+    <record id="natura_N4" model="">
+        <field name="code">N4</field>
+        <field name="name">Esenti</field>
+    </record>
+    <record id="natura_N5" model="">
+        <field name="code">N5</field>
+        <field name="name">Regime del margine</field>
+    </record>
+    <record id="natura_N6" model="">
+        <field name="code">N6</field>
+        <field name="name">Inversione contabile (reverse charge)</field>
+    </record>
+    <record id="natura_N6.1" model="">
+        <field name="code">N6.1</field>
+        <field name="name">Inversione contabile rottami e materiali di recupero</field>
+    </record>
+    <record id="natura_N6.2" model="">
+        <field name="code">N6.2</field>
+        <field name="name">Inversione contabile cessione oro e argento puro</field>
+    </record>
+    <record id="natura_N6.3" model="">
+        <field name="code">N6.3</field>
+        <field name="name">Inversione contabile subappalto nel settore edile</field>
+    </record>
+    <record id="natura_N6.4" model="">
+        <field name="code">N6.4</field>
+        <field name="name">Inversione contabile cessione di fabbricati</field>
+    </record>
+    <record id="natura_N6.5" model="">
+        <field name="code">N6.5</field>
+        <field name="name">Inversione contabile cessione di telefoni cellulari</field>
+    </record>
+    <record id="natura_N6.6" model="">
+        <field name="code">N6.6</field>
+        <field name="name">Inversione contabile cessione di prodotti elettronici</field>
+    </record>
+    <record id="natura_N6.7" model="">
+        <field name="code">N6.7</field>
+        <field name="name">Inversione contabile prestazioni edilizia/settori connessi</field>
+    </record>
+    <record id="natura_N6.8" model="">
+        <field name="code">N6.8</field>
+        <field name="name">Inversione contabile operazioni settore energetico</field>
+    </record>
+    <record id="natura_N6.9" model="">
+        <field name="code">N6.9</field>
+        <field name="name">Inversione contabile altri casi</field>
+    </record>
+    <record id="natura_N7" model="">
+        <field name="code">N7</field>
+        <field name="name">IVA assolta in altro stato UE</field>
+    </record>
+</data>

@@ -1,0 +1,27 @@
+Titolo:
+Compos sui.
+
+Presentazione:
+Comincio con l'informarvi che prima di aggiornare a questa versione è indispensabile passare prima per la 9.00 e che tutti gli utenti siano entrati ovvero abbiano fatto il login almeno una volta utilizzando la 9.00; diversamente gli stessi non riusciranno ad accedere più al programma. Qualora vi troviate in uno stallo del genere la soluzione c'è, ed è ad appannaggio dell'amministratore di sistema, o meglio di chi ha accesso al database, si tratta di rigenerare l'hash della password utilizzando l'apposita utility gazie/passhash.php e quindi fare copia incolla dello stesso dentro la colonna user_password_hash della tabella gaz_admin.
+Se siete disposti al suddetto lavoro manuale potete aggiornare anche direttamente da versioni più vecchie senza altre preoccupazioni.
+Nessun problema per chi installa per la prima volta.
+Gli oltre 100 commit che hanno portato a questa versione ottengono i seguenti miglioramenti:
+- lieve ottimizzazione grafica, ad esempio adesso lo sfondo ripete il logo aziendale desaturato e decontrastato, se l'installazione non è nuova dovrete reinserire il logo per vedere il risultato.
+- se la partiva IVA di cedente e committente delle fatture coincidono allora sul tracciato XML, in automatico, mette TD27 autofattura (A.De Vincentiis).
+- il widget sulla home ricorda la presenza di contratti da fatturare nel mese corrente (A.De Vincentiis).
+- in inserimento prima nota è stato corretto il bug che impediva la selezione di un cliente/fornitore se ancora presente il sottoconto del precedente inserimento (A.De Vincentiis).
+- la generazione del nome file XML delle autofatture è stato allineato al parametro globale che identifica il sezionale scelto (A.Romano).
+- la gestione del nome fattura elettronica è stato esteso ai 9 sezionali, solo su sistemi Linux (A.Romano).
+- gestione dei file XML delle fatture elettroniche emesse verso la PA e quindi da firmare prima dell'invio (A.De Vincentiis).
+- in caso di DdT in conto visione si raggruppa comunque assieme agli altri DdT e non si fa saltare la numerazione (A.De Vincentiis).
+- nell'elenco fatture di vendita, quando si sceglie il sezionale riservato alle autofatture reverse charge, si visualizzano le stesse e le relative fatture di acquisto (A.Germani).
+- risolto problema relativo all'inventario eseguito nella stessa data di altri movimenti di magazzino (A.De Vincentiis e A.Germani).
+- corretto il bug che impediva la correzione da inventario delle giacenze degli articoli con lotti  (A.De Vincentiis e A.Germani).
+- risolto il problema di perdita lotto in acquisizione fattura elettronica quando già inserito il ddt in esso contenuto  (A.De Vincentiis e A.Germani).
+- aggiunti i grigi alla palette dei colori aziendali (A.De Vincentiis).
+- diversi miglioramenti operati da Antonio Germani sul suo modulo "Vacation rental" per la gestione delle prenotazioni alloggi.
+
+Ricordo il lavoro fatto già dalla passata versione:
+in $_SESSION['aes_key'] avete la chiave (per sua natura temporanea) che potrete usare per l'encrypt/decrypt dei dati sensibili sul database di eventuali vostri moduli personalizzati.
+
+Antonio de Vincentiis, Montesilvano, 26 novembre 2022

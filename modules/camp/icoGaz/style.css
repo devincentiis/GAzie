@@ -1,0 +1,106 @@
+/*
+  --------------------------------------------------------------------------
+	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP
+	  Copyright (C) 2018-2022 - Antonio Germani, Massignano (AP)
+	  https://www.lacasettabio.it
+	  https://www.programmisitiweb.lacasettabio.it
+	  --------------------------------------------------------------------------
+    ICOGAZ è una classe CSS di icone creata da Antonio Germani
+    Copyright (C) 2018-2022 - Antonio Germani, Massignano (AP)
+	  https://www.lacasettabio.it
+	  https://www.programmisitiweb.lacasettabio.it
+	  --------------------------------------------------------------------------
+	  Questo programma e` free software;   e` lecito redistribuirlo  e/o
+	  modificarlo secondo i  termini della Licenza Pubblica Generica GNU
+	  come e` pubblicata dalla Free Software Foundation; o la versione 2
+	  della licenza o (a propria scelta) una versione successiva.
+
+	  Questo programma  e` distribuito nella speranza  che sia utile, ma
+	  SENZA   ALCUNA GARANZIA; senza  neppure  la  garanzia implicita di
+	  NEGOZIABILITA` o di  APPLICABILITA` PER UN  PARTICOLARE SCOPO.  Si
+	  veda la Licenza Pubblica Generica GNU per avere maggiori dettagli.
+
+	  Ognuno dovrebbe avere   ricevuto una copia  della Licenza Pubblica
+	  Generica GNU insieme a   questo programma; in caso  contrario,  si
+	  scriva   alla   Free  Software Foundation,  Inc.,   59
+	  Temple Place, Suite 330, Boston, MA 02111-1307 USA Stati Uniti.
+	  --------------------------------------------------------------------------
+	  # free to use, Author name and references must be left untouched  #
+	  --------------------------------------------------------------------------
+*/
+/* ICONE REGISTRO DI CAMPAGNA - Antonio Germani */
+[class^="icoGaz-"], [class*=" icoGaz-"] {
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+}
+.icoGaz-grain15::before {
+ content: url(icons/grain15.svg);
+}
+.icoGaz-grain30::before {
+ content: url(icons/grain30.svg);
+}
+.icoGaz-tractor15::before {
+ content: url(icons/tractor15.png);
+}
+.icoGaz-tractor30::before {
+ content: url(icons/tractor30.png);
+}
+.icoGaz-pig15::before {
+ content: url(icons/pig15.svg);
+}
+.icoGaz-pig30::before {
+ content: url(icons/pig30.svg);
+}
+.icoGaz-bee15::before {
+ content: url(icons/bee15.svg);
+}
+.icoGaz-bee30::before {
+ content: url(icons/bee30.svg);
+}
+.icoGaz-fertilizer15::before {
+ content: url(icons/fertilizer15.svg);
+}
+.icoGaz-fertilizer30::before {
+ content: url(icons/fertilizer30.svg);
+}
+.icoGaz-field15::before {
+ content: url(icons/field15.svg);
+}
+.icoGaz-field30::before {
+ content: url(icons/field30.svg);
+}
+.icoGaz-gardener15::before {
+ content: url(icons/gardener15.svg);
+}
+.icoGaz-gardener30::before {
+ content: url(icons/gardener30.svg);
+}
+.icoGaz-pest15::before {
+ content: url(icons/pest15.svg);
+}
+.icoGaz-pest30::before {
+ content: url(icons/pest30.svg);
+}
+.icoGaz-scissors15::before {
+ content: url(icons/scissors15.svg);
+}
+.icoGaz-scissors30::before {
+ content: url(icons/scissors30.svg);
+}
+.icoGaz-seedling15::before {
+ content: url(icons/seedling15.svg);
+}
+.icoGaz-seedling30::before {
+ content: url(icons/seedling30.svg);
+}
+.icoGaz-watering15::before {
+ content: url(icons/watering15.svg);
+}
+.icoGaz-watering30::before {
+ content: url(icons/watering30.svg);
+}

@@ -1,0 +1,55 @@
+﻿  -----------------------------------------------------------------------
+ Sincronizzazione e-commerce <-> GAzie via FTP e SFTP
+  -----------------------------------------------------------------------
+ Joomla-Hikashop       Wordpress-Woocommerce        Prestashop
+
+          contattare l'autore per altri e-commerce
+  -----------------------------------------------------------------------
+  @Author    Antonio Germani
+  @Website   https://www.programmisitiweb.lacasettabio.it
+  @Contact   340-5011912
+  @Copyright Copyright (C) 2018 - 2023 Antonio Germani All Rights Reserved.
+  versione 4.2
+  ------------------------------------------------------------------------
+
+ Questo è un sistema che, tramite appositi file inseriti nell'e-commerce, permette di interfacciare/sincronizzare GAzie ad un sito internet scambiando i dati da un database ad un altro. Lo scambio dei dati fra i due DataBase avviene tramite file xml salvati via FTP o SFTP.
+ Grazie alla sua semplicità tecnica questo sistema è adattabile ad ogni applicazione che utilizzi tabelle di database.
+L'adattabilità fra i vari CMS e siti e-commerce è realizzata creando specifici file di interfaccia che dovranno elaborare i file xml inviati da GAzie. Il modulo di GAzie "Shop-synchronize", invece, è già in grado di elaborare i file xml che gli e-commerce gli inviano.
+ Il meccanismo di funzionamento è semplice; per ovviare al fatto che la maggior parte dei database non sono gestibili da programmi esterni al dominio cui il database appartiene, si caricano i dati da trasferire tramite un file xml via FTP e poi si avvia il programma, residente nel dominio del database da modificare, che si occuperà di aggiornare il proprio data base.
+Per evitare intrusioni indesiderate, l'interfaccia di GAzie, al momento di connettersi con l'e-commerce, passa, tramite l'url, una password criptata. Tale
+password potrà essere decriptata e controllata dal file interfaccia dell'e-commerce.
+ Il modulo shop-synchronize è in grado di sincronizzare i prodotti bidirezionalmente. Inoltre può importare gli ordini creando cliente e prodotti in GAzie qualora non esistenti.
+
+*ATTIVAZIONE*
+Per attivare la sincronizzazione manuale basta semplicemente mantere attivo questo modulo e cliccare sui relativi pulsanti di sincronizzazione presenti alla pagina "Sincronizza"
+Nel caso specifico dell'importazione degli ordini e aggiornamento articoli e giacenze, c'è una sincronizzazione automatica, attivabile nella pagina impostazioni del modulo, con la possibilità di regolare l'intervallo di tempo fra una sincronizzazione e l'altra.
+Infine, si consiglia di attivare anche il relativo widget in home page.
+
+*IMPOSTAZIONI PRIMA DELL'USO*,
+Nella pagina "Sincronizza", cliccando sul pulsante "Impostazioni", si dovrà impostare l'FTP e i percorsi del sito e-commerce.
+Sempre nella stessa pagina sarà possibile scegliere se usare il più sicuro sistema Sftp al posto del semplice ftp. In questo caso si dovranno fare ulteriori impostazioni specifiche del Sftp.
+
+*Dalla VERSIONE 2.0*
+questo modulo si completa con una maggiore sincronizzazione riuscendo a gestire anche le immagini, i prezzi e le descrizioni estese degli articoli.
+Inoltre la sincronizzazione è bidirezionale:
+-si possono importare, creandoli se inesistenti, gli articoli dall'ecommerce a GAzie
+-si possono aggiornare gli articoli da GAzie all'ecommerce nei prezzi, immagini e descrizioni estese.
+
+*Dalla VERSIONE 4.0*
+è stata implementata la gestione delle varianti di un singolo prodotto. Quindi, ad esempio, è possibile gestire una stessa maglietta con differenti colori, decori, prezzi e immagini.
+
+*Dalla Versione 4.1*
+Sono state sincronizzate le categorie
+Si possono esportare gli articoli da GAzie inserendoli in un nuovo e-commerce vuoto
+Risolti alcuni problemi con i caratteri speciali nelle descrizioni
+
+*Dalla Versione 4.2*
+Adeguato il sistema di criptazione delle password a quello presente in GAzie.
+Aggiunta la possibilità di sincronizzare i feedback del modulo Vacation-rental.
+
+* FILE DI INTERFACCIA DA INSERIRE NEL SITO E-COMMERCE*
+ I file di interfaccia da inserire nel sito devono essere creati in base alle esigenze e alle impostazioni dell'applicazione installata nell'e-commerce.
+
+Nel sito di Antonio Germani sono disponibili i file di interfaccia per Joomla-Hikashop, Joomla-Solidres, WordPress-Woocommerce e Prestashop così come è possibile richiedere ulteriori file di interfaccia specifici per altri e-commerce: https:www.programmisitiweb.lacasettabio.it
+
+

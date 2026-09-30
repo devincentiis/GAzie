@@ -1,0 +1,21 @@
+Titolo:
+L'odore del mare
+
+Presentazione:
+Sono qui a presentarvi la versione 9.10 ad oltre nove mesi dall'ultimo rilascio del 10 aprile dello scorso anno, attesa durata come una gestazione umana, per partorire esattamente il giorno del ventunesimo compleanno.
+Se si considera l'ingegnerizzazione risalente agli inizi del nuovo millennio la longevità è straordinaria, così come il futuro che si spera almeno altrettanto lungo.
+Mi astengo dall'elencare le numerosissime modifiche meno importanti e cito solo i miglioramenti degni di rilievo:
+- Aggiunto l'IP banning: dopo dieci tentativi falliti di login solo l'amministratore di database, intervenendo sulla nuova tabella gaz_banned_ip, potrà eventualmente risolvere l'empasse.
+- Sui preventivi/ordini clienti è data la possibilità di spostare i righi in qualsiasi altra posizione e in entrambi versi, la scelta avviene tramite finestra modale.
+- Risolto problema contabilizzazione fatture acquisti in caso di incasso automatico e reverse-charge.
+- Documenti di acquisto: adesso è consentita la modifica della produzione di riferimento.
+- Registrazione movimenti contabili: in configurazione azienda aggiunta la possibilità di attivare lo scroll automatico sul rigo di input.
+- Consentita la generazione del pdf dei registri IVA anche se sono stati riscontrati e segnalati degli errori.
+- Le descrizioni dei listini adesso sono personalizzabili.
+- Modulo statistiche: aggiunto modo "Fatturato per tipo di pagamento".
+- In Tools&Info aggiunta la creazione di un "Calendario olandese" con fasi lunari, numeri settimane ed eventuale dedica a cliente/fornitore.
+- Iniziati i lavori per la generazione dei documenti di vendita (ordini,conferme,ddt) in formato elettronico XML Peppol, nella lista dei DdT troverete il bottone per provarlo.
+Pur provenendo da una versione abbastanza stabile ed affidabile il bugfix è stato realizzato collaborando con altri sviluppatori e grazie ai numerosi utilizzatori che ci riferiscono con pazienza certosina.
+Di Antonio Germani è il lavoro fatto sui moduli Vacation Rental e Registro di Campagna.
+
+Antonio de Vincentiis, Montesilvano, 27 gennaio 2025

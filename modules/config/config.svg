@@ -1,0 +1,49 @@
+<svg width="400" height="400" version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <radialGradient id="B" cx="22.82" cy="12.09" r="16.371" gradientTransform="matrix(.044232 .58326 -1.205 .091385 30.624 -11.223)" gradientUnits="userSpaceOnUse">
+   <stop id="P" stop-color="#49effd" offset=".29891"/>
+   <stop id="Q" stop-color="#babdb6" offset="1"/>
+  </radialGradient>
+  <radialGradient id="C" cx="24.651" cy="29.22" r="12.843" gradientTransform="matrix(1.8213 -1.2455 .93479 1.367 -54.038 20.713)" gradientUnits="userSpaceOnUse">
+   <stop id="N" stop-color="#cfd3d7" offset="0"/>
+   <stop id="O" stop-color="#888a85" offset="1"/>
+  </radialGradient>
+  <linearGradient id="D" x2="0" y1="8.109" y2="42.2" gradientTransform="matrix(1.1692 0 0 1.0964 -5.3757 -3.5462)" gradientUnits="userSpaceOnUse">
+   <stop id="V" stop-color="#fff" stop-opacity=".8" offset="0"/>
+   <stop id="W" stop-color="#fff" stop-opacity="0" offset="1"/>
+  </linearGradient>
+  <radialGradient id="E" cx="15.944" cy="13.237" r="12.843" gradientTransform="matrix(-.29074 2.5352 -3.9714 -.45545 71.724 -19.4)" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#cfd4d7" offset="0"/>
+   <stop stop-color="#888a85" offset="1"/>
+  </radialGradient>
+  <linearGradient id="F" x2="0" y1="18.908" y2="24.23" gradientUnits="userSpaceOnUse">
+   <stop id="L" stop-color="#555753" offset="0"/>
+   <stop id="M" stop-color="#2e3436" stop-opacity="0" offset="1"/>
+  </linearGradient>
+  <linearGradient id="G" x2="0" y1="21.05" y2="25.907" gradientTransform="matrix(1.1692 0 0 1.0964 -6.77 10.202)" gradientUnits="userSpaceOnUse">
+   <stop id="T" stop-color="#555753" offset="0"/>
+   <stop id="U" stop-color="#555753" stop-opacity="0" offset="1"/>
+  </linearGradient>
+  <linearGradient id="linearGradient1057" x1="5.0866" x2="40.125" y1="23.372" y2="23.372" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#3af6f6" offset="0"/>
+   <stop stop-color="#85868a" offset="1"/>
+  </linearGradient>
+ </defs>
+ <g transform="matrix(11.003 0 0 9.8372 -63.719 -37.191)">
+  <g id="I">
+   <g id="X" transform="translate(1.3942 .62752)">
+    <path id="Y" d="m5.6526 8.5715v33.987h33.906v-33.987l-4.6767-4.3855h-24.553z" fill="url(#linearGradient1057)" fill-rule="evenodd" stroke="#92eefb" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.132"/>
+    <path id="Z" d="m10.592 4.8441-4.3529 4.1836 1.3896 0.27409h30.182l1.1703-0.27409-4.5168-4.1836z" fill="url(#B)" fill-rule="evenodd"/>
+    <rect id="a" x="10.269" y="28.04" width="24.553" height="11.02" rx="1.086" ry="1.018" fill="none" opacity=".5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.132"/>
+    <rect id="b" x="10.269" y="27.05" width="24.553" height="11.02" rx="1.086" ry="1.018" fill="url(#C)" fill-rule="evenodd" stroke="#118099" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.132"/>
+    <path id="c" transform="translate(-1.3942 -.62752)" d="m12.281 5.3438v0.03125c-0.07818-0.00214-0.14444-0.027843-0.21875 0l-0.125 0.03125-0.0625 0.09375-4 3.75-0.09375 0.09375-0.0625 0.125c-0.027843 0.074313-0.00214 0.14057 0 0.21875h-0.03125v32.438h0.03125c-0.00214 0.07818-0.027843 0.14444 0 0.21875l0.09375 0.25 0.25 0.09375c0.074313 0.02784 0.14057 0.0021 0.21875 0v0.03125h31.438v-0.03125c0.07818 0.0021 0.14444 0.02784 0.21875 0l0.25-0.09375 0.09375-0.25c0.02784-0.07431 0.0021-0.14057 0-0.21875h0.03125v-32.438h-0.03125c0.0021-0.078182 0.02784-0.14444 0-0.21875l-0.0625-0.125-0.09375-0.09375-3.9688-3.75-0.0625-0.09375-0.125-0.03125c-0.07431-0.027843-0.14057-0.00214-0.21875 0v-0.03125zm0.1875 1.125h23.094l3.625 3.4062v0.03125h-30.375v-0.03125zm-3.6562 4.4375h30.375v30.688h-30.375z" fill="url(#D)" fill-rule="evenodd" opacity=".8"/>
+    <rect id="d" x="10.269" y="13.669" width="24.553" height="11.02" rx="1.086" ry="1.018" fill="none" opacity=".5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.132"/>
+    <g fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.132">
+     <rect id="e" x="10.269" y="12.669" width="24.553" height="11.02" rx="1.086" ry="1.018" fill="url(#E)" stroke="#098ea1"/>
+     <rect id="f" x="18.652" y="19.474" width="7.889" height="4.19" rx=".335" ry=".37" fill="url(#F)" stroke="#555753"/>
+     <rect id="g" x="18.652" y="33.85" width="7.889" height="4.19" rx=".335" ry=".37" fill="url(#G)" stroke="#555753"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

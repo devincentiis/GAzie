@@ -1,0 +1,11 @@
+Titolo:
+Un tempo piccolo.
+
+Presentazione:
+Senza preamboli, vado subito ad elencarvi le novità presenti su questo rilascio tralasciando il debug; siccome spaziano su tanti argomenti citerò solo quelli che ritengo più importanti:
+- ho aggiunto il modulo attivabile "SincroOpenCart3" per consentire la sincronizzazione tramite API dell'ecommerce OpenCart versione 3 di cui viene fornita la relativa estensione in formato ocmod.
+- in collaborazione con Antonio Germani abbiamo aggiunto la possibilità di tradurre nelle lingue presenti nella tabella "gaz_languages" gli articoli di magazzino, e i gruppi articoli, mancano le categorie merceologiche.
+- Antonio Germani ha: esteso il multilingua sul suo modulo vacation_rental, aggiunta l'operazione 'Scarico altri usi' sul registro SIAN, aggiunta la gestione dei contratto di locazione,
+sistemata la comunicazione via SFTP con chiave SSH di shop-synchronize, aggiunta la creazione del file ISTAT dei movimenti turistici e del file alloggiati web per la Polizia di Stato trasferibili attraverso i relativi web-service.
+
+Antonio de Vincentiis, Montesilvano, 15 giugno 2025

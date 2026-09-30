@@ -1,0 +1,11 @@
+Titolo: Habere non haberi.
+
+Presentazione:
+
+GAzie compie diciannove anni! L'ultimo in cui si potrà vantare di essere un teenager.
+Come regalo un nuovo logo stilisticamente più moderno, mi sono cimentato designer, spero apprezziate lo sforzo e che susciti una bella sensazione in chi lo guarda; era ora di cambiare look anche al maialino colorato che lo ha accompagnato per così tanti anni, forse poco professionale già dall'inizio figuriamoci oggi, uno scherzo, quasi triviale.
+Questa volta non mi dilungo con un changelog, chi è interessato può guardare su questo portale in  Code -> Browse commits da [r5948] a [r6137].
+Cito solo il lavoro più grosso fatto da me ed Antonio Germani per renderlo compatibile con il PHP 8.1 modificando parti di codice e aggiornando diverse librerie.
+Con più lentezza sto apportando modifiche in modo che possa essere compatibile anche con PHP 8.2.
+
+Antonio de Vincentiis, Montesilvano, 27 gennaio 2023

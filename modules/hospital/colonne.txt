@@ -1,0 +1,1 @@
+'id_patient','first_name','last_name','birth_date','birth_place','birth_prov_code','birth_country','tax_code','iban','health_card_number','telephone','residence_address','residence_place','residence_postal_code','residenze_prov_code','e_mail','note','status','last_revision'

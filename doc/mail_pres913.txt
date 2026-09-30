@@ -1,0 +1,14 @@
+Titolo:
+Quelli che restano.
+
+Presentazione:
+È solo una minor release che come al solito rimuove i piccoli errori, però colgo l'occasione per condividere il modulo "Hospital", una bozza, ma fa qualcosa di nuovo che credo molto utile, se non altro come esempio: usa la variabile superglobale e volatile $_SESSION['aes_key'] contenente la chiave per criptare e decriptare dati e documenti sensibili come quelli sanitari.
+Si tratta della stessa chiave che già adoperiamo per nascondere sul server le password di accesso ai server SMTP per l'invio delle email.
+Sul modulo Hospital oltre alle anagrafiche dei pazienti/ospiti vengono cifrati gli eventuali documenti importati, pertanto non solo i dati sulle tabelle ma anche il contenuto dei files dentro il direttorio data/files verranno criptati.
+Altra particolarità del modulo è quella che ad ogni generazione i pdf vengono protetti da una OneTimePassword che consente l'invio in sicurezza del referto o cartella clinica attraverso qualsiasi canale (email, CRM, ecc) purché la OTP venga comunicata in separata sede.
+Altro nuova funzionalità: è stata aggiunta da Antonio Germani: adesso è possibile la ristampa e generazione multipla dei documenti del modulo Acquisti.
+
+Antonio de Vincentiis, Montesilvano, 25 aprile 2026
+
+
+

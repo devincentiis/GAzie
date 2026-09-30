@@ -1,0 +1,115 @@
+/*
+Il presente CSS permette di gestire la customizzazione delle form in
+termini di occultamento di determinate righe che non presentino campi
+obbligatori.
+Credit: m_zolfo
+*/
+
+/**************************************
+ namespace per id/classi IER
+***************************************/
+
+#IERenableIncludeExcludeRows::before {
+	content: "\e019";
+	width: 30px;
+	height: 30px;
+	font-size:16px;
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	float: left;
+	cursor: pointer;
+	cursor: hand;
+}
+
+#IERhelpIncludeExcludeRows::before {
+	content: "\e085";
+	font-size: 16px;
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	border-radius: 6px;
+	margin-left: 5px;
+	float: left;
+	/* cursor: pointer; */
+	cursor: hand;
+	width:30px
+}
+
+#IERsaveIncludeExcludeRows::before {
+	content: "\e172";
+	font-size: 16px;
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	border-radius: 6px;
+	margin-left: 5px;
+	float: left;
+	cursor: pointer;
+	cursor: hand;
+	width: 30px;
+}
+
+#IERresetIncludeExcludeRows::before {
+	content: "\e221";
+	font-size: 16px;
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	border-radius: 6px;
+	margin-left: 5px;
+	float: left;
+	cursor: pointer;
+	cursor: hand;
+	width: 30px;
+}
+
+.IERincludeExcludeBTN.excluded::before {
+	content:"\e106";
+	color: red;
+}
+
+.IERincludeExcludeBTN::before {
+	content: "\e105";
+	color: #03ab00;
+	font-size: 16px;
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	border-radius: 6px;
+	margin-left: 15px;
+	margin-top:-20px;
+	float: left;
+	line-height:0px;
+}
+
+#IERsaveIncludeExcludeRows::before{ color: #333 }
+#IERsaveIncludeExcludeRows.excluded::before{ color: red }
+
+#IERresetIncludeExcludeRows::before{ color: #ccc }
+#IERresetIncludeExcludeRows.IERenabled::before{ color: #333 }
+.IERmodified::before {
+	color: red;
+}
