@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 /**
  * MySQL database dump.
@@ -16,30 +14,27 @@ class MySQLDump
 	public const CREATE = 2;
 	public const DATA = 4;
 	public const TRIGGERS = 8;
-	public const ALL = 15; // DROP | CREATE | DATA | TRIGGERS
+	public const ROUTINES = 16;
+	public const ALL = 31; // DROP | CREATE | DATA | TRIGGERS | ROUTINES
 
 	private const MAX_SQL_SIZE = 1e6;
 
-	/** @var array */
-	public $tables = [
+	public array $tables = [
 		'*' => self::ALL,
 	];
-
-	/** @var mysqli */
-	private $connection;
 
 
 	/**
 	 * Connects to database.
 	 */
-	public function __construct(mysqli $connection, string $charset = 'utf8mb4')
-	{
-		$this->connection = $connection;
-
+	public function __construct(
+		private readonly mysqli $connection,
+		string $charset = 'utf8mb4',
+	) {
 		if ($connection->connect_errno) {
 			throw new Exception($connection->connect_error);
 
-		} elseif (!$connection->set_charset($charset)) { // was added in MySQL 5.0.7 and PHP 5.0.5, fixed in PHP 5.1.5)
+		} elseif (!$connection->set_charset($charset)) {
 			throw new Exception($connection->error);
 		}
 	}
@@ -50,7 +45,7 @@ class MySQLDump
 	 */
 	public function save(string $file): void
 	{
-		$handle = strcasecmp(substr($file, -3), '.gz') ? fopen($file, 'wb') : gzopen($file, 'wb');
+		$handle = str_ends_with(strtolower($file), '.gz') ? gzopen($file, 'wb') : fopen($file, 'wb');
 		if (!$handle) {
 			throw new Exception("ERROR: Cannot write file '$file'.");
 		}
@@ -87,7 +82,9 @@ class MySQLDump
 		$this->connection->query('LOCK TABLES `' . implode('` READ, `', $tables) . '` READ');
 
 		$db = $this->connection->query('SELECT DATABASE()')->fetch_row();
-		fwrite($handle, '-- Created at ' . date('j.n.Y G:i') . " using David Grudl MySQL Dump Utility\n"
+		fwrite(
+			$handle,
+			'-- Created at ' . date('j.n.Y G:i') . " using David Grudl MySQL Dump Utility\n"
 			. (isset($_SERVER['HTTP_HOST']) ? "-- Host: $_SERVER[HTTP_HOST]\n" : '')
 			. '-- MySQL Server: ' . $this->connection->server_info . "\n"
 			. '-- Database: ' . $db[0] . "\n"
@@ -96,11 +93,37 @@ class MySQLDump
 			. "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n"
 			. "SET FOREIGN_KEY_CHECKS=0;\n"
 			. "SET UNIQUE_CHECKS=0;\n"
-			. "SET AUTOCOMMIT=0;\n"
+			. "SET AUTOCOMMIT=0;\n",
 		);
 
 		foreach ($tables as $table) {
 			$this->dumpTable($handle, $table);
+		}
+
+		if (($this->tables['*'] ?? 0) & self::ROUTINES) {
+			$routines = [];
+			foreach (['FUNCTION', 'PROCEDURE'] as $type) {
+				$res = $this->connection->query("SHOW $type STATUS WHERE Db = DATABASE()");
+				while ($row = $res->fetch_assoc()) {
+					$routines[] = [$type, $row['Name']];
+				}
+				$res->close();
+			}
+
+			$res = $this->connection->query('SHOW EVENTS WHERE Db = DATABASE()');
+			while ($row = $res->fetch_assoc()) {
+				$routines[] = ['EVENT', $row['Name']];
+			}
+			$res->close();
+
+			if ($routines) {
+				fwrite($handle, "-- --------------------------------------------------------\n\n");
+				fwrite($handle, "DELIMITER ;;\n\n");
+				foreach ($routines as [$type, $name]) {
+					$this->writeRoutine($handle, $type, $name);
+				}
+				fwrite($handle, "DELIMITER ;\n\n");
+			}
 		}
 
 		fwrite($handle, "COMMIT;\n");
@@ -114,9 +137,9 @@ class MySQLDump
 	 * Dumps table to logical file.
 	 * @param  resource
 	 */
-	public function dumpTable($handle, $table): void
+	public function dumpTable($handle, string $table): void
 	{
-		$mode = isset($this->tables[$table]) ? $this->tables[$table] : $this->tables['*'];
+		$mode = $this->tables[$table] ?? $this->tables['*'];
 		if ($mode === self::NONE) {
 			return;
 		}
@@ -192,18 +215,96 @@ class MySQLDump
 		}
 
 		if ($mode & self::TRIGGERS) {
-			$res = $this->connection->query("SHOW TRIGGERS LIKE '" . $this->connection->real_escape_string($table) . "'");
-			if ($res->num_rows) {
+			$res = $this->connection->query("SHOW TRIGGERS WHERE `Table` = '" . $this->connection->real_escape_string($table) . "'");
+			$triggers = [];
+			while ($row = $res->fetch_assoc()) {
+				$triggers[] = $row['Trigger'];
+			}
+			$res->close();
+
+			if ($triggers) {
 				fwrite($handle, "DELIMITER ;;\n\n");
-				while ($row = $res->fetch_assoc()) {
-					fwrite($handle, "CREATE TRIGGER {$this->delimite($row['Trigger'])} $row[Timing] $row[Event] ON $delTable FOR EACH ROW\n$row[Statement];;\n\n");
+				foreach ($triggers as $trigger) {
+					$delTrigger = $this->delimite($trigger);
+					if ($mode & self::DROP) {
+						fwrite($handle, "DROP TRIGGER IF EXISTS $delTrigger;;\n\n");
+					}
+
+					// SHOW TRIGGERS returns a normalized body with broken escaping, only SHOW CREATE gives the original
+					$res = $this->connection->query("SHOW CREATE TRIGGER $delTrigger");
+					$row = $res->fetch_assoc();
+					$res->close();
+					fwrite($handle, $this->stripDefiner($row['SQL Original Statement']) . ";;\n\n");
 				}
 				fwrite($handle, "DELIMITER ;\n\n");
 			}
-			$res->close();
 		}
 
 		fwrite($handle, "\n");
+	}
+
+
+	/**
+	 * Dumps stored function to logical file.
+	 * @param  resource
+	 */
+	public function dumpFunction($handle, string $name): void
+	{
+		fwrite($handle, "DELIMITER ;;\n\n");
+		$this->writeRoutine($handle, 'FUNCTION', $name);
+		fwrite($handle, "DELIMITER ;\n\n");
+	}
+
+
+	/**
+	 * Dumps stored procedure to logical file.
+	 * @param  resource
+	 */
+	public function dumpProcedure($handle, string $name): void
+	{
+		fwrite($handle, "DELIMITER ;;\n\n");
+		$this->writeRoutine($handle, 'PROCEDURE', $name);
+		fwrite($handle, "DELIMITER ;\n\n");
+	}
+
+
+	/**
+	 * Dumps scheduled event to logical file.
+	 * @param  resource
+	 */
+	public function dumpEvent($handle, string $name): void
+	{
+		fwrite($handle, "DELIMITER ;;\n\n");
+		$this->writeRoutine($handle, 'EVENT', $name);
+		fwrite($handle, "DELIMITER ;\n\n");
+	}
+
+
+	private function writeRoutine($handle, string $type, string $name): void
+	{
+		$mode = $this->tables['*'] ?? 0;
+		$delName = $this->delimite($name);
+
+		if ($mode & self::DROP) {
+			fwrite($handle, "DROP $type IF EXISTS $delName;;\n\n");
+		}
+
+		if ($mode & self::CREATE) {
+			$res = $this->connection->query("SHOW CREATE $type $delName");
+			$row = $res->fetch_assoc();
+			$res->close();
+			fwrite($handle, $this->stripDefiner($row['Create ' . ucfirst(strtolower($type))]) . ";;\n\n");
+		}
+	}
+
+
+	/**
+	 * Removes the DEFINER clause so the dump imports under any user.
+	 */
+	private function stripDefiner(string $sql): string
+	{
+		$identifier = '(?:`(?:[^`]|``)*`|\S+?)';
+		return preg_replace('/^CREATE\s+DEFINER\s*=\s*' . $identifier . '@' . $identifier . '\s+/', 'CREATE ', $sql, 1);
 	}
 
 
