@@ -46,7 +46,7 @@ $search_fields = [
     'sezione' => "seziva = %d",
     'id_tes' => "id_tes = %d",
     'tipoddt' => " tipdoc = '%s' ",
-    'tipo' => " ( tipdoc LIKE '%s' OR tipdoc = 'FAD' OR tipdoc = 'RPL') ",
+    'tipo' => " ( tipdoc LIKE '%s' OR tipdoc = 'FAD' OR tipdoc = 'RPL' OR tipdoc = 'RDV') ",
     'numero' => "numdoc LIKE '%%%s%%'",
     'anno' => "YEAR(datemi) = %d",
     'omdescri'  => "CONCAT({$gTables['orderman']}.id, {$gTables['orderman']}.description) LIKE '%%%s%%'",
@@ -92,7 +92,7 @@ $ts = new TableSorter(
 );
 
 # le <select> spaziano solo tra i documenti di vendita del sezionale corrente
-$where_select = sprintf(" (tipdoc = 'RPL' OR tipdoc = 'FAD' OR tipdoc LIKE 'DD_') AND seziva = %d", $sezione);
+$where_select = sprintf(" (tipdoc = 'RPL' OR tipdoc = 'RDV' OR tipdoc = 'FAD' OR tipdoc LIKE 'DD_') AND seziva = %d", $sezione);
 ?>
 <script>
 $(function() {
@@ -306,6 +306,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
             while ($r = gaz_dbi_fetch_array($result)) {
                    switch ($r['tipdoc']) {
                         case "RPL":
+                        case "RDV":
                         case "DDT":
                         case "DDV":
                         case "DDY":
@@ -345,7 +346,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                                 if ($r["id_con"] > 0) {
                                     echo "<a title=\"" . $script_transl['acc_entry'] . "\" href=\"../contab/admin_movcon.php?id_tes=" . $r["id_con"] . "&Update\">cont. n." . $r["id_con"] . "</a>";
                                 }
-                            } else if ($r['tipdoc'] == 'DDX' || $r['tipdoc'] == 'DDZ' || $r['tipdoc'] == 'DDW' || $r['tipdoc'] == 'DDJ' || $r['tipdoc'] == 'DDD' || $r['tipdoc'] == 'DDC' || $r['tipdoc'] == 'RPL') {
+                            } else if ($r['tipdoc'] == 'DDX' || $r['tipdoc'] == 'DDZ' || $r['tipdoc'] == 'DDW' || $r['tipdoc'] == 'DDJ' || $r['tipdoc'] == 'DDD' || $r['tipdoc'] == 'DDC' || $r['tipdoc'] == 'RPL' || $r['tipdoc'] == 'RDV') {
                                echo '<td><a class="btn btn-xs btn-default" style="cursor: none;">da non fatturare</a></td>';
                             } else {
                                 if ($r['tipdoc'] == 'DDV' && $r['id_doc_ritorno'] > 0) {

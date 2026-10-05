@@ -976,7 +976,7 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         } else {
           $form['protoc'] = 1;
         }
-        if (substr($form['tipdoc'], 0, 2) == 'DD' || $form['tipdoc']=='CMR' || $form['tipdoc']=='RPL') {  //ma se e' un ddt il protocollo è 0 cosè come il numero e data fattura
+        if (substr($form['tipdoc'], 0, 2) == 'DD' || $form['tipdoc']=='CMR' || $form['tipdoc']=='RPL' || $form['tipdoc']=='RDV') {  //ma se e' un ddt il protocollo è 0 cosè come il numero e data fattura
           $form['protoc'] = 0;
           $form['numfat'] = 0;
           $form['datfat'] = 0;

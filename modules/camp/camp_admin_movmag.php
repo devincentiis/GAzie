@@ -77,7 +77,7 @@ if (isset($_POST['erase'])) {
 }
 // se è stato premuto il pulsante di cambio coltura
 if (isset($_POST['cambiocolt'])) {
-	gaz_dbi_query("UPDATE " . $gTables['campi'] . " SET id_colture = '" . $_POST['id_colture'] . "' WHERE codice = " . $_POST['campo_impianto1']);
+	gaz_dbi_query("UPDATE " . $gTables['campi'] . " SET id_colture = " . (int)$_POST['id_colture'] . " WHERE codice = " . (int)$_POST['campo_impianto1']);
     $_POST['id_colture'] = 0;
     $_POST['nome_colt'] = "";
     $form['id_colture'] = 0;
@@ -93,16 +93,19 @@ if (isset($_POST['patent'])) {
 				$data['camp']['numero']=$_POST['patent_number'];
 				$data['camp']['scadenza']=$_POST['patent_expiry'];
 				$patent = json_encode($data);
-				gaz_dbi_query("UPDATE " . $gTables['anagra'] . " SET custom_field = '" . $patent . "' WHERE id = " . addslashes($_POST['adminid']));
+        $patent = mysqli_real_escape_string($link, $patent);
+				gaz_dbi_query("UPDATE " . $gTables['anagra'] . " SET custom_field = '" . $patent . "' WHERE id = " . intval($_POST['adminid']));
 			} else { //se non c'è il modulo "camp" lo aggiungo
 				$data['camp']= array('numero' => $_POST['patent_number'], 'scadenza' => $_POST['patent_expiry']);
 				$patent = json_encode($data);
-				gaz_dbi_query("UPDATE " . $gTables['anagra'] . " SET custom_field = '" . $patent . "' WHERE id = " . addslashes($_POST['adminid']));
+        $patent = mysqli_real_escape_string($link, $patent);
+				gaz_dbi_query("UPDATE " . $gTables['anagra'] . " SET custom_field = '" . $patent . "' WHERE id = " . intval($_POST['adminid']));
 			}
 		} else { // se non c'è un json lo creo
 			$array= array('camp'=>array('numero' => $_POST['patent_number'], 'scadenza' => $_POST['patent_expiry']));
 			$patent = json_encode($array);
-			gaz_dbi_query("UPDATE " . $gTables['anagra'] . " SET custom_field = '" . $patent . "' WHERE id = " . addslashes($_POST['adminid']));
+      $patent = mysqli_real_escape_string($link, $patent);
+			gaz_dbi_query("UPDATE " . $gTables['anagra'] . " SET custom_field = '" . $patent . "' WHERE id = " . intval($_POST['adminid']));
 		}
 	}
 }
@@ -114,8 +117,9 @@ if (isset($_POST['feno']) AND strlen($_POST['add_feno'])>0) {
 		$instantwarning[] = "La fase fenologica '". $_POST['add_feno'] ."' è già presente!";
 	} else {
 		if (!is_array($feno_array)){ // inserisco per la prima volta la riga in company data
-			$feno_json = '["'.$_POST['add_feno'].'"]';
-			$query="INSERT INTO " . $gTables['company_data'] . " (description, var, data, ref) VALUES ('Fasi fenologiche', 'feno_json', '".$feno_json."', '')";
+			$feno_json = json_encode(array($_POST['add_feno']));
+			$feno_sql = mysqli_real_escape_string($link, $feno_json);
+			$query="INSERT INTO " . $gTables['company_data'] . " (description, var, data, ref) VALUES ('Fasi fenologiche', 'feno_json', '".$feno_sql."', '')";
 			gaz_dbi_query($query);
 			$feno = gaz_dbi_get_row($gTables['company_data'], "var", "feno_json");
 			$feno_json = $feno['data'];	// carico nel form il json appena creato e salvato;
@@ -123,7 +127,8 @@ if (isset($_POST['feno']) AND strlen($_POST['add_feno'])>0) {
 		} else { // altrimenti la modifico aggiungengo la nuova fase a quelle già presenti
 			$feno_array[] = $_POST['add_feno'];
 			$feno_json = json_encode ($feno_array);
-			gaz_dbi_query("UPDATE " . $gTables['company_data'] . " SET data = '" . $feno_json . "' WHERE var = 'feno_json'");
+			$feno_sql = mysqli_real_escape_string($link, $feno_json);
+			gaz_dbi_query("UPDATE " . $gTables['company_data'] . " SET data = '" . $feno_sql . "' WHERE var = 'feno_json'");
 			$_POST['feno_json'] = $feno_json;
 		}
 	}
@@ -875,7 +880,7 @@ if (!isset($_POST['Update']) and isset($_GET['Update'])) { //se è il primo acce
 							$form['scorig2'][$form['mov']], $form['id_mov2'], $admin_aziend['stock_eval_method'],
 							array('datreg' => $form['datreg'], 'operat' => $form['operat'], 'desdoc' => $form['desdoc']));
 							// riprendo il salvataggio del movimento acqua in movmag con i dati mancanti del quaderno di campagna
-							$query = "UPDATE " . $gTables['movmag'] . " SET type_mov = '" . 1 . "', id_rif = '".$id_movmag."', tipdoc = '".$form['tipdoc']."' , campo_impianto = '" . $form['campo_impianto'.$n] . "' , id_avversita = '" . $form['id_avversita'][$form['mov']] . "' , id_colture = '" . $form['id_colture'] . "' , id_orderman = '" . $form['id_orderman'] . "' , id_lotmag = '" . $form['id_lotmag'][$form['mov']] . "' WHERE id_mov ='" . $id_movmag_acqua . "'";
+							$query = "UPDATE " . $gTables['movmag'] . " SET type_mov = '" . 1 . "', id_rif = ".intval($id_movmag).", tipdoc = '".$form['tipdoc']."' , campo_impianto = '" . $form['campo_impianto'.$n] . "' , id_avversita = '" . $form['id_avversita'][$form['mov']] . "' , id_colture = '" . $form['id_colture'] . "' , id_orderman = '" . $form['id_orderman'] . "' , id_lotmag = '" . $form['id_lotmag'][$form['mov']] . "' WHERE id_mov ='" . $id_movmag_acqua . "'";
 							gaz_dbi_query($query);
 							$id_rif=$id_movmag_acqua;// il movmag padre avrà il riferimento del movmag acqua
 						}
