@@ -94,6 +94,8 @@ if ($last_opening) {
 if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     $form['hidden_req'] = '';
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+    $form['docattach']=[];
+    $form['checkbox_docattach']='';
     if (!isset($_GET['di'])) {
         $form['date_ini_D'] = $last_opening_day;
     } else {
@@ -149,6 +151,13 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
 } else { // accessi successivi
     $form['hidden_req'] = htmlentities($_POST['hidden_req']);
     $form['ritorno'] = $_POST['ritorno'];
+    $string_docattach = $_POST['checkbox_docattach'];
+    $a_docattach = explode(',', $string_docattach);
+    $a_docattach = array_map('intval', $a_docattach);
+    foreach($a_docattach as $v){
+      $form['docattach'][$v]=$v;
+    }
+    $form['checkbox_docattach'] = implode(',', $a_docattach);
     $form['date_ini_D'] = intval($_POST['date_ini_D']);
     $form['date_ini_M'] = intval($_POST['date_ini_M']);
     $form['date_ini_Y'] = intval($_POST['date_ini_Y']);
@@ -253,18 +262,33 @@ if ($form['account_ini'] == $form['account_fin']) {
 }
 
 if (isset($_POST['print']) && $msg == '') {
-    //Mando in stampa i movimenti contabili generati
-    if ($form['account_fin'] == 0) {
-        $form['account_fin'] == $form['account_ini'];
-    }
-    $_SESSION['print_request'] = ['script_name' => 'stampa_partit', 'codice' => $form['account_ini'], 'codfin' => $form['account_fin'], 'regini' => date("dmY", $utsini),'regfin' => date("dmY", $utsfin), 'ds' => date("dmY", $utsexe), 'idg'=>$form['id_customer_group']];
-    header("Location: sent_print.php");
-    exit;
+  if ($form['account_fin'] == 0) {
+    $form['account_fin'] == $form['account_ini'];
+  }
+  $_SESSION['print_request'] = ['script_name' => 'stampa_partit', 'codice' => $form['account_ini'], 'codfin' => $form['account_fin'], 'regini' => date("dmY", $utsini),'regfin' => date("dmY", $utsfin), 'ds' => date("dmY", $utsexe), 'idg'=>$form['id_customer_group'],'docattach'=>$form['checkbox_docattach']];
+  header("Location: sent_print.php");
+  exit;
 }
 
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup'));
-echo "<script type=\"text/javascript\">
+?>
+<script>
+$(function() {
+  $('.check_doc').on('change', function() {
+    var idsChecked = $('.check_doc:checked').map(function() {
+      return this.id;
+    }).get();
+    $('#checkbox_docattach').val(idsChecked.join(','));
+  });
+  $("#checkDocs").click(function () {
+    $('input:checkbox.check_doc').not(this).prop('checked', this.checked);
+    var idsChecked = $('.check_doc:checked').map(function() {
+      return this.id;
+    }).get();
+    $('#checkbox_docattach').val(idsChecked.join(','));
+  });
+});
 var cal = new CalendarPopup();
 var calName = '';
 function setMultipleValues(y,m,d) {
@@ -281,12 +305,12 @@ function setDate(name) {
   cal.setReturnFunction('setMultipleValues');
   cal.showCalendar('anchor', mdy);
 }
-
 </script>
-";
-echo "<form method=\"POST\" name=\"select\">\n";
-echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
-echo "<input type=\"hidden\" value=\"" . $form['ritorno'] . "\" name=\"ritorno\" />\n";
+<form method="POST" name="form_select">
+<input type="hidden" value="<?= $form['hidden_req'] ?>" name="hidden_req" />
+<input type="hidden" value="<?= $form['ritorno'] ?>" name="ritorno" />
+<input type="hidden" value="<?= $form['checkbox_docattach'] ?>" id="checkbox_docattach"  name="checkbox_docattach" />
+<?php
 $gForm = new contabForm();
 echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . $script_transl['title'];
 echo "</div>\n";
@@ -389,9 +413,9 @@ if (isset($_POST['preview']) and $msg == '') {
       }
     } else {
       $trsl=array_keys($script_transl['header2']);
-      echo '<thead><tr><th>'.$trsl[0].'</th><th>'.$trsl[1].'</th><th>'.$trsl[2].'</th><th class="text-center">'.$trsl[3].'</th><th class="text-center">'.$trsl[4].'</th><th class="text-center">'.$trsl[5].'</th><th class="text-right">'.$trsl[6].'</th><th class="text-right">'.$trsl[7].'</th><th class="text-right">'.$trsl[8].'</th></tr></thead>';
+      echo '<thead><tr><th>'.$trsl[0].'</th><th>'.$trsl[1].'</th><th>Allega</th><th>'.$trsl[2].'</th><th class="text-center">'.$trsl[3].'</th><th class="text-center">'.$trsl[4].'</th><th class="text-center">'.$trsl[5].'</th><th class="text-right">'.$trsl[6].'</th><th class="text-right">'.$trsl[7].'</th><th class="text-right">'.$trsl[8].'</th></tr></thead>';
       $span = 9;
-      echo "<tr class=\"FacetDataTD\"><td colspan=\"8\" align=\"right\"><b>SALDO PRECEDENTE &nbsp;</b></td>";
+      echo '<tr class="FacetDataTD"><td></td><td></td><td class="text-center"><input type="checkbox" id="checkDocs"></td><td colspan=5 align="right"><b>SALDO PRECEDENTE &nbsp;</b></td>';
       echo "<td align=\"right\"><b>" . gaz_format_number($saldo_precedente) . " &nbsp;</b></td></tr>";
       foreach ($m as $key => $mv) {
           $totdare+= $mv['dare'];
@@ -400,8 +424,14 @@ if (isset($_POST['preview']) and $msg == '') {
           $saldo -= $mv['avere'];
           echo "<tr class=\"FacetDataTD\">
                 <td>" . gaz_format_date($mv["datreg"]) . " &nbsp;</td>";
-          echo "<td><a target=\"_blank\" class=\"btn btn-edit btn-xs\" href=\"admin_movcon.php?id_tes=" . $mv["id_tes"] . "&Update\">" . $mv["id_tes"] . "</a> &nbsp</td>";
-          echo '<td><div class="gazie-tooltip" data-type="movcon-thumb" data-id="' . $mv["id_tes"] . '" data-title="' . str_replace("\"", "'", $mv["tt"]) . '" >' . $mv["tesdes"] . '</div></td>';
+          echo "<td><a target=\"_blank\" class=\"btn btn-edit btn-xs\" href=\"admin_movcon.php?id_tes=" . $mv["id_tes"] . "&Update\">" . $mv["id_tes"] . "</a> &nbsp</td>
+          <td>";
+          if (!empty($mv['numdoc'])){
+          ?>
+          <input type="checkbox" class="check_doc col-xs-9" value="" id="<?= $mv["id_tes"]?>" <?= isset($form['docattach'][$mv['id_tes']])?'checked':'' ?>></td>
+          <?php
+          }
+          echo '</td><td><div class="gazie-tooltip" data-type="movcon-thumb" data-id="' . $mv["id_tes"] . '" data-title="' . str_replace("\"", "'", $mv["tt"]) . '" >' . $mv["tesdes"] . '</div></td>';
           if (!empty($mv['numdoc'])) {
               echo "<td align=\"center\">" . $mv["protoc"] . " &nbsp;</td>";
               echo "<td align=\"center\">" . $mv["numdoc"] . " &nbsp;</td>";

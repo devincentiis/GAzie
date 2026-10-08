@@ -3426,6 +3426,114 @@ class Schedule {
 		}
 	}
 }
+class cleaningElectronicInvoice {
+
+  function tryBase64Decode($s)
+  {
+    // Check if there are valid base64 characters
+    if (preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s)) {
+      // Decode the string in strict mode and check the results
+      try {
+        $decoded = base64_decode($s, true);
+        if ($decoded !== false) {
+          // Encode the string again
+          if(base64_encode($decoded) == $s) {
+                    return $decoded;
+                  } else {
+            error_log('Charset non gestito in tryBase64Decode ' . print_r($decoded, true), 0);
+                    return $decoded;
+                  }
+        }
+      } catch (Exception $ex) {
+        //$ex->getMessage();
+      }
+    }
+    return $s;
+  }
+
+  function recursiveDecodeContent($temp_content, $fn)
+  {
+    $to = <<<TXT
+    MIME-Version: 1.0
+    Content-Disposition: attachment; filename="smime.p7m"
+    Content-Type: application/x-pkcs7-mime; smime-type=signed-data; name="smime.p7m"
+    Content-Transfer-Encoding: base64
+    \n
+    TXT;
+    $restorefile=false;
+    $count=1;
+    while($count > 0) {
+        $last_temp_content=$temp_content;
+        $removed_header = str_replace($to,'',$temp_content,$count);
+        if ($count==1){ $restorefile = true; }
+        $temp_content = base64_decode($removed_header,true);
+    }
+    if ($restorefile) { // ripristino il file in formato binario
+        file_put_contents($fn,$last_temp_content);
+    }
+    return $last_temp_content;
+  }
+
+  function extractDER($file)
+  {
+    $tmp = tempnam(DATA_DIR . 'files/tmp/', 'ricder');
+    $txt = tempnam(DATA_DIR . 'files/tmp/', 'rictxt');
+    $flags = PKCS7_BINARY|PKCS7_NOVERIFY|PKCS7_NOSIGS;
+    openssl_pkcs7_verify($file, $flags, $tmp); // estrazione certificato
+    @openssl_pkcs7_verify($file, $flags, '/dev/null', array(), $tmp, $txt); // estrazione contenuto - questo potrebbe fallire se il file non è ASN.1 clean
+    unlink($tmp);
+    $out = file_get_contents($txt);
+    unlink($txt);
+    return $out;
+  }
+
+  function removeSignature($s)
+  {
+    $start_xml = strpos($s, '<?xml ');
+    if ($start_xml !== FALSE) {
+      $s = substr($s, $start_xml);
+    } else {
+      $start_xml = strpos($s, '<?xml-stylesheet ');
+      if ($start_xml !== FALSE) {
+        $s = substr($s, $start_xml);
+      }
+    }
+    preg_match_all('/<\/.+?>/', $s, $matches, PREG_OFFSET_CAPTURE);
+    $lastMatch = end($matches[0]);
+    // trovo l'ultimo carattere del tag di chiusura per eliminare la coda
+    $f_end = $lastMatch[1]+strlen($lastMatch[0]);
+    $s = substr($s, 0, $f_end);
+    // elimino le sequenze di caratteri aggiunti dalla firma (ancora da testare approfonditamente)
+    $s = preg_replace('/[\x{0004}]{1}[\x{0082}]{1}[\x{0001}-\x{001F}]{1}[\s\S]{1}/i', '', $s);
+    $s = preg_replace('/[\x{0004}]{1}[\x{0082}]{1}[\s\S]{1}[\x{0000}]{1}/i', '', $s);
+    $s = preg_replace('/[\x{0004}]{1}[\x{0081}]{1}[\s\S]{1}/i', '', $s);
+    $s = preg_replace('/[\x{0004}]{1}[\s\S]{1}/i', '', $s);
+    $s = preg_replace('/[\x{0003}]{1}[\s\S]{1}/i', '', $s);
+    //$s = preg_replace('/[\x{0004}]{1}[A-Za-z]{1}/i', '', $s); // per eliminare tag finale
+    return $s;
+  }
+
+  function recoverCorruptedXML($s)
+  {
+    libxml_use_internal_errors(true);
+    $xml = @simplexml_load_string($s);
+    $errors = libxml_get_errors();
+    if (!empty($errors) && is_array($errors) && count($errors)>0) {
+      $lines = explode("\n", $s);
+      foreach ($errors as $error) {
+        if (strpos($error->message, 'Opening and ending tag mismatch')!==false) {
+          $tag   = trim(preg_replace('/Opening and ending tag mismatch: (.*) line.*/', '$1', $error->message));
+          $line  = $error->line-1;
+          $lines[$line] = substr($lines[$line], 0, strpos($lines[$line], '</')).'</'.$tag.'>';
+        }
+      }
+      libxml_clear_errors();
+      return implode("\n", $lines);
+    } else {
+      return $s;
+    }
+  }
+}
 
 // controllo se ho delle funzioni specifiche per il modulo corrente residente nella directory del module stesso, con queste caratteristiche: modules/nome_modulo/lib.function.php
 if (@file_exists('./lib.function.php')) {

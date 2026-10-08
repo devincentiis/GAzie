@@ -116,6 +116,7 @@ class invoiceXMLvars {
   public $totimpfat;
   public $totimpmer;
   public $tot_ritenute;
+  public $ali_ritenute;
   public $impbol;
   public $BolloVirtuale;
   public $totriport;
@@ -186,6 +187,7 @@ class invoiceXMLvars {
     $this->link = $admin_aziend['web_url'];
     $this->perbollo = 0;
     $this->iva_bollo = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['taxstamp_vat']);
+    $this->ali_ritenute = $admin_aziend['ritenuta'];
     $this->client = $anagrafica->getPartner($tesdoc['clfoco']);
     $this->cliente1 = $this->client['ragso1'];
     $this->cliente2 = $this->client['ragso2'];
@@ -408,6 +410,9 @@ class invoiceXMLvars {
         $this->body_castle[$rigo['codvat']]['impcast'] += $v_for_castle;
         $this->castel[$rigo['codvat']] += $v_for_castle;
         $this->totimp_body += $rigo['importo'];
+        if ( $rigo['ritenuta'] >= 0.01 ) {
+          $this->ali_ritenute = $rigo['ritenuta'];
+        }
         $this->ritenuta += round($rigo['importo'] * $rigo['ritenuta'] / 100, 2);
         $this->totimp_doc += $v_for_castle;
         // aggiungo all'accumulatore l'eventuale iva non esigibile (split payment PA)
@@ -1481,7 +1486,7 @@ function create_XML_invoice($testata, $gTables, $rows = 'rigdoc', $dest = false,
     $el->appendChild($el1);
     $el1 = $domDoc->createElement("ImportoRitenuta", number_format($XMLvars->tot_ritenute, 2, '.', ''));
     $el->appendChild($el1);
-    $el1 = $domDoc->createElement("AliquotaRitenuta", number_format($XMLvars->azienda['ritenuta'], 2, '.', ''));
+    $el1 = $domDoc->createElement("AliquotaRitenuta", number_format($XMLvars->ali_ritenute, 2, '.', ''));
     $el->appendChild($el1);
     $el1 = $domDoc->createElement("CausalePagamento", $XMLvars->azienda['causale_pagam_770']);
     $el->appendChild($el1);

@@ -23,8 +23,10 @@
  --------------------------------------------------------------------------
 */
 require("../../library/include/datlib.inc.php");
-
 $admin_aziend=checkAdmin();
+require("../../library/include/electronic_invoice.inc.php");
+$cleanFAE = new cleaningElectronicInvoice;
+
 if (!ini_get('safe_mode')){ //se me lo posso permettere...
     ini_set('memory_limit','128M');
     gaz_set_time_limit (0);
@@ -212,5 +214,217 @@ $pdf->SetFont('helvetica','B',8);
 $pdf->Cell($aRiportare['top'][0]['lun'],4,'SALDO al '.$descrDatafin.' : ',1,0,'R');
 $pdf->Cell($aRiportare['top'][1]['lun'],4,$aRiportare['top'][1]['nam'],1,0,'R');
 $pdf->setRiporti('');
+$pdf->setVars($admin_aziend,'Documento allegato');
+$string_docattach = $_GET['docattach'];
+$a_docattach = explode(',', $string_docattach);
+$a_docattach = array_map('intval', $a_docattach);
+foreach($a_docattach as $v){
+  // riprendo la testata documento a partire dalla sua referenza di contabilizzazione
+  $tesdoc = $v >= 1 ? gaz_dbi_get_row($gTables['tesdoc'],'id_con',$v): false;
+  if ($tesdoc) {
+    $xml = new DOMDocument();
+    $xmlString = '';
+    $fae_flux = gaz_dbi_get_row($gTables['fae_flux'],'id_tes_ref',$tesdoc['id_tes']);
+    // riprendo eventuali altre testate (es. fattura differita con più di un ddt)
+    $testate = gaz_dbi_dyn_query("*", $gTables['tesdoc']," tipdoc LIKE '" .$tesdoc['tipdoc']. "' AND seziva = " .$tesdoc['seziva']. " AND YEAR(datfat)=".substr($tesdoc['datfat'],0,4)." AND protoc = " .$tesdoc['protoc'],'datemi ASC, numdoc ASC, id_tes ASC');
+    if (substr($tesdoc['tipdoc'],0,1) == 'F' ) { // FATTURE VENDITE
+      if ($fae_flux && $fae_flux['flux_status']=='PI'){ // se è un file verso PA firmato lo riprendo dalla dir come tale
+        $xmlString=file_get_contents(DATA_DIR . 'files/' . $admin_aziend['codice'] . '/' . $tesdoc['filename_ret'], true);
+      } else { // ... per gli altri prendo quelli che ho ricreati al volo da DB
+        $xmlString=create_XML_invoice($testate,$gTables,'rigdoc',false,'Fattura');
+      }
+    } elseif (substr($tesdoc['tipdoc'],0,1) == 'A' ) { // FATTURE ACQUISTI
+      // provengono da file con tracciato che potrebbe essere firmato per cui andrà ripulito
+      $fattxml = DATA_DIR . 'files/' . $admin_aziend['codice'] . '/' .$tesdoc['id_tes'].'.inv';
+      // Verifica se il file esiste ed è effettivamente un file
+      if (!file_exists($fattxml) || !is_file($fattxml)) {
+        continue;
+      } else {
+        $p7mContent = file_get_contents($fattxml);
+        $p7mContent = $cleanFAE->recursiveDecodeContent($p7mContent,$fattxml);
+        $cert = @tempnam(DATA_DIR . 'files/tmp/', 'pem');
+        $retn = openssl_pkcs7_verify($fattxml, PKCS7_NOVERIFY, $cert);
+        unlink($cert);
+        if (!$retn) {
+          echo "Error verifying PKCS#7 signature in {$fattxml}";
+          return false;
+        }
+
+        $fatt = $cleanFAE->extractDER($fattxml);
+        if (empty($fatt)) {
+          $test = @base64_decode(file_get_contents($fattxml));
+          // Salto lo header (INDISPENSABILE perché la regexp funzioni sempre)
+          if (strpos($test, 'FatturaElettronicaSemplificata') !== FALSE) {
+            if (preg_match('#(<[^>]*FatturaElettronicaSemplificata.*</[^>]*FatturaElettronicaSemplificata>)#', substr($test, 54), $gregs)) {
+              $fatt = '<'.'?'.'xml version="1.0"'.'?'.'>' . $gregs[1]; // RECUPERO INTESTAZIONE XML
+            }
+          } else {
+            if (preg_match('#(<[^>]*FatturaElettronica.*</[^>]*FatturaElettronica>)#', substr($test, 54), $gregs)) {
+              $fatt = '<'.'?'.'xml version="1.0"'.'?'.'>' . $gregs[1]; // RECUPERO INTESTAZIONE XML
+            }
+          }
+        }
+
+        if (!empty($fatt)) {
+          $xmlString = $fatt;
+        } else {
+          $xmlString = $cleanFAE->removeSignature($p7mContent);
+        }
+      }
+    }
+
+    if (empty(trim($xmlString))) continue;
+    $xml = simplexml_load_string($xmlString, 'SimpleXMLElement', LIBXML_NOERROR);
+    if (!$xml) continue;
+
+    $cedente = $xml->FatturaElettronicaHeader->CedentePrestatore;
+    $cessionario = $xml->FatturaElettronicaHeader->CessionarioCommittente;
+    $datiGenerali = $xml->FatturaElettronicaBody->DatiGenerali->DatiGeneraliDocumento;
+    $beniServizi = $xml->FatturaElettronicaBody->DatiBeniServizi;
+    $pagamenti = $xml->FatturaElettronicaBody->DatiPagamento;
+
+    $denominazioneCedente = $cedente->DatiAnagrafici->Anagrafica->Denominazione ?? ($cedente->DatiAnagrafici->Anagrafica->Cognome . ' ' . $cedente->DatiAnagrafici->Anagrafica->Nome);
+    $pIvaCedente = $cedente->DatiAnagrafici->IdFiscaleIVA->IdCodice;
+
+    $indCedente = '';
+    if (isset($cedente->Sede)) {
+        $indCedente = "<br/><span style=\"color:#555555;\">" . htmlspecialchars($cedente->Sede->Indirizzo) . " " . htmlspecialchars($cedente->Sede->NumeroCivico ?? '') . ", " . htmlspecialchars($cedente->Sede->CAP) . " " . htmlspecialchars($cedente->Sede->Comune) . " (" . htmlspecialchars($cedente->Sede->Provincia) . ")</span>";
+    }
+
+    $denominazioneCessionario = $cessionario->DatiAnagrafici->Anagrafica->Denominazione ?? ($cessionario->DatiAnagrafici->Anagrafica->Cognome . ' ' . $cessionario->DatiAnagrafici->Anagrafica->Nome);
+    $pIvaCessionario = $cessionario->DatiAnagrafici->IdFiscaleIVA->IdCodice;
+
+    $indCessionario = '';
+    if (isset($cessionario->Sede)) {
+        $indCessionario = "<br/><span style=\"color:#555555;\">" . htmlspecialchars($cessionario->Sede->Indirizzo) . " " . htmlspecialchars($cessionario->Sede->NumeroCivico ?? '') . ", " . htmlspecialchars($cessionario->Sede->CAP) . " " . htmlspecialchars($cessionario->Sede->Comune) . " (" . htmlspecialchars($cessionario->Sede->Provincia) . ")</span>";
+    }
+
+    $htmlContent = '
+    <table border="0" cellspacing="0" cellpadding="12" width="100%" style="border: 1px solid #888888;" bgcolor="#fbfdfe">
+    <tr>
+    <td>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+        <tr>
+            <td width="50%" bgcolor="#fafafa">
+                <strong>CEDENTE / PRESTATORE</strong><br/>
+                ' . htmlspecialchars($denominazioneCedente) . '<br/>
+                P.IVA / CF: ' . htmlspecialchars($pIvaCedente) . '
+                ' . $indCedente . '
+            </td>
+            <td width="50%" bgcolor="#fafafa">
+                <strong>CESSIONARIO / COMMITTENTE</strong><br/>
+                ' . htmlspecialchars($denominazioneCessionario) . '<br/>
+                P.IVA / CF: ' . htmlspecialchars($pIvaCessionario) . '
+                ' . $indCessionario . '
+            </td>
+        </tr>
+    </table>
+
+    <h3 style="color:#003366; margin-top:10px;">Dati Documento</h3>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+        <tr bgcolor="#f2f2f2">
+            <th width="25%"><strong>Tipo Documento</strong></th>
+            <th width="25%"><strong>Numero</strong></th>
+            <th width="25%"><strong>Data</strong></th>
+            <th width="25%"><strong>Valuta</strong></th>
+        </tr>
+        <tr>
+            <td>' . htmlspecialchars($datiGenerali->TipoDocumento) . '</td>
+            <td>' . htmlspecialchars($datiGenerali->Numero) . '</td>
+            <td>' . htmlspecialchars($datiGenerali->Data) . '</td>
+            <td>' . htmlspecialchars($datiGenerali->Divisa) . '</td>
+        </tr>
+    </table>
+    <p></p>
+    <h3 style="color:#003366; margin-top:10px;">Dettaglio Linee Beni e Servizi</h3>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+        <thead>
+            <tr bgcolor="#f2f2f2">
+                <th width="6%"><strong>Num.</strong></th>
+                <th width="44%"><strong>Descrizione</strong></th>
+                <th width="8%" align="right"><strong>Qta</strong></th>
+                <th width="12%" align="right"><strong>Prezzo Unit.</strong></th>
+                <th width="6%" align="center"><strong>UM</strong></th>
+                <th width="12%" align="right"><strong>Prezzo Tot.</strong></th>
+                <th width="12%" align="center"><strong>Aliquota / Nat.</strong></th>
+            </tr>
+        </thead>
+        <tbody>';
+    foreach ($beniServizi->DettaglioLinee as $linea) {
+        $qta = (string)$linea->Quantita;
+        $um = (string)$linea->UnitaMisura;
+        $prezzoUnit = (float)$linea->PrezzoUnitario;
+        $prezzoTot = (float)$linea->PrezzoTotale;
+
+        // CORREZIONE 1: Se la quantità è vuota o zero (righe di sole note), lasciamo lo spazio vuoto
+        $mostraQta = ($qta != "" && (float)$qta > 0) ? number_format((float)$qta, 2, ',', '.') : '';
+        $mostraUM = ($um != "") ? htmlspecialchars($um) : '';
+
+        // CORREZIONE 2: Se il prezzo unitario o totale è zero ed è una riga descrittiva pura, puliamo l'output
+        $mostraPrezzoUnit = ($prezzoUnit == 0 && $qta == "") ? '' : number_format($prezzoUnit, 2, ',', '.');
+        $mostraPrezzoTot = ($prezzoTot == 0 && $qta == "") ? '0,00' : number_format($prezzoTot, 2, ',', '.');
+
+        // CORREZIONE 3: Se manca la percentuale IVA, cerchiamo il codice Natura esenzione (es. N1 per i bolli)
+        $iva = (string)$linea->AliquotaIVA;
+        $natura = (string)$linea->Natura;
+        $mostraIVA = ($iva != "") ? number_format((float)$iva, 2, ',', '.') . '%' : htmlspecialchars($natura);
+
+        $htmlContent .= '
+            <tr>
+                <td width="6%" align="center">' . htmlspecialchars($linea->NumeroLinea) . '</td>
+                <td width="44%">' . htmlspecialchars($linea->Descrizione) . '</td>
+                <td width="8%" align="right">' . $mostraQta . '</td>
+                <td width="12%" align="right">' . $mostraPrezzoUnit . '</td>
+                <td width="6%" align="center">' . $mostraUM . '</td>
+                <td width="12%" align="right"><strong>' . $mostraPrezzoTot . '</strong></td>
+                <td width="12%" align="center">' . $mostraIVA . '</td>
+            </tr>';
+    }
+    $totaleFatturaValore = number_format((float)$datiGenerali->ImportoTotaleDocumento, 2, ',', '.');
+    $htmlContent .= '
+            <tr bgcolor="#edf4fc">
+                <td colspan="5" align="right"><strong>TOTALE FATTURA:</strong></td>
+                <td colspan="2" align="right"><strong>€ ' . $totaleFatturaValore . '</strong></td>
+            </tr>
+        </tbody>
+    </table>';
+    $dettaglioPagamento = $pagamenti->DettaglioPagamento ?? null;
+    if ($dettaglioPagamento) {
+        $htmlContent .= '
+    <p></p>
+        <h3 style="color:#003366; margin-top:10px;">Dati di Pagamento</h3>
+        <table border="1" cellpadding="3" cellspacing="0" width="100%">
+            <thead>
+                <tr bgcolor="#f2f2f2">
+                    <th width="20%"><strong>Modalità Pagamento</strong></th>
+                    <th width="40%"><strong>Dettagli</strong></th>
+                    <th width="20%" align="center"><strong>Scadenza</strong></th>
+                    <th width="20%" align="right"><strong>Importo</strong></th>
+                </tr>
+            </thead>
+            <tbody>';
+        foreach ($pagamenti->DettaglioPagamento as $detPag) {
+            $impPag = number_format((float)$detPag->ImportoPagamento, 2, ',', '.');
+            $htmlContent .= '
+                <tr>
+                    <td width="20%">' . htmlspecialchars($detPag->ModalitaPagamento) . '</td>
+                    <td width="40%">' . htmlspecialchars($detPag->Beneficiario ?? '') . '</td>
+                    <td width="20%" align="center">' . htmlspecialchars($detPag->DataScadenzaPagamento ?? '') . '</td>
+                    <td width="20%" align="right">€ ' . $impPag . '</td>
+                </tr>';
+        }
+        $htmlContent .= '
+            </tbody>
+        </table>
+             </td>
+    </tr>
+</table>';
+    }
+    $pdf->AddPage();
+    $pdf->SetFont('dejavusans', '', 7);
+    $pdf->writeHTML($htmlContent, true, false, true, false, '');
+  }
+}
+// FINE STAMPA ALLEGATI
 $pdf->Output();
 ?>
