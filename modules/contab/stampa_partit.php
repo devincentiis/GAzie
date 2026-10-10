@@ -369,12 +369,16 @@ foreach($a_docattach as $v){
 
         // CORREZIONE 2: Se il prezzo unitario o totale è zero ed è una riga descrittiva pura, puliamo l'output
         $mostraPrezzoUnit = ($prezzoUnit == 0 && $qta == "") ? '' : number_format($prezzoUnit, 2, ',', '.');
-        $mostraPrezzoTot = ($prezzoTot == 0 && $qta == "") ? '0,00' : number_format($prezzoTot, 2, ',', '.');
+        $mostraPrezzoTot = ($prezzoTot == 0 && $qta == "") ? '' : number_format($prezzoTot, 2, ',', '.');
 
         // CORREZIONE 3: Se manca la percentuale IVA, cerchiamo il codice Natura esenzione (es. N1 per i bolli)
         $iva = (string)$linea->AliquotaIVA;
         $natura = (string)$linea->Natura;
-        $mostraIVA = ($iva != "") ? number_format((float)$iva, 2, ',', '.') . '%' : htmlspecialchars($natura);
+        if (abs($prezzoTot) >= 0.01 ){
+          $mostraIVA = ($iva >= 0.01) ? number_format((float)$iva, 2, ',', '.') . '%' : htmlspecialchars($natura);
+        } else {
+          $mostraIVA = '';
+        }
 
         $htmlContent .= '
             <tr>
