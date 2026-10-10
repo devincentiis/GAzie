@@ -214,7 +214,13 @@ $pdf->SetFont('helvetica','B',8);
 $pdf->Cell($aRiportare['top'][0]['lun'],4,'SALDO al '.$descrDatafin.' : ',1,0,'R');
 $pdf->Cell($aRiportare['top'][1]['lun'],4,$aRiportare['top'][1]['nam'],1,0,'R');
 $pdf->setRiporti('');
-$pdf->setVars($admin_aziend,'Documento allegato');
+$title = array('luogo_data'=>$luogo_data,
+               'hile'=>[]
+              );
+$pdf->setVars($admin_aziend,$title);
+$item_head['top']= [['lun' => 80,'nam'=>'Allegato riferito al partitario:'],['lun' => 25,'nam'=>'Conto']];
+$pdf->setItemGroup($item_head);
+
 $string_docattach = $_GET['docattach'];
 $a_docattach = explode(',', $string_docattach);
 $a_docattach = array_map('intval', $a_docattach);
@@ -274,6 +280,7 @@ foreach($a_docattach as $v){
     }
 
     if (empty(trim($xmlString))) continue;
+
     $xml = simplexml_load_string($xmlString, 'SimpleXMLElement', LIBXML_NOERROR);
     if (!$xml) continue;
 
@@ -415,11 +422,9 @@ foreach($a_docattach as $v){
         }
         $htmlContent .= '
             </tbody>
-        </table>
-             </td>
-    </tr>
-</table>';
+        </table>';
     }
+    $htmlContent .= '</td></tr></table>';
     $pdf->AddPage();
     $pdf->SetFont('dejavusans', '', 7);
     $pdf->writeHTML($htmlContent, true, false, true, false, '');

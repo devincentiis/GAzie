@@ -2731,7 +2731,7 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
 								?>
 								<div class="col-md-4">
 									<div class="form-group">
-									<p>ERRORE l'articolo non è impostato correttamente</p>
+									<p>ERRORE l'articolo non è impostato correttamente: Quando deve movimentare il SIAN, l'articolo va inizialmente creato nel Modulo Registro di campagna.</p>
 									</div>
 								</div>
 								<?php
