@@ -80,28 +80,28 @@ $enable_sync = explode(",",$getenable_sync);
 
     }
 
-		$n=0;
+		
 		unset ($value);
 		if (isset ($_POST['addval'])){
-			foreach ($_POST['addval'] as $add) {
-        if (strlen($add)>0){ // insert solo se valorizzato
+			foreach ($_POST['addval'] as $n => $add) { 
+				if (strlen($add)>0){ // insert solo se valorizzato
 
-          if ($_POST['addvar'][$n]=="chiave" AND !empty($_FILES['myfile']['name'])){
-            $add=$_FILES['myfile']['name'];
-          }
-          $value['var']=$_POST['addvar'][$n];
-          $value['val']=$add;
+				  if ($_POST['addvar'][$n]=="chiave" AND !empty($_FILES['myfile']['name'])){
+					$add=$_FILES['myfile']['name'];
+				  }
+				  $value['var']=$_POST['addvar'][$n];
+				  $value['val']=$add;
 
-          $value['description']=$_POST['adddes'][$n];
-          if (strpos($value['var'],"psw") !== false || (strpos($value['var'],"pass") !== false && $value['var']!=="keypass")){// se è una password la cripto
-            gaz_dbi_query("INSERT INTO ".$gTables['company_config']." (description, val, var) VALUES ('".$value['description']."', TO_BASE64(AES_ENCRYPT('".addslashes($value['val'])."','".$_SESSION['aes_key']."')),  '".$value['var']."')");
+				  $value['description']=$_POST['adddes'][$n];
+				  if (strpos($value['var'],"psw") !== false || (strpos($value['var'],"pass") !== false && $value['var']!=="keypass")){// se è una password la cripto
+					gaz_dbi_query("INSERT INTO ".$gTables['company_config']." (description, val, var) VALUES ('".$value['description']."', TO_BASE64(AES_ENCRYPT('".addslashes($value['val'])."','".$_SESSION['aes_key']."')),  '".$value['var']."')");
 
 
-          }else{
-           gaz_dbi_table_insert('company_config', $value);
-          }
-          $n++;
-        }
+				  }else{
+				   gaz_dbi_table_insert('company_config', $value);
+				  }
+				 
+				}
 			}
 
 		}
@@ -133,6 +133,18 @@ if (isset($script)) { // se è stato tradotto lo script lo ritorno al chiamante
 }
 
 $script_transl = $strCommon + $script_transl;
+
+// Metodo di trasporto della sincronizzazione: legacy, webhook
+$sync_transport = [
+    "id" => 0,
+    "description" => "Metodo di sincronizzazione con l'e-commerce",
+    "var" => "sync_transport",
+    "val" => "legacy"
+];
+// Webhook: invia l'XML via HTTPS con firma HMAC, garantendo autenticità e integrità ed evitando l'uso delle credenziali FTP/SFTP per la sincronizzazione XML.
+// Legacy: trasferisce file XML via FTP (non cifrato) o SFTP (cifrato e autenticato).
+// Il webhook evita file XML temporanei e può ridurre i passaggi e i tempi di trasferimento; le immagini possono continuare a usare SFTP.
+
 $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0, 1000);
 ?>
 <div align="center" class="FacetFormHeaderFont">
@@ -256,6 +268,13 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
                 $accpass["val"]="";
 
               }
+			  
+			  if ($r['var'] == "sync_transport") {
+					$sync_transport["id"] = $r["id"];
+					$sync_transport["description"] = $r["description"];
+					$sync_transport["var"] = $r["var"];
+					$sync_transport["val"] = $r["val"];
+				}
 
             }
 
@@ -302,6 +321,49 @@ $result = gaz_dbi_dyn_query("*", $gTables['company_config'], "1=1", ' id ASC', 0
 				</div>
 				</div>
 			</div><!-- chiude row  -->
+			
+			<div class="row">
+				<div class="form-group">
+					<label for="sync_transport" class="col-sm-5 control-label">
+						Metodo di sincronizzazione con l'e-commerce
+						 <a href="#" onclick="alert('Webhook: invia file XML via HTTPS con firma HMAC, garantendo autenticità e integrità ed evitando l\'uso delle credenziali FTP/SFTP per la sincronizzazione XML.\n\nLegacy: trasferisce file XML via FTP -non cifrato- o SFTP -cifrato e autenticato-'); return false;">ℹ️</a>
+
+					</label>
+
+					<div class="col-sm-7">
+						<select
+							class="form-control input-sm"
+							id="sync_transport"
+							name="<?php echo ($sync_transport['id'] > 0)
+								? $sync_transport['var']
+								: 'addval[]'; ?>"
+						>
+							<option value="webhook"
+								<?php echo ($sync_transport['val'] == "webhook")
+									? 'selected="selected"' : ''; ?>>
+								Webhook HTTPS / HMAC
+							</option>
+
+							<option value="legacy"
+								<?php echo ($sync_transport['val'] == "legacy")
+									? 'selected="selected"' : ''; ?>>
+								Legacy FTP / SFTP
+							</option>
+						</select>
+
+						<?php if ($sync_transport['id'] == 0) { ?>
+							<input type="hidden"
+								name="addvar[]"
+								value="sync_transport">
+
+							<input type="hidden"
+								name="adddes[]"
+								value="Metodo di sincronizzazione con l'e-commerce">
+						<?php } ?>
+					</div>
+				</div>
+			</div>
+			
 			<div class="row">
 				<div class="form-group" >
 				<label for="input<?php echo $user["id"]; ?>" class="col-sm-5 control-label">Attiva la sincronizzazione automatica <p style='font-size:8px;'> Per un corretto allineamento di GAzie con l'e-commerce, si consiglia di mantere sempre attivato.</p></label>

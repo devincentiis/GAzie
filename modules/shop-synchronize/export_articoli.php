@@ -84,6 +84,22 @@ if ($exists) {
 }
 $admin_aziend = gaz_dbi_get_row($gTables['admin'] . ' LEFT JOIN ' . $gTables['aziend'] . ' ON ' . $gTables['admin'] . '.' . $c_e . '= ' . $gTables['aziend'] . '.codice', "user_name", $_SESSION["user_name"]);
 $path = gaz_dbi_get_row($gTables['company_config'], 'var', 'path');
+
+// Scelta del sistema di sincronizzazione
+// legacy = vecchio sistema FTP/SFTP
+// webhook = nuovo sistema HTTPS/HMAC
+// Leggo il metodo di sincronizzazione dalla configurazione
+$syncTransportRow = gaz_dbi_get_row(
+	$gTables['company_config'],
+	'var',
+	'sync_transport'
+);
+
+$syncTransport = (
+	isset($syncTransportRow['val'])
+	&& in_array($syncTransportRow['val'], ['legacy', 'webhook'], true)
+) ? $syncTransportRow['val'] : 'legacy';
+
 $urlinterf = $path['val']."articoli-gazie.php";// nome del file interfaccia presente nella root dell'e-commerce. Per evitare intrusioni indesiderate Il file dovrà gestire anche una password ($accpass).
 // il percorso per raggiungere questo file va impostato in configurazione avanzata azienda alla voce "Website root directory
 
@@ -101,115 +117,223 @@ if (isset($_POST['Return'])) {
 
 if (isset($_POST['conferma'])) { // se confermato
 
-	if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val']=="SI"){
 
-		// SFTP login with private key and password
-		$ftp_port = gaz_dbi_get_row($gTables['company_config'], "var", "port")['val'];
-		$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
-    $rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
-    $rdec=gaz_dbi_fetch_row($rsdec);
-    $rdec[0]=$rdec[0]??'';
-    $ftp_keypass=$rdec?htmlspecialchars_decode($rdec[0]):'';
+    // Stabilisco se il trasferimento FTP/SFTP è necessario
+    $needsFileTransfer = (
+        $syncTransport === 'legacy'
+        || (isset($_GET['img']) && $_GET['img'] === 'updimg')
+    );
 
-		if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key"){ // SFTP log-in con KEY
+    // Anche un insert può richiedere il caricamento di un'immagine
+    if (
+        !$needsFileTransfer
+        && $syncTransport === 'webhook'
+        && isset($_GET['todo'])
+        && $_GET['todo'] === 'insert'
+    ) {
+        $maxProductsForImages = (int)($_POST['num_products'] ?? -1);
 
-      try {
-        $key = PublicKeyLoader::load(file_get_contents('../../data/files/'.$admin_aziend['codice'].'/secret_key/'. $ftp_key ),$ftp_keypass);
-      }
-      catch(Exception $e) {
-        ?>
-        <script>
-        alert("<?php echo 'SFTP Error Message: ' .$e->getMessage();
-        echo " Controlla percorso e password della chiave pubblica. Se stai usando un server locale, controlla anche che sia installato e abilitato SSH"; ?>");
-        location.replace("./synchronize.php");
-        </script>
-        <?php
-        exit;
-      }
+        for ($ordCheck = 0; $ordCheck <= $maxProductsForImages; $ordCheck++) {
+            if (
+                isset($_POST['download'.$ordCheck])
+                && (
+                    !empty($_POST['imgurl'.$ordCheck])
+                    || !empty($_POST['imgblob'.$ordCheck])
+                )
+            ) {
+                $needsFileTransfer = true;
+                break;
+            }
+        }
+    }
+
+    if ($needsFileTransfer) {
 
 
-			$sftp = new SFTP($ftp_host, $ftp_port);
-			if (!$sftp->login($ftp_user, $key)) {
-				// non si connette: key LOG-IN FALSE
-				?>
+		if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val']=="SI"){
+
+			// SFTP login with private key and password
+			$ftp_port = gaz_dbi_get_row($gTables['company_config'], "var", "port")['val'];
+			$ftp_key = gaz_dbi_get_row($gTables['company_config'], "var", "chiave")['val'];
+			$rsdec=gaz_dbi_query("SELECT AES_DECRYPT(FROM_BASE64(val),'".$_SESSION['aes_key']."') FROM ".$gTables['company_config']." WHERE var = 'psw_chiave'");
+			$rdec=gaz_dbi_fetch_row($rsdec);
+			$rdec[0]=$rdec[0]??'';
+			$ftp_keypass=$rdec?htmlspecialchars_decode($rdec[0]):'';
+
+			
+			if (gaz_dbi_get_row($gTables['company_config'], "var", "keypass")['val']=="key") {
+
+				try {
+					// Carico la chiave privata
+					$keyPath = '../../data/files/'
+						. $admin_aziend['codice']
+						. '/secret_key/'
+						. $ftp_key;
+
+					$keyContents = @file_get_contents($keyPath);
+
+					if ($keyContents === false) {
+						throw new \RuntimeException(
+							'Impossibile leggere il file della chiave privata: '
+							. $ftp_key
+						);
+					}
+
+					$key = PublicKeyLoader::loadPrivateKey(
+						$keyContents,
+						$ftp_keypass
+					);
+
+					// Connessione e autenticazione SFTP
+					$sftp = new SFTP($ftp_host, $ftp_port);
+
+					if (!$sftp->login($ftp_user, $key)) {
+						throw new \RuntimeException(
+							'Il server ha rifiutato l autenticazione con chiave privata.'
+						);
+					}
+
+				} catch (\Throwable $e) {
+
+					$errorMessage = 'Connessione SFTP con chiave privata non riuscita: '
+						. $e->getMessage();
+
+					?>
+					<script>
+					alert(<?php echo json_encode(
+						$errorMessage,
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+					); ?>);
+
+					location.replace(<?php echo json_encode(
+						$_POST['ritorno'] ?? './synchronize.php',
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+					); ?>);
+					</script>
+					<?php
+					exit;
+				}
+
+			} else { // SFTP log-in con password
+
+				$sftp = new SFTP($ftp_host, $ftp_port);
+				if (!$sftp->login($ftp_user, $ftp_pass)) {
+					// non si connette: password LOG-IN FALSE
+					?>
+					<script>
+					alert("<?php echo "Mancata connessione Sftp con password: impossibile sincronizzare l\'e-commerce"; ?>");
+					location.replace("<?php echo $_POST['ritorno']; ?>");
+					</script>
+					<?php
+					exit;
+				} else {
+					?>
+					<div class="alert alert-success text-center" >
+					<strong>ok</strong> Connessione SFTP con password riuscita.
+					</div>
+					<?php
+				}
+			}
+		} else {
+			// imposto la connessione al server
+		try {
+				$conn_id = ftp_connect($ftp_host);
+		} catch (Error $ex) { // Error is the base class for all internal PHP error exceptions.
+		  ?>
 				<script>
-				alert("<?php echo "Mancata connessione Sftp con file chiave segreta: impossibile scaricare gli ordini dall\'e-commerce"; ?>");
+				alert("<?php echo "Errore: connessione FTP a " . $ftp_host . ": ". $ex->getMessage() ." Controllare se l'estensione FTP è abilitata in Php!"; ?>");
 				location.replace("<?php echo $_POST['ritorno']; ?>");
 				</script>
 				<?php
+		}
+
+			// controllo se la connessione è OK...
+			if ((!$conn_id)){
+				  // ERRORE chiudo la connessione FTP
+				header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=8");
+				exit;
+			}else{// se ho avuto la connessione al server
+
+		  // effettuo login con user e pass
+		  $mylogin = ftp_login($conn_id, $ftp_user, $ftp_pass);
+		}
+
+			if ((!$mylogin)){
+		   // ERRORE chiudo la connessione FTP
+				ftp_quit($conn_id);
+				header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=7");
+				exit;
 			}
-		} else { // SFTP log-in con password
+			//FTP turn passive mode on
+			ftp_pasv($conn_id, true);
+		}
+	} // Fine if ($needsFileTransfer)
+	
+	if ($_GET['img']=="updimg") { // se si devono aggiornare le immagini
 
-			$sftp = new SFTP($ftp_host, $ftp_port);
-			if (!$sftp->login($ftp_user, $ftp_pass)) {
-				// non si connette: password LOG-IN FALSE
-				?>
-				<script>
-				alert("<?php echo "Mancata connessione Sftp con password: impossibile sincronizzare l\'e-commerce"; ?>");
-				location.replace("<?php echo $_POST['ritorno']; ?>");
-				</script>
-				<?php
-			} else {
-				?>
-				<div class="alert alert-success text-center" >
-				<strong>ok</strong> Connessione SFTP con password riuscita.
-				</div>
-				<?php
+		if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val'] == "SI") {
+
+			// Modalità SFTP
+			$imageDir = $ftp_path_upload . "images";
+
+			if (!$sftp->mkdir($imageDir)) {
+				// La cartella esiste già: elimino i file del precedente aggiornamento
+				$files = $sftp->nlist($imageDir);
+
+				if (!is_array($files)) {
+					$sftp->disconnect();
+					header("Location: ../../modules/shop-synchronize/export_articoli.php?success=6");
+					exit;
+				}
+
+				foreach ($files as $file) {
+					$fileName = basename(rtrim($file, '/'));
+
+					if ($fileName === '' || $fileName === '.' || $fileName === '..') {
+						continue;
+					}
+
+					if (strpos($file, $imageDir . '/') === 0) {
+						$remoteFile = $file;
+					} else {
+						$remoteFile = $imageDir . '/' . $fileName;
+					}
+
+					if (!$sftp->delete($remoteFile)) {
+						$sftp->disconnect();
+						header("Location: ../../modules/shop-synchronize/export_articoli.php?success=6");
+						exit;
+					}
+				}
+			}
+
+		} else {
+
+			// Modalità FTP: mantengo il comportamento esistente
+			if (!@ftp_mkdir($conn_id, $ftp_path_upload . "images")) {
+				$files = ftp_nlist($conn_id, $ftp_path_upload . "images");
+
+				if (is_array($files) && count($files) > 0) {
+					foreach ($files as $key => $item) {
+						if (in_array($item, array(
+							$ftp_path_upload . 'images/.',
+							$ftp_path_upload . 'images/..'
+						))) {
+							unset($files[$key]);
+						}
+					}
+
+					foreach ($files as $file) {
+						if (!@ftp_delete($conn_id, $file)) {
+							header("Location: ../../modules/shop-synchronize/export_articoli.php?success=6");
+							exit;
+						}
+					}
+				}
 			}
 		}
-	} else {
-		// imposto la connessione al server
-    try {
-    		$conn_id = ftp_connect($ftp_host);
-    } catch (Error $ex) { // Error is the base class for all internal PHP error exceptions.
-      ?>
-			<script>
-			alert("<?php echo "Errore: connessione FTP a " . $ftp_host . ": ". $ex->getMessage() ." Controllare se l'estensione FTP è abilitata in Php!"; ?>");
-			location.replace("<?php echo $_POST['ritorno']; ?>");
-			</script>
-			<?php
-    }
-
-		// controllo se la connessione è OK...
-		if ((!$conn_id)){
-			  // ERRORE chiudo la connessione FTP
-			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=8");
-			exit;
-		}else{// se ho avuto la connessione al server
-
-      // effettuo login con user e pass
-      $mylogin = ftp_login($conn_id, $ftp_user, $ftp_pass);
-    }
-
-		if ((!$mylogin)){
-       // ERRORE chiudo la connessione FTP
-			ftp_quit($conn_id);
-			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=7");
-			exit;
-		}
-		//FTP turn passive mode on
-		ftp_pasv($conn_id, true);
 	}
-	if ($_GET['img']=="updimg"){ // se si devono aggiornare le immagini
-		if (!@ftp_mkdir($conn_id, $ftp_path_upload."images")){ // se non c'è la cartella images la creo
-			// get contents of the current directory
-			$files = ftp_nlist($conn_id, $ftp_path_upload."images");
-      if (count($files)>0){
-        foreach ($files as $key => $item) {
-          if (in_array($item, array($ftp_path_upload.'images/.', $ftp_path_upload.'images/..'))) {
-             unset($files[$key]);
-          }
-        }
-        foreach ($files as $file){ // se c'era, cancello i files del precedente aggiornamento
-          if (@ftp_delete($conn_id, $file)){
-          } else {
-            header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=6");
-            exit;
-          }
-        }
-      }
-		}
-	}
+
 
 		// creo il file xml
 	$xml_output = '<?xml version="1.0" encoding="UTF-8"?>
@@ -293,7 +417,9 @@ if (isset($_POST['conferma'])) { // se confermato
         $xml_output .= "\t\t\t<lang_code>".$lang['lang_code']."</lang_code>\n";
         $bodytextlang = gaz_dbi_get_row($gTables['body_text'], "table_name_ref", 'artico', " AND code_ref = '".substr($_POST['codice'.$ord],0,32)."' AND lang_id = ".$lang['lang_id']);
         $lang_descri = (isset($bodytextlang['descri']))?html_entity_decode($bodytextlang['descri']):html_entity_decode($_POST['descri'.$ord]);
-        $lang_bodytext = (isset($bodytextlang['body_text']))?html_entity_decode($bodytextlang['body_text']):html_entity_decode($_POST['body_text'.$ord]);
+		$lang_bodytext = (isset($bodytextlang['body_text']))
+			? html_entity_decode($bodytextlang['body_text'])
+			: html_entity_decode($_POST['body_text'.$ord] ?? '');
         $obj = (isset($bodytextlang['custom_field']))?json_decode($bodytextlang['custom_field']):'';
         $lang_web_url = (isset($obj->web_url))?$obj->web_url:$artic['web_url'];
         // invio i testi multilingua
@@ -312,40 +438,122 @@ if (isset($_POST['conferma'])) { // se confermato
       $xml_output .= "\t</Languages>\n";
 
 			$xml_output .= "\t<WebPublish>".$_POST['web_public'.$ord]."</WebPublish>\n";// 1=attivo su web; 2=attivo e prestabilito; 3=attivo e pubblicato in home; 4=attivo, in home e prestabilito; 5=disattivato su web"
-			if (isset($_POST['imgurl'.$ord]) && ($_GET['img']=="updimg" || $_GET['todo']=="insert") && (strlen($_POST['imgurl'.$ord])>0)){ // se è da aggiornare e c'è un'immagine HQ
-				if (@ftp_put($conn_id, $ftp_path_upload."images/".$_POST['imgname'.$ord], $_POST['imgurl'.$ord],  FTP_BINARY)){
-					// ho scritto l'immagine web HQ nella cartella e-commerce
-					ftp_chmod($conn_id, 0664, $ftp_path_upload."images/".$_POST['imgname'.$ord]);// fornisco i permessi necessari all'immagine
-					$xml_output .= "\t<ImgUrl>".$web_site_path."images/".$_POST['imgname'.$ord]."</ImgUrl>\n"; // ne scrivo l'url nel file xml
-				} else {
-					// ERRORE chiudo la connessione FTP
-					ftp_quit($conn_id);die;
-					header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=5");
-					exit;
-				}
-			}elseif (isset($_POST['imgblob'.$ord]) && ($_GET['img']=="updimg" || $_GET['todo']=="insert") && (strlen($_POST['imgblob'.$ord])>0)){// se è da aggiornare e c'è un'immagine blob
-				file_put_contents("../../data/files/tmp/img.jpg", base64_decode($_POST['imgblob'.$ord])); // salvo immagine nella cartella temporanea
+			
+		if (isset($_POST['imgurl'.$ord]) &&	($_GET['img']=="updimg" || $_GET['todo']=="insert") && strlen($_POST['imgurl'.$ord]) > 0 ) {
+			$remoteImage = $ftp_path_upload . "images/" . $_POST['imgname'.$ord];
 
-				if (@ftp_put($conn_id, $ftp_path_upload."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg", "../../data/files/tmp/img.jpg",  FTP_BINARY)){
-					// scrivo l'immagine web blob nella cartella images dell'e-commerce
-					ftp_chmod($conn_id, 0664, $ftp_path_upload."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg");// fornisco i permessi necessari all'immagine
-					$xml_output .= "\t<ImgUrl>".$web_site_path."images/".str_replace(' ', '_', $_POST['codice'.$ord]).".jpg</ImgUrl>\n"; // ne scrivo l'url nel file xml
-				} else {
-					// ERRORE chiudo la connessione FTP
-					ftp_quit($conn_id);
-					header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=5");
-					exit;
+			if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val'] == "SI") {
+				// Caricamento immagine HQ tramite SFTP
+				$imageUploaded = $sftp->put(
+					$remoteImage,
+					$_POST['imgurl'.$ord],
+					SFTP::SOURCE_LOCAL_FILE
+				);
+
+				if ($imageUploaded) {
+					$sftp->chmod(0664, $remoteImage);
+				}
+			} else {
+				// Caricamento immagine HQ tramite FTP
+				$imageUploaded = @ftp_put(
+					$conn_id,
+					$remoteImage,
+					$_POST['imgurl'.$ord],
+					FTP_BINARY
+				);
+
+				if ($imageUploaded) {
+					@ftp_chmod($conn_id, 0664, $remoteImage);
 				}
 			}
+
+			if ($imageUploaded) {
+				$xml_output .= "\t<ImgUrl>".$web_site_path."images/".$_POST['imgname'.$ord]."</ImgUrl>\n";
+			} else {
+				if (isset($sftp) && gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val'] == "SI") {
+					$sftp->disconnect();
+				} elseif (isset($conn_id) && $conn_id) {
+					@ftp_close($conn_id);
+				}
+
+				header("Location: ../../modules/shop-synchronize/export_articoli.php?success=5");
+				exit;
+			}
+		}elseif (isset($_POST['imgblob'.$ord]) && ($_GET['img']=="updimg" || $_GET['todo']=="insert") && strlen($_POST['imgblob'.$ord]) > 0	) {
+			// Salvo temporaneamente l'immagine BLOB sul server GAzie
+			$localImage = "../../data/files/tmp/img.jpg";
+			$imageData = base64_decode($_POST['imgblob'.$ord], true);
+			$imageSaved = ($imageData !== false)
+				? file_put_contents($localImage, $imageData)
+				: false;
+
+			$remoteImage = $ftp_path_upload . "images/"
+				. str_replace(' ', '_', $_POST['codice'.$ord]) . ".jpg";
+
+			$useSftp = gaz_dbi_get_row(
+				$gTables['company_config'],
+				'var',
+				'Sftp'
+			)['val'] == "SI";
+
+			$imageUploaded = false;
+
+			if ($imageSaved !== false) {
+				if ($useSftp) {
+					// Caricamento tramite SFTP
+					$imageUploaded = $sftp->put(
+						$remoteImage,
+						$localImage,
+						SFTP::SOURCE_LOCAL_FILE
+					);
+
+					if ($imageUploaded) {
+						$sftp->chmod(0664, $remoteImage);
+					}
+				} else {
+					// Caricamento tramite FTP
+					$imageUploaded = @ftp_put(
+						$conn_id,
+						$remoteImage,
+						$localImage,
+						FTP_BINARY
+					);
+
+					if ($imageUploaded) {
+						@ftp_chmod($conn_id, 0664, $remoteImage);
+					}
+				}
+			}
+
+			if ($imageUploaded) {
+				$xml_output .= "\t<ImgUrl>"
+					. $web_site_path . "images/"
+					. str_replace(' ', '_', $_POST['codice'.$ord]) . ".jpg"
+					. "</ImgUrl>\n";
+			} else {
+				// Errore durante il salvataggio o il caricamento dell'immagine
+				if ($useSftp) {
+					if (isset($sftp)) {
+						$sftp->disconnect();
+					}
+				} elseif (isset($conn_id) && $conn_id) {
+					@ftp_close($conn_id);
+				}
+
+				header(
+					"Location: ../../modules/shop-synchronize/export_articoli.php?success=5"
+				);
+				exit;
+			}
+		}
 
 			$xml_output .= "\t</Product>\n";
 		}
 	}
 	$xml_output .="</Products>\n</GAzieDocuments>";
+	$xml_products = $xml_output; // Conserva l'XML prodotti per il webhook
 	$xmlFileP = "prodotti.xml";
-	$xmlHandle = fopen($xmlFileP, "w");
-	fwrite($xmlHandle, $xml_output);
-	fclose($xmlHandle);
+	
 
 	// *** creazione file xml delle categorie ***
 	// carico in $categories le categorie che sono presenti in GAzie
@@ -365,78 +573,259 @@ if (isset($_POST['conferma'])) { // se confermato
 		$xml_output .= "\t</Category>\n";
 	}
 	$xml_output .="</Categories>\n</GAzieDocuments>";
+	$xml_categories = $xml_output; // Conserva l'XML categorie per il webhook
 	$xmlFileC = "categorie.xml";
-	$xmlHandle = fopen($xmlFileC, "w");
-	fwrite($xmlHandle, $xml_output);
-	fclose($xmlHandle);
+	
+	
+	// Preparo il documento XML unico per il webhook, senza modificare il legacy
+	if ($syncTransport === 'webhook') {
+		$xml_products_body = preg_replace(
+			'/\A.*?<GAzieDocuments\b[^>]*>/s',
+			'',
+			$xml_products,
+			1
+		);
+		$xml_products_body = preg_replace(
+			'/<\/GAzieDocuments>\s*\z/s',
+			'',
+			$xml_products_body,
+			1
+		);
 
-	if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val']=="SI"){
+		$xml_categories_body = preg_replace(
+			'/\A.*?<GAzieDocuments\b[^>]*>/s',
+			'',
+			$xml_categories,
+			1
+		);
+		$xml_categories_body = preg_replace(
+			'/<\/GAzieDocuments>\s*\z/s',
+			'',
+			$xml_categories_body,
+			1
+		);
 
-		if ($sftp->put($ftp_path_upload."prodotti.xml", $xmlFileP, SFTP::SOURCE_LOCAL_FILE)){
-			$sftp->put($ftp_path_upload."categorie.xml", $xmlFileC, SFTP::SOURCE_LOCAL_FILE);
-			$sftp->disconnect();
-		}else {
-			// chiudo la connessione FTP
-			$sftp->disconnect();
-			?>
-			<script>
-			alert("<?php echo "Errore di upload del file xml tramite SFTP"; ?>");
-			location.replace("<?php echo $_POST['ritorno']; ?>");
-			</script>
-			<?php
-		}
-	} else { // FTP semplice
-		// upload file xml
-		if (ftp_put($conn_id, $ftp_path_upload."prodotti.xml", $xmlFileP, FTP_ASCII)){
-			ftp_put($conn_id, $ftp_path_upload."categorie.xml", $xmlFileC, FTP_ASCII);
-			// è OK
-			//echo "xml trasferito";
-		} else{
-			// ERRORE chiudo la connessione FTP
-			ftp_quit($conn_id);
-			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=4");
-			exit;
-		}
+		$xml_webhook = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+			. '<GAzieDocuments AppVersion="1" Creator="Antonio Germani Copyright" CreatorUrl="https://www.programmisitiweb.lacasettabio.it">'
+			. $xml_categories_body
+			. $xml_products_body
+			. "\n</GAzieDocuments>";
 	}
-	$access=base64_encode($accpass);
+	if ($syncTransport === 'legacy') {
+		// Creo i file XML locali solo per il trasporto legacy
+		$xmlFileP = "prodotti.xml";
+		$xmlHandle = fopen($xmlFileP, "w");
+		fwrite($xmlHandle, $xml_products);
+		fclose($xmlHandle);
 
-	// avvio il file di interfaccia presente nel sito web remoto
+		$xmlFileC = "categorie.xml";
+		$xmlHandle = fopen($xmlFileC, "w");
+		fwrite($xmlHandle, $xml_categories);
+		fclose($xmlHandle);
+		if (gaz_dbi_get_row($gTables['company_config'], 'var', 'Sftp')['val']=="SI"){
 
-	$file = @fopen ($urlinterf.'?access='.$access, "r");
-	if ( $file ){ // controllo se il file esiste o mi dà accesso
-		while (!feof($file)) { // scorro il file generato dall'interfaccia durante la sua eleborazione
-			$line = fgets($file);
-			$ln=explode("-",$line);
-			if (isset($ln) && count($ln)>1 && strlen($ln[3])>0){ // Se l'e-commerce ha restituito l'ID riferito ad un articolo
-				// vado a modificare il riferimento id e-commerce nell'articolo di GAzie
-				gaz_dbi_put_row($gTables['artico'], "codice", rtrim($ln[3],"<br>\n"), "ref_ecommerce_id_product", $ln[1]); // tolgo <br>\n perché viene aggiunto dall'ecommerce
-				gaz_dbi_put_row($gTables['artico'], "codice", rtrim($ln[3],"<br>\n"), "web_public", "5");// lo imposto come disattivato
+			if ($sftp->put($ftp_path_upload."prodotti.xml", $xmlFileP, SFTP::SOURCE_LOCAL_FILE)){
+				$sftp->put($ftp_path_upload."categorie.xml", $xmlFileC, SFTP::SOURCE_LOCAL_FILE);
+				$sftp->disconnect();
+			}else {
+				// chiudo la connessione FTP
+				$sftp->disconnect();
+				?>
+				<script>
+				alert("<?php echo "Errore di upload del file xml tramite SFTP"; ?>");
+				location.replace("<?php echo $_POST['ritorno']; ?>");
+				</script>
+				<?php
+			}
+		} else { // FTP semplice
+			// upload file xml
+			if (ftp_put($conn_id, $ftp_path_upload."prodotti.xml", $xmlFileP, FTP_ASCII)){
+				ftp_put($conn_id, $ftp_path_upload."categorie.xml", $xmlFileC, FTP_ASCII);
+				// è OK
+				//echo "xml trasferito";
+			} else{
+				// ERRORE chiudo la connessione FTP
+				ftp_quit($conn_id);
+				header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=4");
+				exit;
+			}
+		}
+		$access=base64_encode($accpass);
+
+		// avvio il file di interfaccia presente nel sito web remoto
+
+		$file = @fopen ($urlinterf.'?access='.$access, "r");
+		if ( $file ){ // controllo se il file esiste o mi dà accesso
+			while (!feof($file)) { // scorro il file generato dall'interfaccia durante la sua eleborazione
+				$line = fgets($file);
+				$ln=explode("-",$line);
+				if (isset($ln) && count($ln)>1 && strlen($ln[3])>0){ // Se l'e-commerce ha restituito l'ID riferito ad un articolo
+					// vado a modificare il riferimento id e-commerce nell'articolo di GAzie
+					gaz_dbi_put_row($gTables['artico'], "codice", rtrim($ln[3],"<br>\n"), "ref_ecommerce_id_product", $ln[1]); // tolgo <br>\n perché viene aggiunto dall'ecommerce
+					gaz_dbi_put_row($gTables['artico'], "codice", rtrim($ln[3],"<br>\n"), "web_public", "5");// lo imposto come disattivato
+				}
+			}
+
+		} else {// ho avuto problemi
+			$headers = get_headers ($urlinterf.'?access='.$access);// controllo l'header
+			if(intval(substr($headers[0], 9, 3))==400){
+				// chiudo la connessione FTP
+				ftp_quit($conn_id);
+				header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=3");
+				exit;
+			}else{
+				// chiudo la connessione FTP
+				ftp_quit($conn_id);
+				header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=2");
+				exit;
+			}
+
+		}
+		// chiudo la connessione FTP
+		if (isset($conn_id)){
+			ftp_quit($conn_id);
+		}
+		header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=1");
+		exit;
+		
+	} else {
+		// Ramo webhook: invio XML via HTTPS POST firmato HMAC
+		$webhookError = '';
+		$webhookResponse = false;
+		$httpCode = 0;
+		$curlError = '';
+
+		if (!function_exists('curl_init')) {
+			$webhookError = 'Estensione cURL non disponibile in PHP.';
+		} else {
+			$signature = hash_hmac('sha256', $xml_webhook, $accpass);
+			$ch = curl_init($urlinterf);
+
+			if ($ch === false) {
+				$webhookError = 'Impossibile inizializzare la richiesta webhook.';
+			} else {
+				curl_setopt_array($ch, array(
+					CURLOPT_POST => true,
+					CURLOPT_POSTFIELDS => $xml_webhook,
+					CURLOPT_HTTPHEADER => array(
+						'Content-Type: application/xml',
+						'X-Signature: ' . $signature
+					),
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_CONNECTTIMEOUT => 20,
+					CURLOPT_TIMEOUT => 0,
+					CURLOPT_SSL_VERIFYPEER => true,
+					CURLOPT_SSL_VERIFYHOST => 2
+				));
+
+				$webhookResponse = curl_exec($ch);
+				$curlError = curl_error($ch);
+				$httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+				if ($webhookResponse === false) {
+					$webhookError = 'Errore nella richiesta HTTPS: ' . $curlError;
+				} elseif ($httpCode !== 200) {
+					$webhookError = 'Il server ha risposto con HTTP '
+						. $httpCode . '. Risposta: ' . trim($webhookResponse);
+				}
 			}
 		}
 
-	} else {// ho avuto problemi
-		$headers = get_headers ($urlinterf.'?access='.$access);// controllo l'header
-		if(intval(substr($headers[0], 9, 3))==400){
-			// chiudo la connessione FTP
-			ftp_quit($conn_id);
-			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=3");
-			exit;
-		}else{
-			// chiudo la connessione FTP
-			ftp_quit($conn_id);
-			header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=2");
+		// Gestisco eventuali errori di trasporto
+		if ($webhookError !== '') {
+			if (isset($sftp)) {
+				$sftp->disconnect();
+			}
+			if (isset($conn_id) && $conn_id) {
+				@ftp_close($conn_id);
+			}
+
+			$ritorno = $_POST['ritorno'] ?? './synchronize.php';
+			?>
+			<script>
+			alert(<?php echo json_encode(
+				$webhookError,
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+			); ?>);
+			location.replace(<?php echo json_encode($ritorno); ?>);
+			</script>
+			<?php
 			exit;
 		}
 
+		// Interpreto la risposta: OK oppure uno o più ID di inserimento
+		$responseBody = trim((string) $webhookResponse);
+		$insertFound = false;
+
+		if (preg_match_all(
+			'/INSERT-(\d+)-CODE-([^\r\n<]+)/',
+			$responseBody,
+			$matches,
+			PREG_SET_ORDER
+		)) {
+			foreach ($matches as $match) {
+				$productId = (int) $match[1];
+				$productCode = trim($match[2]);
+
+				if ($productCode !== '') {
+					gaz_dbi_put_row(
+						$gTables['artico'],
+						'codice',
+						$productCode,
+						'ref_ecommerce_id_product',
+						$productId
+					);
+
+					gaz_dbi_put_row(
+						$gTables['artico'],
+						'codice',
+						$productCode,
+						'web_public',
+						'5'
+					);
+
+					$insertFound = true;
+				}
+			}
+		}
+
+		// HTTP 200 da solo non basta: verifico il contenuto della risposta
+		if ($responseBody !== 'OK' && !$insertFound) {
+			if (isset($sftp)) {
+				$sftp->disconnect();
+			}
+			if (isset($conn_id) && $conn_id) {
+				@ftp_close($conn_id);
+			}
+
+			$ritorno = $_POST['ritorno'] ?? './synchronize.php';
+			$message = 'Risposta inattesa dal webhook: ' . $responseBody;
+			?>
+			<script>
+			alert(<?php echo json_encode(
+				$message,
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+			); ?>);
+			location.replace(<?php echo json_encode($ritorno); ?>);
+			</script>
+			<?php
+			exit;
+		}
+
+		// Operazione riuscita
+		if (isset($sftp)) {
+			$sftp->disconnect();
+		}
+		if (isset($conn_id) && $conn_id) {
+			@ftp_close($conn_id);
+		}
+
+		header("Location: ../../modules/shop-synchronize/export_articoli.php?success=1");
+		exit;
 	}
-	// chiudo la connessione FTP
-  if (isset($conn_id)){
-    ftp_quit($conn_id);
-  }
-	header("Location: " . "../../modules/shop-synchronize/export_articoli.php?success=1");
-    exit;
+
 } else {
-	require('../../library/include/header.php');
+    require('../../library/include/header.php');
 	$script_transl = HeadMain();
 }
 
