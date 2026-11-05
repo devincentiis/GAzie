@@ -1251,7 +1251,7 @@ class selectcontract extends SelectBox {
 					echo ' <option value="' . $r["id_contract"] . '"' . $selected .'>N.' . $r["doc_number"] .' del '.gaz_format_date($r["conclusion_date"]). '</option>';
 				}
         echo "<option value=\"0\"> ---------- </option>\n";
-				echo ' </select>';
+				echo ' </select>&nbsp;';
 			} else {
         $msg = $script_transl['notfound'] . '!';
         echo '<input type="hidden" name="' . $this->name . '" id="'. $this->name.'" />';
@@ -1260,7 +1260,7 @@ class selectcontract extends SelectBox {
       $msg = $script_transl['minins'] . ' 2 ' . $script_transl['charat'] . ' 🔍';
       echo '<input type="hidden" name="' . $this->name . '" id="'. $this->name.'" />';
     }
-    echo '&nbsp;<input type="text" class="' . $class . '" name="cosecont" placeholder="'.$msg.'" id="search_contract" value="' . $cerca . '" maxlength="16" />';
+    echo '<input type="text" class="' . $class . '" name="cosecont" placeholder="'.$msg.'" id="search_contract" value="' . $cerca . '" maxlength="16" />';
   }
 }
 

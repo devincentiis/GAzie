@@ -97,6 +97,7 @@ $strScript = array("admin_aziend.php" =>
         'stock_eval_method' => 'Method of stock enhancement',
         'stock_eval_method_value' => array(0 => 'Standard', 1 => 'Weighted average cost', 2 => 'LIFO', 3 => 'FIFO'),
         'mascli' => 'Master customers account ',
+        'default_codpag' => 'Default payment for new customers',
         'masfor' => 'Master suppliers account',
         'masban' => 'Master banks account',
         'mas_staff' => 'Master employees account',

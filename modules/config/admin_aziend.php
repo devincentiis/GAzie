@@ -47,6 +47,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['mas_staff'] = intval(substr($_POST['mas_staff'], 0, 3));
     $form['masban'] = intval(substr($_POST['masban'], 0, 3));
     $form['mas_fixed_assets'] = intval(substr($_POST['mas_fixed_assets'], 0, 3));
+    $form['default_codpag'] = max(1, intval($_POST['default_codpag'] ?? 1));
     $form['mas_found_assets'] = intval(substr($_POST['mas_found_assets'], 0, 3));
     $form['mas_cost_assets'] = intval(substr($_POST['mas_cost_assets'], 0, 3));
     $form['datnas'] = substr($_POST['datnas'], 0, 10);
@@ -220,6 +221,12 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
             } elseif ($toDo == 'update') {
                 gaz_dbi_table_update('aziend', $form['codice'], $form);
             }
+            // pagamento predefinito per i nuovi clienti: riga di company_config, creata se manca
+            if (gaz_dbi_get_row($gTables['company_config'], 'var', 'default_codpag')) {
+                gaz_dbi_put_row($gTables['company_config'], 'var', 'default_codpag', 'val', $form['default_codpag']);
+            } else {
+                gaz_dbi_table_insert('company_config', array('description' => 'Codice pagamento predefinito per i nuovi clienti', 'var' => 'default_codpag', 'val' => $form['default_codpag']));
+            }
             // in ogni caso se è stata scelta come azienda intermediatrice verso l'AdE aggiorno la configurazione
             if (( $form['codice'] == $form['intermediary_code'] || $form['intermediary_code'] == 0 ) && isset($_POST['intermediary_check'])) {
                 if ($_POST['intermediary_check'] == 'y') {
@@ -261,6 +268,9 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     } else {
         $form['intermediary_descr'] = '';
     }
+    // pagamento predefinito per i nuovi clienti: se non ancora salvato uso 1
+    $default_codpag = gaz_dbi_get_row($gTables['company_config'], 'var', 'default_codpag');
+    $form['default_codpag'] = ($default_codpag && intval($default_codpag['val']) > 0) ? intval($default_codpag['val']) : 1;
     $imap_check = gaz_dbi_get_row($gTables['company_config'], 'var', 'imap_server');
     if (!$imap_check){// se non esistono i righi del server imap li creo
       $arr=array('description'=>'IMAP Secure: ssl,tls,notls,/novalidate-cert(server con certificati autofirmati),/optional php flags.','var'=>'imap_secure','val'=>'');
@@ -283,6 +293,7 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
     $form['ivaera'] = 5;
     $form['image'] = file_get_contents( "../../library/images/comp_logo.gif");
     $form['web_url'] = 'https://';
+    $form['default_codpag'] = 1;
     // rilevo l'eventuale intermediario
     $intermediary = gaz_dbi_get_row($gTables['config'], 'variable', 'intermediary');
     $form['intermediary_code'] = $intermediary['cvalue'];
@@ -772,6 +783,16 @@ if ($admin_aziend['Abilit']==9){
                         <label for="decimal_price" class="col-sm-4 control-label"><?php echo $script_transl['decimal_price']; ?></label>
                         <?php
                         $gForm->selectNumber('decimal_price', $form['decimal_price'], 0, 0, 5, "col-sm-8", '', 'style="max-width: 100px;"');
+                        ?>
+                    </div>
+                </div>
+            </div><!-- chiude row  -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="default_codpag" class="col-sm-4 control-label"><?php echo $script_transl['default_codpag']; ?></label>
+                        <?php
+                        $gForm->selectFromDB('pagame', 'default_codpag', 'codice', $form['default_codpag'], 'tippag`, `giodec`, `numrat', true, ' ', 'descri');
                         ?>
                     </div>
                 </div>

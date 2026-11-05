@@ -94,9 +94,11 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
 		<link rel="apple-touch-startup-image" href="data:image/x-icon;base64,<?php echo $ico114; ?>"  type="image/x-icon">
 		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="data:image/x-icon;base64,<?php echo $ico114; ?>"  type="image/x-icon" />
     <link href="../../js/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/adminlte/dist/css/global_search.css">
     <link rel="stylesheet" href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/adminlte/dist/css/AdminLTE.css">
+
     <link href="../../<?php echo(STATIC_VERSION);?>js/jquery.ui/jquery-ui.css" rel="stylesheet">
 		<script src="../../js/jquery/jquery-3.7.1.min.js"></script>
     <?php
@@ -150,6 +152,11 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             th a, .breadcrumb li a, a i.glyphicon-cog {
               color: #<?= $admin_aziend['colore'] ?>;
               text-shadow: 1px 1px 2px #000;
+              padding: 2px;
+            }
+            .breadcrumb li a:not(:has(i)){
+              border-radius: 4px;
+              border: 1px solid;
             }
             .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
               background-color: #<?= $admin_aziend['colore'] ?>;
@@ -188,6 +195,11 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             th a, .breadcrumb li a, a i.glyphicon-cog {
               color: #<?= $admin_aziend['colore'] ?>;
               filter: brightness(0.5);
+              padding: 2px;
+            }
+            .breadcrumb li a:not(:has(i)){
+              border-radius: 4px;
+              border: 1px solid;
             }
             .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
               background-color: #<?= $admin_aziend['colore'] ?>;
@@ -226,6 +238,11 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
             th a, .breadcrumb li a, a i.glyphicon-cog {
               color: #<?= $admin_aziend['colore'] ?>;
               filter: brightness(0.5);
+              padding: 2px;
+            }
+            .breadcrumb li a:not(:has(i)){
+              border-radius: 4px;
+              border: 1px solid;
             }
             .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
               background-color: #<?= $admin_aziend['colore'] ?>;
@@ -427,6 +444,13 @@ if ($rslen < 18) {
                     </a>
                     <div class="navbar-custom-menu">
                         <ul class="nav navbar-nav">
+                            <?php // ricerca globale in tutti i moduli (Ctrl+K), tendina gestita da js/custom/global_search.js ?>
+                            <li class="gz-gs hidden-xs">
+                                <div class="gz-gs-box"><?php // niente form: la barra è già dentro un form, Invio lo gestisce global_search.js ?>
+                                    <i class="fa fa-search gz-gs-icon"></i>
+                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)" title="Ricerca in tutti i moduli. Jolly: * qualsiasi testo, ? un carattere">
+                                </div>
+                            </li>
 							<li class='blink'></li>
                             <?php
                             //leggo se il modulo è abilitato

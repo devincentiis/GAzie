@@ -663,7 +663,7 @@ class lotmag {
       if ($row['operat']>0){$lotqty=$lotqty+$row['quanti'];}
       if ($row['operat']<0){$lotqty=$lotqty-$row['quanti'];}
     }
-    return $lotqty;
+    return round($lotqty,5);
   }
 
    function divideLots($quantity) {

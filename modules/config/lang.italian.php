@@ -96,6 +96,7 @@ $strScript = array(
         'stock_eval_method' => 'Metodo di valorizzazione magazzino',
         'stock_eval_method_value' => array(0 => 'Standard', 1 => 'Prezzo medio ponderato', 2 => 'LIFO', 3 => 'FIFO'),
         'mascli' => 'Mastro clienti ',
+        'default_codpag' => 'Pagamento predefinito per i nuovi clienti',
         'masfor' => 'Mastro fornitori',
         'masban' => 'Mastro banche',
         'mas_staff' => 'Mastro collaboratori',

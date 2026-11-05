@@ -1,0 +1,89 @@
+.main-header .navbar .gz-gs {
+  position: relative;
+  padding: 10px 12px 0 0;
+}
+.gz-gs-box {
+    position: relative;
+    margin: 0;
+}
+.gz-gs-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+    color: #8a6d00;
+    pointer-events: none; /* il clic sulla lente arriva alla casella */
+}
+#gz-gs-input {
+    display: block; /* il form ha la stessa altezza della casella, cosi' la lente resta centrata */
+    width: 260px;
+    height: 30px;
+    padding: 4px 10px 4px 28px;
+    border: 1px solid #e0a800;
+    border-radius: 15px;
+    background: #fffdf5;
+    color: #000000;
+    font-size: 13px;
+    outline: none;
+}
+#gz-gs-input:focus {
+    border-color: #c99300;
+    box-shadow: 0 0 0 2px rgba(224, 168, 0, 0.25);
+}
+.gz-gs-drop {
+    position: absolute;
+    right: 12px;
+    top: 44px;
+    width: 420px;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #fffdf5;
+    border: 1px solid #e0a800;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(92, 67, 0, 0.18);
+    z-index: 1100;
+    font-size: 13px;
+}
+.gz-gs-head {
+    padding: 6px 12px 3px;
+    font-weight: bold;
+    color: #5c4300;
+    background: #fff3c4;
+    border-top: 1px solid #f5d76e;
+}
+.gz-gs-head:first-child {
+    border-top: 0;
+}
+.gz-gs-drop a.gz-gs-item,
+.gz-gs-drop a.gz-gs-all {
+    display: block;
+    padding: 5px 12px;
+    color: #000000;
+    text-decoration: none;
+}
+.gz-gs-drop a.gz-gs-item small {
+    display: block;
+    color: #777777;
+}
+.gz-gs-drop a.gz-gs-item:hover,
+.gz-gs-drop a.gz-gs-item.active,
+.gz-gs-drop a.gz-gs-all:hover,
+.gz-gs-drop a.gz-gs-all.active {
+    background: #fff3c4;
+    color: #5c4300;
+}
+.gz-gs-drop a.gz-gs-all {
+    border-top: 1px solid #f5d76e;
+    text-align: center;
+    font-style: italic;
+}
+.gz-gs-empty {
+    padding: 8px 12px;
+    color: #777777;
+}
+.gz-gs-drop mark,
+.gz-gs-page mark {
+    padding: 0;
+    background: #ffe28a;
+}

@@ -1,0 +1,265 @@
+/* Skin adminlte_clean "default": palette gialla con dettagli rosa, la stessa di bs3clean. */
+
+body {
+    background-color: #fffef8;
+}
+
+/* AdminLTE dipinge l'area del contenuto di grigio (#ecf0f5): la porto allo stesso colore del body */
+.content-wrapper,
+.right-side {
+    background-color: #fffef8;
+}
+
+/* Barra superiore e logo: il colore di sfondo e' quello dell'azienda, impostato in header.php (come nel tema lte) */
+.main-header .navbar,
+.main-header .logo {
+    border-color: #f5d76e;
+}
+
+/* bordo inferiore della barra superiore dello stesso giallo del footer */
+.main-header .navbar {
+    border-bottom: 1px solid #f5d76e;
+}
+
+.main-header .logo {
+    color: #123311;
+}
+
+.main-header .navbar .sidebar-toggle,
+.main-header .navbar .navbar-nav > li > a {
+    color: #123311;
+}
+
+.main-header .navbar .sidebar-toggle:hover,
+.main-header .navbar .navbar-nav > li > a:hover,
+.main-header .navbar .navbar-nav > .open > a {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #000;
+}
+
+/* Sidebar: stesso colore del tema lte (#222d32), voci chiare */
+.main-sidebar {
+    background-color: #222d32;
+}
+
+.sidebar-menu > li > a,
+.treeview-menu > li > a {
+    color: #b8c7ce;
+}
+
+.sidebar-menu > li:hover > a,
+.treeview-menu > li > a:hover {
+    background-color: #1e282c;
+    color: #fff;
+}
+
+.sidebar-menu > li.active > a,
+.sidebar-menu > li.active > a:hover {
+    background-color: #1e282c;
+    color: #fff;
+    border-left-color: #c2185b;
+}
+
+.sidebar-menu .treeview-menu > li.active > a {
+    color: #fff;
+}
+
+/* Menu utente */
+.dropdown-menu {
+    border-color: #f5d76e;
+}
+
+.user-menu .user-header.bg-light-blue {
+    background-color: #fff3c4 !important;
+    color: #000000;
+}
+
+/* AdminLTE scrive nome e azienda in bianco nell'intestazione: sul giallo devono essere neri */
+.user-menu .user-header > p,
+.user-menu .user-header > p > small {
+    color: #000000 !important;
+    opacity: 1;
+}
+
+
+/* Pulsanti */
+.btn-default {
+    background-color: #fffbea;
+    border-color: #e0a800;
+    color: #5c4300;
+}
+
+.btn-default:hover,
+.btn-default:focus {
+    background-color: #fff3c4;
+    border-color: #c99300;
+    color: #3e2c00;
+}
+
+/* Pulsante di modifica (btn-edit, es. report_client.php): stesso aspetto dei btn-xs btn-default */
+.btn-edit {
+    background-color: #fffbea;
+    border: 1px solid #e0a800;
+    color: #5c4300;
+}
+
+.btn-edit:hover,
+.btn-edit:focus {
+    background-color: #fff3c4;
+    border-color: #c99300;
+    color: #3e2c00;
+}
+
+/* Pulsanti di modifica (btn-edit) in tutte le pagine: stessa altezza dei btn-xs, cosi' le righe delle tabelle restano basse */
+a.btn-edit {
+    height: 22px;
+    margin: 0;
+    line-height: 18px;
+    padding: 1px 5px;
+    font-size: 12px;
+}
+
+/* Collegamenti */
+a {
+    color: #000000;
+}
+
+a:hover,
+a:focus {
+    color: #444444;
+}
+
+/* Titolo della pagina e breadcrumb */
+.content-header > h1 {
+    color: #5c4300;
+}
+
+.breadcrumb > li > a {
+    background-color: #fffbea;
+    border-color: #e0a800;
+    color: #5c4300;
+}
+
+/* Voce genitore (primo elemento del breadcrumb): più marcata delle altre */
+.breadcrumb > li > a.btn-primary {
+    background-color: #e0a800;
+    border-color: #c99300;
+    color: #000000;
+}
+
+.breadcrumb > li > a.btn-primary:hover,
+.breadcrumb > li > a.btn-primary:focus {
+    background-color: #c99300;
+    border-color: #a87a00;
+    color: #000000;
+}
+
+.breadcrumb > li > a:hover,
+.breadcrumb > li > a:focus {
+    background-color: #fff3c4;
+    border-color: #c99300;
+    color: #3e2c00;
+}
+
+/* Box e pannelli */
+.box {
+    border-top-color: #f5d76e;
+}
+
+/* le varianti di colore dei box (box-primary, box-info...) hanno un bordo proprio di AdminLTE piu' specifico: qui lo riporto al giallo */
+.box.box-primary,
+.box.box-info,
+.box.box-warning,
+.box.box-success,
+.box.box-danger,
+.box.box-default {
+    border-top-color: #f5d76e;
+}
+
+.box-header {
+    color: #5c4300;
+}
+
+.panel-info {
+    border-color: #f5d76e;
+}
+
+/* Pannelli di tutte le varianti (panel-success, panel-danger, ecc.): stesso bordo giallo, anche se la variante imposta il proprio colore */
+.panel {
+    border-color: #f5d76e;
+}
+
+/* Riquadri di inserimento (div con classe input-area): stesso bordo giallo degli altri pannelli */
+div.input-area,
+table.input-area {
+    border: 1px solid #f5d76e;
+}
+
+.panel-info > .panel-heading {
+    background-color: #fff3c4;
+    border-color: #f5d76e;
+    color: #5c4300;
+}
+
+/* home: 30px tra una riga di pannelli e l'altra, come lo spazio orizzontale tra due colonne */
+#sortable .panel {
+    background-color: #f8f8f8;
+    margin-bottom: 30px;
+}
+
+/* home: tabelle, pulsanti e campi restano dentro il pannello; le tabelle larghe scorrono in orizzontale nel pannello */
+#sortable .dataTables_wrapper,
+#sortable .table-responsive {
+    overflow-x: auto;
+}
+#sortable .btn {
+    max-width: 100%;
+    white-space: normal;
+}
+#sortable .form-control {
+    max-width: 100%;
+}
+#sortable .panel .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Tabelle */
+/* righe alternate in tutte le tabelle: chiara le dispari, un po' piu' calda le pari */
+.table > tbody > tr:nth-of-type(odd),
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f7f7f7;
+}
+
+.table > tbody > tr:nth-of-type(even),
+.table-striped > tbody > tr:nth-of-type(even) {
+    background-color: #ebebeb;
+}
+
+.table > thead > tr > th,
+.table > tbody > tr > td {
+    border-color: #f5d76e;
+}
+
+/* tabelle dei moduli (class "Tlarge"): sfondo colorato invece che trasparente */
+table.Tlarge {
+    background-color: #fffdf5;
+}
+
+/* tabelle con bordi (class "table table-bordered"): stesso giallo di sidebar, barra e footer */
+.table-bordered,
+.table-bordered > thead > tr > th,
+.table-bordered > thead > tr > td,
+.table-bordered > tbody > tr > th,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > th,
+.table-bordered > tfoot > tr > td {
+    border: 1px solid #f5d76e;
+}
+
+/* Footer */
+.main-footer {
+    background-color: #fffbea;
+    border-top-color: #f5d76e;
+    color: #5c4300;
+}

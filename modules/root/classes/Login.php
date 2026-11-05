@@ -213,8 +213,9 @@ class Login
 		// if database connection opened
 		if ($this->databaseConnection()) {
 			// database query, getting all the info of the selected user
-			$query_user = $this->db_connection->prepare("SELECT *, SHA2(CONVERT(AES_DECRYPT(UNHEX(aes_key), UNHEX(SHA2('".$user_password_sha."', 512))) USING utf8), 512) AS aes_key_pass FROM " . DB_TABLE_PREFIX . '_admin WHERE user_name = :user_name');
+			$query_user = $this->db_connection->prepare("SELECT *, SHA2(CONVERT(AES_DECRYPT(UNHEX(aes_key), UNHEX(SHA2(:user_password_sha, 512))) USING utf8), 512) AS aes_key_pass FROM " . DB_TABLE_PREFIX . '_admin WHERE user_name = :user_name');
 			$query_user->bindValue(':user_name', $user_name, PDO::PARAM_STR);
+			$query_user->bindValue(':user_password_sha', $user_password_sha, PDO::PARAM_STR);
 			$query_user->execute();
 			// get result row (as an object)
 			return $query_user->fetchObject();

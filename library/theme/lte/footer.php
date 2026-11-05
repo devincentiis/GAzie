@@ -135,6 +135,12 @@ $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
               <div class='form-group'>
                 <a onclick="restoreUserConfig();" style="cursor: pointer;">Ripristina default</a>
               </div>
+              <hr/>
+              <div>
+              <?php
+                echo '<a href="../root/global_search_manage.php"><i class="fa fa-cog"></i> Ricerca globale</a>';
+              ?>
+              </div>
             </form>
           </div><!-- /.tab-pane -->
         </div>
@@ -188,6 +194,7 @@ $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
     <script src="../../library/theme/lte/adminlte/dist/js/app.js"></script>
     <script src="../../js/custom/jquery.ui.autocomplete.html.js"></script>
     <script src="../../js/custom/gz-library.js"></script>
+    <script src="../../js/custom/global_search.js"></script>
     <script src="../../js/tinymce/tinymce.min.js"></script>
     <script src="../../js/custom/tinymce.js"></script>
     <script src="../../js/jquery.ui/datepicker-<?php echo substr($admin_aziend['lang'], 0, 2); ?>.js"></script>

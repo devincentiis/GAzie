@@ -1,0 +1,563 @@
+/* Tema adminlte_clean: regole di layout aggiuntive rispetto ad AdminLTE 2. */
+
+/* Codici articolo (pulsanti btn-xs colorati): stessa altezza e stessa larghezza */
+.btn-xs.btn-danger,
+.btn-xs.btn-info {
+    min-width: 96px;
+    height: 24px;
+    line-height: 20px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    text-align: center;
+}
+
+/* Sidebar piu' stretta (200px invece dei 230px di AdminLTE): tutti i punti che usano la larghezza vanno aggiornati */
+@media (min-width: 768px) {
+    /* sidebar fissa a tutta altezza: resta visibile anche con pagine lunghe; scorre al proprio interno */
+    .main-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 200px;
+    }
+
+    /* con la sidebar espansa i sottomenu stanno nel flusso: la colonna puo' scorrere al proprio interno.
+       Con la sidebar ridotta i sottomenu sono pannelli sovrapposti e non devono essere tagliati. */
+    body:not(.sidebar-collapse) .main-sidebar {
+        overflow-y: auto;
+    }
+    .main-header .logo {
+        width: 200px;
+    }
+    .main-header .navbar,
+    .content-wrapper {
+        margin-left: 200px;
+    }
+    .sidebar-collapse .main-sidebar {
+        transform: translate(-200px, 0);
+    }
+    .sidebar-collapse .main-header .navbar,
+    .sidebar-collapse .content-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Sottomenu allineato alla voce che lo apre: AdminLTE gli lascia 5px a sinistra, che rendono le sottovoci piu' strette.
+   Il rientro del testo resta sul padding delle sottovoci. */
+.sidebar-menu .treeview-menu {
+    padding-left: 0;
+}
+
+/* Sidebar ridotta: la voce passata con il mouse arriva fino al bordo destro del menu che compare
+   (il menu parte da 50px e misura 250px, quindi finisce a 300px) */
+@media (min-width: 768px) {
+    .sidebar-collapse .sidebar-menu > li.treeview:hover > a {
+        width: 300px;
+    }
+}
+
+/* Sottomenu della sidebar: con la sidebar ridotta compaiono come pannelli sovrapposti, quindi devono avere uno sfondo pieno */
+.sidebar-menu > li > .treeview-menu,
+.sidebar-menu .treeview-menu .treeview-menu {
+    background-color: #2c3b41;
+}
+
+/* Blocco azienda in cima alla sidebar: logo, nome e partita IVA, con spazio prima della prima voce del menu */
+/* Spazio in cima alla sidebar, prima della prima voce del menu: qui c'è il logo, sempre visibile perché la sidebar è fissa */
+.gz-company-panel {
+    height: 65px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Logo in cima alla sidebar, sopra i codici rapidi: resta visibile durante lo scorrimento */
+.gz-sidebar-logo-wrap {
+    height: auto;
+    margin: -40px 0 0 0; /* la parte alta del logo è coperta dalla barra bianca */
+    padding: 0 10px;
+    text-align: center;
+    line-height: 0;
+}
+
+.gz-sidebar-logo {
+    max-height: 40px;
+    max-width: 140px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Codici rapidi: tre pulsanti grigio scuro che occupano la larghezza della sidebar */
+.gz-quick-panel {
+    height: auto;
+    min-height: 65px;
+    margin-bottom: 0;
+    padding: 12px 8px 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Senza preferiti il pannello dei codici rapidi non ha pulsanti: si riduce a 20px invece di 65px */
+.gz-quick-panel.gz-quick-empty {
+    height: 20px;
+    min-height: 20px;
+    padding: 0;
+}
+
+/* Pulsanti dei report: stesse misure di btn-xs (il contenuto della pagina, non la barra o la sidebar) */
+.gz-report .content-wrapper .btn:not(.btn-xs):not(.btn-edit) {
+    height: 22px;
+    line-height: 20px;
+    padding: 1px 5px;
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+.gz-quick-panel .gz-quick {
+    display: block;
+    height: 22px;
+    line-height: 20px;
+    padding: 1px 5px;
+    font-size: 10px;
+    text-align: center;
+    background-color: #3c4a50;
+    border: 1px solid #2b373c;
+    color: #ffffff;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.gz-quick-panel .gz-quick:hover,
+.gz-quick-panel .gz-quick:focus {
+    background-color: #4d5f66;
+    border-color: #3c4a50;
+    color: #ffffff;
+}
+
+/* Sidebar ridotta (50px): i pulsanti dei preferiti restano dentro la barra, il testo che non entra viene troncato con i puntini */
+.sidebar-collapse .gz-quick-panel {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.sidebar-collapse .gz-quick-panel .gz-quick {
+    font-size: 9px;
+    padding: 1px 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gz-company-panel .image {
+    padding-right: 8px;
+}
+
+/* Logo prima del nome azienda, nella barra con la sidebar espansa */
+.main-header .logo-lg .gz-logo-lg {
+    height: 28px;
+    width: auto;
+    max-width: 40px;
+    vertical-align: middle;
+    margin-right: 4px;
+    object-fit: contain;
+}
+
+/* Icone nella barra in alto (es. icona del modulo per la documentazione): altezza contenuta, la barra resta di 50px */
+.main-header .navbar .navbar-nav > li > a > img {
+    display: block;
+    height: 20px;
+    width: auto;
+}
+
+/* Logo nella barra quando la sidebar e' ridotta (logo-mini, larghezza 50px) */
+.main-header .logo-mini .gz-logo-mini {
+    max-width: 40px;
+    max-height: 40px;
+    object-fit: contain;
+}
+
+.gz-company-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.gz-company-name {
+    margin: 0;
+    color: #fff;
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 16px;
+    white-space: normal;
+}
+
+.gz-company-panel small {
+    color: #b8c7ce;
+}
+
+/* Menu utente: le voci una sotto l'altra */
+.gz-user-links {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+}
+
+.gz-user-links a {
+    padding: 6px 8px;
+    color: #444;
+}
+
+/* pulsanti "flat" di AdminLTE (es. Cambia password ed Esci nel menu utente): angoli arrotondati come gli altri pulsanti */
+.btn.btn-flat {
+    border-radius: 4px;
+}
+
+/* voci del menu utente: al passaggio del mouse lo sfondo cambia, come la stellina della barra in alto */
+.gz-user-links a:hover,
+.gz-user-links a:focus {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #000;
+    text-decoration: none;
+}
+
+/* Breadcrumb nell'intestazione del contenuto: AdminLTE lo posiziona in assoluto a destra, con schermi larghi si spostava
+   sopra il titolo. Lo lascio nel flusso normale, a sinistra. */
+.content-header > .breadcrumb {
+    position: static;
+    float: none;
+    display: block;
+    margin: 0 0 10px 0;
+    padding: 0;
+    background: none;
+}
+
+/* Barra del breadcrumb trasparente in tutte le pagine (AdminLTE e Bootstrap le danno uno sfondo grigio) */
+ol.breadcrumb {
+    background: transparent;
+    background-color: transparent;
+}
+
+/* Bordi gialli nelle tabelle di tutte le pagine di report (classe gz-report sul body), anche senza table-bordered */
+.gz-report .content-wrapper table {
+    border-collapse: collapse;
+}
+
+.gz-report .content-wrapper table th,
+.gz-report .content-wrapper table td {
+    border: 1px solid #f5d76e;
+}
+
+/* Menu a tendina dei filtri nei report: larghezza fissa, senza spazio vuoto oltre il testo piu' lungo */
+.gz-report .content-wrapper select.input-sm {
+    width: 90px;
+}
+
+/* Nei report le date centrate e le celle con piu' pulsanti restano su una riga: altrimenti la riga diventa piu' alta */
+.gz-report .content-wrapper table.Tlarge td[align="center"],
+.gz-report .content-wrapper table.Tlarge td:has(.btn + .btn) {
+    white-space: nowrap;
+}
+
+/* Tab delle maschere (nav-pills): barra di schede con bordo giallo, scheda attiva in rosa */
+.content-wrapper .nav-pills {
+    /* le colonne float dell'intestazione della maschera non devono far scorrere la barra delle schede a destra */
+    clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 4px;
+    margin: 0 0 12px 0;
+    padding: 0 0 0 0;
+    border-bottom: 2px solid #f5d76e;
+}
+
+.content-wrapper .nav-pills > li {
+    float: none;
+    margin: 0;
+}
+
+.content-wrapper .nav-pills > li > a {
+    margin: 0;
+    padding: 7px 16px;
+    font-size: 13px;
+    color: #5c4300;
+    background-color: #fffbea;
+    border: 1px solid #f5d76e;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+}
+
+.content-wrapper .nav-pills > li > a:hover,
+.content-wrapper .nav-pills > li > a:focus {
+    background-color: #fff3c4;
+    color: #3e2c00;
+}
+
+.content-wrapper .nav-pills > li.active > a,
+.content-wrapper .nav-pills > li.active > a:hover,
+.content-wrapper .nav-pills > li.active > a:focus {
+    background-color: #ffc4da;
+    color: #6b2143;
+    border-color: #e8a0bd;
+}
+
+/* il pulsante di salvataggio, ultimo elemento della barra, va a destra */
+.content-wrapper .nav-pills > li:last-child {
+    margin-left: auto;
+    padding-bottom: 4px;
+}
+
+/* contenuto della scheda con un po' di respiro */
+.content-wrapper .tab-content {
+    padding-top: 4px;
+}
+
+/* Casella in fondo alla sidebar: espande o riduce la barra */
+/* in fondo alla sidebar, allineata al bordo inferiore */
+.gz-sidebar-toggle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px 10px;
+    border-top: 1px solid #3a4a50;
+    background-color: #222d32;
+    text-align: center;
+}
+
+.gz-sidebar-toggle input {
+    margin: 0;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+/* lascia spazio sotto le voci del menu perché la casella non le copra */
+.main-sidebar .sidebar {
+    padding-bottom: 36px;
+}
+
+/* Footer fisso in fondo alla finestra, a destra della sidebar (larghezza sidebar 200px) */
+.main-footer {
+    position: relative;
+    margin-left: 200px; /* come il contenuto: a destra della sidebar */
+    height: 40px;
+    padding: 8px 15px;
+    line-height: 24px;
+    text-align: center;
+}
+
+/* Versione e link sulla stessa riga, allineati a destra */
+.main-footer {
+    text-align: right;
+}
+
+.main-footer > .pull-right {
+    float: none !important; /* AdminLTE imposta pull-right con !important */
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.main-footer > a {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+/* Con la sidebar chiusa il footer occupa tutta la larghezza */
+.sidebar-collapse .main-footer {
+    margin-left: 0;
+}
+
+
+/* Il footer sta in fondo alla pagina: il contenuto occupa almeno l'altezza della finestra, meno barra e footer */
+.content-wrapper {
+    min-height: calc(100vh - 90px);
+    padding-bottom: 20px;
+}
+
+/* Su schermi piccoli la sidebar e' sovrapposta: il footer occupa tutta la larghezza */
+@media (max-width: 767px) {
+    .main-footer {
+        margin-left: 0;
+    }
+}
+
+/* Schede dei form: i campi partono tutti dalla stessa colonna. Il padding della colonna col-sm-8 e quello dei campi col-sm-6 sommati davano bordi a 500px e 515px */
+.tab-pane .form-group > .col-sm-8 {
+    padding-left: 0;
+}
+.tab-pane .form-group > input.col-sm-6,
+.tab-pane .form-group > select.col-sm-6 {
+    padding-left: 2px;
+}
+/* menu a tendina alti come i campi di testo (25px) */
+.tab-pane .form-group > select {
+    height: 25px;
+}
+/* spazio uguale tra un campo e il successivo: il gruppo contiene i float di etichetta e campo, il margine e' sempre lo stesso */
+.tab-pane .form-group {
+    display: flow-root;
+    margin-bottom: 8px;
+}
+
+/* Pulsanti "evadi" nella colonna stato degli ordini: stessa larghezza, cosi' sono allineati */
+.btn-evadi {
+    min-width: 130px;
+    text-align: center;
+}
+
+/* colore rosa pastello dei pulsanti "evadi" della colonna stato (anche quello con l'icona cliente) */
+.btn-evadi,
+.btn-evadi-user {
+    background-color: #fbe3ec;
+    border-color: #e7a9c0;
+    color: #6b2a44;
+}
+
+.btn-evadi:hover,
+.btn-evadi:focus,
+.btn-evadi-user:hover,
+.btn-evadi-user:focus {
+    background-color: #f6cfe0;
+    border-color: #d989a8;
+    color: #4f1d31;
+}
+
+/* Suggerimenti di ricerca (autocompletamento): con "%%" arrivano centinaia di voci, la lista ha altezza limitata e scorre */
+.ui-autocomplete {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Articoli nei suggerimenti (search.php, apply_evidenze): in esaurimento (E) arancione, non movimentabili (N) rosso, come nei temi lte e g7 */
+mark.apply-evidenze-e {
+    background-color: #ffc870;
+    color: #000000;
+}
+
+mark.apply-evidenze-n {
+    background-color: #f79a9a;
+    color: #000000;
+}
+
+/* Tendina dei suggerimenti: stessi colori del tema (bordo giallo, voce evidenziata in giallo chiaro) invece dello stile jQuery UI */
+.ui-autocomplete.ui-menu.ui-widget.ui-widget-content {
+    background-color: #fffdf5;
+    border: 1px solid #e0a800;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(92, 67, 0, 0.18);
+    padding: 4px 0;
+    font-size: 13px;
+    min-width: 220px;
+}
+
+.ui-autocomplete.ui-menu .ui-menu-item-wrapper {
+    padding: 6px 12px;
+    color: #000000;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+.ui-autocomplete.ui-menu .ui-menu-item-wrapper.ui-state-active,
+.ui-autocomplete.ui-menu .ui-menu-item-wrapper.ui-state-focus,
+.ui-autocomplete.ui-menu .ui-menu-item:hover .ui-menu-item-wrapper {
+    background: #fff3c4 !important;
+    color: #5c4300 !important;
+    border: 0 !important;
+    margin: 0;
+}
+
+/* Campo ricerca contratto (search_contract): stessa larghezza del campo cliente (search_clfoco), invece del 100% della colonna */
+input#search_contract.ui-autocomplete-input {
+    width: 182px;
+}
+
+/* Ricerca globale nella barra in alto (js/custom/global_search.js) */
+.main-header .navbar .gz-gs {
+    position: relative;
+    padding: 10px 12px 0 0;
+}
+.gz-gs-box {
+    position: relative;
+    margin: 0;
+}
+.gz-gs-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+    color: #8a6d00;
+    pointer-events: none; /* il clic sulla lente arriva alla casella */
+}
+#gz-gs-input {
+    display: block; /* il form ha la stessa altezza della casella, cosi' la lente resta centrata */
+    width: 260px;
+    height: 30px;
+    padding: 4px 10px 4px 28px;
+    border: 1px solid #e0a800;
+    border-radius: 15px;
+    background: #fffdf5;
+    color: #000000;
+    font-size: 13px;
+    outline: none;
+}
+#gz-gs-input:focus {
+    border-color: #c99300;
+    box-shadow: 0 0 0 2px rgba(224, 168, 0, 0.25);
+}
+.gz-gs-drop {
+    position: absolute;
+    right: 12px;
+    top: 44px;
+    width: 420px;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #fffdf5;
+    border: 1px solid #e0a800;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(92, 67, 0, 0.18);
+    z-index: 1100;
+    font-size: 13px;
+}
+.gz-gs-head {
+    padding: 6px 12px 3px;
+    font-weight: bold;
+    color: #5c4300;
+    background: #fff3c4;
+    border-top: 1px solid #f5d76e;
+}
+.gz-gs-head:first-child {
+    border-top: 0;
+}
+.gz-gs-drop a.gz-gs-item,
+.gz-gs-drop a.gz-gs-all {
+    display: block;
+    padding: 5px 12px;
+    color: #000000;
+    text-decoration: none;
+}
+.gz-gs-drop a.gz-gs-item small {
+    display: block;
+    color: #777777;
+}
+.gz-gs-drop a.gz-gs-item:hover,
+.gz-gs-drop a.gz-gs-item.active,
+.gz-gs-drop a.gz-gs-all:hover,
+.gz-gs-drop a.gz-gs-all.active {
+    background: #fff3c4;
+    color: #5c4300;
+}
+.gz-gs-drop a.gz-gs-all {
+    border-top: 1px solid #f5d76e;
+    text-align: center;
+    font-style: italic;
+}
+.gz-gs-empty {
+    padding: 8px 12px;
+    color: #777777;
+}
+.gz-gs-drop mark,
+.gz-gs-page mark {
+    padding: 0;
+    background: #ffe28a;
+}

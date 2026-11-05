@@ -337,7 +337,9 @@ if (isset($_POST['Insert']) || isset($_POST['Update'])) {   //se non e' il primo
   $form['datnas_M'] = 1;
   $form['datnas_D'] = 1;
   $form['counas'] = $admin_aziend['country'];
-  $form['codpag'] = 1;
+  // pagamento predefinito impostato in Azienda; se non ancora salvato uso 1
+  $default_codpag = gaz_dbi_get_row($gTables['company_config'], 'var', 'default_codpag');
+  $form['codpag'] = ($default_codpag && intval($default_codpag['val']) > 0) ? intval($default_codpag['val']) : 1;
   $form['spefat'] = 'N';
   $form['stapre'] = 'N';
   $form['allegato'] = 1;

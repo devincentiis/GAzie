@@ -102,6 +102,7 @@ $strScript = array("admin_aziend.php" =>
         'stock_eval_method' => 'Metodo de evaluaci&oacute;n de Stock',
         'stock_eval_method_value' => array(0 => 'Estandar', 1 => 'Costo promedio ponderado', 2 => 'LIFO', 3 => 'FIFO'),
         'mascli' => 'Cuenta Maestra de Clientes ',
+        'default_codpag' => 'Pago predeterminado para nuevos clientes',
         'masfor' => 'Cuenta Maestra de Proveedores',
         'masban' => 'Cuenta Maestra de Bancos',
         'mas_staff' => 'Cuenta Maestra de Empleados',

@@ -53,7 +53,7 @@ $strScript = array("admin_orderman.php" =>
 		"Gli operai non possono lavorare più di 13 ore al giorno: D. Lgs. 66/2003",
 		"Aggiungi operaio",
 		"Articolo non presente o sconosciuto! Selezionare l'articolo fra quelli mostrati nell'elenco a tendina.",
-		"Non c'è sufficiente disponibilità di un ID lotto selezionato",
+		"Non c'è sufficiente disponibilità di un ID lotto selezionato", // 21+
 		"Manca la data di registrazione",
 		"Il numero d'ordine inserito è inesistente",
 		"L'articolo è già stato prodotto per questo ordine",
