@@ -46,7 +46,11 @@ $(function () {
     el.appendChild(document.createTextNode(text.slice(last)));
   }
 
-  function render(q, groups, withPages) {
+  function render(q, groups, withPages, tcLink) {
+    // se tcLink non è false vuol dire che è stato selezionato uno script tramite trans_code per link rapido da tastiera
+    if (tcLink){
+      window.location.href = "../"+tcLink;
+    }
     $drop.empty();
     var menu = withPages ? menuMatches(q) : [];
     if (menu.length) groups = [{group: 'Pagine', icon: 'fa-bars', rows: menu}].concat(groups);
@@ -81,7 +85,7 @@ $(function () {
     lastQ = q;
     if (xhr) xhr.abort();
     xhr = $.getJSON(endpoint, {ajax: 1, q: q}, function (data) {
-      if ($.trim($input.val()) === q) render(q, data.groups || [], data.pages !== false);
+      if ($.trim($input.val()) === q) render(q, data.groups || [], data.pages !== false, data.tc_link);
     });
   }
 

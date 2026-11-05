@@ -52,8 +52,21 @@ function gsLike($fields, $term) {
 
 $results = array(); // gruppo => array di risultati (title, detail, url)
 if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
+  $T = $gTables;
+  $notTransCode = true;
+  $tc_link = '';
+  if ( strlen($q) == 6 ) { // se ho digitato 6 caratteri controllo prima se coincide con un trans_code per link rapido da tastiera
+    $sql = "SELECT CONCAT(" . $T['module'] . ".name,'/'," . $T['menu_module'] . ".link) AS tc_link FROM " . $T['menu_module'] . " LEFT JOIN " . $T['module'] . " ON " . $T['menu_module'] . ".id_module = " . $T['module'] . ".id WHERE ".$T['menu_module'].".trans_code = '".strtoupper($q)."' UNION ALL SELECT CONCAT(" . $T['module'] . ".name,'/'," . $T['menu_script'] . ".link) AS tc_link FROM " . $T['menu_script'] . " LEFT JOIN " . $T['menu_module'] . " ON " . $T['menu_script'] . ".id_menu = " . $T['menu_module'] . ".id  LEFT JOIN " . $T['module'] . " ON " . $T['menu_module'] . ".id_module = " . $T['module'] . ".id  WHERE " . $T['menu_script'] . ".trans_code = '".strtoupper($q)."'";
+    $result = gaz_dbi_query($sql);
+    if (gaz_dbi_num_rows($result) >= 1) {
+      $row = gaz_dbi_fetch_array($result);
+      $notTransCode = false;
+      $tc_link = $row['tc_link'];
+      //error_log($tc_link);
+    }
+  }
+  if ($notTransCode){
     $num = ctype_digit($q) ? intval($q) : 0; // termine solo numerico: cerco anche per numero esatto
-    $T = $gTables;
     $anag = $T['clfoco'] . " LEFT JOIN " . $T['anagra'] . " ON " . $T['clfoco'] . ".id_anagra = " . $T['anagra'] . ".id";
     $anagFields = array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['anagra'] . '.pariva', $T['anagra'] . '.codfis',
                         $T['anagra'] . '.e_mail', $T['anagra'] . '.telefo', $T['anagra'] . '.cell', $T['anagra'] . '.citspe');
@@ -185,11 +198,12 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
         }
         if ($rows) $results[] = array('group' => $s['group'], 'icon' => $s['icon'], 'rows' => $rows);
     }
+  }
 }
 
 if ($isAjax) {
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(array('q' => $q, 'pages' => !in_array('pagine', $gsDisabled), 'groups' => $results));
+    echo json_encode(array('q' => $q, 'pages' => !in_array('pagine', $gsDisabled), 'groups' => $results,'tc_link'=>$tc_link));
     exit;
 }
 

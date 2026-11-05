@@ -228,6 +228,9 @@ td.ui-datepicker-other-month>a.ui-state-default.ui-priority-secondary{
 	color: #fff;
 	border-color: transparent;
 }
+.navbar-nav > .user-menu > .dropdown-menu > .user-body a.btn-warning {
+	color: #fff !important;
+}
 .btn-danger {
 	background-color: #5b100c;
 	color: #fff;

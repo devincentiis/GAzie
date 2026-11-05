@@ -509,6 +509,9 @@ $imap_check = gaz_dbi_get_row($gTables['company_config'], 'var', 'imap_server');
 
 ?>
 <script src='../../js/sha256/forge-sha256.min.js'></script>
+<?php
+if ($admin_aziend['Abilit']==9){
+?>
 <script>
 $(function(){
 	$("#dialog_module_card").dialog({ autoOpen: false });
@@ -613,6 +616,14 @@ $(function(){
 		});
 		$("#dialog_module_card" ).dialog( "open" );
 	});
+
+});
+</script>
+<?php
+}
+?>
+<script>
+$(function(){
   $('#user_password_new').keypress(function(e) {
     var s = String.fromCharCode( e.which );
     var pfield = $(this).position();
@@ -1043,17 +1054,17 @@ if ($user_data["Abilit"] == 9) {
 <?php
 if ($admin_aziend['Abilit']==9){
 ?>
-      <div  id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="max-width:1500px; margin:auto;">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header active">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><div class="btn btn-danger glyphicon glyphicon-remove"></div></button>
-                </div>
-                <div class="modal-body edit-content small"></div>
-                <!--<div class="modal-footer"></div>-->
+  <div  id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="max-width:1500px; margin:auto;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header active">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><div class="btn btn-danger glyphicon glyphicon-remove"></div></button>
             </div>
+            <div class="modal-body edit-content small"></div>
+            <!--<div class="modal-footer"></div>-->
         </div>
-      </div>
+    </div>
+  </div>
 	<div style="display:none;" id="dialog_module_card" title="Disabilitazione script">
     <p><b>Modulo:</b></p>
 		<p class="ui-state-highlight" id="iddescri"></p>

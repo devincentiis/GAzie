@@ -12,20 +12,21 @@
     top: 50%;
     transform: translateY(-50%);
     line-height: 1;
-    color: #8a6d00;
+    color: yellow;
+    text-shadow:  0 0 4px #000;
     pointer-events: none; /* il clic sulla lente arriva alla casella */
 }
 #gz-gs-input {
-    display: block; /* il form ha la stessa altezza della casella, cosi' la lente resta centrata */
-    width: 260px;
-    height: 30px;
-    padding: 4px 10px 4px 28px;
-    border: 1px solid #e0a800;
-    border-radius: 15px;
-    background: #fffdf5;
-    color: #000000;
-    font-size: 13px;
-    outline: none;
+	display: block;
+	width: 260px;
+	height: 30px;
+	padding: 4px 10px 4px 28px;
+	border: 1px solid;
+	border-radius: 15px;
+	background: #ffffffe0;
+	color: #000000;
+	font-size: 13px;
+	outline: none;
 }
 #gz-gs-input:focus {
     border-color: #c99300;
@@ -38,10 +39,9 @@
     width: 420px;
     max-height: 70vh;
     overflow-y: auto;
-    background: #fffdf5;
-    border: 1px solid #e0a800;
+    background: #fff;
+    border: 1px solid;
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(92, 67, 0, 0.18);
     z-index: 1100;
     font-size: 13px;
 }
