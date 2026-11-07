@@ -5,7 +5,7 @@
 */
 $module = 'root';
 require("../../library/include/datlib.inc.php");
-require_once("../../library/theme/adminlte_clean/function.php");
+require_once("theme_favorites.lib.php");
 $admin_aziend = checkAdmin();
 
 $user = $admin_aziend['user_name'];

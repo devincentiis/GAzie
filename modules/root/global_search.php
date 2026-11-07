@@ -51,6 +51,7 @@ function gsLike($fields, $term) {
 
 
 $results = array(); // gruppo => array di risultati (title, detail, url)
+$tc_link = ''; // valorizzato solo se il testo è un trans_code (vedi sotto)
 if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
   $T = $gTables;
   $notTransCode = true;
@@ -71,6 +72,9 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
     $anagFields = array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['anagra'] . '.pariva', $T['anagra'] . '.codfis',
                         $T['anagra'] . '.e_mail', $T['anagra'] . '.telefo', $T['anagra'] . '.cell', $T['anagra'] . '.citspe');
     $mascli = intval($admin_aziend['mascli']);
+    // la colonna invoice_descri c'è solo dopo l'aggiornamento 9.13: senza, la fonte contratti cerca solo nelle altre colonne
+    $contrDescri = gaz_dbi_query("SHOW COLUMNS FROM " . $T['contract'] . " LIKE 'invoice_descri'");
+    $hasDescri = gaz_dbi_num_rows($contrDescri) > 0;
     $masfor = intval($admin_aziend['masfor']);
 
     // registro delle fonti: aggiungere una voce per cercare in un'altra tabella
@@ -120,7 +124,7 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
         array('key' => 'contratti', 'group' => 'Contratti', 'icon' => 'fa-handshake-o', 'module' => 'vendit', 'script' => 'admin_contract',
             'select' => $T['contract'] . ".id_contract AS k, CONCAT('Contratto n.', " . $T['contract'] . ".doc_number, ' del ', DATE_FORMAT(" . $T['contract'] . ".conclusion_date, '%d-%m-%Y')) AS t, " . $T['anagra'] . ".ragso1 AS d",
             'from' => $T['contract'] . " LEFT JOIN " . $anag . " ON " . $T['contract'] . ".id_customer = " . $T['clfoco'] . ".codice",
-            'where' => "(" . gsLike(array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['contract'] . '.note', $T['contract'] . '.invoice_descri'), $q) . ($num ? " OR " . $T['contract'] . ".doc_number = " . $num : "") . ")",
+            'where' => "(" . gsLike(array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['contract'] . '.note') + ($hasDescri ? array($T['contract'] . '.invoice_descri') : array()), $q) . ($num ? " OR " . $T['contract'] . ".doc_number = " . $num : "") . ")",
             'order' => $T['contract'] . ".conclusion_date DESC",
             'url' => function ($r) { return '../vendit/admin_contract.php?Update&id_contract=' . intval($r['k']); }),
         array('key' => 'assistenze', 'group' => 'Assistenze', 'icon' => 'fa-wrench', 'module' => 'suppor', 'script' => 'admin_assist',
@@ -173,7 +177,7 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
             'where' => "(" . gsLike(array($T['instal'] . '.oggetto', $T['instal'] . '.descrizione', $T['instal'] . '.seriale', $T['instal'] . '.note', $T['anagra'] . '.ragso1'), $q) . ($num ? " OR " . $T['instal'] . ".codice = " . $num : "") . ")",
             'order' => $T['instal'] . ".datainst DESC",
             'url' => function ($r) { return '../suppor/admin_install.php?codice=' . intval($r['k']) . '&Update'; }),
-        array('key' => 'dipendenti', 'group' => 'Dipendenti', 'icon' => 'fa-id-badge', 'module' => 'humres', 'script' => 'admin_staff',
+        array('key' => 'personale', 'group' => 'Personale', 'icon' => 'fa-users', 'module' => 'humres', 'script' => 'admin_staff',
             'select' => $T['staff'] . ".id_clfoco AS k, CONCAT_WS(' ', " . $T['anagra'] . ".ragso1, " . $T['anagra'] . ".ragso2) AS t, " . $T['staff'] . ".job_title AS d",
             'from' => $T['staff'] . " LEFT JOIN " . $anag . " ON " . $T['staff'] . ".id_clfoco = " . $T['clfoco'] . ".codice",
             'where' => gsLike(array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['anagra'] . '.codfis', $T['staff'] . '.job_title'), $q),
@@ -187,11 +191,23 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
             'url' => function ($r) { return '../orderman/admin_orderman.php?Update&codice=' . intval($r['k']); }),
     );
 
+    // funzioni rapide (codici del menu, es. FATVEN): elenco in cima alla tendina; il codice esatto apre la pagina direttamente (vedi tc_link)
+    if (!in_array('codici', $gsDisabled)) {
+        $quickUrl = null;
+        $qrows = gsQuickCodes($q, $limit, $quickUrl);
+        if ($qrows) $results[] = array('group' => 'Funzioni rapide', 'icon' => 'fa-bolt', 'rows' => $qrows);
+    }
+
     foreach ($sources as $s) {
         // le fonti pesanti solo nella pagina completa, a meno che l'utente non le voglia anche nella tendina
         if ($isAjax && !empty($s['page_only']) && !in_array($s['key'], $gsSettings['dropdown'])) continue;
         if (in_array($s['key'], $gsDisabled) || !gsCanSee($s['module'], $s['script'])) continue;
-        $rs = gaz_dbi_dyn_query($s['select'], $s['from'], $s['where'], $s['order'], 0, $limit);
+        // una fonte che non risponde (tabella o colonna mancante) non blocca le altre
+        try {
+            $rs = gaz_dbi_dyn_query($s['select'], $s['from'], $s['where'], $s['order'], 0, $limit);
+        } catch (Throwable $e) {
+            continue;
+        }
         $rows = array();
         while ($r = gaz_dbi_fetch_array($rs)) {
             $rows[] = array('title' => (string) $r['t'], 'detail' => (string) $r['d'], 'url' => $s['url']($r));

@@ -200,9 +200,9 @@ class Report_template extends TCPDF {
         //Compute the check digit
         $sum = 0;
         for ($i = 1; $i <= 11; $i+=2)
-            $sum+=3 * $barcode{$i};
+            $sum+=3 * $barcode[$i];
         for ($i = 0; $i <= 10; $i+=2)
-            $sum+=$barcode{$i};
+            $sum+=$barcode[$i];
         $r = $sum % 10;
         if ($r > 0)
             $r = 10 - $r;
@@ -213,10 +213,10 @@ class Report_template extends TCPDF {
         //Test validity of check digit
         $sum = 0;
         for ($i = 1; $i <= 11; $i+=2)
-            $sum+=3 * $barcode{$i};
+            $sum+=3 * $barcode[$i];
         for ($i = 0; $i <= 10; $i+=2)
-            $sum+=$barcode{$i};
-        return ($sum + $barcode{12}) % 10 == 0;
+            $sum+=$barcode[$i];
+        return ($sum + $barcode[12]) % 10 == 0;
     }
 
     function Barcode($x, $y, $barcode, $h, $w, $len) {
@@ -255,17 +255,17 @@ class Report_template extends TCPDF {
             '9' => array('A', 'B', 'B', 'A', 'B', 'A')
         );
         $code = '101';
-        $p = $parities[$barcode{0}];
+        $p = $parities[$barcode[0]];
         for ($i = 1; $i <= 6; $i++)
-            $code.=$codes[$p[$i - 1]][$barcode{$i}];
+            $code.=$codes[$p[$i - 1]][$barcode[$i]];
         $code.='01010';
         for ($i = 7; $i <= 12; $i++)
-            $code.=$codes['C'][$barcode{$i}];
+            $code.=$codes['C'][$barcode[$i]];
         $code.='101';
         $this->SetFillColor(0);
         //Draw bars
         for ($i = 0; $i < strlen($code); $i++) {
-            if ($code{$i} == '1')
+            if ($code[$i] == '1')
                 $this->Rect($x + $i * $w, $y, $w, $h, 'F');
         }
         //Print text uder barcode

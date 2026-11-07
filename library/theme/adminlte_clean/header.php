@@ -4,6 +4,7 @@
   Il menu e la logica di HeadMain() sono in function.php di questo tema.
 */
 require_once("../../library/theme/adminlte_clean/function.php");
+require_once("../root/theme_favorites.lib.php");
 // statistiche di utilizzo del menu (gaz_menu_usage): come nel tema lte, conta gli accessi alle pagine dei moduli
 if (isset($scriptname) && $scriptname != 'admin.php') {
     $gzUsage = gaz_dbi_dyn_query("*", $gTables['menu_usage'], ' adminid="' . $admin_aziend["user_name"] . '" AND company_id="' . $admin_aziend['company_id'] . '" AND link="' . $mod_uri . '" ', ' adminid', 0, 1);

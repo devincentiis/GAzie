@@ -5,7 +5,7 @@
   I preferiti sono salvati per azienda e utente in data/files/<company_id>/<user_name>.json.
 */
 require("../../library/include/datlib.inc.php");
-require_once("../../library/theme/adminlte_clean/function.php");
+require_once("theme_favorites.lib.php");
 
 if (empty($_SESSION['user_name']) || empty($_SESSION['company_id'])) {
     http_response_code(403);

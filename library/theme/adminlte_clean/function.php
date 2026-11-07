@@ -469,47 +469,4 @@ function pastelColors() {
     return $r . $g . $b;
 }
 
-// file dei preferiti di un utente in una azienda: data/files/<company_id>/<user_name>.json
-// il nome utente è ripulito, così non può uscire dalla cartella
-function gzFavoritesFile($companyId, $user) {
-    $name = preg_replace('/[^A-Za-z0-9_.-]/', '_', (string) $user);
-    return __DIR__ . '/../../../data/files/' . (int) $companyId . '/' . $name . '.json';
-}
 
-// preferiti dell'utente nell'azienda (stellina nella barra)
-function gzFavoritesFor($companyId, $user) {
-    $file = gzFavoritesFile($companyId, $user);
-    return is_file($file) ? (json_decode((string) file_get_contents($file), true) ?: []) : [];
-}
-
-// salva i preferiti dell'utente nell'azienda; la cartella viene creata se manca
-function gzFavoritesSave($companyId, $user, $list) {
-    $file = gzFavoritesFile($companyId, $user);
-    if (!is_dir(dirname($file))) {
-        mkdir(dirname($file), 0775, true);
-    }
-    file_put_contents($file, json_encode(array_values($list), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-}
-
-// la pagina corrente è nei preferiti dell'utente?
-function gzIsFavorite($companyId, $user, $link) {
-    foreach (gzFavoritesFor($companyId, $user) as $f) {
-        if ($f['link'] === $link) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// sigla di una pagina dal nome del file: prima lettera del prefisso + il resto in maiuscolo
-// es. report_docven.php -> RDOCVEN, admin_utente.php -> AUTENTE
-// sigla del pulsante: quella scelta dall'utente nei preferiti, altrimenti ricavata dal nome del file
-function gzPageCode($link, $custom = '') {
-    if ($custom !== '') {
-        return $custom;
-    }
-    $base = pathinfo(basename((string) $link), PATHINFO_FILENAME);
-    $parts = explode('_', $base);
-    $code = mb_strtoupper(mb_substr($parts[0], 0, 1)) . mb_strtoupper(implode('', array_slice($parts, 1)));
-    return $code !== '' ? $code : mb_strtoupper($base);
-}

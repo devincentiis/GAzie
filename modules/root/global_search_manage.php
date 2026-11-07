@@ -51,14 +51,18 @@ if (isset($_POST['tutte'])) {
     exit;
 }
 
+// elenco delle funzioni rapide che l'utente può usare (codici del menu)
+$quickExact = null;
+$quickList = gsQuickCodes('', 500, $quickExact);
+
 require("../../library/include/header.php");
 $script_transl = HeadMain();
 ?>
-<div class="box box-primary">
-  <div class="box-body">
+<div class="panel panel-info">
+  <div class="box-body text-center">
     <h4>Ricerca globale</h4>
     <p>Scegli in quali dati cercare con il campo "Cerca in GAzie" nella barra in alto (scorciatoia <b>Ctrl+K</b>).</p>
-    <table class="table table-striped table-bordered table-condensed" style="max-width: 640px;">
+    <table class="table Tmiddle table-striped table-bordered table-condensed" align="center">
       <thead>
         <tr><th></th><th>Cerca in</th><th>Modulo</th><th class="text-center">Stato</th><th class="text-center">Anche nella tendina</th><th></th></tr>
       </thead>
@@ -94,12 +98,34 @@ $script_transl = HeadMain();
       <button type="submit" name="tutte" value="1" class="btn btn-sm btn-default">Riattiva tutte</button>
     </form>
     <br>
+    <h4>Funzioni rapide</h4>
+    <p>Digita uno di questi codici (o l'inizio) nel campo "Cerca in GAzie": <b>Invio</b> sul codice completo apre subito la funzione.<?php echo in_array('codici', $disabled) ? ' <span class="label label-default">esclusa dalla ricerca</span>' : ''; ?></p>
+    <?php if ($quickList) { ?>
+    <table class="table Tmiddle table-striped table-bordered table-condensed" align="center">
+      <thead><tr><th>Codice</th><th>Funzione</th><th>Modulo</th></tr></thead>
+      <tbody>
+      <?php foreach ($quickList as $qr) { ?>
+      <tr>
+        <td><code><?php echo htmlspecialchars($qr['code']); ?></code></td>
+        <td><a href="<?php echo htmlspecialchars($qr['url']); ?>"><?php echo htmlspecialchars($qr['label']); ?></a></td>
+        <td><?php echo htmlspecialchars($qr['detail']); ?></td>
+      </tr>
+      <?php } ?>
+      </tbody>
+    </table>
+    <?php } else { ?>
+    <p class="text-muted">Nessuna funzione rapida disponibile per i tuoi permessi.</p>
+    <?php } ?>
+    <br>
     <h4>Come funziona</h4>
+  </div>
+  <div>
     <ul>
       <li><b>Fonti:</b> compaiono solo i dati dei moduli a cui hai accesso. Una fonte esclusa non viene più cercata, né nella tendina né nella pagina dei risultati.</li>
       <li><b>Anche nella tendina:</b> le righe dei documenti sono le tabelle più grandi, quindi di base compaiono solo nella pagina completa dei risultati (Invio o "Vedi tutti i risultati"). Spuntando la casella compaiono anche nella tendina mentre scrivi, con qualche decimo di secondo in più di attesa.</li>
       <li><b>Jolly:</b> <code>*</code> (o <code>%</code>) sostituisce qualsiasi testo e <code>?</code> un solo carattere. Per esempio <code>toner*hp</code> trova "TONER NERO PER HP" e <code>fel?s</code> trova "Felis". La ricerca è sempre di tipo "contiene".</li>
       <li><b>Pagine del menu:</b> cerca tra le voci della barra laterale, per arrivare velocemente a una pagina scrivendone il nome.</li>
+      <li><b>Funzioni rapide:</b> sono i codici assegnati alle voci del menu (campo <code>trans_code</code> in <code>gaz_menu_script</code> e <code>gaz_menu_module</code>); si cercano dall'inizio del codice e compaiono in cima alla tendina.</li>
       <li><b>Personali:</b> ogni utente ha le proprie scelte, in ogni azienda.</li>
       <li><b>Salvataggio:</b> le scelte sono memorizzate in <code>data/files/&lt;azienda&gt;/&lt;utente&gt;_ricerca.json</code>, accanto ai preferiti. Senza il file tutte le fonti sono attive.</li>
     </ul>

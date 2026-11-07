@@ -53,7 +53,11 @@ $(function () {
     }
     $drop.empty();
     var menu = withPages ? menuMatches(q) : [];
-    if (menu.length) groups = [{group: 'Pagine', icon: 'fa-bars', rows: menu}].concat(groups);
+    // le funzioni rapide restano in cima; le pagine del menu vengono subito dopo
+    if (menu.length) {
+      var pg = {group: 'Pagine', icon: 'fa-bars', rows: menu};
+      groups = (groups.length && groups[0].group === 'Funzioni rapide') ? [groups[0], pg].concat(groups.slice(1)) : [pg].concat(groups);
+    }
     if (!groups.length) {
       $drop.append($('<div class="gz-gs-empty"></div>').text('Nessun risultato'));
     }

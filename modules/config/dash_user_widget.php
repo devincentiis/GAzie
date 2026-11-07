@@ -45,6 +45,13 @@ $(function(){
 </div>
 <input id="post_logout" type="hidden" name="" />
 <style>
+img.usr-picture {
+	width: 120px;
+	height: 120px;
+	object-fit: cover;
+	display: block;
+	margin: 0 auto;
+}
 img.usr-picture:hover {
 	box-shadow: 0 0 5px #<?php echo $admin_aziend['colore']; ?>;
 }
