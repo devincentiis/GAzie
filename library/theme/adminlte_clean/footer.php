@@ -7,6 +7,20 @@ $contact_link = (isset($contact_link)) ? $contact_link : '';
         </section>
     </div>
     <footer class="main-footer">
+        <?php
+        // come nel tema lte: con il debug attivo (debug_active in gconfig.myconf.php) l'amministratore (livello 9)
+        // vede le versioni di database e PHP, la chiave di sessione e il collegamento all'utilità degli hash
+        if (!empty($debug_active) && isset($admin_aziend['Abilit']) && $admin_aziend['Abilit'] == 9) {
+            $gzDbVer = gaz_dbi_fetch_array(gaz_dbi_query("SELECT @@version"));
+            echo '<div class="gz-debug hidden-xs">'
+                . '<span class="label label-danger">DEBUG ON</span>'
+                . '<a class="btn btn-xs btn-info gz-debug-hash" href="../../passhash.php">HASHES UTILITY</a>'
+                . ' '
+                . 'DB: ' . htmlspecialchars($gzDbVer ? $gzDbVer[0] : '') . ' - PHP: ' . phpversion()
+                . '<span class="gz-debug-key">' . (isset($_SESSION['aes_key']) ? htmlspecialchars((string) $_SESSION['aes_key'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : '') . '</span>'
+                . '</div>';
+        }
+        ?>
         <a target="_new" href="https://<?php echo $contact_link; ?>">https://<?php echo $contact_link; ?></a>
         <div class="pull-right hidden-xs">Version <?php echo defined('GAZIE_VERSION') ? GAZIE_VERSION : ''; ?></div>
     </footer>

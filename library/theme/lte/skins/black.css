@@ -460,3 +460,23 @@ mark.apply-evidenze-e {
 mark.apply-evidenze-n {
  background: #FD3030;
 }
+
+/* acquisizione fatture elettroniche di acquisto (modules/acquis/acquire_invoice.php) */
+.ai-card, .ai-ov-box { background: #121a1a; border-color: #444; }
+.ai-card > h4, .ai-ov-bar, .ai-tab th, .ai-tab td, .ai-rep li { border-color: #333; }
+.ai-ov-bar { background: #201e1d; }
+.ai-picked { color: #ddd; }
+.ai-drop { color: #bbb; border-color: #555; }
+.ai-drop:hover, .ai-drop.ai-over { background: #1b2730; }
+.ai-tab tr.ai-current td { background: #3a3415; }
+#gaz-wait { background: rgba(0,0,17,.65); }
+#gaz-wait .gaz-wait-msg { color: #ddd; }
+
+/* cruscotti statistici (modules/stats): colori per lo sfondo scuro */
+.sv-kpi, .sv-card, .sa-kpi, .sa-card, .sm-kpi, .sm-card { background: #121a1a; border-color: #444; }
+.sm-kpi.sm-alert { background: #2a1515; border-color: #7a3a35; }
+.sv-card > h4, .sa-card > h4, .sm-card > h4, .sv-tab th, .sv-tab td, .sa-tab th, .sa-tab td, .sm-tab th, .sm-tab td { border-color: #333; }
+.sv-kpi .sv-val, .sa-kpi .sa-val, .sm-kpi .sm-val { color: #fff; }
+.sv-period, .sa-period, .sm-period { color: #ddd; }
+.sv-kpi .sv-lbl, .sa-kpi .sa-lbl, .sm-kpi .sm-lbl, .sv-tab th, .sa-tab th, .sm-tab th, .sv-filter label, .sa-filter label, .sm-filter label { color: #aaa; }
+.sv-bar, .sa-bar { background: #2a3136; }

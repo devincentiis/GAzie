@@ -1,6 +1,6 @@
 UPDATE `gaz_config` SET `cvalue` = '163' WHERE `id` =2;
-ALTER TABLE `gaz_menu_module`	ADD COLUMN `trans_code` VARCHAR(6) NULL COMMENT 'Sequenza di caratteri da digitare per avvio rapido da tastiera' AFTER `accesskey`, ADD INDEX `trans_code` (`trans_code`);
-ALTER TABLE `gaz_menu_script`	ADD COLUMN `trans_code` VARCHAR(6) NULL COMMENT 'Sequenza di caratteri da digitare per avvio rapido da tastiera' AFTER `accesskey`, ADD INDEX `trans_code` (`trans_code`);
+ALTER TABLE `gaz_menu_module`	ADD COLUMN `trans_code` VARCHAR(6) NULL COMMENT 'Sequenza di caratteri da digitare per avvio rapido da tastiera' AFTER `accesskey`, ADD INDEX (`trans_code`);
+ALTER TABLE `gaz_menu_script`	ADD COLUMN `trans_code` VARCHAR(6) NULL COMMENT 'Sequenza di caratteri da digitare per avvio rapido da tastiera' AFTER `accesskey`, ADD INDEX (`trans_code`);
 UPDATE `gaz_menu_script` SET `trans_code`='MOVCON' WHERE `link`='admin_movcon.php?Insert';
 UPDATE `gaz_menu_script` SET `trans_code`='MOVMAG' WHERE `link`='admin_movmag.php?Insert';
 UPDATE `gaz_menu_script` SET `trans_code`='DDTVEN' WHERE `link`='admin_docven.php?Insert&tipdoc=DDT';
@@ -10,6 +10,28 @@ UPDATE `gaz_menu_script` SET `trans_code`='PREVEN' WHERE `link`='admin_broven.ph
 UPDATE `gaz_menu_script` SET `trans_code`='ORDACQ' WHERE `link`='admin_broacq.php?tipdoc=AOR';
 UPDATE `gaz_menu_script` SET `trans_code`='PREACQ' WHERE `link`='admin_broacq.php?tipdoc=APR';
 CREATE TABLE IF NOT EXISTS `gaz_api_token` ( `id` INT NOT NULL AUTO_INCREMENT, `adminid` VARCHAR(20) NOT NULL,`nome` VARCHAR(60) NOT NULL DEFAULT '', `token_hash` CHAR(64) NOT NULL, `created` DATETIME NOT NULL, `expires` DATETIME NOT NULL, `revoked` TINYINT NOT NULL DEFAULT 0, `last_used` DATETIME DEFAULT NULL, PRIMARY KEY (`id`), UNIQUE KEY `token_hash` (`token_hash`));
+ALTER TABLE `gaz_breadcrumb` COMMENT='Tabella utilizzata dai widget della dashboard personalizzate dai singoli utenti (exec_mode=2), per la personalizzazione delle ricerche globali - global_search (exec_mode=5), per la memorizzazione delle voci di menù preferite ', ADD INDEX (`file`);
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'codici','Funzioni rapide (codici del menu)'
+FROM `gaz_aziend` a,`gaz_admin` u;
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'pagine','Pagine del menu'
+FROM `gaz_aziend` a,`gaz_admin` u;
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'barcode_doc','Return Automatico'
+FROM `gaz_aziend` a,`gaz_admin` u;
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'articoli','Articoli'
+FROM `gaz_aziend` a,`gaz_admin` u;
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'clienti','Clienti'
+FROM `gaz_aziend` a,`gaz_admin` u;
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'fornitori','Fornitori'
+FROM `gaz_aziend` a,`gaz_admin` u;
+INSERT INTO `gaz_breadcrumb` (`exec_mode`,`codice_aziend`,`adminid`,`file`,`titolo`)
+SELECT 5,a.codice,u.user_name,'produzioni','Produzioni/commesse'
+FROM `gaz_aziend` a,`gaz_admin` u;
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
 SET @adminid_existsXXX = ( SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'gaz_XXXrigbro' AND COLUMN_NAME = 'adminid');
 SET @adminid_queryXXX = IF(@adminid_existsXXX = 0,  "ALTER TABLE `gaz_XXXrigbro` ADD COLUMN `adminid` VARCHAR(20) NOT NULL AFTER `status`","SELECT 1");

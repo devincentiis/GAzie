@@ -49,8 +49,7 @@ if(isset($_POST['addrow'])&&!empty($_POST['addrow'])){ // aggiungo il widget
 	$file=filter_var($_POST['addrow'],FILTER_SANITIZE_FULL_SPECIAL_CHARS).".php";
 	// controllo se il widget è sul db
 	$widget_exist=gaz_dbi_get_row($gTables['breadcrumb'], "adminid ='".$admin_aziend['user_name']."' AND (codice_aziend = 0 OR codice_aziend = ".$admin_aziend['codice'].") AND file", $file);
-
-  if($widget_exist){ // il widget esiste faccio l'upload
+  if ($widget_exist) { // il widget esiste faccio l'upload
 		gaz_dbi_put_row($gTables['breadcrumb'],'id_bread',$widget_exist['id_bread'],'exec_mode', 2);
 		if (!empty($titolo)){ // ho modificato il titolo
 			gaz_dbi_put_row($gTables['breadcrumb'],'id_bread',$widget_exist['id_bread'],'titolo', $titolo);
@@ -58,11 +57,11 @@ if(isset($_POST['addrow'])&&!empty($_POST['addrow'])){ // aggiungo il widget
     if ($widget_exist['codice_aziend']==0){// se il codice azienda è ancora 0 lo imposto
       gaz_dbi_put_row($gTables['breadcrumb'],'id_bread',$widget_exist['id_bread'],'codice_aziend', $admin_aziend['codice']);
     }
-	}else{ // non esiste lo devo inserire
+	} else { // non esiste lo devo inserire
 		gaz_dbi_query("INSERT INTO " . $gTables['breadcrumb'] . "(position_order,exec_mode,file,titolo,adminid,codice_aziend)  SELECT COALESCE(MAX(position_order),0)+1,'2','".$file."','".$titolo."','" . $admin_aziend['user_name'] . "', ". $admin_aziend['codice'] ." FROM " . $gTables['breadcrumb']." WHERE adminid = '".$admin_aziend['user_name']."'");
 	}
-}elseif(isset($_POST['delrow'])&&!empty($_POST['delrow'])){ // elimino il widget dall'utente facendo l'upload del rigo
-	gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET exec_mode = 9 WHERE file = '".$_POST['delrow'].".php' AND adminid = '".$admin_aziend['user_name']."' AND (codice_aziend = 0 OR codice_aziend = ".$admin_aziend['codice'].")");
+} else if (isset($_POST['delrow'])&&!empty($_POST['delrow'])){ // elimino il widget dall'utente
+  gaz_dbi_query("DELETE FROM ".$gTables['breadcrumb']." WHERE file = '".filter_input(INPUT_POST, 'delrow', FILTER_SANITIZE_URL).".php' AND adminid = '".$admin_aziend['user_name']."' AND (codice_aziend = 0 OR codice_aziend = ".(int)$admin_aziend['codice'].")");
 }
 ?>
 <script>

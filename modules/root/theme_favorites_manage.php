@@ -1,27 +1,50 @@
 <?php
 /*
+  --------------------------------------------------------------------------
+  GAzie - Gestione Azienda
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
+  --------------------------------------------------------------------------
+  Questo programma e` free software;   e` lecito redistribuirlo  e/o
+  modificarlo secondo i  termini della Licenza Pubblica Generica GNU
+  come e` pubblicata dalla Free Software Foundation; o la versione 2
+  della licenza o (a propria scelta) una versione successiva.
+
+  Questo programma  e` distribuito nella speranza  che sia utile, ma
+  SENZA   ALCUNA GARANZIA; senza  neppure  la  garanzia implicita di
+  NEGOZIABILITA` o di  APPLICABILITA` PER UN  PARTICOLARE SCOPO.  Si
+  veda la Licenza Pubblica Generica GNU per avere maggiori dettagli.
+
+  Ognuno dovrebbe avere   ricevuto una copia  della Licenza Pubblica
+  Generica GNU insieme a   questo programma; in caso  contrario,  si
+  scriva   alla   Free  Software Foundation, 51 Franklin Street,
+  Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
+  --------------------------------------------------------------------------
+  AUTORE: Andrea Biasi
+  -------------------------------------------------------------------
+ */
+
+/*
   GAzie - gestione dei preferiti della barra laterale (tema adminlte_clean).
   Mostra i preferiti dell'utente nell'azienda (data/files/<company_id>/<user_name>.json) e permette di modificarli e rimuoverli.
 */
 $module = 'root';
 require("../../library/include/datlib.inc.php");
-require_once("theme_favorites.lib.php");
 $admin_aziend = checkAdmin();
-
-$user = $admin_aziend['user_name'];
-$companyId = $admin_aziend['company_id'];
+require_once("theme_favorites.lib.php");
 
 // rimozione di un preferito dell'utente
 if (isset($_POST['rimuovi']) && preg_match('#^/[a-z0-9_]+/[a-z0-9_]+\.php(\?[a-z0-9_&=.%-]*)?$#i', $_POST['rimuovi'])) {
-    $list = array_values(array_filter(gzFavoritesFor($companyId, $user), function ($f) {
+    $list = array_values(array_filter(gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']), function ($f) {
         return $f['link'] !== $_POST['rimuovi'];
     }));
-    gzFavoritesSave($companyId, $user, $list);
+    gzFavoritesSave($admin_aziend['company_id'], $admin_aziend['user_name'], $list);
     header('Location: theme_favorites_manage.php');
     exit;
 }
 
-$mine = gzFavoritesFor($companyId, $user);
+$mine = gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']);
 
 // modifica di nome e link di un preferito dell'utente: la riga diventa un form (?modifica=posizione nell'elenco)
 $pattern_link = '#^/[a-z0-9_]+/[a-z0-9_]+\.php(\?[a-z0-9_&=.%-]*)?$#i';
@@ -65,7 +88,7 @@ if (isset($_POST['salva'])) {
                 }
             }
         }
-        gzFavoritesSave($companyId, $user, $mine);
+        gzFavoritesSave($admin_aziend['company_id'], $admin_aziend['user_name'], $mine);
         header('Location: theme_favorites_manage.php');
         exit;
     }

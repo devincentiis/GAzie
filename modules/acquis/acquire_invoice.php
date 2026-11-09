@@ -22,6 +22,10 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
+// Acquisizione delle fatture elettroniche di acquisto (XML / P7M).
+// La pagina iniziale carica più fatture insieme (anche pacchetti ZIP) nella coda "faesync" (gaz_NNNfiles con item_ref = 'faesync',
+// file in data/files/<azienda>/doc/<id_doc>.<estensione>), la stessa usata dai moduli di sincronizzazione; ogni fattura della coda
+// si apre in un riquadro su questa stessa pagina (POST fae_from_sync) e, dopo la conferma, si passa da soli alla successiva.
 require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
 $admin_aziend = checkAdmin();
@@ -216,6 +220,344 @@ function concileDdT($name,$sel,$acc_DataDDT) {
 $sync_mods=[];
 $sync_mods=explode(",",$admin_aziend['gazSynchro']);
 
+// ---------------------------------------------------------------- acquisizione massiva: coda delle fatture da acquisire
+$aiSelf = basename($_SERVER['SCRIPT_NAME']);
+
+// ---------------------------------------------------------------- abbinamento automatico degli articoli
+// Per ogni rigo della fattura si cerca l'articolo di magazzino più corrispondente, in quest'ordine:
+//  1. memoria: un rigo di una fattura precedente dello stesso fornitore con lo stesso codice (o la stessa descrizione)
+//     a cui era stato assegnato un articolo, anche a mano: così una scelta fatta una volta viene riproposta da sola;
+//  2. codice: il codice riportato in fattura (CodiceValore) uguale al codice, al codice fornitore o al barcode di un articolo;
+//  3. descrizione: l'articolo con la descrizione più simile (solo sopra la soglia $aiMatchMin, da controllare).
+// Restituisce false oppure ['codart', 'descri', 'how' => memoria|codice|descrizione, 'score' => 0-100].
+$aiMatchMin = 75;
+function aiNorm($s) {
+    $s = strtoupper(iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', (string) $s));
+    return trim(preg_replace('/[^A-Z0-9]+/', ' ', $s));
+}
+function aiSimilar($a, $b) {
+    $a = aiNorm($a); $b = aiNorm($b);
+    if ($a === '' || $b === '') return 0;
+    if ($a === $b) return 100;
+    similar_text($a, $b, $pct);
+    $ta = array_unique(explode(' ', $a)); $tb = array_unique(explode(' ', $b));
+    $tok = 100 * count(array_intersect($ta, $tb)) / count(array_unique(array_merge($ta, $tb)));
+    return (int) round(max($pct, ($pct + $tok * 2) / 3));
+}
+function aiFindArticle($codiceFornitore, $codes, $descri, $clfoco) {
+    global $gTables, $aiMatchMin;
+    $e = function ($s) { return gaz_dbi_real_escape_string((string) $s); };
+    $clfoco = intval($clfoco);
+    $art = $gTables['artico'];
+    $hist = $gTables['rigdoc'] . ' r JOIN ' . $gTables['tesdoc'] . ' t ON t.id_tes = r.id_tes JOIN ' . $art . ' a ON a.codice = r.codart';
+    // 1. memoria: abbinamenti salvati nel custom_field degli articoli, poi i righi precedenti dello stesso fornitore con lo stesso codice
+    $m = aiAliasFind($clfoco, $codiceFornitore, $descri);
+    if ($m) return $m;
+    if ($clfoco > 0) {
+        $conds = array();
+        if ($codiceFornitore !== '') $conds[] = "r.codice_fornitore = '" . $e($codiceFornitore) . "'";
+        foreach ($conds as $cond) {
+            $rs = gaz_dbi_query("SELECT r.codart, MAX(a.descri) AS descri, MAX(r.descri) AS rd, MAX(r.id_rig) AS last FROM $hist
+                WHERE t.clfoco = $clfoco AND t.tipdoc LIKE 'A%' AND r.codart <> '' AND $cond GROUP BY r.codart ORDER BY last DESC LIMIT 5");
+            $found = array();
+            while ($r = gaz_dbi_fetch_array($rs)) $found[] = $r;
+            if (count($found) == 1) return array('codart' => $found[0]['codart'], 'descri' => $found[0]['descri'], 'how' => 'memoria', 'score' => 100);
+            // stesso codice usato dal fornitore per articoli diversi: vale solo se anche la descrizione è la stessa
+            foreach ($found as $r) {
+                if (aiNorm($r['rd']) === aiNorm($descri)) return array('codart' => $r['codart'], 'descri' => $r['descri'], 'how' => 'memoria', 'score' => 100);
+            }
+        }
+    }
+    // 2. codice in fattura = codice, codice fornitore o barcode di un articolo
+    $vals = array();
+    foreach ($codes as $c) {
+        $c = trim($c);
+        if (strlen($c) >= 3 && $c !== '0' && !preg_match('/^0+$/', $c)) $vals[] = "'" . $e($c) . "'";
+    }
+    if ($vals) {
+        $in = implode(',', array_unique($vals));
+        $rs = gaz_dbi_query("SELECT codice, descri, clfoco FROM $art WHERE codice IN ($in) OR codice_fornitore IN ($in) OR barcode IN ($in) LIMIT 20");
+        $best = false; $bestScore = -1; $n = 0;
+        while ($r = gaz_dbi_fetch_array($rs)) {
+            $n++;
+            // con più articoli candidati si preferisce quello dello stesso fornitore e poi quello con la descrizione più simile
+            $s = aiSimilar($r['descri'], $descri) + (intval($r['clfoco']) == $clfoco ? 100 : 0);
+            if ($s > $bestScore) { $bestScore = $s; $best = $r; }
+        }
+        if ($best && ($n == 1 || $bestScore >= 100 + 50 || aiSimilar($best['descri'], $descri) >= 50)) {
+            return array('codart' => $best['codice'], 'descri' => $best['descri'], 'how' => 'codice', 'score' => 100);
+        }
+    }
+    // 3. descrizione più simile: candidati che contengono le due parole più lunghe della descrizione
+    $words = array_filter(array_unique(explode(' ', aiNorm($descri))), function ($w) { return strlen($w) >= 4 && !ctype_digit($w); });
+    usort($words, function ($a, $b) { return strlen($b) - strlen($a); });
+    $words = array_slice($words, 0, 2);
+    if (count($words) == 2) {
+        $like = array();
+        foreach ($words as $w) $like[] = "descri LIKE '%" . $e($w) . "%'";
+        $rs = gaz_dbi_query("SELECT codice, descri, clfoco FROM $art WHERE " . implode(' AND ', $like) . " ORDER BY (clfoco = '$clfoco') DESC LIMIT 60");
+        $best = false; $bestScore = 0;
+        while ($r = gaz_dbi_fetch_array($rs)) {
+            $s = aiSimilar($r['descri'], $descri);
+            if (intval($r['clfoco']) == $clfoco) $s += 3; // a parità si preferisce un articolo dello stesso fornitore
+            if ($s > $bestScore) { $bestScore = $s; $best = $r; }
+        }
+        if ($best && $bestScore >= $aiMatchMin) {
+            return array('codart' => $best['codice'], 'descri' => $best['descri'], 'how' => 'descrizione', 'score' => min(99, $bestScore));
+        }
+    }
+    return false;
+}
+// Memoria degli abbinamenti nel custom_field (JSON) dell'articolo, chiave "fae_alias": elenco di chiavi
+// "<fornitore>|C|<codice in fattura>" e "<fornitore>|D|<descrizione normalizzata>". Le altre chiavi del JSON restano com'erano.
+function aiAliasKeys($clfoco, $codiceFornitore, $descri) {
+    $k = array();
+    if (trim($codiceFornitore) !== '') $k[] = intval($clfoco) . '|C|' . trim($codiceFornitore);
+    $d = aiNorm($descri);
+    if ($d !== '') $k[] = intval($clfoco) . '|D|' . substr($d, 0, 120);
+    return $k;
+}
+function aiAliasOwners($key) { // articoli che hanno la chiave fra i propri abbinamenti
+    global $gTables;
+    $like = gaz_dbi_real_escape_string(addcslashes(json_encode($key, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '\\%_'));
+    $rs = gaz_dbi_query("SELECT codice, descri, custom_field FROM " . $gTables['artico'] . " WHERE custom_field LIKE '%" . $like . "%' LIMIT 5");
+    $acc = array();
+    while ($r = gaz_dbi_fetch_array($rs)) {
+        $cf = json_decode((string) $r['custom_field'], true);
+        if (is_array($cf) && isset($cf['fae_alias']) && in_array($key, (array) $cf['fae_alias'], true)) {
+            $r['cf'] = $cf;
+            $acc[] = $r;
+        }
+    }
+    return $acc;
+}
+function aiAliasFind($clfoco, $codiceFornitore, $descri) {
+    if (intval($clfoco) <= 0) return false;
+    foreach (aiAliasKeys($clfoco, $codiceFornitore, $descri) as $key) {
+        $own = aiAliasOwners($key);
+        if ($own) return array('codart' => $own[0]['codice'], 'descri' => $own[0]['descri'], 'how' => 'memoria', 'score' => 100);
+    }
+    return false;
+}
+function aiAliasSave($codart, $clfoco, $codiceFornitore, $descri) {
+    global $gTables;
+    $enc = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+    if (intval($clfoco) <= 0 || $codart === '' || substr($codart, 0, 6) == 'Insert') return;
+    $art = gaz_dbi_get_row($gTables['artico'], 'codice', $codart);
+    if (!$art) return;
+    $keys = aiAliasKeys($clfoco, $codiceFornitore, $descri);
+    foreach ($keys as $key) { // una chiave punta a un solo articolo: se è stata cambiata a mano la si toglie dal precedente
+        foreach (aiAliasOwners($key) as $o) {
+            if ($o['codice'] == $codart) continue;
+            $o['cf']['fae_alias'] = array_values(array_diff((array) $o['cf']['fae_alias'], array($key)));
+            gaz_dbi_put_row($gTables['artico'], 'codice', $o['codice'], 'custom_field', json_encode($o['cf'], $enc));
+        }
+    }
+    $cf = json_decode((string) $art['custom_field'], true);
+    if (!is_array($cf)) $cf = array();
+    $list = isset($cf['fae_alias']) ? array_values((array) $cf['fae_alias']) : array();
+    $new = array_slice(array_values(array_unique(array_merge(array_diff($list, $keys), $keys))), -30); // gli ultimi 30 abbinamenti
+    if ($new === $list) return;
+    $cf['fae_alias'] = $new;
+    gaz_dbi_put_row($gTables['artico'], 'codice', $codart, 'custom_field', json_encode($cf, $enc));
+}
+$aiDocDir = DATA_DIR . 'files/' . $admin_aziend['codice'] . '/doc/';
+$aiTmpDir = DATA_DIR . 'files/tmp/';
+$aiMaxZipEntries = 2000;
+
+function aiH($s) { return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8'); }
+
+// nome del file come lo userà acquire_invoice.php (che lo copia in data/files/<azienda>/<nome>): senza percorso né caratteri strani
+function aiCleanName($name) {
+    $name = basename(str_replace('\\', '/', (string) $name));
+    $name = preg_replace('/[^A-Za-z0-9._-]/', '_', $name);
+    return substr($name, 0, 200);
+}
+
+function aiExt($name) {
+    $e = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+    return in_array($e, array('xml', 'p7m')) ? $e : '';
+}
+
+// file di servizio dello SdI che non sono fatture: metadati (_MT_), ricevute e notifiche
+function aiIsSdiService($name) {
+    return (bool) preg_match('/_(MT|RC|NS|MC|NE|DT|AT|EC|SE)_\d{3}\.xml$/i', $name);
+}
+
+// contenuto XML di una fattura .xml o .p7m (anche codificata in base64), come fa acquire_invoice.php; null se non si riesce
+function aiXmlContent($raw) {
+    global $aiTmpDir;
+    $raw = preg_replace('/^\xEF\xBB\xBF/', '', (string) $raw);
+    if (preg_match('/^\s*</', $raw)) return $raw;
+    $t = preg_replace('/\s+/', '', $raw);
+    if ($t !== '' && preg_match('/^[A-Za-z0-9\/+]+={0,2}$/', $t)) {
+        $d = base64_decode($t, true);
+        if ($d !== false) $raw = $d;
+        if (preg_match('/^\s*</', $raw)) return $raw;
+    }
+    // busta di firma PKCS#7 (CAdES): si estrae il contenuto con openssl, senza verificare la firma
+    $xml = null;
+    if (function_exists('openssl_pkcs7_verify') && is_dir($aiTmpDir)) {
+        $in = tempnam($aiTmpDir, 'aiin');
+        $cert = tempnam($aiTmpDir, 'aicrt');
+        $out = tempnam($aiTmpDir, 'aiout');
+        file_put_contents($in, "MIME-Version: 1.0\nContent-Disposition: attachment; filename=\"smime.p7m\"\n"
+            . "Content-Type: application/x-pkcs7-mime; smime-type=signed-data; name=\"smime.p7m\"\nContent-Transfer-Encoding: base64\n\n"
+            . chunk_split(base64_encode($raw)));
+        $flags = PKCS7_BINARY | PKCS7_NOVERIFY | PKCS7_NOSIGS;
+        if (@openssl_pkcs7_verify($in, $flags, $cert, array(), $cert, $out) !== -1) {
+            $c = @file_get_contents($out);
+            if ($c && strpos($c, '<') !== false) $xml = $c;
+        }
+        @unlink($in); @unlink($cert); @unlink($out);
+    }
+    if ($xml === null && preg_match('#(<\?xml.*</[^>]*FatturaElettronica(Semplificata)?>)#s', $raw, $m)) {
+        // ultima possibilità: il testo tra l'intestazione XML e il tag di chiusura, ripulito dai byte della busta
+        $xml = preg_replace('/[\x{0004}][\x{0082}][\s\S]{2}|[\x{0004}][\x{0081}][\s\S]|[\x{0004}][\s\S]/', '', $m[1]);
+    }
+    return $xml;
+}
+
+// dati principali della fattura per l'elenco: fornitore, partita IVA, numero, data, totale, tipo, numero di fatture nel file
+function aiInfo($raw) {
+    $xml = aiXmlContent($raw);
+    if ($xml === null) return array('error' => 'contenuto non leggibile');
+    $dom = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $ok = $dom->loadXML($xml);
+    if (!$ok) $ok = $dom->loadXML(preg_replace('/[^\P{C}\n\r\t]/u', '', $xml));
+    libxml_clear_errors();
+    if (!$ok) return array('error' => 'XML non valido');
+    $xp = new DOMXPath($dom);
+    $v = function ($q) use ($xp) { $n = $xp->query($q); return ($n && $n->length) ? trim($n->item(0)->nodeValue) : ''; };
+    $root = $dom->documentElement ? $dom->documentElement->localName : '';
+    if (stripos($root, 'FatturaElettronica') === false) return array('error' => 'non è una fattura elettronica');
+    $ced = "//*[local-name()='FatturaElettronicaHeader']/*[local-name()='CedentePrestatore']/*[local-name()='DatiAnagrafici']";
+    $name = $v($ced . "/*[local-name()='Anagrafica']/*[local-name()='Denominazione']");
+    if ($name === '') $name = trim($v($ced . "/*[local-name()='Anagrafica']/*[local-name()='Nome']") . ' ' . $v($ced . "/*[local-name()='Anagrafica']/*[local-name()='Cognome']"));
+    // fattura semplificata: il cedente non ha DatiAnagrafici
+    if ($name === '') $name = $v("//*[local-name()='CedentePrestatore']/*[local-name()='Denominazione']");
+    $piva = $v("//*[local-name()='CedentePrestatore']//*[local-name()='IdFiscaleIVA']/*[local-name()='IdCodice']");
+    $paese = $v("//*[local-name()='CedentePrestatore']//*[local-name()='IdFiscaleIVA']/*[local-name()='IdPaese']");
+    $cf = $v("//*[local-name()='CedentePrestatore']//*[local-name()='CodiceFiscale']");
+    $gen = "//*[local-name()='FatturaElettronicaBody'][1]/*[local-name()='DatiGenerali']/*[local-name()='DatiGeneraliDocumento']";
+    $bodies = $xp->query("//*[local-name()='FatturaElettronicaBody']");
+    $tot = $v($gen . "/*[local-name()='ImportoTotaleDocumento']");
+    if ($tot === '') {
+        // senza totale dichiarato: somma di imponibile e imposta del riepilogo IVA
+        $s = 0;
+        foreach ($xp->query("//*[local-name()='FatturaElettronicaBody'][1]//*[local-name()='DatiRiepilogo']") as $r) {
+            foreach (array('ImponibileImporto', 'Imposta') as $f) {
+                $n = $xp->query("*[local-name()='" . $f . "']", $r);
+                if ($n->length) $s += (float) $n->item(0)->nodeValue;
+            }
+        }
+        $tot = $s ? (string) $s : '';
+    }
+    return array('fornitore' => $name, 'piva' => $piva, 'paese' => $paese, 'cf' => $cf,
+        'tipo' => $v($gen . "/*[local-name()='TipoDocumento']"), 'numero' => $v($gen . "/*[local-name()='Numero']"),
+        'data' => $v($gen . "/*[local-name()='Data']"), 'totale' => $tot, 'corpi' => $bodies ? $bodies->length : 1);
+}
+
+// mette una fattura nella coda faesync; restituisce array(esito, messaggio)
+function aiQueue($name, $content) {
+    global $gTables, $aiDocDir;
+    $name = aiCleanName($name);
+    $ext = aiExt($name);
+    if ($ext === '') return array('skip', 'non è un file XML o P7M');
+    if (aiIsSdiService($name)) return array('skip', 'file di servizio dello SdI (metadati o notifica), non una fattura');
+    if (strlen($content) == 0) return array('err', 'file vuoto');
+    $info = aiInfo($content);
+    if (isset($info['error'])) return array('err', $info['error']);
+    $e = gaz_dbi_real_escape_string($name);
+    $rs = gaz_dbi_query("SELECT id_doc, status FROM " . $gTables['files'] . " WHERE item_ref = 'faesync' AND title = '" . $e . "' LIMIT 1");
+    if ($r = gaz_dbi_fetch_array($rs)) return array('skip', $r['status'] ? 'già acquisita in precedenza' : 'già in coda');
+    $rs = gaz_dbi_query("SELECT id_tes FROM " . $gTables['tesdoc'] . " WHERE BINARY fattura_elettronica_original_name = '" . $e . "' LIMIT 1");
+    if (gaz_dbi_fetch_array($rs)) return array('skip', 'già acquisita (c\'è un documento con questo file)');
+    if (!is_dir($aiDocDir) && !@mkdir($aiDocDir, 0775, true)) return array('err', 'impossibile creare la cartella data/files/.../doc');
+    $id = gaz_dbi_table_insert('files', array('table_name_ref' => date('Y-m-d H:i:s'), 'item_ref' => 'faesync', 'extension' => $ext, 'title' => $name, 'status' => 0));
+    if (!$id || file_put_contents($aiDocDir . intval($id) . '.' . $ext, $content) === false) {
+        if ($id) gaz_dbi_del_row($gTables['files'], 'id_doc', intval($id));
+        return array('err', 'impossibile salvare il file (controlla i permessi di data/files)');
+    }
+    return array('ok', trim($info['fornitore'] . ' - n. ' . $info['numero'] . ' del ' . ($info['data'] ? gaz_format_date($info['data']) : '?')));
+}
+
+// fatture contenute in un pacchetto ZIP (anche ZIP dentro lo ZIP, un livello); si leggono in memoria, senza estrarre su disco
+function aiFromZip($path, $zipName, &$aiReport, $depth = 0) {
+    global $aiTmpDir, $aiMaxZipEntries;
+    $zip = new ZipArchive();
+    if ($zip->open($path) !== true) { $aiReport[] = array('err', $zipName, 'pacchetto ZIP non leggibile'); return; }
+    $n = min($zip->numFiles, $aiMaxZipEntries);
+    for ($i = 0; $i < $n; $i++) {
+        $entry = $zip->getNameIndex($i);
+        if ($entry === false || substr($entry, -1) == '/') continue;
+        $base = basename(str_replace('\\', '/', $entry));
+        if ($base === '' || $base[0] == '.' || strpos($entry, '__MACOSX/') === 0) continue;
+        $label = $zipName . ' &rsaquo; ' . aiH($base);
+        if (strtolower(pathinfo($base, PATHINFO_EXTENSION)) == 'zip' && $depth == 0) {
+            $tmp = tempnam($aiTmpDir, 'aizip');
+            file_put_contents($tmp, $zip->getFromIndex($i));
+            aiFromZip($tmp, $label, $aiReport, 1);
+            @unlink($tmp);
+            continue;
+        }
+        if (aiExt($base) === '') continue; // pdf, html e altri allegati del pacchetto: si ignorano
+        $res = aiQueue($base, (string) $zip->getFromIndex($i));
+        $aiReport[] = array($res[0], $label, $res[1]);
+    }
+    if ($zip->numFiles > $aiMaxZipEntries) $aiReport[] = array('err', $zipName, 'lette solo le prime ' . $aiMaxZipEntries . ' voci');
+    $zip->close();
+}
+
+// ---------------------------------------------------------------- richieste
+
+$aiReport = array();
+if (isset($_POST['ai_upload'])) {
+    $f = isset($_FILES['fae']) ? $_FILES['fae'] : null;
+    $count = $f && is_array($f['name']) ? count($f['name']) : 0;
+    if (!$count || ($count == 1 && $f['error'][0] == UPLOAD_ERR_NO_FILE)) {
+        $aiReport[] = array('err', 'Caricamento', 'nessun file scelto');
+    }
+    for ($i = 0; $i < $count; $i++) {
+        $orig = (string) $f['name'][$i];
+        if ($f['error'][$i] == UPLOAD_ERR_NO_FILE) continue;
+        if ($f['error'][$i] != UPLOAD_ERR_OK) {
+            $aiReport[] = array('err', aiH($orig), $f['error'][$i] == UPLOAD_ERR_INI_SIZE ? 'il file supera upload_max_filesize del server' : 'caricamento non riuscito (errore ' . intval($f['error'][$i]) . ')');
+            continue;
+        }
+        if (strtolower(pathinfo($orig, PATHINFO_EXTENSION)) == 'zip') {
+            aiFromZip($f['tmp_name'][$i], aiH($orig), $aiReport);
+        } else {
+            $res = aiQueue($orig, (string) file_get_contents($f['tmp_name'][$i]));
+            $aiReport[] = array($res[0], aiH($orig), $res[1]);
+        }
+    }
+    $_SESSION['ai_report'] = $aiReport;
+    header('Location: ' . $aiSelf);
+    exit;
+}
+// toglie dalla coda le fatture scelte (solo quelle ancora da acquisire)
+if (isset($_POST['ai_remove']) && isset($_POST['ai_sel']) && is_array($_POST['ai_sel'])) {
+    $n = 0;
+    foreach ($_POST['ai_sel'] as $id) {
+        $row = gaz_dbi_get_row($gTables['files'], 'id_doc', intval($id));
+        if ($row && $row['item_ref'] == 'faesync' && intval($row['status']) == 0) {
+            @unlink($aiDocDir . intval($row['id_doc']) . '.' . aiExt('x.' . $row['extension']));
+            gaz_dbi_del_row($gTables['files'], 'id_doc', intval($row['id_doc']));
+            $n++;
+        }
+    }
+    $_SESSION['ai_report'] = array(array('info', 'Coda', $n . ' fatture tolte dalla coda'));
+    header('Location: ' . $aiSelf);
+    exit;
+}
+if (isset($_SESSION['ai_report'])) {
+    $aiReport = $_SESSION['ai_report'];
+    unset($_SESSION['ai_report']);
+}
+
+
 if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso nessun upload
 	$form['fattura_elettronica_original_name'] = '';
 	$form['date_ini_D'] = '01';
@@ -338,6 +680,10 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 			}
 			if (substr($kr,0,7)=='codric_' && $vr<=0 && $vr !='isdescri') {
 				$msg['err'][] = 'no_codric';
+			}
+			// riga lasciata su "cerca articolo magazzino" senza aver scelto l'articolo: si salverebbe il codice fittizio Insert_from_db
+			if (substr($kr,0,7)=='codart_' && $vr=='Insert_from_db' && !in_array('no_codart', $msg['err'])) {
+				$msg['err'][] = 'no_codart';
 			}
 		}
 	} else if (isset($_POST['IncreaseBenamm'])){ // ho chiesto l'incremento di valore di un bene ammortizzabile
@@ -620,12 +966,21 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 				// Elimino spazi dal codice fornitore creato
 				$form['rows'][$nl]['codice_fornitore'] = preg_replace("/\s+/","_",$form['rows'][$nl]['codice_fornitore']);
 				// vedo se ho uno stesso codice_fornitore già acquisito in precedenti documenti tramite la funzione specifica, se si lo propongo
-        $codart = $gForm->CodartFromCodiceFornitore($form['rows'][$nl]['codice_fornitore'],(isset($form['clfoco'])?$form['clfoco']:0));
-        $codice_articolo = $codart ? $codart['codart'] : '';
-				$artico = gaz_dbi_get_row($gTables['artico'], 'codice', $codice_articolo);
-				$form['rows'][$nl]['codart'] = ($artico && !empty($form['rows'][$nl]['codice_fornitore']))?$artico['codice']:'';
-				$form['rows'][$nl]['search_codart'] = ($artico && !empty($form['rows'][$nl]['codice_fornitore']))?$artico['descri']:'';
 				$form['rows'][$nl]['descri'] = $item->getElementsByTagName('Descrizione')->item(0)->nodeValue;
+				// ricerca automatica dell'articolo di magazzino (memoria, codice, descrizione): solo alla prima apertura, poi vale la scelta sul form
+				$form['rows'][$nl]['codart'] = '';
+				$form['rows'][$nl]['search_codart'] = '';
+				$form['rows'][$nl]['match'] = '';
+				if (!empty($_POST['Submit_file']) || isset($_POST['Select_doc'])) {
+					$aiCodes = array();
+					foreach ($item->getElementsByTagName('CodiceValore') as $cv) $aiCodes[] = $cv->nodeValue;
+					$aiM = aiFindArticle($form['rows'][$nl]['codice_fornitore'], $aiCodes, $form['rows'][$nl]['descri'], isset($form['clfoco']) ? $form['clfoco'] : 0);
+					if ($aiM) {
+						$form['rows'][$nl]['codart'] = $aiM['codart'];
+						$form['rows'][$nl]['search_codart'] = $aiM['descri'];
+						$form['rows'][$nl]['match'] = $aiM['how'] . '|' . $aiM['score'] . '|' . $aiM['codart'];
+					}
+				}
 				if ($item->getElementsByTagName("Quantita")->length >= 1) {
 					$form['rows'][$nl]['quanti'] = $item->getElementsByTagName('Quantita')->item(0)->nodeValue;
 					$form['rows'][$nl]['tiprig'] = 0;
@@ -708,6 +1063,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
             $form['excluded_ddt_row'] .= '-'.$nl;
 					}
 					$form['rows'][$nl]['codart']=$form['codart_'.$post_nl];
+					$form['match_'.$post_nl] = isset($_POST['match_'.$post_nl]) ? substr(preg_replace('/[^A-Za-z0-9_|.\-]/', '', $_POST['match_'.$post_nl]), 0, 60) : '';
 					$form['search_codart_'.$post_nl] = isset($_POST['search_codart_'.$post_nl])?substr($_POST['search_codart_'.$post_nl],0,35):'';
 					$form['rows'][$nl]['search_codart']=$form['search_codart_'.$post_nl];
 					$form['codric_'.$post_nl] = (isset($_POST['codric_'.$post_nl]))?intval($_POST['codric_'.$post_nl]):'';
@@ -722,6 +1078,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					$form['expiry_'.$post_nl] = isset($_POST['expiry_'.$post_nl])?substr($_POST['expiry_'.$post_nl],0,10):'';
           // fine lotmag
 				} else {
+					$form['match_'.$post_nl] = isset($form['rows'][$nl]['match']) ? $form['rows'][$nl]['match'] : '';
 					if (isset( $form['rows'][$nl]['codart'])){
 						$form['codart_'.$post_nl] = $form['rows'][$nl]['codart'];
 					} else {
@@ -1008,6 +1365,7 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					$form['identifier_'.$post_nl] = substr($_POST['identifier_'.$post_nl],0,35);
 					$form['expiry_'.$post_nl] = substr($_POST['expiry_'.$post_nl],0,10);
 				} else {
+					$form['match_'.$post_nl] = isset($form['rows'][$nl]['match']) ? $form['rows'][$nl]['match'] : '';
 					if (isset( $form['rows'][$nl]['codart'])){
 						$form['codart_'.$post_nl] = $form['rows'][$nl]['codart'];
 					} else {
@@ -1421,7 +1779,8 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 					}
 					$form['rows'][$i]['id_tes'] = $ultimo_id;
 					$aliiva=$form['rows'][$i]['codvat'];
-          $form['rows'][$i]['pervat']=gaz_dbi_get_row($gTables['aliiva'], 'codice', $aliiva)['aliquo'];
+          $pervat=gaz_dbi_get_row($gTables['aliiva'], 'codice', $aliiva);
+          $form['rows'][$i]['pervat'] = $pervat ? $pervat['aliquo'] : 0;
 					$exist_new_codart=gaz_dbi_get_row($gTables['artico'], "codice", $new_codart);
 					if ($exist_new_codart && substr($v['codart'],0,6)!='Insert') { // il codice esiste lo uso, ma prima controllo se l'ho volutamente cambiato sul form
 						if( $exist_new_codart['codice'] != $form['rows'][$i]['codart'] ){ // ho scelto un codice diverso
@@ -1473,6 +1832,10 @@ if (!isset($_POST['fattura_elettronica_original_name'])) { // primo accesso ness
 
 					// inserisco il rigo rigdoc
 					$id_rif=rigdocInsert($form['rows'][$i]);
+					// memoria dell'abbinamento (codice / descrizione del fornitore -> articolo) per le prossime fatture
+					if ($form['rows'][$i]['tiprig'] <= 1 && strlen($form['rows'][$i]['codart']) > 0) {
+						aiAliasSave($form['rows'][$i]['codart'], $form['clfoco'], $v['codice_fornitore'], $v['descri']);
+					}
 					if (isset($form['rows'][$i]['good_or_service']) && $form['rows'][$i]['good_or_service']==0 && strlen($form['rows'][$i]['codart'])>0 && $form['tipdoc']!=="AFC"){ // se l'articolo prevede di movimentare il magazzino e non è una nota credito
 						// Antonio Germani - creo movimento di magazzino sempre perché, se c'erano, sono stati cancellati
 						if (isset($v['NumeroDDT']) && $v['NumeroDDT']>0){ // se c'è un ddt
@@ -1833,6 +2196,12 @@ if ($toDo=='insert' || $toDo=='update' ) {
 				$whareh_dropdown = $magazz->selectIdWarehouse('warehouse_'.$k,(isset($form['warehouse_'.$k]))?$form['warehouse_'.$k]:0,true,'col-xs-12',$form['codart_'.$k],$datdoc,($docOperat[$tipdoc]*-floatval($v['quanti'])));
 				$codvat_dropdown = $gForm->selectFromDB('aliiva', 'codvat_'.$k, 'codice', $form['codvat_'.$k], 'aliquo', true, '-', 'descri', '', 'col-sm-12 small', null, 'style="max-width: 350px;"', false, true);
 				$codart_select = $gForm->concileArtico('codart_'.$k,(isset($form['search_codart_'.$k]))?$form['search_codart_'.$k]:'',$form['codart_'.$k],$k,$form['identifier_'.$k],$form['expiry_'.$k]);
+				$aiMt = isset($form['match_'.$k]) ? explode('|', $form['match_'.$k]) : array();
+				$codart_select .= '<input type="hidden" name="match_'.$k.'" value="'.aiH(isset($form['match_'.$k]) ? $form['match_'.$k] : '').'">';
+				if (count($aiMt) == 3 && $aiMt[2] === $form['codart_'.$k]) { // l'articolo è ancora quello trovato in automatico
+					$aiLbl = array('memoria' => array('success', 'abbinato in precedenza'), 'codice' => array('info', 'trovato per codice'), 'descrizione' => array('warning', 'descrizione simile al '.intval($aiMt[1]).'%: controlla'));
+					if (isset($aiLbl[$aiMt[0]])) $codart_select .= '<div class="col-xs-12"><span class="label label-'.$aiLbl[$aiMt[0]][0].'" title="Abbinamento automatico: se non è giusto usa il pulsante col codice per cambiarlo">'.$aiLbl[$aiMt[0]][1].'</span></div>';
+				}
 				//forzo i valori diversi dalla descrizione a vuoti se è descrittivo
 				if (abs($v['prelis'])<0.00000001 && abs(floatval($v['quanti'])) < 0.000000001 ){ // siccome il prezzo e la quantità sono a zero mi trovo di fronte ad un rigo di tipo descrittivo
 					$v['codice_fornitore'] = '';
@@ -1945,61 +2314,12 @@ if ($yesatt){
         </iframe>
 <?php
 	}
-} else { // all'inizio chiedo l'upload di un file xml o p7m
+} else { // all'inizio: caricamento di più fatture (XML, P7M, ZIP) e coda di quelle da acquisire
+  // consultazione del canale telematico, solo per i canali che la prevedono
+  if (!empty($send_fae_zip_package['val']) && $send_fae_zip_package['val']!='pec_SDI' && !in_array($send_fae_zip_package['val'],$sync_mods)) {
 ?>
 <div class="panel panel-default gaz-table-form">
 	<div class="container-fluid">
-
-		<?php
-		if (!isset($_POST['fattura_elettronica_original_name']) && in_array($send_fae_zip_package['val'],$sync_mods)){
-			if ($res_faesync->num_rows >0){
-				?>
-				<div class="row">
-					<div class="col-md-12">
-						<div class="form-group">
-							<label for="image" class="col-sm-4 control-label">Queste fatture sono arrivate ma ancora da acquisire:</label>
-							<div class="col-sm-8">
-							<?php
-              $first='class="btn btn-success" title="Acquisisci"';
-							foreach($res_faesync as $faesync){
-                $linkxml = "view_fae.php?id_tes=" . $faesync['id_doc'].'.'. $faesync['extension'].'&fromdoc';
-								echo '<p>'.$faesync['table_name_ref']." ";
-                if ($first) {
-                  echo '<button type="submit" '. $first .' name="fae_from_sync" value="'. $faesync['id_doc'].  '">'.$faesync['title'].' </button>';
-                	echo '<a class="btn btn-default btn-xml" target="_blank" title="Anteprima" onclick="prevXML(\''.$linkxml.'\')"> <i class="glyphicon glyphicon-eye-open" title="Visualizza"></i></a>';
-                } else {
-                  echo '<a class="btn btn-default btn-xml" target="_blank" title="Anteprima" onclick="prevXML(\''.$linkxml.'\')">'.$faesync['title'].' <i class="glyphicon glyphicon-eye-open" title="Visualizza"></i></a>';
-                }
-                ?>
-                <input type="hidden" name="fae_original_name<?php echo $faesync['id_doc'];?>" value="<?php echo $faesync['title'];?>">
-                <input type="hidden" name="table_name_ref<?php echo $faesync['id_doc'];?>" value="<?php echo substr($faesync['table_name_ref'],0,10);?>">
-								</p>
-                <?php
-                $first=false;
-							}
-							?>
-							</div>
-						</div>
-					</div>
-				</div><!-- chiude row  -->
-				<?php
-			}
-		}
-		?>
-
-       <div class="row">
-           <div class="col-md-12">
-               <div class="form-group">
-                   <label for="image" class="col-sm-4 control-label">Seleziona il file xml, p7m <?php if (!empty($send_fae_zip_package['val'])) { echo 'o pacchetto ZIP'; } ?> </label>
-                   <div class="col-sm-8">File: <input type="file" accept=".xml,.p7m,.zip" name="userfile" />
-				   </div>
-               </div>
-           </div>
-       </div><!-- chiude row  -->
-<?php
-
-if (!empty($send_fae_zip_package['val']) && $send_fae_zip_package['val']!='pec_SDI' && !in_array($send_fae_zip_package['val'],$sync_mods)) {
-?>
 		<div class="row">
 			<div class="col-md-12">
 				<div class="form-group">
@@ -2052,15 +2372,312 @@ if (!empty($send_fae_zip_package['val']) && $send_fae_zip_package['val']!='pec_S
 		</div><!-- chiude row  -->
 <?php
 	}
-}
 ?>
 		<div class="col-sm-12 text-right"><input name="Submit_file" type="submit" class="btn btn-warning" value="<?php echo $script_transl['btn_acquire']; ?>" />
 		</div>
 		<br /><br />
-	</div> <!-- chiude container -->
-</div><!-- chiude panel -->
+	</div>
+</div>
+<?php
+  }
+  echo '</form>'; // il form della pagina di acquisizione si chiude qui: la coda ha i propri form
+// ---------------------------------------------------------------- coda: fatture ancora da acquisire
+$queue = array();
+$rs = gaz_dbi_query("SELECT * FROM " . $gTables['files'] . " WHERE item_ref = 'faesync' AND status = 0 ORDER BY id_doc");
+while ($r = gaz_dbi_fetch_array($rs)) $queue[] = $r;
+// fornitori per partita IVA (o codice fiscale), per dire subito se il fornitore è già in anagrafica
+$masfor = intval($admin_aziend['masfor']);
+$suppliers = array();
+$rs = gaz_dbi_query("SELECT f.codice, n.pariva, n.codfis, n.ragso1 FROM " . $gTables['clfoco'] . " f JOIN " . $gTables['anagra'] . " n ON n.id = f.id_anagra
+    WHERE f.codice BETWEEN " . $masfor . "000001 AND " . $masfor . "999999");
+while ($r = gaz_dbi_fetch_array($rs)) {
+    if (trim($r['pariva']) !== '') $suppliers['p' . ltrim(trim($r['pariva']), '0')] = $r;
+    if (trim($r['codfis']) !== '') $suppliers['c' . strtoupper(trim($r['codfis']))] = $r;
+}
+$rows = array();
+$acquired = 0;
+foreach ($queue as $q) {
+    $ext = aiExt('x.' . $q['extension']);
+    $path = $aiDocDir . intval($q['id_doc']) . '.' . $ext;
+    $info = is_file($path) ? aiInfo(file_get_contents($path)) : array('error' => 'file mancante in data/files/.../doc');
+    // acquisita nel frattempo (da questa pagina o da acquire_invoice.php): esce dalla coda.
+    // Un file con più fatture (lotto) esce solo quando sono stati registrati tanti documenti quante sono le fatture
+    $rsT = gaz_dbi_query("SELECT COUNT(*) n FROM " . $gTables['tesdoc'] . " WHERE BINARY fattura_elettronica_original_name = '" . gaz_dbi_real_escape_string($q['title']) . "'");
+    $nDoc = intval(gaz_dbi_fetch_array($rsT)['n']);
+    $need = (!isset($info['error']) && $info['corpi'] > 1) ? $info['corpi'] : 1;
+    if ($nDoc >= $need) {
+        gaz_dbi_table_update('files', array('id_doc', intval($q['id_doc'])), array('status' => 1));
+        $acquired++;
+        continue;
+    }
+    if ($nDoc > 0) $info['fatte'] = $nDoc;
+    $sup = null;
+    if (!isset($info['error'])) {
+        if ($info['piva'] !== '' && isset($suppliers['p' . ltrim($info['piva'], '0')])) $sup = $suppliers['p' . ltrim($info['piva'], '0')];
+        elseif ($info['cf'] !== '' && isset($suppliers['c' . strtoupper($info['cf'])])) $sup = $suppliers['c' . strtoupper($info['cf'])];
+    }
+    // stesso numero dello stesso fornitore già registrato: probabile doppione
+    $dup = false;
+    if ($sup && $info['numero'] !== '' && $info['data'] !== '') {
+        $dup = (bool) gaz_dbi_fetch_array(gaz_dbi_query("SELECT id_tes FROM " . $gTables['tesdoc'] . " WHERE tipdoc LIKE 'A%' AND clfoco = " . intval($sup['codice'])
+            . " AND numfat = '" . gaz_dbi_real_escape_string($info['numero']) . "' AND YEAR(datfat) = " . intval(substr($info['data'], 0, 4)) . " LIMIT 1"));
+    }
+    $rows[] = array('q' => $q, 'ext' => $ext, 'info' => $info, 'sup' => $sup, 'dup' => $dup);
+}
+// ordine: per data della fattura, così si registrano in ordine cronologico
+usort($rows, function ($a, $b) {
+    $da = isset($a['info']['data']) ? $a['info']['data'] : '';
+    $db = isset($b['info']['data']) ? $b['info']['data'] : '';
+    return strcmp($da . sprintf('%010d', $a['q']['id_doc']), $db . sprintf('%010d', $b['q']['id_doc']));
+});
+$tipi = array('TD01' => 'Fattura', 'TD02' => 'Acconto su fattura', 'TD03' => 'Acconto su parcella', 'TD04' => 'Nota di credito', 'TD05' => 'Nota di debito',
+    'TD06' => 'Parcella', 'TD16' => 'Integrazione reverse charge', 'TD17' => 'Autofattura servizi estero', 'TD18' => 'Acquisto beni intra',
+    'TD19' => 'Integrazione beni art.17', 'TD24' => 'Fattura differita', 'TD25' => 'Fattura differita (terzi)', 'TD26' => 'Cessione beni ammortizzabili', 'TD27' => 'Autoconsumo');
+
+$iniMax = ini_get('upload_max_filesize');
+$iniPost = ini_get('post_max_size');
+$iniFiles = intval(ini_get('max_file_uploads'));
+?>
+<div class="ai-page">
+  <div class="ai-card">
+    <h4><i class="fa fa-upload"></i> Carica le fatture <small>più file XML / P7M o pacchetti ZIP</small></h4>
+    <div class="ai-body">
+      <form method="POST" enctype="multipart/form-data" id="ai-form">
+        <label class="ai-drop" id="ai-drop">
+          <i class="fa fa-cloud-upload"></i>
+          <b>Trascina qui i file</b> oppure clicca per sceglierli
+          <input type="file" name="fae[]" id="ai-files" multiple accept=".xml,.p7m,.zip,.XML,.P7M,.ZIP">
+          <div class="ai-picked" id="ai-picked"></div>
+        </label>
+        <div class="ai-actions">
+          <button type="submit" name="ai_upload" value="1" class="btn btn-warning" id="ai-send" disabled><i class="fa fa-plus"></i> Metti in coda</button>
+        </div>
+      </form>
+      <p class="ai-help">Dagli ZIP si prendono solo i file .xml e .p7m (anche dentro uno ZIP contenuto nello ZIP); i file di servizio dello SdI (metadati _MT_, ricevute, notifiche) e gli altri allegati si ignorano.
+        Le fatture già in coda o già acquisite vengono saltate. Limiti del server: <?php echo aiH($iniMax); ?> per file, <?php echo aiH($iniPost); ?> in tutto,
+        <?php echo $iniFiles; ?> file per invio: per molte fatture conviene uno ZIP.</p>
+      <?php if ($aiReport) {
+        $cnt = array('ok' => 0, 'skip' => 0, 'err' => 0, 'info' => 0);
+        foreach ($aiReport as $r) $cnt[$r[0]]++;
+        $ico = array('ok' => 'fa-check ai-ok', 'skip' => 'fa-minus-circle ai-skip', 'err' => 'fa-times ai-err', 'info' => 'fa-info-circle text-muted');
+        echo '<hr class="ai-sep">' . ($cnt['info'] == count($aiReport) ? '' : '<p><b>Esito:</b> <span class="ai-ok">' . $cnt['ok'] . ' in coda</span> &middot; <span class="ai-skip">' . $cnt['skip'] . ' saltate</span> &middot; <span class="ai-err">' . $cnt['err'] . ' con errori</span></p>') . '<ul class="ai-rep">';
+        // i nomi in $r[1] sono già protetti (contengono il separatore &rsaquo; per i file dentro gli ZIP)
+        foreach ($aiReport as $r) echo '<li><i class="fa ' . $ico[$r[0]] . '"></i> ' . $r[1] . ' &mdash; <span class="text-muted">' . aiH($r[2]) . '</span></li>';
+        echo '</ul>';
+      } ?>
+    </div>
+  </div>
+
+  <div class="ai-card">
+    <h4><i class="fa fa-list"></i> Fatture da acquisire <small><?php echo count($rows); ?> in coda<?php echo $acquired ? ' &middot; ' . $acquired . ' appena acquisite tolte dalla coda' : ''; ?></small></h4>
+    <div class="ai-body">
+      <?php if ($rows) { ?>
+      <form method="POST" id="ai-qform">
+      <div class="ai-tools">
+        <span class="text-muted ai-note"><i class="fa fa-info-circle"></i> La fattura si apre qui sopra nella normale pagina di acquisizione: controlli conti, IVA e articoli e confermi come sempre.
+          Con "Elabora la coda", dopo ogni conferma si apre da sola la fattura successiva.</span>
+        <span>
+          <button type="button" class="btn btn-sm btn-success" id="ai-next"><i class="fa fa-play"></i> Elabora la coda</button>
+          <button type="submit" name="ai_remove" value="1" class="btn btn-sm btn-default" onclick="return document.querySelectorAll('.ai-sel:checked').length ? confirm('Togliere dalla coda le fatture selezionate? I file vengono cancellati.') : (alert('Seleziona almeno una fattura'), false);"><i class="fa fa-trash"></i> Togli dalla coda</button>
+        </span>
+      </div>
+      <div class="ai-scroll">
+      <table class="ai-tab">
+        <tr><th><input type="checkbox" id="ai-all" title="Seleziona tutte"></th><th>Fornitore</th><th>Documento</th><th>Data</th><th class="r">Totale</th><th>Controlli</th><th></th></tr>
+        <?php foreach ($rows as $r) {
+          $q = $r['q'];
+          $in = $r['info'];
+          $id = intval($q['id_doc']);
+          $label = isset($in['error']) ? $q['title'] : trim(($in['fornitore'] !== '' ? $in['fornitore'] : '?') . ' - n. ' . $in['numero'] . ($in['data'] ? ' del ' . gaz_format_date($in['data']) : ''));
+          echo '<tr data-id="' . $id . '" data-label="' . aiH($label) . '"' . (isset($in['error']) ? ' class="ai-bad"' : '') . '><td><input type="checkbox" class="ai-sel" name="ai_sel[]" value="' . $id . '"></td>';
+          if (isset($in['error'])) {
+            echo '<td colspan="4"><span class="ai-badge ai-b-err">' . aiH($in['error']) . '</span><div class="ai-file">' . aiH($q['title']) . '</div></td><td></td>';
+          } else {
+            $tipo = isset($tipi[$in['tipo']]) ? $tipi[$in['tipo']] : $in['tipo'];
+            echo '<td>' . aiH($in['fornitore'] !== '' ? $in['fornitore'] : '?') . '<div class="ai-file">' . aiH(($in['paese'] ? $in['paese'] : '') . $in['piva']) . ' &middot; ' . aiH($q['title']) . '</div></td>';
+            echo '<td>' . aiH($tipo) . ' n. <b>' . aiH($in['numero']) . '</b>' . ($in['corpi'] > 1 ? ' <span class="ai-badge ai-b-info">' . intval($in['corpi']) . ' fatture nel file' . (isset($in['fatte']) ? ', ' . intval($in['fatte']) . ' già acquisite' : '') . '</span>' : '') . '</td>';
+            echo '<td class="ai-nowrap">' . ($in['data'] ? gaz_format_date($in['data']) : '') . '</td>';
+            echo '<td class="r">' . ($in['totale'] !== '' ? '&euro;&nbsp;' . number_format((float) $in['totale'], 2, ',', '.') : '') . '</td>';
+            echo '<td>' . ($r['sup'] ? '<span class="ai-badge ai-b-ok" title="' . aiH($r['sup']['ragso1']) . '"><i class="fa fa-check"></i> fornitore in anagrafica</span>' : '<span class="ai-badge ai-b-new" title="Verrà proposto l\'inserimento del nuovo fornitore"><i class="fa fa-user-plus"></i> fornitore nuovo</span>')
+              . ($r['dup'] ? '<span class="ai-badge ai-b-err" title="Esiste già un documento di questo fornitore con lo stesso numero nello stesso anno"><i class="fa fa-exclamation-triangle"></i> numero già registrato</span>' : '') . '</td>';
+          }
+          echo '<td class="r"><a class="btn btn-xs btn-default" title="Anteprima" href="view_fae.php?id_tes=' . $id . '.' . aiH($r['ext']) . '&amp;fromdoc" target="_blank"><i class="fa fa-eye"></i></a> '
+            . '<button type="button" class="btn btn-xs btn-success ai-acq" data-id="' . $id . '" data-title="' . aiH($q['title']) . '"><i class="fa fa-sign-in"></i> Acquisisci</button></td></tr>';
+        } ?>
+      </table>
+      </div>
+      </form>
+      <?php } else { ?>
+      <div class="ai-empty"><i class="fa fa-check-circle"></i><br>Nessuna fattura da acquisire.</div>
+      <?php } ?>
+    </div>
+  </div>
+</div>
+<?php // invio alla pagina di acquisizione esistente: è il formato che acquire_invoice.php usa per le fatture della coda faesync ?>
+<div class="ai-ov" id="ai-ov">
+  <div class="ai-ov-box">
+    <div class="ai-ov-bar">
+      <span class="ai-ov-title"><i class="fa fa-sign-in"></i> <b id="ai-ov-title"></b> <span class="text-muted" id="ai-ov-pos"></span></span>
+      <span id="ai-ov-msg" class="ai-ov-msg"></span>
+      <span class="ai-ov-btns">
+        <button type="button" class="btn btn-sm btn-default" id="ai-skip" title="Lascia questa fattura in coda e passa alla successiva"><i class="fa fa-step-forward"></i> Salta</button>
+        <button type="button" class="btn btn-sm btn-default" id="ai-close" title="Chiudi e torna all'elenco"><i class="fa fa-times"></i> Chiudi</button>
+      </span>
+    </div>
+    <iframe name="ai-frame" id="ai-frame" src="about:blank" title="Acquisizione fattura"></iframe>
+  </div>
+</div>
+<form method="POST" action="<?php echo $aiSelf; ?>" target="ai-frame" id="ai-go" style="display:none">
+  <input type="hidden" name="fattura_elettronica_original_name" value="">
+  <input type="hidden" name="curr_doc" value="0">
+  <input type="hidden" name="id_doc" value="0">
+  <input type="hidden" name="incrbenamm" value="0">
+  <input type="hidden" name="excluded_ddt_row" value="">
+  <input type="hidden" name="fae_from_sync" id="ai-go-id" value="">
+  <input type="hidden" name="" id="ai-go-name" value="">
+  <input type="hidden" name="" id="ai-go-date" value="">
+</form>
+<script>
+(function () {
+  var inp = document.getElementById('ai-files'), drop = document.getElementById('ai-drop'), picked = document.getElementById('ai-picked'), send = document.getElementById('ai-send');
+  function show() {
+    var n = inp.files ? inp.files.length : 0, names = [];
+    for (var i = 0; i < n && i < 8; i++) names.push(inp.files[i].name);
+    picked.textContent = n ? n + (n == 1 ? ' file: ' : ' file: ') + names.join(', ') + (n > 8 ? ' ...' : '') : '';
+    send.disabled = !n;
+  }
+  inp.addEventListener('change', show);
+  ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('ai-over'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('ai-over'); }); });
+  drop.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files.length) { inp.files = e.dataTransfer.files; show(); } });
+
+  // acquisizione nella stessa pagina: acquire_invoice.php si apre nel riquadro; quando la conferma riesce,
+  // acquire_invoice.php porta su report_docacq.php: è il segnale che la fattura è stata registrata
+  var today = '<?php echo date('Y-m-d'); ?>';
+  var ov = document.getElementById('ai-ov'), frame = document.getElementById('ai-frame');
+  var cur = null, queueMode = false, doneCount = 0;
+  var rows = function () { return Array.prototype.slice.call(document.querySelectorAll('tr[data-id]')); };
+  function pending() { return rows().filter(function (tr) { return !/ai-(done|skipped|bad)/.test(tr.className); }); }
+  function msg(t, cls) { var m = document.getElementById('ai-ov-msg'); m.textContent = t || ''; m.className = 'ai-ov-msg ' + (cls || ''); }
+  function open(tr) {
+    cur = tr;
+    var id = tr.getAttribute('data-id'), title = tr.querySelector('.ai-acq').getAttribute('data-title');
+    document.getElementById('ai-go-id').value = id;
+    var nm = document.getElementById('ai-go-name'); nm.name = 'fae_original_name' + id; nm.value = title;
+    var dt = document.getElementById('ai-go-date'); dt.name = 'table_name_ref' + id; dt.value = today; // data di registrazione proposta: oggi
+    document.getElementById('ai-ov-title').textContent = tr.getAttribute('data-label');
+    var p = pending();
+    document.getElementById('ai-ov-pos').textContent = queueMode ? (p.length > 1 ? '(ne restano altre ' + (p.length - 1) + ')' : '(ultima della coda)') : '';
+    rows().forEach(function (r) { r.classList.remove('ai-current'); });
+    tr.classList.add('ai-current');
+    ov.classList.add('ai-on');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('ai-go').submit();
+  }
+  function advance() {
+    var p = pending();
+    if (queueMode && p.length) { open(p[0]); return; }
+    close();
+  }
+  function close() {
+    ov.classList.remove('ai-on');
+    document.body.style.overflow = '';
+    cur = null;
+    frame.src = 'about:blank';
+    // se qualcosa è stato acquisito si ricarica l'elenco, così le fatture registrate escono dalla coda
+    if (doneCount) location.href = '<?php echo $aiSelf; ?>';
+  }
+  frame.addEventListener('load', function () {
+    if (!cur) return;
+    var w, path = '';
+    try { w = frame.contentWindow; path = w.location.pathname; } catch (e) { return; }
+    if (w.document.getElementById('ai-drop')) { cur = null; doneCount++; close(); return; }
+    if (/report_docacq\.php$/.test(path)) {
+      // registrata: la riga diventa "acquisita" e si passa alla successiva (in modalità coda)
+      cur.classList.remove('ai-current');
+      cur.classList.add('ai-done');
+      var cell = cur.querySelector('.ai-acq');
+      if (cell) cell.outerHTML = '<span class="ai-badge ai-b-ok"><i class="fa fa-check"></i> acquisita</span>';
+      doneCount++;
+      msg(doneCount + (doneCount == 1 ? ' fattura acquisita' : ' fatture acquisite'), 'ai-ok');
+      cur = null;
+      advance();
+      return;
+    }
+    // dentro il riquadro basta la pagina di acquisizione: si nascondono barra in alto, menu laterale e piè di pagina
+    try {
+      var d = w.document, st = d.createElement('style');
+      st.textContent = '.main-header,.main-sidebar,.main-footer,.gz-sidebar{display:none!important}.content-wrapper,.main-footer{margin-left:0!important}body,.wrapper,.content-wrapper{padding-top:0!important;min-height:0!important}';
+      d.head.appendChild(st);
+    } catch (e) {}
+  });
+  document.getElementById('ai-skip').addEventListener('click', function () {
+    if (cur) { cur.classList.remove('ai-current'); cur.classList.add('ai-skipped'); }
+    cur = null;
+    advance();
+  });
+  document.getElementById('ai-close').addEventListener('click', close);
+  Array.prototype.forEach.call(document.querySelectorAll('.ai-acq'), function (b) {
+    b.addEventListener('click', function () { queueMode = false; open(b.closest('tr')); });
+  });
+  var next = document.getElementById('ai-next');
+  if (next) next.addEventListener('click', function () {
+    // una nuova passata riprende anche le fatture saltate in precedenza
+    rows().forEach(function (r) { r.classList.remove('ai-skipped'); });
+    var p = pending();
+    if (!p.length) { alert('Nessuna fattura da acquisire'); return; }
+    queueMode = true;
+    open(p[0]);
+  });
+  var all = document.getElementById('ai-all');
+  if (all) all.addEventListener('change', function () { Array.prototype.forEach.call(document.querySelectorAll('.ai-sel'), function (c) { c.checked = all.checked; }); });
+})();
+</script>
 <?php
 }
+?>
+<script>
+// attesa durante i POST: le elaborazioni (lettura XML, controlli, registrazione) possono durare a lungo,
+// quindi a ogni invio della pagina si copre lo schermo con library/images/wait_spinner.html.
+// Se il form è indirizzato a un riquadro (iframe) della pagina, lo spinner va dentro quel riquadro.
+(function () {
+  var SPIN = '../../library/images/wait_spinner.html';
+  function show(doc) {
+    try {
+      if (!doc || !doc.body || doc.getElementById('gaz-wait')) return;
+      var d = doc.createElement('div');
+      d.id = 'gaz-wait';
+      d.setAttribute('role', 'status');
+      d.innerHTML = '<iframe src="' + SPIN + '" title="Attendere"></iframe>'
+        + '<div class="gaz-wait-msg">Elaborazione in corso, attendere&hellip;</div>';
+      doc.body.appendChild(d);
+    } catch (e) {}
+  }
+  function hide() { var d = document.getElementById('gaz-wait'); if (d) d.parentNode.removeChild(d); }
+  function onSend(form, submitter) {
+    if (submitter && submitter.name === 'Download') return; // scarica un allegato: la pagina non cambia
+    var t = (submitter && submitter.getAttribute('formtarget')) || form.getAttribute('target') || '';
+    if (t === '_blank') return;
+    if (t && t !== '_self') {
+      var f = document.querySelector('iframe[name="' + t + '"]');
+      if (f) { try { show(f.contentDocument); } catch (e) {} }
+      return;
+    }
+    show(document);
+  }
+  // invio con un pulsante (si ignora l'invio annullato da onclick/onsubmit con return false)
+  document.addEventListener('submit', function (e) {
+    var form = e.target, sub = e.submitter;
+    setTimeout(function () { if (!e.defaultPrevented) onSend(form, sub); }, 0);
+  });
+  // invio da script (this.form.submit() nelle select): non genera l'evento submit
+  var nativeSubmit = HTMLFormElement.prototype.submit;
+  HTMLFormElement.prototype.submit = function () { onSend(this, null); return nativeSubmit.apply(this, arguments); };
+  // tornando indietro col browser la pagina può essere ripresa dalla cache con lo spinner ancora visibile
+  window.addEventListener('pageshow', hide);
+})();
+</script>
+<?php
 require("../../library/include/footer.php");
 ?>
 

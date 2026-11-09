@@ -85,6 +85,13 @@
     width: auto;
     object-fit: contain;
 }
+/* sidebar ridotta (50px): il logo si rimpicciolisce per restare dentro la barra; espandendola torna alla misura normale */
+.sidebar-collapse .gz-sidebar-logo-wrap {
+    padding: 0 4px;
+}
+.sidebar-collapse .gz-sidebar-logo {
+    max-width: 42px;
+}
 
 /* Codici rapidi: tre pulsanti grigio scuro che occupano la larghezza della sidebar */
 .gz-quick-panel {
@@ -95,6 +102,11 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* pannello con preferiti e codici rapidi: più spazio in alto (da 12px a 24px); senza pulsanti resta a 20px */
+.gz-company-panel.gz-quick-panel:not(.gz-quick-empty) {
+    padding-top: 24px;
 }
 
 /* Senza preferiti il pannello dei codici rapidi non ha pulsanti: si riduce a 20px invece di 65px */
@@ -334,6 +346,7 @@ ol.breadcrumb {
     padding-bottom: 36px;
 }
 
+
 /* Footer fisso in fondo alla finestra, a destra della sidebar (larghezza sidebar 200px) */
 .main-footer {
     position: relative;
@@ -501,6 +514,31 @@ input#search_contract.ui-autocomplete-input {
     font-size: 13px;
     outline: none;
 }
+/* suggerimento semitrasparente sotto la casella: compare al passaggio del mouse e sparisce appena si scrive (non copre la tendina) */
+.gz-gs-box::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.3;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+.gz-gs-box:hover::after {
+    opacity: 0.75;
+}
+.gz-gs-box:focus-within::after {
+    display: none;
+}
 #gz-gs-input:focus {
     border-color: #c99300;
     box-shadow: 0 0 0 2px rgba(224, 168, 0, 0.25);
@@ -561,3 +599,204 @@ input#search_contract.ui-autocomplete-input {
     padding: 0;
     background: #ffe28a;
 }
+
+/* ----------------------------------------------------------------------------------------------
+   Acquisizione fatture elettroniche di acquisto (modules/acquis/acquire_invoice.php):
+   caricamento multiplo, coda delle fatture da acquisire, riquadro di acquisizione e attesa
+   ---------------------------------------------------------------------------------------------- */
+.ai-page { padding: 4px 4px 20px 4px; }
+.ai-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); margin-bottom: 14px; }
+.ai-card > h4 { margin: 0; padding: 10px 14px; font-size: 15px; font-weight: 600; border-bottom: 1px solid #eef0f2; }
+.ai-card > h4 small { color: #888; font-weight: normal; }
+.ai-card .ai-body { padding: 12px 14px; }
+.ai-drop { display: block; width: 100%; margin: 0; font-weight: normal; border: 2px dashed #c9d3dd; border-radius: 6px; padding: 26px 14px; text-align: center; color: #666; cursor: pointer; transition: background .15s, border-color .15s; }
+.ai-drop:hover, .ai-drop.ai-over { background: #f4f8fb; border-color: #3c8dbc; }
+.ai-drop .fa { font-size: 30px; color: #3c8dbc; display: block; margin-bottom: 8px; }
+.ai-drop input[type=file] { display: none; }
+.ai-picked { margin-top: 8px; font-size: 13px; color: #333; }
+.ai-help { color: #888; font-size: 12px; margin: 8px 0 0 0; }
+.ai-note { color: #888; font-size: 12px; }
+.ai-actions { margin-top: 10px; text-align: right; }
+.ai-sep { margin: 12px 0; }
+.ai-rep { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 260px; overflow: auto; }
+.ai-rep li { padding: 3px 0; border-bottom: 1px solid #f2f3f5; }
+.ai-rep .fa { width: 16px; text-align: center; }
+.ai-ok { color: #2e7d32; }
+.ai-skip { color: #8a6d00; }
+.ai-err { color: #c62828; }
+.ai-tab { width: 100%; font-size: 13px; }
+.ai-tab th { font-weight: 600; color: #666; font-size: 12px; border-bottom: 1px solid #e3e6ea; padding: 6px; white-space: nowrap; }
+.ai-tab td { padding: 6px; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
+.ai-tab .r { text-align: right; white-space: nowrap; }
+.ai-tab .ai-nowrap { white-space: nowrap; }
+.ai-tab .ai-file { color: #999; font-size: 11px; word-break: break-all; }
+.ai-tab tr.ai-done td { opacity: .45; }
+.ai-tab tr.ai-current td { background: #fffbe6; }
+.ai-tab tr.ai-skipped td { opacity: .6; }
+.ai-badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 9px; margin: 2px 2px 0 0; white-space: nowrap; }
+.ai-b-ok { background: #e8f5e9; color: #2e7d32; }
+.ai-b-new { background: #fff3cd; color: #8a6d00; }
+.ai-b-err { background: #fdecea; color: #c62828; }
+.ai-b-info { background: #eef2f6; color: #555; }
+.ai-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.ai-empty { color: #999; padding: 24px 0; text-align: center; }
+.ai-empty .fa { font-size: 22px; color: #2e7d32; }
+.ai-scroll { overflow-x: auto; }
+.ai-ov { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(20, 30, 40, .55); padding: 1.5vh 1.5vw; }
+.ai-ov.ai-on { display: block; }
+.ai-ov-box { background: #fff; border-radius: 6px; height: 100%; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+.ai-ov-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 12px; border-bottom: 1px solid #e3e6ea; background: #f7f9fb; }
+.ai-ov-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-ov-msg { font-size: 13px; font-weight: 600; }
+.ai-ov-btns { display: flex; gap: 6px; }
+.ai-ov iframe { flex: 1 1 auto; width: 100%; border: 0; }
+/* attesa durante l'invio della pagina (library/images/wait_spinner.html) */
+#gaz-wait { position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,.65); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: wait; }
+#gaz-wait iframe { width: 120px; height: 120px; border: 0; background: transparent; pointer-events: none; }
+#gaz-wait .gaz-wait-msg { margin-top: 8px; font-weight: bold; color: #444; }
+
+/* ----------------------------------------------------------------------------------------------
+   Cruscotti statistici (modules/stats/stats_vendit.php, stats_acquis.php, stats_magazz.php)
+   ---------------------------------------------------------------------------------------------- */
+/* Statistiche delle vendite (stats_vendit.php) */
+.sv-page { padding: 4px 4px 20px 4px; }
+.sv-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 16px 0; }
+.sv-period { font-size: 15px; color: #444; }
+.sv-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sv-filter label { margin: 0; font-weight: normal; color: #666; }
+.sv-page .sv-filter select.form-control { width: auto; min-width: 80px; display: inline-block; }
+.sv-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.sv-kpi { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); position: relative; }
+.sv-kpi .sv-ico { position: absolute; right: 12px; top: 12px; font-size: 20px; color: #c9d3dd; }
+.sv-kpi .sv-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: #777; }
+.sv-kpi .sv-val { font-size: 24px; font-weight: 600; margin: 4px 0 2px 0; color: #222; white-space: nowrap; }
+.sv-kpi .sv-sub { font-size: 12px; color: #888; }
+.sv-var { font-weight: 600; font-size: 12px; white-space: nowrap; }
+.sv-up { color: #2e7d32; }
+.sv-down { color: #c62828; }
+.sv-neu { color: #888; }
+.sv-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+.sv-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
+.sv-card > h4 { margin: 0; padding: 10px 14px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eef0f2; }
+.sv-card > h4 small { color: #888; font-weight: normal; }
+.sv-card .sv-body { padding: 10px 14px; overflow-x: auto; }
+.sv-card .sv-chart { position: relative; height: 280px; }
+.sv-w8 { grid-column: span 8; }
+.sv-w4 { grid-column: span 4; }
+.sv-w6 { grid-column: span 6; }
+.sv-w12 { grid-column: span 12; }
+@media (max-width: 991px) { .sv-w8, .sv-w4, .sv-w6 { grid-column: span 12; } }
+.sv-tab { width: 100%; font-size: 13px; }
+.sv-tab th { font-weight: 600; color: #666; font-size: 12px; border-bottom: 1px solid #e3e6ea; padding: 5px 6px; white-space: nowrap; }
+.sv-tab td { padding: 5px 6px; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
+.sv-tab tr:last-child td { border-bottom: 0; }
+.sv-tab .r { text-align: right; white-space: nowrap; }
+.sv-tab .sv-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-bar { height: 4px; background: #eef2f6; border-radius: 2px; margin-top: 3px; }
+.sv-bar span { display: block; height: 4px; background: #3c8dbc; border-radius: 2px; max-width: 100%; }
+.sv-empty { color: #999; padding: 20px 0; text-align: center; }
+.sv-cum { font-weight: normal; font-size: 12px; margin: 0; cursor: pointer; float: right; }
+.sv-cum input { vertical-align: middle; margin: 0 3px 0 0; }
+.sv-note { color: #999; font-size: 12px; margin-top: 14px; }
+.sv-card .sv-chart.sv-chart-sm { height: 250px; }
+/* Statistiche degli acquisti (stats_acquis.php) */
+.sa-page { padding: 4px 4px 20px 4px; }
+.sa-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 16px 0; }
+.sa-period { font-size: 15px; color: #444; }
+.sa-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sa-filter label { margin: 0; font-weight: normal; color: #666; }
+.sa-page .sa-filter select.form-control { width: auto; min-width: 80px; display: inline-block; }
+.sa-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.sa-kpi { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); position: relative; }
+.sa-kpi .sa-ico { position: absolute; right: 12px; top: 12px; font-size: 20px; color: #c9d3dd; }
+.sa-kpi .sa-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: #777; }
+.sa-kpi .sa-val { font-size: 24px; font-weight: 600; margin: 4px 0 2px 0; color: #222; white-space: nowrap; }
+.sa-kpi .sa-sub { font-size: 12px; color: #888; }
+.sa-var { font-weight: 600; font-size: 12px; white-space: nowrap; }
+.sa-good { color: #2e7d32; }
+.sa-bad { color: #c62828; }
+.sa-neu { color: #888; }
+.sa-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+.sa-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
+.sa-card > h4 { margin: 0; padding: 10px 14px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eef0f2; }
+.sa-card > h4 small { color: #888; font-weight: normal; }
+.sa-card .sa-body { padding: 10px 14px; overflow-x: auto; }
+.sa-card .sa-chart { position: relative; height: 280px; }
+.sa-w8 { grid-column: span 8; }
+.sa-w4 { grid-column: span 4; }
+.sa-w6 { grid-column: span 6; }
+.sa-w12 { grid-column: span 12; }
+@media (max-width: 991px) { .sa-w8, .sa-w4, .sa-w6 { grid-column: span 12; } }
+.sa-tab { width: 100%; font-size: 13px; }
+.sa-tab th { font-weight: 600; color: #666; font-size: 12px; border-bottom: 1px solid #e3e6ea; padding: 5px 6px; white-space: nowrap; }
+.sa-tab td { padding: 5px 6px; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
+.sa-tab tr:last-child td { border-bottom: 0; }
+.sa-tab .r { text-align: right; white-space: nowrap; }
+.sa-tab .sa-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sa-bar { height: 4px; background: #eef2f6; border-radius: 2px; margin-top: 3px; }
+.sa-bar span { display: block; height: 4px; background: #e08e0b; border-radius: 2px; max-width: 100%; }
+.sa-empty { color: #999; padding: 20px 0; text-align: center; }
+.sa-cum { font-weight: normal; font-size: 12px; margin: 0; cursor: pointer; float: right; }
+.sa-cum input { vertical-align: middle; margin: 0 3px 0 0; }
+.sa-note { color: #999; font-size: 12px; margin-top: 14px; }
+.sa-card .sa-chart.sa-chart-sm { height: 250px; }
+/* Statistiche del magazzino (stats_magazz.php) */
+.sm-page { padding: 4px 4px 20px 4px; }
+.sm-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 16px 0; }
+.sm-period { font-size: 15px; color: #444; }
+.sm-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sm-filter label { margin: 0; font-weight: normal; color: #666; }
+.sm-page .sm-filter select.form-control { width: auto; min-width: 80px; display: inline-block; }
+.sm-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.sm-kpi { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); position: relative; }
+.sm-kpi.sm-alert { border-color: #f1c0bc; background: #fffafa; }
+.sm-kpi .sm-ico { position: absolute; right: 12px; top: 12px; font-size: 20px; color: #c9d3dd; }
+.sm-kpi.sm-alert .sm-ico { color: #e8a39d; }
+.sm-kpi .sm-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: #777; }
+.sm-kpi .sm-val { font-size: 24px; font-weight: 600; margin: 4px 0 2px 0; color: #222; white-space: nowrap; }
+.sm-kpi .sm-sub { font-size: 12px; color: #888; }
+.sm-var { font-weight: 600; font-size: 12px; white-space: nowrap; }
+.sm-up { color: #2e7d32; }
+.sm-down { color: #c62828; }
+.sm-neu { color: #888; }
+.sm-neg { color: #c62828; font-weight: 600; }
+.sm-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+.sm-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
+.sm-card > h4 { margin: 0; padding: 10px 14px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eef0f2; }
+.sm-card > h4 small { color: #888; font-weight: normal; }
+.sm-card .sm-body { padding: 10px 14px; overflow-x: auto; }
+.sm-card .sm-chart { position: relative; height: 280px; }
+.sm-w8 { grid-column: span 8; }
+.sm-w4 { grid-column: span 4; }
+.sm-w6 { grid-column: span 6; }
+.sm-w12 { grid-column: span 12; }
+@media (max-width: 991px) { .sm-w8, .sm-w4, .sm-w6 { grid-column: span 12; } }
+.sm-tab { width: 100%; font-size: 13px; }
+.sm-tab th { font-weight: 600; color: #666; font-size: 12px; border-bottom: 1px solid #e3e6ea; padding: 5px 6px; white-space: nowrap; }
+.sm-tab td { padding: 5px 6px; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
+.sm-tab tr:last-child td { border-bottom: 0; }
+.sm-tab .r { text-align: right; white-space: nowrap; }
+.sm-tab .sm-name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sm-empty { color: #999; padding: 20px 0; text-align: center; }
+.sm-hint { color: #888; font-size: 12px; margin: 0 0 6px 0; }
+.sm-note { color: #999; font-size: 12px; margin-top: 14px; }
+.sm-card .sm-chart.sm-chart-sm { height: 250px; }
+.sv-hint { color: #777; font-size: 12px; margin: 0 0 6px 0; }
+.sm-hint.sm-hint-more { margin-top: 6px; }
+
+/* debug attivo (debug_active): riga nel footer per l'amministratore e dump di xdebug sopra la pagina, come nel tema lte */
+.main-footer .gz-debug { float: left; max-width: calc(100% - 380px); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; font-size: 12px; }
+.main-footer .gz-debug .btn { margin: 0 6px 0 4px; vertical-align: baseline; }
+.main-footer .gz-debug .label { font-size: 11px; }
+.main-footer .gz-debug .gz-debug-key { margin: 0 8px 0 14px; font-family: monospace; }
+pre.xdebug-var-dump { z-index: 820; position: relative; }
+
+/* elenco dei contratti (modules/vendit/report_contract.php) */
+/* colori di evidenza: rosso = periodo scaduto non fatturato, giallo = da fatturare a breve */
+tr.ctr-scaduto > td { background-color: #f8d7da !important; }
+tr.ctr-prossimo > td { background-color: #fff3cd !important; }
+/* menu di anno e mese dei filtri: stessa larghezza della cella, come gli altri filtri */
+table.gz-contratti td.gz-flt-data { white-space: nowrap; }
+table.gz-contratti td.gz-flt-data select { display: inline-block; width: 52px !important; padding: 2px 4px; font-size: 11px; vertical-align: top; }
+/* la colonna Data resta stretta anche su schermi larghi: il resto dello spazio va alle altre colonne */
+table.gz-contratti > tbody > tr > td:nth-child(2), table.gz-contratti > tr > td:nth-child(2) { width: 1%; white-space: nowrap; }

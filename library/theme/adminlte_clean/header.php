@@ -42,7 +42,7 @@ $userName = trim($admin_aziend['user_firstname'] . ' ' . $admin_aziend['user_las
     <link rel="stylesheet" href="../../js/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../library/theme/lte/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="../../library/theme/lte/adminlte/dist/css/AdminLTE.css">
-    <link rel="stylesheet" href="../../library/theme/adminlte_clean/style.css">
+    <link rel="stylesheet" href="../../library/theme/adminlte_clean/style.css?v=<?php echo @filemtime(__DIR__ . '/style.css'); ?>">
     <?php // colore della barra superiore: quello dell'azienda (es. EAD6D6), come nel tema lte
     $gzCompanyColor = preg_match('/^[0-9a-fA-F]{6}$/', (string) $admin_aziend['colore']) ? $admin_aziend['colore'] : 'ffffff';
     // immagine di sfondo delle pagine: quella dell'azienda se presente, altrimenti quella generica (come nel tema lte)
@@ -109,9 +109,9 @@ try {
                         <ul class="nav navbar-nav">
                             <?php // ricerca globale in tutti i moduli (Ctrl+K), tendina gestita da js/custom/global_search.js ?>
                             <li class="gz-gs hidden-xs">
-                                <div class="gz-gs-box"><?php // niente form: la barra è già dentro un form, Invio lo gestisce global_search.js ?>
+                                <div class="gz-gs-box" data-tip="Ricerca in tutti i moduli. Jolly: * qualsiasi testo, ? un carattere"><?php // niente form: la barra è già dentro un form, Invio lo gestisce global_search.js ?>
                                     <i class="fa fa-search gz-gs-icon"></i>
-                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)" title="Ricerca in tutti i moduli. Jolly: * qualsiasi testo, ? un carattere">
+                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)">
                                 </div>
                             </li>
                             <?php // stellina: aggiunge o toglie la pagina corrente ai preferiti della barra laterale
@@ -146,7 +146,7 @@ try {
                                     <li class="user-body">
                                         <div class="gz-user-links">
                                             <a href="<?php echo $userPageUrl; ?>"><i class="fa fa-user"></i> Scheda utente</a>
-                                            <a href="../root/api_token.php"><i class="fa fa-key"></i> Token API</a>
+                                            <span class="text-muted" title="Token API disabilitato" style="display:block;padding:3px 10px;cursor:not-allowed;opacity:.6"><i class="fa fa-key"></i> Token API (disabilitato)</span>
                                             <a href="../root/theme_favorites_manage.php"><i class="fa fa-star"></i> Preferiti</a>
                                             <a href="../root/global_search_manage.php"><i class="fa fa-search"></i> Ricerca globale</a>
                                             <?php if ($admin_aziend['Abilit'] >= 8) { ?>

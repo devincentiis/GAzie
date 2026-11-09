@@ -79,7 +79,7 @@ function printDash($gTables,$module,$admin_aziend,$transl,$excluded_script){
           echo "<ol class=\"breadcrumb\">";
           echo "<li> --- </li>";
       }
-      echo "<li><a href=\"../../modules/root/admin.php\"><i class=\"glyphicon glyphicon-home\"></i></a>&nbsp;<a href='../../modules/root/admin_breadcrumb.php?url=".$pos."'><i class='glyphicon glyphicon-cog'></i></a></li>";
+      echo "<li><a href=\"../../modules/root/admin.php\"><i class=\"glyphicon glyphicon-home\"></i></a></li>";
       echo "</ol>";
 	  }
   }

@@ -1,11 +1,11 @@
 <?php
 /*
-  -------------------------------------------------------------------
+  --------------------------------------------------------------------------
   GAzie - Gestione Azienda
-  Copyright (C) 2004-2024 Antonio De Vincentiis Montesilvano (PE)
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
   (https://www.devincentiis.it)
   <https://gazie.sourceforge.net>
-  -------------------------------------------------------------------
+  --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
   come e` pubblicata dalla Free Software Foundation; o la versione 2
@@ -20,7 +20,7 @@
   Generica GNU insieme a   questo programma; in caso  contrario,  si
   scriva   alla   Free  Software Foundation, 51 Franklin Street,
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
-  -------------------------------------------------------------------
+  --------------------------------------------------------------------------
  */
 $config = new UserConfig;
 
@@ -109,8 +109,8 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
       echo '<style> pre.xdebug-var-dump { z-index: 820; position: relative; } </style>';
     } ;
     ?>
-        <link href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/scheletons/<?= $style; ?>" rel="stylesheet" type="text/css" />
-        <link href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/skins/<?= $admin_aziend['skin']; ?>" rel="stylesheet" type="text/css" />
+        <link href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/scheletons/<?= $style; ?>?v=<?= @filemtime(__DIR__ . "/scheletons/" . $style); ?>" rel="stylesheet" type="text/css" />
+        <link href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/skins/<?= $admin_aziend['skin']; ?>?v=<?= @filemtime(__DIR__ . "/skins/" . $admin_aziend['skin']); ?>" rel="stylesheet" type="text/css" />
 <?php
     if (!empty($admin_aziend['skin']) && file_exists("../../library/theme/lte/skins/" . $admin_aziend['skin'])) {
         $isblack = strpos($admin_aziend['skin'],'black') === false ? false : true;
@@ -448,7 +448,7 @@ if ($rslen < 18) {
                             <li class="gz-gs hidden-xs">
                                 <div class="gz-gs-box"><?php // niente form: la barra è già dentro un form, Invio lo gestisce global_search.js ?>
                                     <i class="fa fa-search gz-gs-icon"></i>
-                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)" title="Ricerca in tutti i moduli. Jolly: * qualsiasi testo, ? un carattere">
+                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" mode="db" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)" title="Ricerca in tutti i moduli. Jolly: * qualsiasi testo, ? un carattere">
                                 </div>
                             </li>
 							<li class='blink'></li>

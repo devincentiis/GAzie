@@ -308,10 +308,11 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
         while ( $row = gaz_dbi_fetch_array($res_pos) ) {
           echo "<li><a class='btn btn-xs btn-default' href='".$row['link']."'>".$row['titolo']."</a></li>";
           $yeslink=true;
+          $ultimo_link=$row['link']; $ultimo_titolo=$row['titolo']; // l'ultima voce letta: il while esaurito porta $row a null
         }
         echo "<li><a class='btn btn-xs btn-default' href='../../modules/root/admin.php'><i class='fa fa-home'></i></a>&nbsp;<a class='btn btn-xs btn-default' href='../../modules/root/admin_breadcrumb.php?url=".$pos."'><i class='glyphicon glyphicon-cog'></i></a></li>";
         echo "</ol>";
-        if ($yeslink) echo "<h1><a href='".$row['link']."'>".$row['titolo']."</a></h1>";
+        if ($yeslink) echo "<h1><a href='".$ultimo_link."'>".$ultimo_titolo."</a></h1>";
     } else {
 		  if ($pos=='modules/root/admin.php') { // sulla home page
 				echo "<a href='../../modules/root/admin_dash.php'><i class='glyphicon glyphicon-cog'></i></a>";
@@ -376,7 +377,8 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
     }
     require("../../language/".$admin_aziend['lang']."/menu.inc.php");
     echo '<script type="text/javascript">';
-    echo '$("#title_from_menu").text("'.$accTitle.'")';
+    // il titolo è testo puro: le entità HTML delle etichette di menu (es. &agrave;) vanno decodificate, e la stringa passata come JSON
+    echo '$("#title_from_menu").text('.json_encode(html_entity_decode($accTitle, ENT_QUOTES, 'UTF-8')).')';
 		echo '
 		 countclick = 0;
 		 function chkSubmit() {

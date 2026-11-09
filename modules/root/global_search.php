@@ -21,15 +21,23 @@
   scriva   alla   Free  Software Foundation, 51 Franklin Street,
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
+  AUTORE: Andrea Biasi
+  -------------------------------------------------------------------
  */
+
 // Ricerca globale: cerca il termine in tutte le fonti (anagrafiche, articoli, documenti, contratti, assistenze)
 // che l'utente può vedere. Con ajax=1 risponde in JSON (tendina della barra in alto), altrimenti mostra la pagina dei risultati.
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 require_once("global_search.lib.php");
-$gsSettings = gsSettingsFor($admin_aziend['company_id'], $admin_aziend['user_name']);
-$gsDisabled = $gsSettings['disabled'];
-
+$mode = substr($_GET['mode'],0,2);
+if ( $mode=='db' ) { // ho scelto la modalità inversa con attivazioni da database appoggiandomi alla tabella gaz_breadcrumb colonna exec_mode = 5 e con la colonna "file" contenente il valore abilitato e position_order per le attivazioni in tendina
+  $gsSettings = gsSettingsForDb($admin_aziend['company_id'], $admin_aziend['user_name']);
+  $gsDisabled = $gsSettings['disabled'];
+} else {
+  $gsSettings = gsSettingsFor($admin_aziend['company_id'], $admin_aziend['user_name']);
+  $gsDisabled = $gsSettings['disabled'];
+}
 $isAjax = !empty($_GET['ajax']);
 $q = isset($_GET['q']) ? trim(preg_replace('/\s+/', ' ', (string) $_GET['q'])) : '';
 $q = mb_substr($q, 0, 50);
@@ -52,6 +60,7 @@ function gsLike($fields, $term) {
 
 $results = array(); // gruppo => array di risultati (title, detail, url)
 $tc_link = ''; // valorizzato solo se il testo è un trans_code (vedi sotto)
+$artico_exact = null; // articolo con barcode, codice o codice produttore uguale al testo (es. lettura con pistola barcode)
 if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
   $T = $gTables;
   $notTransCode = true;
@@ -64,6 +73,16 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
       $notTransCode = false;
       $tc_link = $row['tc_link'];
       //error_log($tc_link);
+    }
+  }
+  // corrispondenza esatta con un solo articolo: la barra lo inserisce nel documento aperto o apre la scheda (disattivabile)
+  if ($notTransCode && !in_array('barcode_doc', $gsDisabled) && gsCanSee('magazz', 'admin_artico',$admin_aziend['user_name'])) {
+    $qe = gaz_dbi_real_escape_string($q);
+    $rs_ex = gaz_dbi_query("SELECT codice, MIN(descri) AS descri FROM " . $T['artico'] . " WHERE barcode = '" . $qe . "' OR codice = '" . $qe . "' OR (codice_fornitore <> '' AND codice_fornitore = '" . $qe . "') GROUP BY codice LIMIT 2");
+    if (gaz_dbi_num_rows($rs_ex) == 1) {
+      $ex = gaz_dbi_fetch_array($rs_ex);
+      $artico_exact = array('codice' => $ex['codice'], 'descri' => (string) $ex['descri'],
+        'url' => '../magazz/admin_artico.php?Update&codice=' . urlencode($ex['codice']));
     }
   }
   if ($notTransCode){
@@ -124,7 +143,7 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
         array('key' => 'contratti', 'group' => 'Contratti', 'icon' => 'fa-handshake-o', 'module' => 'vendit', 'script' => 'admin_contract',
             'select' => $T['contract'] . ".id_contract AS k, CONCAT('Contratto n.', " . $T['contract'] . ".doc_number, ' del ', DATE_FORMAT(" . $T['contract'] . ".conclusion_date, '%d-%m-%Y')) AS t, " . $T['anagra'] . ".ragso1 AS d",
             'from' => $T['contract'] . " LEFT JOIN " . $anag . " ON " . $T['contract'] . ".id_customer = " . $T['clfoco'] . ".codice",
-            'where' => "(" . gsLike(array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['contract'] . '.note') + ($hasDescri ? array($T['contract'] . '.invoice_descri') : array()), $q) . ($num ? " OR " . $T['contract'] . ".doc_number = " . $num : "") . ")",
+            'where' => "(" . gsLike(array_merge(array($T['anagra'] . '.ragso1', $T['anagra'] . '.ragso2', $T['contract'] . '.note'), ($hasDescri ? array($T['contract'] . '.invoice_descri') : array())), $q) . ($num ? " OR " . $T['contract'] . ".doc_number = " . $num : "") . ")",
             'order' => $T['contract'] . ".conclusion_date DESC",
             'url' => function ($r) { return '../vendit/admin_contract.php?Update&id_contract=' . intval($r['k']); }),
         array('key' => 'assistenze', 'group' => 'Assistenze', 'icon' => 'fa-wrench', 'module' => 'suppor', 'script' => 'admin_assist',
@@ -194,14 +213,14 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
     // funzioni rapide (codici del menu, es. FATVEN): elenco in cima alla tendina; il codice esatto apre la pagina direttamente (vedi tc_link)
     if (!in_array('codici', $gsDisabled)) {
         $quickUrl = null;
-        $qrows = gsQuickCodes($q, $limit, $quickUrl);
+        $qrows = gsQuickCodes($q, $limit, $quickUrl,$admin_aziend['user_name']);
         if ($qrows) $results[] = array('group' => 'Funzioni rapide', 'icon' => 'fa-bolt', 'rows' => $qrows);
     }
 
     foreach ($sources as $s) {
         // le fonti pesanti solo nella pagina completa, a meno che l'utente non le voglia anche nella tendina
         if ($isAjax && !empty($s['page_only']) && !in_array($s['key'], $gsSettings['dropdown'])) continue;
-        if (in_array($s['key'], $gsDisabled) || !gsCanSee($s['module'], $s['script'])) continue;
+        if (in_array($s['key'], $gsDisabled) || !gsCanSee($s['module'], $s['script'],$admin_aziend['user_name'])) continue;
         // una fonte che non risponde (tabella o colonna mancante) non blocca le altre
         try {
             $rs = gaz_dbi_dyn_query($s['select'], $s['from'], $s['where'], $s['order'], 0, $limit);
@@ -219,7 +238,7 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
 
 if ($isAjax) {
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(array('q' => $q, 'pages' => !in_array('pagine', $gsDisabled), 'groups' => $results,'tc_link'=>$tc_link));
+    echo json_encode(array('q' => $q, 'pages' => !in_array('pagine', $gsDisabled), 'groups' => $results,'tc_link'=>$tc_link, 'artico_exact' => $artico_exact));
     exit;
 }
 
@@ -241,6 +260,7 @@ function gsMark($text, $q) {
 <div class="gz-gs-page">
     <form method="GET" class="form-inline" style="margin-bottom: 15px;">
         <input type="text" name="q" class="form-control" style="width: 320px;" value="<?php echo htmlspecialchars($q); ?>" placeholder="Cerca in GAzie..." autofocus>
+        <input type="hidden" name="mode" value="<?php echo htmlspecialchars($mode); ?>" />
         <button type="submit" class="btn btn-default"><i class="fa fa-search"></i> Cerca</button>
     </form>
 <?php

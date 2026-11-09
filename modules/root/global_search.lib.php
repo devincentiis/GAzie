@@ -1,8 +1,30 @@
 <?php
 /*
-  GAzie - ricerca globale: elenco delle fonti e impostazioni dell'utente.
-  Le fonti escluse dall'utente sono salvate in data/files/<company_id>/<user_name>_ricerca.json, come i preferiti.
-*/
+  --------------------------------------------------------------------------
+  GAzie - Gestione Azienda
+  Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
+  (https://www.devincentiis.it)
+  <https://gazie.sourceforge.net>
+  --------------------------------------------------------------------------
+  Questo programma e` free software;   e` lecito redistribuirlo  e/o
+  modificarlo secondo i  termini della Licenza Pubblica Generica GNU
+  come e` pubblicata dalla Free Software Foundation; o la versione 2
+  della licenza o (a propria scelta) una versione successiva.
+
+  Questo programma  e` distribuito nella speranza  che sia utile, ma
+  SENZA   ALCUNA GARANZIA; senza  neppure  la  garanzia implicita di
+  NEGOZIABILITA` o di  APPLICABILITA` PER UN  PARTICOLARE SCOPO.  Si
+  veda la Licenza Pubblica Generica GNU per avere maggiori dettagli.
+
+  Ognuno dovrebbe avere   ricevuto una copia  della Licenza Pubblica
+  Generica GNU insieme a   questo programma; in caso  contrario,  si
+  scriva   alla   Free  Software Foundation, 51 Franklin Street,
+  Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
+  --------------------------------------------------------------------------
+  AUTORE: Andrea Biasi
+  -------------------------------------------------------------------
+ */
+
 
 // fonti della ricerca globale: chiave => nome, icona, modulo e script che servono per vederla
 function gsCatalog() {
@@ -32,18 +54,18 @@ function gsCatalog() {
 }
 
 // l'utente può vedere la fonte se ha accesso al modulo e lo script di destinazione non è tra quelli esclusi
-function gsCanSee($module, $script) {
-    global $admin_aziend;
-    if ($module === '') return true;
-    $rights = checkAccessRights($admin_aziend['user_name'], $module, $admin_aziend['company_id']);
-    if ($rights == 0) return false;
-    if (is_array($rights) && in_array($script, $rights)) return false;
-    return true;
+function gsCanSee($module,$script,$user) {
+  global $admin_aziend;
+  if ($module === '') return true;
+  $rights = checkAccessRights($user, $module,$admin_aziend['company_id']);
+  if ($rights == 0) return false;
+  if (is_array($rights) && in_array($script, $rights)) return false;
+  return true;
 }
 
 // funzioni rapide: voci di menu (secondo e terzo livello) il cui codice trans_code inizia con il testo digitato.
 // Restituisce le righe per la tendina e, se il testo coincide esattamente con un codice, l'indirizzo da aprire subito in $exactUrl.
-function gsQuickCodes($q, $limit, &$exactUrl) {
+function gsQuickCodes($q, $limit, &$exactUrl,$user) {
     global $gTables, $admin_aziend;
     $exactUrl = null;
     if ($q !== '' && !preg_match('/^[\pL\pN*?%]+$/u', $q)) return array(); // i codici non contengono spazi né simboli; testo vuoto = tutti i codici
@@ -62,7 +84,7 @@ function gsQuickCodes($q, $limit, &$exactUrl) {
             $mod = (string) $r['modname'];
             if ($mod === '' || (int) $admin_aziend['Abilit'] < (int) $r['ak']) continue;
             $script = pathinfo(parse_url($r['link'], PHP_URL_PATH), PATHINFO_FILENAME);
-            if (!gsCanSee($mod, $script)) continue;
+            if (!gsCanSee($mod, $script,$user)) continue;
             if (!isset($names[$mod])) {
                 $transl = array();
                 $file = __DIR__ . '/../' . $mod . '/menu.' . $admin_aziend['lang'] . '.php';
@@ -83,6 +105,14 @@ function gsQuickCodes($q, $limit, &$exactUrl) {
     }
     return array_slice($rows, 0, $limit);
 }
+
+
+// ==================================================================
+// INIZIO FUNZIONI PER TEMI CHE SI APPOGGIANO SU FILES (adminlte_clean)
+/*
+  GAzie - ricerca globale: elenco delle fonti e impostazioni dell'utente.
+  Le fonti escluse dall'utente sono salvate in data/files/<company_id>/<user_name>_ricerca.json, come i preferiti.
+*/
 
 function gsSettingsFile($companyId, $user) {
     $name = preg_replace('/[^A-Za-z0-9_.-]/', '_', (string) $user);
@@ -105,7 +135,8 @@ function gsSaveSettings($companyId, $user, $settings) {
     if (!is_dir(dirname($file))) {
         mkdir(dirname($file), 0775, true);
     }
-    $known = array_keys(gsCatalog());
+    // oltre alle fonti, le opzioni che si possono disattivare (barcode_doc = codice articolo esatto inserito nel documento aperto)
+    $known = array_merge(array_keys(gsCatalog()), array('barcode_doc'));
     $data = array(
         'disabled' => array_values(array_intersect($known, (array) ($settings['disabled'] ?? array()))),
         'dropdown' => array_values(array_intersect($known, (array) ($settings['dropdown'] ?? array()))),
@@ -124,3 +155,55 @@ function gsSaveDisabled($companyId, $user, $disabled) {
     $s['disabled'] = $disabled;
     gsSaveSettings($companyId, $user, $s);
 }
+// FINE FUNZIONI PER TEMI CHE SI APPOGGIANO SU FILES (adminlte_clean)
+// ==================================================================
+
+
+// ==================================================================
+// INIZIO FUNZIONI PER TEMI CHE SI APPOGGIANO SU DATABASE (lte)
+/*
+  GAzie - ricerca globale: elenco delle fonti e impostazioni dell'utente.
+  Le fonti scelte per l'utente sono salvate nella tabella gaz_breadcrumb con mode = 5 la logica è inversa: la ricerca avviene solo se presente sulla tabella colonna "file"
+*/
+
+// impostazioni dell'utente: 'disabled' = fonti tolte dalla ricerca, 'dropdown' = fonti "solo pagina completa" mostrate anche nella tendina
+function gsSettingsForDb($companyId, $user) {
+    global $gTables, $admin_aziend;
+    $out=[];
+    $out['disabled'] = gsCatalog(); // prima disabilito tutto
+    $out['disabled']['barcode_doc'] = []; // accodo la scelta per invio return automatico
+    $out['dropdown'] = []; // e nessun dropdown
+    $rs = gaz_dbi_dyn_query("*",$gTables['breadcrumb'],"codice_aziend = ".$companyId." AND adminid = '".$user."' AND exec_mode = 5");
+    while ($r = gaz_dbi_fetch_array($rs)) {
+      unset($out['disabled'][$r['file']]); // se è stato abilitato lo elimino dalla matrice dei disabilitati
+      if ($r['position_order']==1){
+        $out['dropdown'][]=$r['file']; // se si vuole la tendina
+      }
+    }
+    $out['disabled'] = array_keys($out['disabled']);
+    return $out;
+}
+
+function gsSaveSettingsDb($companyId, $user, $settings) {
+    // oltre alle fonti, le opzioni che si possono disattivare (barcode_doc = codice articolo esatto inserito nel documento aperto)
+    $known = array_merge(array_keys(gsCatalog()), array('barcode_doc'));
+    $data = array(
+        'disabled' => array_values(array_intersect($known, (array) ($settings['disabled'] ?? array()))),
+        'dropdown' => array_values(array_intersect($known, (array) ($settings['dropdown'] ?? array()))),
+    );
+    file_put_contents($y_row, json_encode($data, JSON_PRETTY_PRINT));
+}
+
+// chiavi delle fonti che l'utente ha tolto dalla ricerca
+function gsDisabledForDb($companyId, $user) {
+    $s = gsSettingsForDb($companyId, $user);
+    return $s['disabled'];
+}
+
+function gsSaveDisabledDb($companyId, $user, $disabled) {
+    $s = gsSettingsForDb($companyId, $user);
+    $s['disabled'] = $disabled;
+    gsSaveSettingsDb($companyId, $user, $s);
+}
+// FINE FUNZIONI PER TEMI CHE SI APPOGGIANO SU FILES (adminlte_clean)
+// ==================================================================

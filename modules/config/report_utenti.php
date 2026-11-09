@@ -105,6 +105,9 @@ while ($r = gaz_dbi_fetch_array($result)) {
 	$regol_lnk='';
 	$company = gaz_dbi_get_row($gTables['aziend'], 'codice', $r['company_id']);
   $tema = explode('/',gaz_dbi_get_row($gTables['admin_config'], 'adminid', $r["user_name"], " AND var_name ='theme'")['var_value']);
+  if (str_contains($tema[3], 'lte')) { // gli utenti che usano il tema lte possono avvalersi della ricerca globale
+    $tema[3] .= ' <a href="../root/global_search_manage.php?mode=db&user='.$r["user_name"].'" target=_new title="Setup ricerca globale"> <i class="fa fa-cog"></i> <i class="fa fa-search"></i></a>';
+  }
 	if ($r["Abilit"]>8){
 		$company['ragso1']=$script_transl['all'];
 		$ri_descr='stampa nomina RESPONSABILE trattamento dati personali';

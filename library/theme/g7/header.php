@@ -75,8 +75,8 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
       return '#' . implode($rgb);
     }
     ?>
-    <link href="../../<?php echo(STATIC_VERSION);?>library/theme/g7/scheletons/<?php echo $style; ?>" rel="stylesheet" type="text/css" />
-    <link href="../../<?php echo(STATIC_VERSION);?>library/theme/g7/skins/<?php echo $skin; ?>" rel="stylesheet" type="text/css" />
+    <link href="../../<?php echo(STATIC_VERSION);?>library/theme/g7/scheletons/<?php echo $style; ?>?v=<?php echo @filemtime(__DIR__ . "/scheletons/" . $style); ?>" rel="stylesheet" type="text/css" />
+    <link href="../../<?php echo(STATIC_VERSION);?>library/theme/g7/skins/<?php echo $skin; ?>?v=<?php echo @filemtime(__DIR__ . "/skins/" . $skin); ?>" rel="stylesheet" type="text/css" />
     <style type="text/css">
       body {
         background-image: url("data:image/x-icon;base64,<?php echo $sfondo; ?>");

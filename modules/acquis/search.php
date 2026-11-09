@@ -87,7 +87,7 @@ if (isset($_GET['term'])) { //	Evitiamo errori se lo script viene chiamato diret
                 }           //	non inizia per za il risultato è nullo, così invece se cerco za%, viene fuori anche un prodotto il
             }            //  cui nome (o descrizione) inizia per za ma il cui codice può anche essere TPQ 
             $like = implode(" OR ", $like);    //	creo la porzione di query per il like, con OR perchè cerco in campi differenti
-            $result = gaz_dbi_dyn_query("codice AS id, CONCAT(codice,' - ',descri,' - ',barcode,' - ',codice_fornitore) AS label, codice AS value, movimentabile", $gTables['artico'], $like, "CASE movimentabile WHEN 'N' THEN 2 WHEN 'E' THEN 1 WHEN 'S' THEN 0 END ASC , catmer ASC, codice ASC");
+            $result = gaz_dbi_dyn_query("codice AS id, CONCAT(codice,' - ',descri,' - ',barcode,' - ',codice_fornitore) AS label, codice AS value, movimentabile", $gTables['artico'], $like, "CASE movimentabile WHEN 'N' THEN 2 WHEN 'E' THEN 1 WHEN 'S' THEN 0 END ASC , catmer ASC, codice ASC", 0, 50); // massimo 50 suggerimenti: con decine di migliaia di articoli (listini importati) senza limite la tendina blocca il browser
             break;
     }
     while ($row = gaz_dbi_fetch_assoc($result)) { 

@@ -127,6 +127,8 @@ class acquisForm extends GAzieForm {
       }
 		} elseif($val=='Insert_from_db'){
 			$acc .= '<input type="text" name="search_'.$name.'" artref="'.$name.'" class="search_artico" placeholder="Cerca articolo" value="' . $search . '"  maxlength="16" />';
+			// per tornare alla scelta iniziale (non in magazzino, nuovo articolo...) senza dover ricaricare la fattura
+			$acc .= ' <button type="submit" class="btn btn-xs btn-default" name="change_'.$name.'" value="1" title="Annulla la ricerca"><i class="glyphicon glyphicon-remove"></i></button>';
 			$acc .= '<input type="hidden" id="'.$name.'" name="'.$name.'" value="'.$val.'">';
 		} else {
 			$acc .= '<select id="'.$name.'" name="'.$name.'" onchange="this.form.submit();">';

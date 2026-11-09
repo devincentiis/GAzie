@@ -684,6 +684,7 @@ $strScript = array("admin_fornit.php" =>
             'no_codric' => 'Non hai selezionato il codice conto di costo',
             'reverse_charge' => 'La fattura è reverse charge emessa con altro sistema?',
             'no_codvat' => 'Non hai selezionato l\'aliquota IVA',
+            'no_codart' => 'Su una riga hai scelto "Cerca articolo magazzino" senza selezionare l\'articolo: sceglilo dall\'elenco oppure annulla la ricerca',
             'same_content' => 'Una fattura di questo fornitore, contenente lo stesso numero e data fattura, è già stato acquisito',
 			'Not_all-ddt' => 'Non tutti i ddt sono stati inseriti. Questa FAE xml è mal formata e per poterla acquisire è necessario aver già inserito tutti i DDT. Non puoi inserirne solo alcuni. In alternativa, inserisci la FAE manualmente.'
         ),
