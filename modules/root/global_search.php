@@ -72,7 +72,6 @@ if ($valid && mb_strlen(str_replace(array('%', '*', '?'), '', $q)) >= 2) {
       $row = gaz_dbi_fetch_array($result);
       $notTransCode = false;
       $tc_link = $row['tc_link'];
-      //error_log($tc_link);
     }
   }
   // corrispondenza esatta con un solo articolo: la barra lo inserisce nel documento aperto o apre la scheda (disattivabile)

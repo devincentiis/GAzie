@@ -32,52 +32,69 @@
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 require_once("theme_favorites.lib.php");
-$admin_aziend['user_name'] = $admin_aziend['user_name'];
 $action = $_POST['action'] ?? '';
-$link = $_POST['link'] ?? '';
+$scriptlink = $_POST['link'] ?? '';
+$mode = isset($_POST['mode']) ? substr($_POST['mode'],0,2) : '';
 $name = trim(strip_tags((string) ($_POST['name'] ?? '')));
 $name = mb_substr($name, 0, 60);
 // pagina del modulo, eventualmente con parametri (es. admin_docven.php?Insert&tipdoc=FAI)
-if ($action === 'toggle' && preg_match('#^/[a-z0-9_]+/[a-z0-9_]+\.php(\?[a-z0-9_&=.%-]*)?$#i', $link)) {
+if ($action === 'toggle' && preg_match('#^/[a-z0-9_]+/[a-z0-9_]+\.php(\?[a-z0-9_&=.%-]*)?$#i', $scriptlink)) {
+  if($mode == 'db') {
+    $link_isset=gaz_dbi_get_row($gTables['breadcrumb'],'codice_aziend',$admin_aziend['company_id'],"AND adminid='".$admin_aziend['user_name']."' AND exec_mode = 4 AND link = '".gaz_dbi_real_escape_string($scriptlink)."' LIMIT 1");
+    if ($link_isset){ // è attivata, disattivo rimuovendo
+      $link_isset=gaz_dbi_del_row($gTables['breadcrumb'],'id_bread',$link_isset['id_bread']);
+    } else { // attivo inserendo
+      gaz_dbi_query("INSERT INTO `gaz_breadcrumb` (`exec_mode`,`link`,`titolo`,`adminid`,`codice_aziend`) VALUES ( 4, '".gaz_dbi_real_escape_string($scriptlink)."','".$name."','".$admin_aziend['user_name']."',".$admin_aziend['company_id']." )");
+    }
+  } else {
     $list = gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']);
     $found = false;
     foreach ($list as $i => $f) {
-        if ($f['link'] === $link) {
-            unset($list[$i]);
-            $found = true;
-        }
+      if ($f['link'] === $scriptlink) {
+        unset($list[$i]);
+        $found = true;
+      }
     }
     if (!$found) {
-        $list[] = ['link' => $link, 'name' => $name !== '' ? $name : $link];
+        $list[] = ['link' => $scriptlink, 'name' => $name !== '' ? $name : $scriptlink];
     }
     gzFavoritesSave($admin_aziend['company_id'], $admin_aziend['user_name'], $list);
     echo $found ? 'removed' : 'added';
     exit;
+  }
 }
 // nuovo ordine dei preferiti dell'utente: order è la lista dei link nell'ordine voluto
 if ($action === 'riordina') {
+  $order = json_decode((string) ($_POST['order'] ?? '[]'), true);
+  if($mode == 'db') {
+    $i=0;
+    foreach ($order as $scriptlink) {
+      gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET position_order = ".$i." WHERE codice_aziend=".$admin_aziend['company_id']." AND adminid='". $admin_aziend['user_name']."' AND exec_mode = 4 AND link ='".$scriptlink."'");
+      $i++;
+    }
+  } else {
     $list = gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']);
-    $order = json_decode((string) ($_POST['order'] ?? '[]'), true);
     if (!is_array($order)) {
-        http_response_code(400);
-        exit('ordine non valido');
+      http_response_code(400);
+      exit('ordine non valido');
     }
     $mine = [];
     foreach ($list as $f) {
-        if (isset($f['link'])) {
-            $mine[$f['link']] = $f;
-        }
+      if (isset($f['link'])) {
+        $mine[$f['link']] = $f;
+      }
     }
     $sorted = [];
-    foreach ($order as $link) {
-        if (is_string($link) && isset($mine[$link])) {
-            $sorted[] = $mine[$link];
-            unset($mine[$link]);
-        }
+    foreach ($order as $scriptlink) {
+      if (is_string($scriptlink) && isset($mine[$scriptlink])) {
+        $sorted[] = $mine[$scriptlink];
+        unset($mine[$scriptlink]);
+      }
     }
     // i preferiti non presenti nell'ordine inviato restano in fondo, nel loro ordine
     $sorted = array_merge($sorted, array_values($mine));
     gzFavoritesSave($admin_aziend['company_id'], $admin_aziend['user_name'], $sorted);
     echo 'ok';
     exit;
+  }
 }

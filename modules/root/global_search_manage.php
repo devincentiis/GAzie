@@ -144,7 +144,7 @@ $quickList = gsQuickCodes('', 500, $quickExact, $user);
 require("../../library/include/header.php");
 $script_transl = HeadMain();
 ?>
-<div class="panel panel-info">
+<div class="panel panel-primary">
   <div class="box-body text-center">
     <h4>Ricerca globale dell'utente: <?= $user ?></h4>
     <p>Scegli in quali dati cercare con il campo "Cerca in GAzie" nella barra in alto (scorciatoia <b>Ctrl+K</b>).</p>
@@ -223,7 +223,6 @@ $script_transl = HeadMain();
       <li><b>Pagine del menu:</b> cerca tra le voci della barra laterale, per arrivare velocemente a una pagina scrivendone il nome.</li>
       <li><b>Funzioni rapide:</b> sono i codici assegnati alle voci del menu (campo <code>trans_code</code> in <code>gaz_menu_script</code> e <code>gaz_menu_module</code>); si cercano dall'inizio del codice e compaiono in cima alla tendina.</li>
       <li><b>Personali:</b> ogni utente ha le proprie scelte, in ogni azienda.</li>
-      <li><b>Salvataggio:</b> le scelte sono memorizzate in <code>data/files/&lt;azienda&gt;/&lt;utente&gt;_ricerca.json</code>, accanto ai preferiti. Senza il file tutte le fonti sono attive.</li>
     </ul>
   </div>
 </div>

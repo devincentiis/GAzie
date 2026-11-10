@@ -183,27 +183,10 @@ function gsSettingsForDb($companyId, $user) {
     $out['disabled'] = array_keys($out['disabled']);
     return $out;
 }
-
-function gsSaveSettingsDb($companyId, $user, $settings) {
-    // oltre alle fonti, le opzioni che si possono disattivare (barcode_doc = codice articolo esatto inserito nel documento aperto)
-    $known = array_merge(array_keys(gsCatalog()), array('barcode_doc'));
-    $data = array(
-        'disabled' => array_values(array_intersect($known, (array) ($settings['disabled'] ?? array()))),
-        'dropdown' => array_values(array_intersect($known, (array) ($settings['dropdown'] ?? array()))),
-    );
-    file_put_contents($y_row, json_encode($data, JSON_PRETTY_PRINT));
-}
-
 // chiavi delle fonti che l'utente ha tolto dalla ricerca
 function gsDisabledForDb($companyId, $user) {
     $s = gsSettingsForDb($companyId, $user);
     return $s['disabled'];
-}
-
-function gsSaveDisabledDb($companyId, $user, $disabled) {
-    $s = gsSettingsForDb($companyId, $user);
-    $s['disabled'] = $disabled;
-    gsSaveSettingsDb($companyId, $user, $s);
 }
 // FINE FUNZIONI PER TEMI CHE SI APPOGGIANO SU FILES (adminlte_clean)
 // ==================================================================

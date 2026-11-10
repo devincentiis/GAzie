@@ -28,6 +28,7 @@ $pdb = intval(gaz_dbi_get_row($gTables['company_config'], 'var', 'menu_alerts_ch
 $period = ($pdb < 15)? 60 : $pdb;
 
 require("../../library/theme/lte/function.php");
+require_once("../root/theme_favorites.lib.php");
 
 if ( isset( $maintenance ) && $maintenance!=FALSE && $maintenance!=$_SESSION['user_email'] ) {
 	header("Location: ../../modules/root/maintenance.php");
@@ -125,7 +126,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
           $sfondo=base64_encode($image_data);
           $brightness = ' text-shadow: 1px 1px 2px black;';
 ?>        <style>
-            .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover, nav.navbar.navbar-static-top.company-color-bright:hover
+            .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover, nav.navbar.navbar-static-top.company-color-bright:hover, .navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a:hover, .navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a.is-hovered
             {
               background-color: #<?= $admin_aziend['colore'] ?>;
               color: black;
@@ -166,7 +167,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
           </style>
 <?php        } elseif ($iswhite) { // se è bianco modifico i colori del menù
 ?>        <style>
-            .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover, nav.navbar.navbar-static-top.company-color-bright:hover
+            .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover, nav.navbar.navbar-static-top.company-color-bright:hover, .navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a:hover, .navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a.is-hovered
             {
               background-color: #<?= $admin_aziend['colore'] ?>;
               color: black;
@@ -211,7 +212,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
           $brightness = ' ';
         } else {
 ?>        <style>
-            .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover, nav.navbar.navbar-static-top.company-color-bright:hover
+            .company-color, .company-color-bright, li.user-header, .company-color-logo, .dropdown-menu > li > a:hover, .dropdown-menu > li.user-body:hover, .navbar-default .navbar-nav > li > a:hover, nav.navbar.navbar-static-top.company-color-bright:hover, .navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a:hover, .navbar-nav > .messages-menu > .dropdown-menu > li .menu > li > a.is-hovered
             {
               background-color: #<?= $admin_aziend['colore'] ?>;
               color: black;
@@ -461,70 +462,53 @@ if ($rslen < 18) {
 								require '../' . $module . '/menu.' . $admin_aziend['lang'] . '.php';
                                 echo '<li><a id="docmodal" href="#myModal" data-toggle="modal" data-target="#doc_modal" title="Documentazione modulo '. $transl[$module]['name'] .'" module="'. $module .'"><img src="../'.$module.'/'.$module.'.png" height="32"><span class="hidden-xs">'.$transl[$module]['name']."</span></a></li>";
                             }
+                            $gzFavOn = (isset($mod_uri) && gzIsFavoriteDb($admin_aziend['company_id'], $admin_aziend['user_name'], $mod_uri));
                             ?>
                             <!-- Messages: style can be found in dropdown.less-->
                             <li class="dropdown messages-menu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fa fa-star" style="color: yellow; text-shadow: 0 0 10px #000;"></i>
-                                    <!--<span class="label label-success">4</span>-->
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" title="Preferiti">
+                                <?php
+                                  if ($gzFavOn){
+                                    echo '<i class="fa fa-star" style="color: yellow; text-shadow: 0 0 10px #000;"></i>';
+                                  } else {
+                                    echo '<i class="fa fa-star-o" style="color: black; text-shadow: 0 0 10px #000;"></i>';
+                                  }
+                                ?>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li class="header">Funzioni più utilizzate</li>
-                                    <li>
-                                        <!-- inner menu: contains the actual data -->
-                                        <ul class="menu">
-                                            <?php
-                                            $result = gaz_dbi_dyn_query("*", $gTables['menu_usage'], ' company_id="' . $admin_aziend['company_id'] . '" AND adminid="' . $admin_aziend["user_name"] . '" ', ' click DESC, last_use DESC', 0, 8);
-                                            if (gaz_dbi_num_rows($result) > 0) {
-                                                while ($r = gaz_dbi_fetch_array($result)) {
-                                                    $rref = explode('-', $r['transl_ref']);
 
-                                                    switch ($rref[1]) {
-                                                        case 'm1':
-                                                            require '../' . $rref[0] . '/menu.' . $admin_aziend['lang'] . '.php';
-                                                            $rref_name = $transl[$rref[0]]['title'];
-                                                            break;
-                                                        case 'm2':
-                                                            require '../' . $rref[0] . '/menu.' . $admin_aziend['lang'] . '.php';
-                                                            $rref_name = $transl[$rref[0]]['m2'][$rref[2]][0];
-                                                            break;
-                                                        case 'm3':
-                                                            require '../' . $rref[0] . '/menu.' . $admin_aziend['lang'] . '.php';
-                                                            $rref_name = $transl[$rref[0]]['m3'][$rref[2]][0];
-                                                            break;
-                                                        case 'sc':
-                                                            require '../' . $rref[0] . '/lang.' . $admin_aziend['lang'] . '.php';
-                                                            $rref_name = $strScript[$rref[2]][$rref[3]];
-                                                            break;
-                                                        default:
-                                                            $rref_name = 'Nome script non trovato';
-                                                            break;
-                                                    }
-                                                    ?>
-                                                    <li><!-- start message -->
-                                                        <a href="<?php
-                                                if ($r["link"] != "")
-                                                    echo '../../modules' . $r["link"];
-                                                else
-                                                    echo "&nbsp;";
-                                                ?>">
-                                                            <div class="pull-left">
-                                                                <i class="fa fa-archive" style="color:#<?php echo $r["color"]; ?>"></i>
-                                                            </div>
-                                                            <h4>
-                                                    <?php echo substr($rref_name, 0, 28); ?>
-                                                                <small style="top: -8px;"><i class="fa fa-thumbs-o-up"></i> <?php echo $r["click"] . ' click'; ?></small>
-                                                            </h4>
-                                                            <p><?php echo substr($r["link"], 0, 38); ?></p>
-                                                        </a>
-                                                    </li>
-        <?php
-    }
-}
-?>
+                                    <li>
+                                        <ul class="menu">
+                                          <?php
+                                          // stellina: aggiunge  la pagina corrente ai preferiti
+                                          if (!$gzFavOn && isset($mod_uri) && $scriptname != 'admin.php') {
+                                            echo '<li><a href="" id="gz-fav" data-link="'.htmlspecialchars($mod_uri).'" title="Aggiungi ai preferiti" style="min-height:24px;"><div class="pull-left"><i class="fa fa-star" style="color: yellow; text-shadow: 0 0 10px #000;"></i></div><h4>Aggiungi ai preferiti</h4></a></li>';
+                                          }
+                                          $result = gaz_dbi_dyn_query("*", $gTables['breadcrumb'], "codice_aziend=" . $admin_aziend['company_id'] ." AND adminid='". $admin_aziend["user_name"] . "' AND exec_mode = 4", ' position_order');
+                                          if (gaz_dbi_num_rows($result) > 0) {
+                                            while ($r = gaz_dbi_fetch_array($result)) {
+                                              $dirmod = explode('/', ltrim($r['link'] , '/'));
+                                          ?>
+                                              <li><!-- start message -->
+                                                <a href="<?= '..'.$r['link'] ?>" class="<?php echo ($mod_uri==$r['link']) ? 'is-hovered' : '' ?>">
+                                                <div class="pull-left"><img src="<?= '../'.$dirmod[0].'/'.$dirmod[0].'.png' ?>" style="height: 24px; width:auto;" /></div>
+                                                <h4><?= $r['titolo'] ?></h4>
+                                                <p><i class="fa fa-star-o"></i> <?= $r['link']  ?></p>
+                                                </a>
+                                              </li>
+
+                                          <?php
+                                            }
+                                          }
+                                          ?>
                                         </ul>
                                     </li>
-                                    <li class="footer"><a href="../../modules/root/admin.php">Vedi tutte</a></li>
+                                  <?php
+                                  if ($gzFavOn && isset($mod_uri) && $scriptname != 'admin.php') {
+                                    echo '<li><a href="" id="gz-fav" data-link="'.htmlspecialchars($mod_uri).'" title="Togli dai preferiti"><i class="fa fa-trash"></i> Togli dai preferiti</a></li>';
+                                  }
+                                 ?>
+                                    <li><a href="../root/theme_favorites_manage.php?mode=db"><i class="fa fa-cog"></i><i class="fa fa-star"></i>Gestisci preferiti</a></li>
                                 </ul>
                             </li>
 

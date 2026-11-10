@@ -186,11 +186,25 @@ $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
     <script src="../../library/theme/lte/plugins/slimScroll/jquery.slimscroll.min.js"></script>
     <script src="../../library/theme/lte/plugins/fastclick/fastclick.min.js"></script>
     <script>
-        var AdminLTEOptions = {
-            sidebarExpandOnHover: <?= $config->getValue('LTE_Onhover')?'true':'false' ?>,
-            enableBoxRefresh: true,
-            enableBSToppltip: true
-        };
+    var AdminLTEOptions = {
+        sidebarExpandOnHover: <?= $config->getValue('LTE_Onhover')?'true':'false' ?>,
+        enableBoxRefresh: true,
+        enableBSToppltip: true
+    };
+    $(function(){
+      $('#gz-fav').on('click', function (e) {
+        e.preventDefault();
+        var link = $(this).data('link');
+        var $item = $('.sidebar-menu a').filter(function () { return $(this).attr('href') === '../../modules' + link; }).first();
+        // nome: la voce del menu se c'è, altrimenti il titolo dell'intestazione della pagina
+        var name = $.trim($item.length ? $item.text() : ($('.content-header h1').first().text() || document.title));
+        name = name.split("»").at(-1).trim();
+        name = $.trim(name.replace(/^(Gestione( degli| dei)?|Visualizzazione( e)?|Emissione( di)?|Lista dei|Selezione e|Genera i)\s*/i, ''));
+        $.post('../../modules/root/theme_favorites.php', {action: 'toggle', link: link, name: name, mode: 'db'}, function () {
+          location.reload();
+        });
+      });
+    });
     </script>
 
     <script src="../../library/theme/lte/adminlte/dist/js/app.js"></script>
