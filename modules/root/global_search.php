@@ -30,7 +30,7 @@
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 require_once("global_search.lib.php");
-$mode = substr($_GET['mode'],0,2);
+$mode = substr((string) ($_GET['mode'] ?? ''),0,2);
 if ( $mode=='db' ) { // ho scelto la modalità inversa con attivazioni da database appoggiandomi alla tabella gaz_breadcrumb colonna exec_mode = 5 e con la colonna "file" contenente il valore abilitato e position_order per le attivazioni in tendina
   $gsSettings = gsSettingsForDb($admin_aziend['company_id'], $admin_aziend['user_name']);
   $gsDisabled = $gsSettings['disabled'];

@@ -111,11 +111,11 @@ try {
                             <li class="gz-gs hidden-xs">
                                 <div class="gz-gs-box" data-tip="Ricerca in tutti i moduli. Jolly: * qualsiasi testo, ? un carattere"><?php // niente form: la barra è già dentro un form, Invio lo gestisce global_search.js ?>
                                     <i class="fa fa-search gz-gs-icon"></i>
-                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)">
+                                    <input type="text" id="gz-gs-input" name="q" autocomplete="off" mode="db" maxlength="50" placeholder="Cerca in GAzie... (Ctrl+K)">
                                 </div>
                             </li>
                             <?php // stellina: aggiunge o toglie la pagina corrente ai preferiti della barra laterale
-                            $gzFavOn = (isset($mod_uri) && gzIsFavorite($admin_aziend['company_id'], $admin_aziend['user_name'], $mod_uri));
+                            $gzFavOn = (isset($mod_uri) && gzIsFavoriteDb($admin_aziend['company_id'], $admin_aziend['user_name'], $mod_uri));
                             if (isset($mod_uri) && $scriptname != 'admin.php') { ?>
                             <li><a href="#" id="gz-fav" data-link="<?php echo htmlspecialchars($mod_uri); ?>" title="<?php echo $gzFavOn ? 'Togli dai preferiti' : 'Aggiungi ai preferiti'; ?>"><i class="fa <?php echo $gzFavOn ? 'fa-star' : 'fa-star-o'; ?>"></i></a></li>
                             <?php } ?>
@@ -145,10 +145,10 @@ try {
                                     </li>
                                     <li class="user-body">
                                         <div class="gz-user-links">
-                                            <a href="<?php echo $userPageUrl; ?>"><i class="fa fa-user"></i> Scheda utente</a>
+                                            <a href="<?php echo $userPageUrl; ?>"><i class="fa fa-user"></i> Impostazioni utente</a>
                                             <span class="text-muted" title="Token API disabilitato" style="display:block;padding:3px 10px;cursor:not-allowed;opacity:.6"><i class="fa fa-key"></i> Token API (disabilitato)</span>
-                                            <a href="../root/theme_favorites_manage.php"><i class="fa fa-star"></i> Preferiti</a>
-                                            <a href="../root/global_search_manage.php"><i class="fa fa-search"></i> Ricerca globale</a>
+                                            <a href="../root/theme_favorites_manage.php?mode=db"><i class="fa fa-star"></i> Preferiti</a>
+                                            <a href="../root/global_search_manage.php?mode=db&amp;user=<?php echo urlencode($admin_aziend['user_name']); ?>"><i class="fa fa-search"></i> Ricerca globale</a>
                                             <?php if ($admin_aziend['Abilit'] >= 8) { ?>
                                             <a href="../config/admin_aziend.php"><i class="fa fa-building"></i> Azienda</a>
                                             <?php } ?>

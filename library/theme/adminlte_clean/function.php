@@ -105,6 +105,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
         $menuArray = array();
         $transl = array();
         while ($row = gaz_dbi_fetch_array($result)) {
+            if (!is_dir("../../modules/" . $row["name"])) continue;
             $chkes =  is_string($row['custom_field'])? json_decode($row['custom_field']):false;
             $path3 = is_string($row['m3_link'])?parse_url($row['m3_link'], PHP_URL_PATH):'';
             $nfr3 = basename($path3,'.php');
@@ -255,8 +256,8 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
           <img src="../../modules/root/view.php?table=aziend&amp;value=<?php echo (int) $admin_aziend['company_id']; ?>" alt="Logo" class="gz-sidebar-logo">
         </div>
         <?php
-        // pulsanti rapidi: i preferiti dell'utente (stellina nella barra)
-        $gzFavs = gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']);
+        // pulsanti rapidi: i preferiti dell'utente (stellina nella barra), dalla tabella gaz_breadcrumb (exec_mode = 4) come nel tema lte
+        $gzFavs = gzFavoritesForDb($admin_aziend['company_id'], $admin_aziend['user_name']);
         // senza preferiti il pannello resta una striscia sottile, come da CSS (.gz-quick-empty)
         ?>
         <div class="gz-company-panel gz-quick-panel<?php echo $gzFavs ? '' : ' gz-quick-empty'; ?>">
@@ -302,26 +303,28 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
     $res_pos = gaz_dbi_dyn_query("*", $gTables['breadcrumb'], ' file="'.$pos.'" AND exec_mode=0', ' id_bread',0,999);
 
     if ( gaz_dbi_num_rows($res_pos)>0 ) {
-        $row = gaz_dbi_fetch_array($res_pos);
+        // la prima riga è la pagina stessa (titolo e link propri), le successive sono i tasti rapidi
+        $pagina = gaz_dbi_fetch_array($res_pos);
         echo '<ol class="breadcrumb">';
-        $yeslink=false;
         while ( $row = gaz_dbi_fetch_array($res_pos) ) {
           echo "<li><a class='btn btn-xs btn-default' href='".$row['link']."'>".$row['titolo']."</a></li>";
-          $yeslink=true;
-          $ultimo_link=$row['link']; $ultimo_titolo=$row['titolo']; // l'ultima voce letta: il while esaurito porta $row a null
         }
         echo "<li><a class='btn btn-xs btn-default' href='../../modules/root/admin.php'><i class='fa fa-home'></i></a>&nbsp;<a class='btn btn-xs btn-default' href='../../modules/root/admin_breadcrumb.php?url=".$pos."'><i class='glyphicon glyphicon-cog'></i></a></li>";
         echo "</ol>";
-        if ($yeslink) echo "<h1><a href='".$ultimo_link."'>".$ultimo_titolo."</a></h1>";
+        // il titolo è quello della pagina, non l'ultimo tasto rapido aggiunto
+        if ($pagina && $pagina['titolo'] !== '') echo "<h1><a href='".$pagina['link']."'>".$pagina['titolo']."</a></h1>";
     } else {
 		  if ($pos=='modules/root/admin.php') { // sulla home page
 				echo "<a href='../../modules/root/admin_dash.php'><i class='glyphicon glyphicon-cog'></i></a>";
 				echo "</ol>";
 		  } else {
-        $result    = gaz_dbi_dyn_query("*", $gTables['menu_module'] , ' link="'.$posizione.'" ',' id',0,1);
+        // la voce si cerca solo tra quelle del modulo corrente: lo stesso nome di file puo' stare in piu' moduli (es. un plugin che copia uno script)
+        $bc_mm = $gTables['menu_module'] . ' JOIN ' . $gTables['module'] . ' bc_mod ON bc_mod.id = ' . $gTables['menu_module'] . '.id_module';
+        $bc_mod = ' AND bc_mod.name="' . addslashes($module) . '"';
+        $result    = gaz_dbi_dyn_query($gTables['menu_module'] . ".*", $bc_mm , $gTables['menu_module'] . '.link="'.$posizione.'"' . $bc_mod, $gTables['menu_module'] . '.id',0,1);
         if (!gaz_dbi_num_rows($result) > 0) {
           $posizionex = explode ("?",$posizione );
-          $result    = gaz_dbi_dyn_query("*", $gTables['menu_module'] , ' link="'.$posizionex[0].'" ',' id',0,1);
+          $result    = gaz_dbi_dyn_query($gTables['menu_module'] . ".*", $bc_mm , $gTables['menu_module'] . '.link="'.$posizionex[0].'"' . $bc_mod, $gTables['menu_module'] . '.id',0,1);
         }
         $riga = gaz_dbi_fetch_array($result);
         if ($riga && $riga["id"]!="" ) { // siamo su una pagina di 2 livello nel menu principale
@@ -336,7 +339,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
         } else { // siamo su una pagina di 3 livello nel menu principale
           $posizione_s = explode ("&seziva",$posizione ); // sui report fatture/ddt aggiungo con js la sezione iva all'url per proporre quella corrente, questo fa si che non coincida con quanto sta sul db allora pulisco la referenza
           $posizione_php = explode (".php",$posizione_s[0]); // pulisco le referenze passate sull'url
-          $result3    = gaz_dbi_dyn_query("*", $gTables['menu_script'] ," link LIKE '".$posizione_php[0].".php%'",'id',0,1);
+          $result3    = gaz_dbi_dyn_query($gTables['menu_script'] . ".*", $gTables['menu_script'] . ' JOIN ' . $gTables['menu_module'] . ' ON ' . $gTables['menu_script'] . '.id_menu = ' . $gTables['menu_module'] . '.id JOIN ' . $gTables['module'] . ' bc_mod ON bc_mod.id = ' . $gTables['menu_module'] . '.id_module',$gTables['menu_script'] . ".link LIKE '".$posizione_php[0].".php%'" . $bc_mod, $gTables['menu_script'] . '.id',0,1);
           if ( $ms = gaz_dbi_fetch_array($result3) ) { // disegno i bottoni di accesso alle funzioni di questa pagina
               $result4    = gaz_dbi_dyn_query($gTables['menu_script'].".*,".$gTables['menu_module'].".link AS lmm,".$gTables['menu_module'].".translate_key AS tmm ", $gTables['menu_script']. " LEFT JOIN ".$gTables['menu_module']." ON ".$gTables['menu_script'].".id_menu = ".$gTables['menu_module'].".id LEFT JOIN ".$gTables['module']." ON ".$gTables['menu_module'].".id_module = ".$gTables['module'].".id", $gTables['menu_script'].".id_menu =".$ms['id_menu']." AND ".$gTables['module'].".name = '".$module."'",'name',0,99);
               echo '<div class="hidden-xs hidden-sm"><ol class="breadcrumb">';

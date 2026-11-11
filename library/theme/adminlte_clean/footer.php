@@ -105,7 +105,7 @@ $(function () {
     // nome: la voce del menu se c'è, altrimenti il titolo dell'intestazione della pagina
     var name = $.trim($item.length ? $item.text() : ($('.content-header h1').first().text() || document.title));
     name = $.trim(name.replace(/^(Gestione( degli| dei)?|Visualizzazione( e)?|Emissione( di)?|Lista dei|Selezione e|Genera i)\s*/i, ''));
-    $.post('../../modules/root/theme_favorites.php', {action: 'toggle', link: link, name: name}, function () {
+    $.post('../../modules/root/theme_favorites.php', {action: 'toggle', link: link, name: name, mode: 'db'}, function () {
       location.reload();
     });
   });

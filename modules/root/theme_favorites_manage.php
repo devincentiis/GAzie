@@ -88,7 +88,7 @@ if (isset($_POST['salva'])) {
       foreach ($mine as $i => $f) {
         if ($f['link'] === $old) {
           if ($mode == 'db') {
-            gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET file ='".$newCode."', link = '".$newLink."', titolo = '".$newName."' WHERE id_bread=".$f['id_bread']);
+            gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET file ='".gaz_dbi_real_escape_string($newCode)."', link = '".gaz_dbi_real_escape_string($newLink)."', titolo = '".gaz_dbi_real_escape_string($newName !== '' ? $newName : $newLink)."' WHERE id_bread=".(int)$f['id_bread']);
           } else {
             $mine[$i]['link'] = $newLink;
             $mine[$i]['name'] = $newName !== '' ? $newName : $newLink;

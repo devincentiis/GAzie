@@ -43,9 +43,12 @@ if ($action === 'toggle' && preg_match('#^/[a-z0-9_]+/[a-z0-9_]+\.php(\?[a-z0-9_
     $link_isset=gaz_dbi_get_row($gTables['breadcrumb'],'codice_aziend',$admin_aziend['company_id'],"AND adminid='".$admin_aziend['user_name']."' AND exec_mode = 4 AND link = '".gaz_dbi_real_escape_string($scriptlink)."' LIMIT 1");
     if ($link_isset){ // è attivata, disattivo rimuovendo
       $link_isset=gaz_dbi_del_row($gTables['breadcrumb'],'id_bread',$link_isset['id_bread']);
+      echo 'removed';
     } else { // attivo inserendo
-      gaz_dbi_query("INSERT INTO `gaz_breadcrumb` (`exec_mode`,`link`,`titolo`,`adminid`,`codice_aziend`) VALUES ( 4, '".gaz_dbi_real_escape_string($scriptlink)."','".$name."','".$admin_aziend['user_name']."',".$admin_aziend['company_id']." )");
+      gaz_dbi_query("INSERT INTO ".$gTables['breadcrumb']." (`exec_mode`,`link`,`titolo`,`adminid`,`codice_aziend`) VALUES ( 4, '".gaz_dbi_real_escape_string($scriptlink)."','".gaz_dbi_real_escape_string($name !== '' ? $name : $scriptlink)."','".gaz_dbi_real_escape_string($admin_aziend['user_name'])."',".(int)$admin_aziend['company_id']." )");
+      echo 'added';
     }
+    exit;
   } else {
     $list = gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']);
     $found = false;
@@ -68,10 +71,13 @@ if ($action === 'riordina') {
   $order = json_decode((string) ($_POST['order'] ?? '[]'), true);
   if($mode == 'db') {
     $i=0;
-    foreach ($order as $scriptlink) {
-      gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET position_order = ".$i." WHERE codice_aziend=".$admin_aziend['company_id']." AND adminid='". $admin_aziend['user_name']."' AND exec_mode = 4 AND link ='".$scriptlink."'");
+    foreach ((array) $order as $scriptlink) {
+      if (!is_string($scriptlink)) continue;
+      gaz_dbi_query("UPDATE ".$gTables['breadcrumb']." SET position_order = ".$i." WHERE codice_aziend=".(int)$admin_aziend['company_id']." AND adminid='". gaz_dbi_real_escape_string($admin_aziend['user_name'])."' AND exec_mode = 4 AND link ='".gaz_dbi_real_escape_string($scriptlink)."'");
       $i++;
     }
+    echo 'ok';
+    exit;
   } else {
     $list = gzFavoritesFor($admin_aziend['company_id'], $admin_aziend['user_name']);
     if (!is_array($order)) {

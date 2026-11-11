@@ -656,7 +656,7 @@ input#search_contract.ui-autocomplete-input {
 #gaz-wait .gaz-wait-msg { margin-top: 8px; font-weight: bold; color: #444; }
 
 /* ----------------------------------------------------------------------------------------------
-   Cruscotti statistici (modules/stats/stats_vendit.php, stats_acquis.php, stats_magazz.php)
+   Cruscotto statistico delle vendite (modules/stats/stats_vendit.php)
    ---------------------------------------------------------------------------------------------- */
 /* Statistiche delle vendite (stats_vendit.php) */
 .sv-page { padding: 4px 4px 20px 4px; }
@@ -699,90 +699,8 @@ input#search_contract.ui-autocomplete-input {
 .sv-cum input { vertical-align: middle; margin: 0 3px 0 0; }
 .sv-note { color: #999; font-size: 12px; margin-top: 14px; }
 .sv-card .sv-chart.sv-chart-sm { height: 250px; }
-/* Statistiche degli acquisti (stats_acquis.php) */
-.sa-page { padding: 4px 4px 20px 4px; }
-.sa-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 16px 0; }
-.sa-period { font-size: 15px; color: #444; }
-.sa-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.sa-filter label { margin: 0; font-weight: normal; color: #666; }
-.sa-page .sa-filter select.form-control { width: auto; min-width: 80px; display: inline-block; }
-.sa-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
-.sa-kpi { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); position: relative; }
-.sa-kpi .sa-ico { position: absolute; right: 12px; top: 12px; font-size: 20px; color: #c9d3dd; }
-.sa-kpi .sa-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: #777; }
-.sa-kpi .sa-val { font-size: 24px; font-weight: 600; margin: 4px 0 2px 0; color: #222; white-space: nowrap; }
-.sa-kpi .sa-sub { font-size: 12px; color: #888; }
-.sa-var { font-weight: 600; font-size: 12px; white-space: nowrap; }
-.sa-good { color: #2e7d32; }
-.sa-bad { color: #c62828; }
-.sa-neu { color: #888; }
-.sa-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
-.sa-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
-.sa-card > h4 { margin: 0; padding: 10px 14px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eef0f2; }
-.sa-card > h4 small { color: #888; font-weight: normal; }
-.sa-card .sa-body { padding: 10px 14px; overflow-x: auto; }
-.sa-card .sa-chart { position: relative; height: 280px; }
-.sa-w8 { grid-column: span 8; }
-.sa-w4 { grid-column: span 4; }
-.sa-w6 { grid-column: span 6; }
-.sa-w12 { grid-column: span 12; }
-@media (max-width: 991px) { .sa-w8, .sa-w4, .sa-w6 { grid-column: span 12; } }
-.sa-tab { width: 100%; font-size: 13px; }
-.sa-tab th { font-weight: 600; color: #666; font-size: 12px; border-bottom: 1px solid #e3e6ea; padding: 5px 6px; white-space: nowrap; }
-.sa-tab td { padding: 5px 6px; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
-.sa-tab tr:last-child td { border-bottom: 0; }
-.sa-tab .r { text-align: right; white-space: nowrap; }
-.sa-tab .sa-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sa-bar { height: 4px; background: #eef2f6; border-radius: 2px; margin-top: 3px; }
-.sa-bar span { display: block; height: 4px; background: #e08e0b; border-radius: 2px; max-width: 100%; }
-.sa-empty { color: #999; padding: 20px 0; text-align: center; }
-.sa-cum { font-weight: normal; font-size: 12px; margin: 0; cursor: pointer; float: right; }
-.sa-cum input { vertical-align: middle; margin: 0 3px 0 0; }
-.sa-note { color: #999; font-size: 12px; margin-top: 14px; }
-.sa-card .sa-chart.sa-chart-sm { height: 250px; }
-/* Statistiche del magazzino (stats_magazz.php) */
-.sm-page { padding: 4px 4px 20px 4px; }
-.sm-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 16px 0; }
-.sm-period { font-size: 15px; color: #444; }
-.sm-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.sm-filter label { margin: 0; font-weight: normal; color: #666; }
-.sm-page .sm-filter select.form-control { width: auto; min-width: 80px; display: inline-block; }
-.sm-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
-.sm-kpi { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); position: relative; }
-.sm-kpi.sm-alert { border-color: #f1c0bc; background: #fffafa; }
-.sm-kpi .sm-ico { position: absolute; right: 12px; top: 12px; font-size: 20px; color: #c9d3dd; }
-.sm-kpi.sm-alert .sm-ico { color: #e8a39d; }
-.sm-kpi .sm-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: #777; }
-.sm-kpi .sm-val { font-size: 24px; font-weight: 600; margin: 4px 0 2px 0; color: #222; white-space: nowrap; }
-.sm-kpi .sm-sub { font-size: 12px; color: #888; }
-.sm-var { font-weight: 600; font-size: 12px; white-space: nowrap; }
-.sm-up { color: #2e7d32; }
-.sm-down { color: #c62828; }
-.sm-neu { color: #888; }
-.sm-neg { color: #c62828; font-weight: 600; }
-.sm-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
-.sm-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0; }
-.sm-card > h4 { margin: 0; padding: 10px 14px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eef0f2; }
-.sm-card > h4 small { color: #888; font-weight: normal; }
-.sm-card .sm-body { padding: 10px 14px; overflow-x: auto; }
-.sm-card .sm-chart { position: relative; height: 280px; }
-.sm-w8 { grid-column: span 8; }
-.sm-w4 { grid-column: span 4; }
-.sm-w6 { grid-column: span 6; }
-.sm-w12 { grid-column: span 12; }
-@media (max-width: 991px) { .sm-w8, .sm-w4, .sm-w6 { grid-column: span 12; } }
-.sm-tab { width: 100%; font-size: 13px; }
-.sm-tab th { font-weight: 600; color: #666; font-size: 12px; border-bottom: 1px solid #e3e6ea; padding: 5px 6px; white-space: nowrap; }
-.sm-tab td { padding: 5px 6px; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
-.sm-tab tr:last-child td { border-bottom: 0; }
-.sm-tab .r { text-align: right; white-space: nowrap; }
-.sm-tab .sm-name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sm-empty { color: #999; padding: 20px 0; text-align: center; }
-.sm-hint { color: #888; font-size: 12px; margin: 0 0 6px 0; }
-.sm-note { color: #999; font-size: 12px; margin-top: 14px; }
-.sm-card .sm-chart.sm-chart-sm { height: 250px; }
 .sv-hint { color: #777; font-size: 12px; margin: 0 0 6px 0; }
-.sm-hint.sm-hint-more { margin-top: 6px; }
+/* acquisti (sa-*) e magazzino (sm-*): plugins/statistiche/statistiche.css */
 
 /* debug attivo (debug_active): riga nel footer per l'amministratore e dump di xdebug sopra la pagina, come nel tema lte */
 .main-footer .gz-debug { float: left; max-width: calc(100% - 380px); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; font-size: 12px; }

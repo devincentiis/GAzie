@@ -207,10 +207,10 @@ while ($r = gaz_dbi_fetch_array($rs_castel)) {
          echo "<td align=\"right\">".gaz_format_number($r['saldo'])." &nbsp;</td>";
          echo "<td align=\"center\" title=\"".$script_transl['pay_title'].$r['ragso1']."\">
 		 		<a class=\"btn btn-xs btn-default\" href=\"supplier_payment.php?partner=".$r["codcon"]."\">
-					<i class=\"glyphicon glyphicon-piggy-bank\"></i>
+					<i class=\"glyphicon glyphicon-euro\"></i>
 				</a>
 			</td>";
-         
+
 			/** ENRICO FEDELE */
 		 echo "<td align=\"center\" title=\"".$script_transl['statement_title'].$r['ragso1']."\">
 		 		<a class=\"btn btn-xs btn-default\" href=\"../contab/select_partit.php?id=".$r['codcon']."&yi=".$annini."&yf=".$annfin."\"  target=\"_blank\">
