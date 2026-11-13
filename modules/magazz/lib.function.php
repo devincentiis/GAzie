@@ -578,7 +578,7 @@ class magazzForm extends GAzieForm {
 		// fine ricerca inventario
         $where = "artico = '$item_code' AND ".$where_condition;
         // echo $where.'<br>';
-        $orderby = "datreg ASC, id_mov ASC"; //ordino in base alle date
+        $orderby = "datreg ASC, operat DESC, id_mov ASC"; //ordino in base alle date
         $return_val = array();
         $accumulatore = array();
         switch ($stock_eval_method) { //calcolo il nuovo valore in base al metodo scelto in configurazione azienda
@@ -588,8 +588,7 @@ class magazzForm extends GAzieForm {
                 // Qui metto i valori dell'ultimo inventario
                 $accumulatore[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice);
                 $giacenza = array('q_g' => $last_invQuanti, 'v_g' => $last_invPrice * $last_invQuanti);
-                $return_val[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice,
-                    'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                $return_val[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice, 'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
                 // Fine valorizzazione con ultimo inventario
                 while ($r = gaz_dbi_fetch_array($rs_movmag)) {
                     // questo e' il prezzo che usero' solo per gli acquisti
@@ -597,41 +596,37 @@ class magazzForm extends GAzieForm {
                     if ($r['operat'] == 1) { //carico
                         $accumulatore[] = array('q' => $r['quanti'], 'v' => $row_val);
                         $giacenza['q_g']+=$r['quanti'];
-                        $giacenza['v_g']+=$r['quanti'] * $row_val;
+                        $giacenza['v_g'] = $giacenza['q_g'] * $row_val;
                         if ($r['id_mov'] == $id_mov) { // e' il movimento di riferimento
-                            $return_val[0] = array('q' => $r['quanti'], 'v' => $row_val,
-                                'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                            $return_val[0] = array('q' => $r['quanti'], 'v' => $row_val,'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                         }
                     } elseif ($r['operat'] == -1) { //scarico
 
                         foreach ($accumulatore as $k => $acc_val) {   //attraverso l'accumulatore
                             if ($acc_val['q'] > $r['quanti']) { // la quantita' nell'accumulatore e' sufficiente per coprire lo scarico
                                 $accumulatore[$k]['q'] -= $r['quanti'];
-                                $giacenza['q_g']-=$r['quanti'];
-                                $giacenza['v_g']-=$r['quanti'] * $acc_val['v'];
+                                $giacenza['q_g'] -= $r['quanti'];
+                                $giacenza['v_g'] = $giacenza['q_g'] * $acc_val['v'];
                                 if ($r['id_mov'] == $id_mov) { // e' il movimento di riferimento
-                                    $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],
-                                        'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                                  $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                                 }
                                 $r['quanti'] = 0;
                                 break;
                             } elseif ($acc_val['q'] == $r['quanti']) {  // la quantita' da scaricare e' la stessa nell'accumulatore
-                                $giacenza['q_g']-=$r['quanti'];
-                                $giacenza['v_g']-=$r['quanti'] * $acc_val['v'];
+                                $giacenza['q_g'] -= $r['quanti'];
+                                $giacenza['v_g'] = $giacenza['q_g'] * $acc_val['v'];
                                 if ($r['id_mov'] == $id_mov) { // e' il movimento di riferimento
-                                    $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],
-                                        'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                                  $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                                 }
                                 unset($accumulatore[$k]);
                                 $r['quanti'] = 0;
                                 break;
                             } else {  // la quantita' da scaricare e' maggiore di quella nell'accumulatore
                                 $r['quanti'] -= $acc_val['q'];
-                                $giacenza['q_g']-=$acc_val['q'];
-                                $giacenza['v_g']-=$acc_val['q'] * $acc_val['v'];
+                                $giacenza['q_g'] -= $acc_val['q'];
+                                $giacenza['v_g'] = $giacenza['q_g'] * $acc_val['v'];
                                 if ($r['id_mov'] == $id_mov) { // e' il movimento che voglio valorizzare: lo accumulo
-                                    $return_val[] = array('q' => $acc_val['q'], 'v' => $acc_val['v'],
-                                        'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                                  $return_val[] = array('q' => $acc_val['q'], 'v' => $acc_val['v'],'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                                 }
                                 unset($accumulatore[$k]);
                             }
@@ -639,10 +634,9 @@ class magazzForm extends GAzieForm {
                         // esco dal loop ma potrebbe accadere che i carichi non erano sufficienti a coprire lo scarico
                         if ($r['quanti'] > 0) { // e' il movimento che voglio valorizzare: lo accumulo
                             $giacenza['q_g']-=$r['quanti'];
-                            $giacenza['v_g']-=0;
+                            $giacenza['v_g']=0;
                             if ($r['id_mov'] == $id_mov) { // e' il movimento che voglio valorizzare: lo accumulo
-                                $return_val[] = array('q' => -$r['quanti'], 'v' => 0,
-                                    'q_g' => $giacenza['q_g'], 'v_g' => 0);
+                                $return_val[] = array('q' => -$r['quanti'], 'v' => 0,'q_g' => round($giacenza['q_g'],5), 'v_g' => 0);
                             }
                         }
                     }
@@ -652,14 +646,13 @@ class magazzForm extends GAzieForm {
             case "1": // WMA
                 $rs_movmag = gaz_dbi_dyn_query("id_mov,quanti,prezzo,scorig,scochi,operat", $gTables['movmag'], $where . " AND caumag < 99", $orderby);
                 $giacenza = array('q_g' => $last_invQuanti, 'v_g' => $last_invPrice * $last_invQuanti);
-                $return_val[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice,
-                    'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                $return_val[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice,'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
                 while ($r = gaz_dbi_fetch_array($rs_movmag)) {
                     $row_val=0;
                     if ($r['operat'] == 1) { //carico
                         $row_val = CalcolaImportoRigo(1, $r['prezzo'], array($r['scorig'], $r['scochi']), $decimal_price);
-                        $giacenza['q_g']+=$r['quanti'];
-                        $giacenza['v_g']+=$r['quanti'] * $row_val;
+                        $giacenza['q_g'] += $r['quanti'];
+                        $giacenza['v_g'] = $giacenza['q_g'] * $row_val;
                     } elseif ($r['operat'] == -1) { //scarico
                         if ($giacenza['q_g'] <= 0) { // se la quantità è già sotto zero forzo anche il valore a 0
                             $giacenza['v_g'] = 0;
@@ -675,8 +668,7 @@ class magazzForm extends GAzieForm {
                         $giacenza['v_g']-=$r['quanti'] * $row_val;
                     }
                     if ($r['id_mov'] == $id_mov) { // e' il movimento che voglio valorizzare
-                        $return_val[0] = array('q' => $r['quanti'], 'v' => $row_val,
-                            'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                        $return_val[0] = array('q' => $r['quanti'], 'v' => $row_val,'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                     }
                 }
                 break;
@@ -685,19 +677,17 @@ class magazzForm extends GAzieForm {
                 // Qui metto i valori dell'ultimo inventario
                 $accumulatore[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice);
                 $giacenza = array('q_g' => $last_invQuanti, 'v_g' => $last_invPrice * $last_invQuanti);
-                $return_val[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice,
-                    'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                $return_val[0] = array('q' => $last_invQuanti, 'v' => $last_invPrice, 'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
                 // Fine valorizzazione con ultimo inventario
                 while ($r = gaz_dbi_fetch_array($rs_movmag)) {
                     // questo e' il prezzo che usero' solo per gli acquisti
                     $row_val = CalcolaImportoRigo(1, $r['prezzo'], array($r['scorig'], $r['scochi']));
                     if ($r['operat'] == 1) { //carico
                         $accumulatore[] = array('q' => $r['quanti'], 'v' => $row_val);
-                        $giacenza['q_g']+=$r['quanti'];
-                        $giacenza['v_g']+=$r['quanti'] * $row_val;
+                        $giacenza['q_g'] += $r['quanti'];
+                        $giacenza['v_g'] = $giacenza['q_g'] * $row_val;
                         if ($r['id_mov'] == $id_mov) { // e' il movimento di riferimento
-                            $return_val[0] = array('q' => $r['quanti'], 'v' => $row_val,
-                                'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                            $return_val[0] = array('q' => $r['quanti'], 'v' => $row_val,'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                         }
                     } elseif ($r['operat'] == -1) { //scarico
 
@@ -705,31 +695,28 @@ class magazzForm extends GAzieForm {
                         foreach ($accumulatore as $k => $acc_val) {   //attraverso l'accumulatore
                             if ($acc_val['q'] > $r['quanti']) { // la quantita' nell'accumulatore e' sufficiente per coprire lo scarico
                                 $accumulatore[$k]['q'] -= $r['quanti'];
-                                $giacenza['q_g']-=$r['quanti'];
-                                $giacenza['v_g']-=$r['quanti'] * $acc_val['v'];
+                                $giacenza['q_g'] -= $r['quanti'];
+                                $giacenza['v_g'] = $giacenza['q_g'] * $acc_val['v'];
                                 if ($r['id_mov'] == $id_mov) { // e' il movimento di riferimento
-                                    $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],
-                                        'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                                    $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                                 }
                                 $r['quanti'] = 0;
                                 break;
                             } elseif ($acc_val['q'] == $r['quanti']) {  // la quantita' da scaricare e' la stessa nell'accumulatore
-                                $giacenza['q_g']-=$r['quanti'];
-                                $giacenza['v_g']-=$r['quanti'] * $acc_val['v'];
+                                $giacenza['q_g'] -= $r['quanti'];
+                                $giacenza['v_g'] = $giacenza['q_g'] * $acc_val['v'];
                                 if ($r['id_mov'] == $id_mov) { // e' il movimento di riferimento
-                                    $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],
-                                        'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                                    $return_val[] = array('q' => $r['quanti'], 'v' => $acc_val['v'],'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                                 }
                                 unset($accumulatore[$k]);
                                 $r['quanti'] = 0;
                                 break;
                             } else {  // la quantita' da scaricare e' maggiore di quella nell'accumulatore
                                 $r['quanti'] -= $acc_val['q'];
-                                $giacenza['q_g']-=$acc_val['q'];
-                                $giacenza['v_g']-=$acc_val['q'] * $acc_val['v'];
+                                $giacenza['q_g'] -= $acc_val['q'];
+                                $giacenza['v_g'] = $giacenza['q_g'] * $acc_val['v'];
                                 if ($r['id_mov'] == $id_mov) { // e' il movimento che voglio valorizzare: lo accumulo
-                                    $return_val[] = array('q' => $acc_val['q'], 'v' => $acc_val['v'],
-                                        'q_g' => $giacenza['q_g'], 'v_g' => $giacenza['v_g']);
+                                    $return_val[] = array('q' => $acc_val['q'], 'v' => $acc_val['v'],'q_g' => round($giacenza['q_g'],5), 'v_g' => $giacenza['v_g']);
                                 }
                                 unset($accumulatore[$k]);
                             }
@@ -737,11 +724,10 @@ class magazzForm extends GAzieForm {
                         $accumulatore = array_reverse($accumulatore);
                         // esco dal loop ma potrebbe accadere che i carichi non erano sufficienti a coprire lo scarico
                         if ($r['quanti'] > 0) { // e' il movimento che voglio valorizzare: lo accumulo
-                            $giacenza['q_g']-=$r['quanti'];
-                            $giacenza['v_g']-=0;
+                            $giacenza['q_g'] -= $r['quanti'];
+                            $giacenza['v_g'] = 0;
                             if ($r['id_mov'] == $id_mov) { // e' il movimento che voglio valorizzare: lo accumulo
-                                $return_val[] = array('q' => -$r['quanti'], 'v' => 0,
-                                    'q_g' => $giacenza['q_g'], 'v_g' => 0);
+                                $return_val[] = array('q' => -$r['quanti'], 'v' => 0,'q_g' => round($giacenza['q_g'],5), 'v_g' => 0);
                             }
                         }
                     }
@@ -956,7 +942,7 @@ class magazzForm extends GAzieForm {
       // restituisce un array con tre indici 'tot' il totale su tutti i magazzini,'val' il valore del magazzino se passato come referenza, altrimenti sarà false, e un array con i valori degli altri magazzini e indice gli id degli altri magazzini, se non passato di tutti
       global $gTables;
       $where = "artico = '".$item_code."' AND caumag <= 99 AND datreg <= '".$date_ref."'";
-      $orderby = "datreg ASC, id_mov ASC"; //ordino in base alle date
+      $orderby = "datreg ASC, operat DESC, id_mov ASC"; //ordino in base alle date
       $acc=['tot'=>0,'val'=>false,'oth'=>[]];
       $rs_movmag = gaz_dbi_dyn_query("operat,id_warehouse,quanti", $gTables['movmag'],$where,$orderby);
       while ($r = gaz_dbi_fetch_array($rs_movmag)){
@@ -1249,6 +1235,55 @@ function getLastSianDay(){ // restituisce la data nel formato aaaa-mm-gg dell'ul
 			}
 		}
 	return $uldtfile ;
+}
+
+function getInventoryData($datref,$catmer,$decimal_price) {
+  global $gTables;
+  $magazz = new magazzForm();
+  $where = $catmer == 100 ? "" : "catmer = " . $catmer. " AND " ;
+  $where .= "(" . $gTables['artico'] . ".good_or_service = 0 OR ". $gTables['artico'] . ".good_or_service = 2 ) AND " . $gTables['artico'] . ".id_assets = 0";
+  $result = gaz_dbi_dyn_query($gTables['artico'] . '.*, ' . $gTables['catmer'] . '.descri AS descat,' . $gTables['catmer'] . '.annota AS anncat', $gTables['artico'] . ' LEFT JOIN ' . $gTables['catmer'] . ' ON catmer = ' . $gTables['catmer'] . '.codice',$where, 'catmer ASC, ' . $gTables['artico'] . '.codice ASC');
+  $return = false;
+  if ($result) {
+    $data=[];
+    while ($r = gaz_dbi_fetch_array($result)) {
+      $codart = $r['codice'];
+      $mv = $magazz->getStockValue(false, addslashes($codart), gaz_format_date($datref,true), null, $decimal_price);
+      $magval = array_pop($mv);
+      $magval=(is_numeric($magval))?['q_g'=>0,'v_g'=>0,'v'=>0]:$magval;
+      if (isset($magval['q_g']) && round($magval['q_g'],6) == "-0"){ // Antonio Germani - se si crea erroneamente un numero esponenziale negativo forzo la quantità a zero
+        $magval['q_g']=0;
+      }
+      $data[$codart]['i_d'] = $r['descri'];
+      $data[$codart]['i_l'] = $r['lot_or_serial'];
+      $data[$codart]['i_u'] = $r['unimis'];
+      $data[$codart]['v_a'] = $magval['v'];
+      $data[$codart]['v_r'] = $magval['v'];
+      $data[$codart]['i_a'] = $r['annota'];
+      $data[$codart]['i_g'] = $r['catmer'];
+      $data[$codart]['g_d'] = $r['descat'];
+      $data[$codart]['g_a'] = $magval['q_g'];
+      $data[$codart]['g_r'] = $magval['q_g'];
+      $data[$codart]['v_g'] = $magval['v_g'];
+      $data[$codart]['lotRestPost']=[];
+      $data[$codart]['class'] = 'info';
+      if ($magval['q_g'] < 0) { // giacenza inferiore a 0
+        $data[$codart]['class'] = 'danger';
+      } elseif ($magval['q_g'] > 0) { //
+        $data[$codart]['class'] = 'success';
+        if ($magval['q_g']<=$r['scorta']){
+          $data[$codart]['class'] = 'warning';
+        }
+      } elseif ( !isset($magval['q']) && ( $r['movimentabile'] == '' || $r['movimentabile'] == 'S' ) ) { // è un articolo mai movimentato e non posto fuori magazzino, potrei essere al primo inventario
+        $data[$codart]['class'] = 'default';
+        $data[$codart]['v_r'] = $r['preacq'];
+      } else { // giacenza = 0
+        $data[$codart]['class'] = 'danger';
+      }
+    }
+    $return = $data;
+  }
+  return $return;
 }
 
 ?>

@@ -226,7 +226,7 @@ $strScript = array(
         "(2) perch&egrave; non ci sono movimenti di acquisto nel ",
         "Non ci sono articoli movimentati!"),
     "inventory_stock.php" =>
-    array('title' => "Inventario fisico di magazzino",
+    array('title' => "Inventario di magazzino",
         'del' => "del",
         'catmer' => "Categoria Merceologica ",
         'select' => "Sel.",
@@ -245,8 +245,7 @@ $strScript = array(
         'errors' => array(" La giacenza reale non pu&ograve; essere negativa",
         " Il valore reale non pu&ograve; essere negativo o uguale a zero",
         " Si sta tentando di fare l'inventario con giacenza attuale e reale entrambe a zero",
-        " Per questo articolo è già stato fatto l'inventario nello stesso giorno"),
-        'preview_title' => 'Confermando le scelte fatte si registreranno i seguenti movimenti di magazzino:'
+        " Per questo articolo è già stato fatto l'inventario nello stesso giorno")
     ),
     "select_schart.php" =>
       array(0 => 'Stampa schedari di magazzino',

@@ -54,7 +54,7 @@ function getMovements($cm_ini,$cm_fin,$art_ini,$art_fin,$date_ini,$date_fin)
                LEFT JOIN ".$gTables['orderman']." ON ".$gTables['movmag'].".id_orderman = ".$gTables['orderman'].".id
                LEFT JOIN ".$gTables['artico']." ON ".$gTables['movmag'].".artico = ".$gTables['artico'].".codice
 			   LEFT JOIN ".$gTables['lotmag']." ON ".$gTables['movmag'].".id_lotmag = ".$gTables['lotmag'].".id";
-        $rs=gaz_dbi_dyn_query ($what, $table,$where,"catmer ASC, artico ASC, datreg ASC, id_mov ASC");
+        $rs=gaz_dbi_dyn_query ($what, $table,$where,"catmer ASC, artico ASC, datreg ASC, operat DESC, id_mov ASC");
         while ($r = gaz_dbi_fetch_array($rs)) {
             $m[] = $r;
         }
@@ -352,6 +352,7 @@ if (isset($_POST['preview']) and $msg=='') {
       } else {
         echo "<td></td><td align=\"right\">".number_format($mv['prezzo']*$mv['quanti'],$admin_aziend['decimal_price'],',','')."</td>";
       }
+      //var_dump($mval);
       echo "<td align=\"right\">".($mval?number_format($mval['q_g'],$admin_aziend['decimal_price'],',','.'):'')."</td>";
       echo "<td align=\"right\">".($mval?number_format($mval['v_g'],$admin_aziend['decimal_price'],',','.'):'')."</td>";
       echo "</tr>";

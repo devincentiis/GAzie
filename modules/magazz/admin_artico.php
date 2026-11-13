@@ -32,31 +32,28 @@ $cbt=(isset($cbt_res['val']))?$cbt_res['val']:0;
 $cbt=($cbt==1||$cbt==2)?$cbt:0;
 
 // m1 Modificato a mano
- function serchCOD()
-   {
-	global $gTables;
-	$max_codice = gaz_dbi_query("select codice from ".$gTables['artico']." order by CAST(codice AS DECIMAL) desc limit 1");
-    $max_cod = gaz_dbi_fetch_array($max_codice);
-    return ++$max_cod[0];
-   }
- function Barcode($EAN)
-   {
-    $dispari = substr($EAN,1,1)+substr($EAN,3,1)+substr($EAN,5,1)+substr($EAN,7,1)+substr($EAN,9,1)+substr($EAN,11,1);
-    $dispari = $dispari * 3;
-    $pari = substr($EAN,0,1)+substr($EAN,2,1)+substr($EAN,4,1)+substr($EAN,6,1)+substr($EAN,8,1)+substr($EAN,10,1);
-    $totale = $pari + $dispari;
-    while ($totale > 10) $totale = $totale - 10;
-    return (substr($EAN,0,12).(10 - $totale));
-   }
+function serchCOD() {
+global $gTables;
+$max_codice = gaz_dbi_query("select codice from ".$gTables['artico']." order by CAST(codice AS DECIMAL) desc limit 1");
+  $max_cod = gaz_dbi_fetch_array($max_codice);
+  return ++$max_cod[0];
+}
+function Barcode($EAN) {
+  $dispari = substr($EAN,1,1)+substr($EAN,3,1)+substr($EAN,5,1)+substr($EAN,7,1)+substr($EAN,9,1)+substr($EAN,11,1);
+  $dispari = $dispari * 3;
+  $pari = substr($EAN,0,1)+substr($EAN,2,1)+substr($EAN,4,1)+substr($EAN,6,1)+substr($EAN,8,1)+substr($EAN,10,1);
+  $totale = $pari + $dispari;
+  while ($totale > 10) $totale = $totale - 10;
+  return (substr($EAN,0,12).(10 - $totale));
+}
 
-  function serchEAN()
-   {
-	global $gTables;
-    $max_barcode = gaz_dbi_query("select max(barcode) from ".$gTables['artico']." where barcode like '3333333%';");
-    $max_barcode = gaz_dbi_fetch_array($max_barcode);
-	if ($max_barcode[0] == null) $max_barcode[0] ='3333333000000';
-    return Barcode($max_barcode[0]+10);
-   }
+function serchEAN() {
+global $gTables;
+  $max_barcode = gaz_dbi_query("select max(barcode) from ".$gTables['artico']." where barcode like '3333333%';");
+  $max_barcode = gaz_dbi_fetch_array($max_barcode);
+  if ($max_barcode[0] == null) $max_barcode[0] ='3333333000000';
+  return Barcode($max_barcode[0]+10);
+}
 // m1 fine Modificato a mano
 
 $admin_aziend = checkAdmin();
@@ -72,16 +69,19 @@ $largeimg=0;
 /* Inizializzo per aprire in finestra modale */
 $modal = false;
 if (isset($_POST['mode']) || isset($_GET['mode'])) {
-    $modal = true;
-    if (isset($_GET['ok_insert'])) {
-        $modal_ok_insert = true;
-    }
+  $modal = true;
+  if (isset($_GET['ok_insert'])) {
+    $modal_ok_insert = true;
+  }
 }
 /** ENRICO FEDELE */
 if (isset($_POST['Update']) || isset($_GET['Update'])) {
-    $toDo = 'update';
+  $toDo = 'update';
+} elseif (isset($_GET['codice']) && strlen($_GET['codice']) > 1 )  {
+  $toDo = 'update';
+  $_GET['Update']='update';
 } else {
-    $toDo = 'insert';
+  $toDo = 'insert';
 }
 
 // carico i dati per la select warehouse del jquery
@@ -1096,10 +1096,11 @@ if ($modal_ok_insert === true) {
                 <div id="esiste" class="row IERincludeExcludeRow">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="esiste" class="col-sm-4 control-label"><?php echo $script_transl['esiste']; ?></label>
-                            <div class="col-sm-2"><?php echo $magval['q_g']; ?></div>
+                          <label for="esiste" class="col-sm-4 control-label"><?php echo $script_transl['esiste']; ?></label>
+                          <div class="col-sm-2"><?= round($magval['q_g'],5)+0; ?></div>
                         </div>
-                    </div>
+                          <a class="btn btn-xs btn-info" href="select_schart.php?di=0101<?= (date('Y')-10).'&df='.date('dmY').'&id='.$form['codice'] ?>" target="_blank"><i class="glyphicon glyphicon-list"></i></a>
+                      </div>
                 </div><!-- chiude row  -->
                 <div id="valore" class="row IERincludeExcludeRow">
                     <div class="col-md-12">

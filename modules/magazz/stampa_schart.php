@@ -83,7 +83,7 @@ $what = $gTables['movmag'].".*, ".
                LEFT JOIN ".$gTables['orderman']." ON ".$gTables['movmag'].".id_orderman = ".$gTables['orderman'].".id
                LEFT JOIN ".$gTables['artico']." ON ".$gTables['movmag'].".artico = ".$gTables['artico'].".codice
 			   LEFT JOIN ".$gTables['lotmag']." ON ".$gTables['movmag'].".id_lotmag = ".$gTables['lotmag'].".id";
-$result = gaz_dbi_dyn_query ($what, $table,$where,"catmer ASC, artico ASC, datreg ASC, id_mov ASC");
+$result = gaz_dbi_dyn_query ($what, $table,$where,"catmer ASC, artico ASC, datreg ASC, operat DESC, id_mov ASC");
 
 $item_head = array('top'=>array(array('lun' => 32,'nam'=>$script_transl['item_head'][0]),
                                 array('lun' => 18,'nam'=>$script_transl['item_head'][1]),
