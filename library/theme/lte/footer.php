@@ -139,7 +139,8 @@ $url = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
               <div>
               <?php
               if ($admin_aziend['Abilit'] >= 8) {
-                echo '<a href="../root/global_search_manage.php?mode=db&user='.$admin_aziend['user_name'].'"><i class="fa fa-cog"></i> <i class="fa fa-search"></i> Setup ricerca globale</a>';
+                echo '<a href="../root/global_search_manage.php?mode=db&user='.$admin_aziend['user_name'].'"><i class="fa fa-cog"></i> <i class="fa fa-search"></i> Setup ricerca globale</a><br/>';
+                echo '<a href="../root/menu_manage.php"><i class="fa fa-cog"></i> <i class="fa fa-list-ul"></i> Personalizza menù</a>';
               }
               ?>
               </div>
