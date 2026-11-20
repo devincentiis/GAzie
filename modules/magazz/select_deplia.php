@@ -24,19 +24,19 @@
 */
 require("../../library/include/datlib.inc.php");
 $admin_aziend=checkAdmin();
+$gForm = new magazzForm();
 $msg='';
 
-
-function getExtremeValue($table_name,$min_max='MIN')
-    {
-        $rs=gaz_dbi_dyn_query ($min_max.'(codice) AS value',$table_name);
-        $data=gaz_dbi_fetch_array($rs);
-        return $data['value'];
-    }
+function getExtremeValue($table_name,$min_max='MIN') {
+  $rs=gaz_dbi_dyn_query ($min_max.'(codice) AS value',$table_name);
+  $data=gaz_dbi_fetch_array($rs);
+  return $data['value'];
+}
 
 if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     $form['hidden_req'] = '';
     $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+    $form['jumpcat'] = '';
     $form['this_date_Y']=date("Y");
     $form['this_date_M']=date("m");
     $form['this_date_D']=date("d");
@@ -95,38 +95,22 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
         header("Location: ".$form['ritorno']);
         exit;
     }
+    $form['jumpcat'] = ( isset($_POST['jumpcat']) ? 'checked' : '' );
 }
 
 //controllo i campi
 if (!checkdate( $form['this_date_M'],$form['this_date_D'],$form['this_date_Y'])) {
-    $msg .='0+';
+  $msg .='0+';
 }
 $utsexe= mktime(0,0,0,$form['this_date_M'],$form['this_date_D'],$form['this_date_Y']);
 if (strcasecmp($form['art_ini'],$form['art_fin'])>0) {
-    $msg .='1+';
+  $msg .='1+';
 }
 if ($form['cm_ini'] > $form['cm_fin']) {
-    $msg .='2+';
+  $msg .='2+';
 }
 // fine controlli
 
-if (isset($_POST['print']) && $msg=='') {
-    if ($form['art_fin']==0){
-        $form['art_fin']==$form['art_ini'];
-    }
-    $_SESSION['print_request']=array('script_name'=>'stampa_depliant',
-                                     'li'=>$form['listino'],
-                                     'bc'=>$form['barcode'],
-                                     'ai'=>$form['art_ini'],
-                                     'af'=>$form['art_fin'],
-                                     'ci'=>$form['cm_ini'],
-                                     'cf'=>$form['cm_fin'],
-                                     'ds'=>date("dmY",$utsexe),
-									 'jumpcat'=>$_POST['jumpcat']
-                                     );
-    header("Location: sent_print.php");
-    exit;
-}
 
 require("../../library/include/header.php");
 $script_transl=HeadMain(0,array('calendarpopup/CalendarPopup'));
@@ -141,7 +125,8 @@ if (isset($admin_aziend['lang'])){
     }
   }
 }
-echo "<script type=\"text/javascript\">
+?>
+<script>
 var cal = new CalendarPopup();
 var calName = '';
 function setMultipleValues(y,m,d) {
@@ -158,12 +143,33 @@ function setDate(name) {
   cal.setReturnFunction('setMultipleValues');
   cal.showCalendar('anchor', mdy);
 }
+function printPdf(urlPrintDoc){
+	$(function(){
+		$('#framePdf').attr('src',urlPrintDoc);
+		$('#framePdf').css({'height': '100%'});
+		$('.framePdf').css({'display': 'block','width': '90%', 'height': '80%', 'z-index':'2000'});
+    $("html, body").delay(100).animate({scrollTop: $('#framePdf').offset().top},200, function() {
+        $("#framePdf").focus();
+    });
+		$('#closePdf').on( "click", function() {
+			$('.framePdf').css({'display': 'none'});
+		});
+	});
+};
 </script>
-";
+<?php
 echo "<form method=\"POST\" name=\"select\">\n";
 echo "<input type=\"hidden\" value=\"".$form['hidden_req']."\" name=\"hidden_req\" />\n";
 echo "<input type=\"hidden\" value=\"".$form['ritorno']."\" name=\"ritorno\" />\n";
-$gForm = new magazzForm();
+?>
+  <div class="framePdf panel panel-success" style="display: none; position: absolute; left: 5%; top: 100px">
+    <div class="col-lg-12">
+      <div class="col-xs-11"><h4><?php echo $script_transl['print']; ?></h4></div>
+      <div class="col-xs-1"><h4><button type="button" id="closePdf"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
+    </div>
+    <iframe id="framePdf"  style="height: 100%; width: 100%" src=""></iframe>
+  </div>
+<?php
 echo "<div align=\"center\" class=\"FacetFormHeaderFont\">".$script_transl['title'];
 echo "</div>\n";
 echo "<table class=\"Tsmall table-striped\" align=\"center\">\n";
@@ -176,14 +182,13 @@ $gForm->CalendarPopup('this_date',$form['this_date_D'],$form['this_date_M'],$for
 echo "</tr>\n";
 echo "<tr>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['listino']."</td><td  class=\"FacetDataTD\">\n";
-$gForm->variousSelect('listino',$script_transl['listino_value'],$form['listino'],'FacetSelect',false);
+$gForm->variousSelect('listino',$script_transl['listino_value'],$form['listino'],'',false,'refresh');
 echo "\t </td>\n";
 echo "</tr>\n";
 echo "<tr>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['barcode']."</td><td  class=\"FacetDataTD\">\n";
-$gForm->variousSelect('barcode',$script_transl['barcode_value'],$form['barcode'],'FacetSelect',false);
-
-echo ' '.$script_transl['jumpcat'].' <input type="checkbox" name="jumpcat" ></td>';
+$gForm->variousSelect('barcode',$script_transl['barcode_value'],$form['barcode'],'',false,'refresh');
+echo ' '.$script_transl['jumpcat'].' <input type="checkbox" name="jumpcat" onchange="this.form.submit()" '.$form['jumpcat'].'></td>';
 echo "</tr>\n";
 echo "<tr>\n";
 echo "<td class=\"FacetFieldCaptionTD\">".$script_transl['cm_ini']."</td><td  class=\"FacetDataTD\">\n";
@@ -201,9 +206,10 @@ echo "<tr>\n";
 echo "<td class=\"FacetFieldCaptionTD\">".$script_transl['art_fin']."</td><td  class=\"FacetDataTD\">\n";
 $gForm->selItem('art_fin',$form['art_fin'],$form['search']['art_fin'],$script_transl['mesg'],$form['hidden_req']);
 echo "</tr>\n";
-echo '<tr><td colspan=2 class="FacetFooterTD text-center"> <input type="submit" class="btn btn-warning" accesskey="i" name="print" value="';
-echo $script_transl['print'];
-echo '" tabindex="100" >';
+// bottone stampa
+$form['art_fin'] = $form['art_fin'] == 0 ? $form['art_ini'] : $form['art_fin'] ;
+$ref = 'li='.$form['listino'].'&bc='.$form['barcode'].'&ai='.$form['art_ini'].'&af='.$form['art_fin'].'&ci='.$form['cm_ini'].'&cf='.$form['cm_fin'].'&ds='.date("dmY",$utsexe).'&jumpcat='.( isset($_POST['jumpcat']) ? '1' : '0' );
+echo '<tr><td class="text-center" colspan=2><a class="btn btn-warning" title="Stampa con PDF" style="cursor:pointer;" onclick="printPdf(\'stampa_depliant.php?'. $ref.'\')" \> <i class="fa fa-file-pdf-o"></i> '.$script_transl['print'].' <i class="glyphicon glyphicon-print" ></i></a>';
 echo "\t </td>\n";
 echo "\t </tr>\n";
 echo "</table>\n";

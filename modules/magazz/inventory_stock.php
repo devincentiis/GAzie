@@ -23,11 +23,12 @@
   --------------------------------------------------------------------------
  */
 require("../../library/include/datlib.inc.php");
-//require("../vendit/lib.function.php");
+require("../vendit/lib.function.php");
 $admin_aziend = checkAdmin();
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 $gForm = new magazzForm;
+$lm = new lotmag;
 $msg = '';
 if (!isset($_POST['ritorno'])) { //al primo accesso allo script
   $_POST['ritorno'] = $_SERVER['HTTP_REFERER'];
@@ -48,30 +49,62 @@ $data = getInventoryData($form['datref'],$form["catmer"],$admin_aziend['decimal_
 if (isset($_POST['export'])) {
   $acc=[];
   foreach ($data as $k => $v) {
+    $lots = [];
+    $lots = [0=>['','']] ;
+    if ($v['i_l'] >= 1 && $v['g_a'] >= 0.00001 ) {  // se è un articolo con lotti o numero seriale riprendo gli eventuali post delle rimanenze dei singoli lotti
+      $lm->getAvailableLots($k,0,gaz_format_date($form['datref'],true));
+      $lotrests = $lm->available;
+      $i=0;
+      foreach($lotrests as $kl=>$vl) {
+        $lots[$i] = [$vl['identifier'],$vl['rest']];
+        $i++;
+      }
+    }
     if (count($acc)==0) {
-      $acc[0] = ['Codice', 'Descrizione articolo', 'U.M.', 'Valore attuale', 'Giacenza', 'Valore giacenza'];
+      $acc[0] = ['Codice', 'Descrizione articolo', 'U.M.', 'Valore attuale','Lotti','', 'Giacenza', 'Valore giacenza'];
     }
     $acc[$k][0] = $k;
     $acc[$k][1] = $v['i_d'];
     $acc[$k][2] = $v['i_u'];
     $acc[$k][3] = $v['v_a'];
-    $acc[$k][4] = $v['g_a'];
-    $acc[$k][5] = round($v['v_g'],5);
+    $acc[$k][4] = $lots[0][0];
+    $acc[$k][5] = $lots[0][1];
+    $acc[$k][6] = $v['g_a'];
+    $acc[$k][7] = round($v['v_g'],5);
+    unset ($lots[0]);
+    foreach($lots as $kl => $vl) {
+      $k='lottoidx_'.$kl;
+      $acc[$k][0] = '';
+      $acc[$k][1] = '';
+      $acc[$k][2] = '';
+      $acc[$k][3] = '';
+      $acc[$k][4] = $vl[0];
+      $acc[$k][5] = $vl[1];
+      $acc[$k][6] = '';
+      $acc[$k][7] = '';
+    }
   }
   $spreadsheet = new Spreadsheet();
   $spreadsheet->setActiveSheetIndex(0);
-  $spreadsheet->getActiveSheet()->fromArray($acc);
-  $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-  $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(90);
-  $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(8);
-  $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(15);
-  $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(15);
-  $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
-  $spreadsheet->getActiveSheet()->getStyle('A:B')->getAlignment()->setHorizontal('left');
-  $spreadsheet->getActiveSheet()->getStyle('C')->getAlignment()->setHorizontal('center');
-  $spreadsheet->getActiveSheet()->getStyle('D:F')->getAlignment()->setHorizontal('right');
-  $highestColumn = $spreadsheet->getActiveSheet()->getHighestColumn();
-  $spreadsheet->getActiveSheet()->getStyle('A1:' . $highestColumn . '1' )->getFont()->setBold(true);
+  $sheet = $spreadsheet->getActiveSheet();
+  $sheet->fromArray($acc);
+  $sheet->mergeCells('E1:F1');
+  $sheet->getStyle('E1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+  $sheet->getStyle($sheet->calculateWorksheetDimension())->getAlignment()->setWrapText(true);
+  $sheet->getColumnDimension('A')->setWidth(30);
+  $sheet->getColumnDimension('B')->setWidth(90);
+  $sheet->getColumnDimension('C')->setWidth(8);
+  $sheet->getColumnDimension('D')->setWidth(15);
+  $sheet->getColumnDimension('E')->setWidth(15);
+  $sheet->getColumnDimension('F')->setWidth(15);
+  $sheet->getColumnDimension('G')->setWidth(15);
+  $sheet->getColumnDimension('H')->setWidth(15);
+  $sheet->getStyle('A:B')->getAlignment()->setHorizontal('left');
+  $sheet->getStyle('C:D')->getAlignment()->setHorizontal('center');
+  $sheet->getStyle('E:F')->getAlignment()->setHorizontal('center');
+  $sheet->getStyle('G:H')->getAlignment()->setHorizontal('right');
+  $highestColumn = $sheet->getHighestColumn();
+  $sheet->getStyle('A1:' . $highestColumn . '1' )->getFont()->setBold(true);
   //mime type
   header('Content-Type: application/vnd.ms-excel');
   header('Content-Disposition: attachment;filename="Inventario_del_'.$form['datref'].'.xls"');
@@ -144,6 +177,7 @@ $gForm->selectFromDB('catmer', 'catmer', 'codice', $form['catmer'], false, false
         <th class="FacetFieldCaptionTD"><?php echo $script_transl['descri']; ?></th>
         <th class="FacetFieldCaptionTD"><?php echo $script_transl['mu']; ?></th>
         <th class="FacetFieldCaptionTD"><?php echo $script_transl['v_a']; ?></th>
+        <th class="FacetFieldCaptionTD"><?php echo $script_transl['lot']; ?></th>
         <th class="FacetFieldCaptionTD"><?php echo $script_transl['g_a']; ?></th>
         <th class="FacetFieldCaptionTD"><?php echo $script_transl['g_v']; ?></th>
       </tr>
@@ -155,6 +189,14 @@ $gForm->selectFromDB('catmer', 'catmer', 'codice', $form['catmer'], false, false
       $totv_g = 0;
       $ctrl_cm = 0;
       foreach ($data as $k => $v) {
+        $lots = '';
+        if ($v['i_l'] >= 1 && $v['g_a'] >= 0.00001 ) {  // se è un articolo con lotti o numero seriale riprendo gli eventuali post delle rimanenze dei singoli lotti
+          $lm->getAvailableLots($k,0,gaz_format_date($form['datref'],true));
+          $lotrests = $lm->available;
+          foreach($lotrests as $kl=>$vl) {
+            $lots .= $vl['identifier'].'<span class="pull-right">'.floatval($vl['rest'])."</span><br/>";
+          }
+        }
         //ini default value
         $tooltip = ' class="gazie-tooltip" data-type="product-thumb" data-id="' . $k . '" data-title="' . $v['i_a'] . '"';
         // end default value
@@ -171,7 +213,7 @@ $gForm->selectFromDB('catmer', 'catmer', 'codice', $form['catmer'], false, false
           echo
          '<td align="left"><span ' . $tooltip . '>' . $v['i_d'] . '</span></td>
             <td align="center">' . $v['i_u'] . '</td>
-            <td align="right">' . gaz_format_quantity($v['v_a'], 0, $admin_aziend['decimal_price']) . '</td>
+            <td align="right">' . gaz_format_quantity($v['v_a'], 0, $admin_aziend['decimal_price']) . '</td><td>'.$lots.'</td>
             <td class="text-right text-'.$v['class'].'">' . gaz_format_quantity($v['g_a'], 1, $admin_aziend['decimal_quantity']) . '</td>
             <td align="right">' . gaz_format_number($v['v_g']) . '</td>
         </tr>';
@@ -179,7 +221,7 @@ $gForm->selectFromDB('catmer', 'catmer', 'codice', $form['catmer'], false, false
         $totv_g += $v['v_g'];
         $ctrl_cm = $v['i_g'];
       }
-      echo '<tr><td colspan=4></td><td class="text-right">' . gaz_format_quantity($totq_g, 1, $admin_aziend['decimal_quantity']) . '</td> <td class="text-right">' . gaz_format_number($totv_g) . '</td></tr>';
+      echo '<tr><td colspan=5></td><td class="text-right">' . gaz_format_quantity($totq_g, 1, $admin_aziend['decimal_quantity']) . '</td> <td class="text-right">' . gaz_format_number($totv_g) . '</td></tr>';
       echo '</tbody></table>';
       ?>
 <div class="panel panel-info">

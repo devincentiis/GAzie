@@ -117,7 +117,7 @@ while ($r = gaz_dbi_fetch_array($result)) {
 		$company['ragso1']=$script_transl['all'];
 	}
   echo "<tr>";
-  echo "<td title=\"".$script_transl['update']."\" align=\"center\"><a class=\"btn btn-xs btn-edit\" href=\"admin_utente.php?user_name=".$r["user_name"]."&Update\">".$r["user_name"]." </a> &nbsp</td>";
+  echo '<td title="'.$script_transl['update'].'" class="text-center"><a class="btn btn-xs btn-edit" href="admin_utente.php?user_name='.$r["user_name"].'&Update"> <i class="glyphicon glyphicon-edit"></i> '.$r["user_name"].' </a></td>';
   echo "<td>".$r["user_lastname"]." </td>";
   echo "<td>".$r["user_firstname"]." </td>";
   echo "<td align=\"center\">".$r["Abilit"]." </td>";

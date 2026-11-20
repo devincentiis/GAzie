@@ -120,8 +120,8 @@ class Depliant extends Report_template {
 
             $this->Cell(93, 5, $code, 'LTR', 2, 'L', 0, '', 1);
 			if (strlen($description)>110) {
-                 $this->Cell(70, 5, substr($description,0,(strlen($description)/2)), 'L', 2, 'L', 0, '', 1);
-                 $this->Cell(70, 5, substr($description,(strlen($description)/2)), 'L', 2, 'L', 0, '', 1);
+                 $this->Cell(70, 5, substr($description,0,round((strlen($description)/2))), 'L', 2, 'L', 0, '', 1);
+                 $this->Cell(70, 5, substr($description,round((strlen($description)/2))), 'L', 2, 'L', 0, '', 1);
 			} else {
 				$this->Cell(70, 5, $description, 'L', 2, 'L', 0, '', 1);
 				$this->cell(70, 5,'','L',2,'L',0,'',1);
@@ -147,11 +147,11 @@ class Depliant extends Report_template {
             $this->SetY($y);
             $this->SetX($x);
 			if (strlen($description)>110) {
-				$this->Cell(93, 5, $code . ' - ' . substr($description,0,(strlen($description)/2)), 'LTR', 2, 'L', 0, '', 1);
-				$this->Cell(93, 5, substr($description,(strlen($description)/2)), 'LR', 2, 'L', 0, '', 1);
+				$this->Cell(93, 5, $code . ' - ' . substr($description,0,round((strlen($description)/2))), 'LTR', 2, 'L', 0, '', 1);
+				$this->Cell(93, 5, substr($description,round((strlen($description)/2))), 'LR', 2, 'L', 0, '', 1);
 			} else {
-				$this->Cell(93, 5, $code . ' - ' . substr($description,0,(strlen($description)/2)), 'LTR', 2, 'L', 0, '', 1);
-				$this->Cell(93, 5, substr($description,(strlen($description)/2)), 'LR', 2, 'L', 0, '', 1);
+				$this->Cell(93, 5, $code . ' - ' . substr($description,0,round((strlen($description)/2))), 'LTR', 2, 'L', 0, '', 1);
+				$this->Cell(93, 5, substr($description,round((strlen($description)/2))), 'LR', 2, 'L', 0, '', 1);
 			}
             $this->Cell(93, 5, '', 'LR', 2);
             $this->Cell(93, 5, $price . ' ' . $admin_aziend['symbol'] . '/' . $um, 'LR', 2);
@@ -166,8 +166,8 @@ class Depliant extends Report_template {
             }
 			 $this->Cell(93, 5, $code, 'LTR', 2, 'L', 0, '', 1);
 			if (strlen($description)>110) {
-                 $this->Cell(93, 5, substr($description,0,(strlen($description)/2)), 'LR', 2, 'L', 0, '', 1);
-                 $this->Cell(93, 5, substr($description,(strlen($description)/2)), 'LR', 2, 'L', 0, '', 1);
+                 $this->Cell(93, 5, substr($description,0,round((strlen($description)/2))), 'LR', 2, 'L', 0, '', 1);
+                 $this->Cell(93, 5, substr($description,round((strlen($description)/2))), 'LR', 2, 'L', 0, '', 1);
 			} else {
 				$this->Cell(93, 5, $description, 'LR', 2, 'L', 0, '', 1);
 				$this->cell(93, 5,'','LR',2,'L',0,'',1);
@@ -236,58 +236,58 @@ $pdf->Open();
 $pdf->SetTopMargin(32);
 $pdf->setFooterMargin(10);
 $pdf->AddPage();
-$ctrl_cm = 0;
+$ctrl_cm = false;
 while ($row = gaz_dbi_fetch_array($result)) {
-    if ($row['depli'] < 1) {
-        continue;
-    }
-    if (isset($_GET['bc']) && intval($_GET['bc']) == 1) { // per stampare i barcode in luogo delle immagini
-        $row['imaart'] = '';
-        $row['imacat'] = '';
+  if ($row['depli'] < 1) { continue; }
+  if (isset($_GET['bc']) && intval($_GET['bc']) == 1) { // per stampare i barcode in luogo delle immagini
+    $row['imaart'] = '';
+    $row['imacat'] = '';
+  } else {
+    $row['barcod'] = '';
+  }
+  $vat = '+IVA ' . floatval($row['aliquo']) . '%';
+  if ($listino == 'web_price') {
+    $price = $row['prezzo'] * $row['web_multiplier'];
+    $row['unimis'] = $row['web_mu'];
+  } else {
+    $price = $row['prezzo'];
+  }
+  if ($row['codcat'] <> $ctrl_cm) {
+    if ($_GET['jumpcat'] == "1" && $ctrl_cm !== false ) {
+      $pdf->AddPage();
+    } else if (!isset($_GET['bc'])) {
+      if ($pdf->GetY() > 250) {
+        $pdf->AddPage();
+      }
     } else {
-        $row['barcod'] = '';
+      if ($ctrl_cm > 0) {
+        $pdf->AddPage();
+      }
     }
-    $vat = '+IVA ' . floatval($row['aliquo']) . '%';
-    if ($listino == 'web_price') {
-        $price = $row['prezzo'] * $row['web_multiplier'];
-        $row['unimis'] = $row['web_mu'];
+    $pdf->printGroupItem($row['codcat'], $row['descat'], $row['imacat'], $row['linkcat']);
+  }
+  if (!empty($row['imaart']) || !empty($row['barcod'])) {
+    if ($pdf->GetY() > 235 && $pdf->GetX() > 90) {
+        $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
+        $pdf->AddPage();
+    } elseif ($pdf->GetY() > 235) {
+        $pdf->AddPage();
+        $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
     } else {
-        $price = $row['prezzo'];
+        $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
     }
-    if ($row['codcat'] <> $ctrl_cm) {
-		if (!isset($_GET['bc']) || $_GET['jumpcat']!="on"){
-			if ($pdf->GetY() > 250) {
-				$pdf->AddPage();
-			}
-		} else {
-			if ($ctrl_cm > 0) {
-				$pdf->AddPage();
-			}
-		}
-		$pdf->printGroupItem($row['codcat'], $row['descat'], $row['imacat'], $row['linkcat']);
-    }
-    if (!empty($row['imaart']) || !empty($row['barcod'])) {
-        if ($pdf->GetY() > 235 && $pdf->GetX() > 90) {
-            $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
-            $pdf->AddPage();
-        } elseif ($pdf->GetY() > 235) {
-            $pdf->AddPage();
-            $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
-        } else {
-            $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
-        }
+  } else {
+    if ($pdf->GetY() > 235 && $pdf->GetX() > 90) {
+      $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
+      $pdf->AddPage();
+    } elseif ($pdf->GetY() > 235) {
+      $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
+      $pdf->AddPage();
     } else {
-		if ($pdf->GetY() > 235 && $pdf->GetX() > 90) {
-			$pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
-			$pdf->AddPage();
-		} elseif ($pdf->GetY() > 235) {
-			$pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
-			$pdf->AddPage();
-		} else {
-			$pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
-		}
+      $pdf->printItem($row['codart'], $row['desart'], $price, $row['unimis'], $row['units'], $row['annart'], $row['imaart'], substr($row['barcod'], 0, 13), $row['linkart'], $vat);
     }
-    $ctrl_cm = $row['codcat'];
+  }
+  $ctrl_cm = $row['codcat'];
 }
 $pdf->Output();
 ?>

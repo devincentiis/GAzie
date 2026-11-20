@@ -153,10 +153,10 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
         foreach ($form['paymov'] as $k => $v) { //attraverso l'array delle partite
             $acc = 0.00;
             foreach ($v as $ki => $vi) {
-                $acc += $vi['amount'];
+                $acc += floatval($vi['amount']);
             }
             if ($acc >= 0.01) {
-                paymovInsert(array('id_tesdoc_ref' => $k, 'id_rigmoc_pay' => $rig_id, 'amount' => $acc, 'expiry' => $date));
+                paymovInsert(array('id_tesdoc_ref' => $k, 'id_rigmoc_pay' => $rig_id, 'amount' => round($acc,2), 'expiry' => $date));
             }
         }
         if ($_POST['print_ticket'] == " checked") {

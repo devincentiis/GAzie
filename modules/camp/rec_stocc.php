@@ -180,12 +180,19 @@ function getMovContainer(cod_silos) {
 			var j=0;
 				$.each(data, function(i, value) {
 				j++;
-        if (parseFloat(value.pro)>=0.000001){
+
+        var pro = parseFloat(value.pro);
+        if (pro > 0.000001) {
           clpro = 'bg-success';
+        } else if (pro < 0) {
+          clpro = 'bg-danger';
+          value.pro = '⚠ ' + pro; // mostra il valore negativo
+          // qui puoi aggiungere anche un allarme visivo
         } else {
           clpro = 'bg-danger';
-          value.pro ='--- vuoto ---';
+          value.pro = '--- vuoto ---'; // zero reale
         }
+
 				$("table.list_movcontainer").append("<tr><td> <button onclick='location.href=\"../magazz/admin_movmag.php?Update&id_mov="+value.id+"\"' target='_blank' type='button'>"+value.id+" </button></td><td class='bg-warning'>&nbsp;"+ value.cod + " </td><td>&nbsp; "+value.datdoc+":"+value.des+value.id_lot+"&nbsp; </td><td class='bg-info'> "+value.val+ "</td><td> &nbsp;" +value.um+ "&nbsp; </td><td class='text-right "+ clpro +"'> "+value.pro+" </td></tr>");
 				});
 				if (j==0){
@@ -294,7 +301,7 @@ $recordnav -> output();
 						echo "Kg.",gaz_format_quantity($content,true)," l.",gaz_format_quantity($content/0.915,true)," Ultimo lotto: ",$lot[1];
 						if ($content > $a_row['capacita']){
 							echo " ERRORE!";
-						}            
+						}
 					}
 					echo ' <a class="btn btn-xs btn-default dialog_content" title="Movimenti nel contenitore" onclick="getMovContainer(\''.$a_row['cod_silos'].'\')" > <i class="glyphicon glyphicon-list"></i></a>';
 					?>

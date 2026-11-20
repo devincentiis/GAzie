@@ -235,7 +235,7 @@ while ($r = gaz_dbi_fetch_array($result)) {
     echo "<td>";
 	if (($r['id_rif']==0||$r['tipdoc']=="MAG"||$r['tipdoc']=="PRO") && intval($r['id_orderman'])==0){
         // in caso di movimento proveniente da produzione forzo l'id_rif con id_orderman
-		echo "<a class=\"btn btn-xs btn-default\" href=\"admin_movmag.php?id_mov=".$r["id_mov"]."&Update\" title=\"".ucfirst($script_transl['update'])."!\"><i class=\"glyphicon glyphicon-edit text-success\"></i> ".$r["id_mov"]."</a> &nbsp</td>";
+		echo "<a class=\"btn btn-xs btn-edit\" href=\"admin_movmag.php?id_mov=".$r["id_mov"]."&Update\" title=\"".ucfirst($script_transl['update'])."\"><i class=\"glyphicon glyphicon-edit\"></i> ".$r["id_mov"]."</a> &nbsp</td>";
     } else {
 		echo "<button class=\"btn btn-xs btn-default disabled\" title=\"Questo movimento puo essere modificato solo nel documento che lo ha creato\"> ".$r["id_mov"]."</button> &nbsp</td>";
 	}

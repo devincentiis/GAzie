@@ -95,7 +95,7 @@ $linkHeaders -> output();
 $result = gaz_dbi_dyn_query ('*', $gTables['caucon'], $where, $orderby);
 while ($row = gaz_dbi_fetch_array($result)) {
     echo "<tr>";
-    echo "<td align=\"center\"><a class=\"btn btn-xs btn-edit\" href=\"admin_caucon.php?codice=".$row["codice"]."&Update\"><i class=\"glyphicon glyphicon-folder-open\"></i>&nbsp;&nbsp;".$row["codice"]."</a> &nbsp</td>";
+    echo '<td class="text-center"><a class="btn btn-xs btn-edit" href="admin_caucon.php?codice='.$row["codice"].'&Update"> <i class="glyphicon glyphicon-edit"></i> '.$row["codice"].'</a> </td>';
     echo "<td>".$row["descri"]." &nbsp;</td>";
     echo "<td align=\"center\">".$script_transl['regiva_value'][$row["regiva"]]." &nbsp;</td>";
     echo "<td align=\"center\">".$script_transl['operat_value'][$row["operat"]]." &nbsp;</td>";

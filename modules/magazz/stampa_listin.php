@@ -141,11 +141,8 @@ switch ($_GET['ts']) {
 
 	   /** ENRICO FEDELE */
 	   /* Inizializzo le variabili e setto la dimensione del font a 9 */
-	   $color = 0;
-	   $color1 = array(255, 255, 255);
-	   $color2 = array(240, 240, 240);
 	   $pdf->SetFont('helvetica', '', 9);
-	   /** ENRICO FEDELE */
+	   $rf=false;
 	   while ($row = gaz_dbi_fetch_array($result)) {
 		  $mv = $gForm->getStockValue(false, $row['codice']);
 		  $magval = array_pop($mv);
@@ -178,37 +175,28 @@ switch ($_GET['ts']) {
 		  /* Modifico il layout della tabella, grassetto corsivo per categoria merceologica e codice articolo */
 		  $pdf->SetFont('helvetica', 'BI', 9);
 		  if ($row["catmer"] <> $ctrlcatmer) {
-			 gaz_set_time_limit(30);
-			 $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
-			 /* Riga della categoria merceologica impostata a tutta larghezza */
-			 $pdf->Cell(190, 4, 'Categoria Merceologica n.' . $row['codcat'] . ' = ' . $row['descat'], 1, 0, 'L', 1);
-			 $pdf->Cell(15, 4, 'U.M.', 1, 0, 'C', true);
-			 $pdf->Cell(25, 4, 'Prezzo', 1, 0, 'C', true);
-			 $pdf->Cell(25, 4, 'Esistenza', 1, 0, 'C', true);
-			 $pdf->Cell(15, 4, '% I.V.A.', 1, 1, 'C', true);
-
+        $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
+        /* Riga della categoria merceologica impostata a tutta larghezza */
+        $pdf->Cell(190, 4, 'Categoria Merceologica ' . $row['codcat'] . ' = ' . $row['descat'], 1, 0, 'L', 1);
+        $pdf->Cell(15, 4, 'U.M.', 1, 0, 'C', true);
+        $pdf->Cell(25, 4, 'Prezzo', 1, 0, 'C', true);
+        $pdf->Cell(25, 4, 'Esistenza', 1, 0, 'C', true);
+        $pdf->Cell(15, 4, '% I.V.A.', 1, 1, 'C', true);
+        $pdf->SetFillColor(235,235,235);
+        $rf = false;
 		  }
-		  /* Alterno il colore delle righe per maggiore leggibilità */
-		  $color == $color1 ? $color = $color2 : $color = $color1;
-		  $pdf->SetFillColor($color[0], $color[1], $color[2]);
-
-		  /* Celle con riempimento */
-		  $pdf->Cell(190, 4, $row['codart'], 1, 0, 'C', true);
-		  /* Reimposto il font per proseguire la stampa senza grassetto/italico */
 		  $pdf->SetFont('helvetica', '', 9);
-		  $pdf->Cell(15, 4, $row['unimis'], 1, 0, 'C', true);
-		  $pdf->Cell(25, 4, number_format($price, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', true);
-		  $pdf->Cell(25, 4, number_format($magval['q_g'], $admin_aziend['decimal_quantity'], ',', '.'), 1, 0, 'R', true);
-		  $pdf->Cell(15, 4, $row['aliquo'], 1, 1, 'C', true); /* A capo dopo questa cella */
-		  /* Descrizione articolo a capo per evitare testo sovrapposto con descrizioni lunghe */
-		  $pdf->Cell(20, 4, 'Descrizione', 1, 0, 'L', true);
-		  $pdf->Cell(250, 4, $row['desart'], 1, 1, 'L', true); /* A capo dopo questa cella */
-		  /* Annotazioni a capo per evitare testo sovrapposto con descrizioni lunghe */
-		  if (strlen($row['annota'])>0){ // Antonio Germani se le annotazioni non ci sono evito di stampare inutilmente la riga
-			$pdf->Cell(20, 4, 'Annotazioni', 1, 0, 'L', true);
-			$pdf->Cell(250, 4, $row['annota'], 1, 1, 'L', true); /* A capo dopo questa cella */
+		  $pdf->Cell(30, 4, $row['codart'], 1, 0, 'C', $rf,'',1);
+		  $pdf->Cell(160, 4, $row['desart'], 1, 0, 'L', $rf,'',1);
+		  $pdf->Cell(15, 4, $row['unimis'], 1, 0, 'C', $rf);
+		  $pdf->Cell(25, 4, number_format($price, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', $rf);
+		  $pdf->Cell(25, 4, number_format($magval['q_g'], $admin_aziend['decimal_quantity'], ',', '.'), 1, 0, 'R', $rf);
+		  $pdf->Cell(15, 4, $row['aliquo'], 1, 1, 'C', $rf); /* A capo dopo questa cella */
+		  if (strlen($row['annota'].'')) { // Antonio Germani se le annotazioni non ci sono evito di stampare inutilmente la riga
+        $pdf->Cell(20, 4, 'Annotazioni', 1, 0, 'L', $rf);
+        $pdf->Cell(250, 4, $row['annota'], 1, 1, 'L', $rf); /* A capo dopo questa cella */
 		  }
-		  /** ENRICO FEDELE */
+      $rf = !$rf;
 		  $ctrlcatmer = $row["catmer"];
 	   }
 	break;
@@ -216,14 +204,14 @@ switch ($_GET['ts']) {
 	   $title = array('luogo_data' => $luogo_data,
 		   'title' => $descrlis . $titoloAddizionale,
 		   'hile' => array(
-			   array('lun' => 30, 'nam' => 'Codice'),
-			   array('lun' => 100, 'nam' => 'Descrizione'),
+			   array('lun' => 20, 'nam' => 'Codice'),
+			   array('lun' => 120, 'nam' => 'Descrizione'),
 			   array('lun' => 10, 'nam' => 'U.M.'),
 			   array('lun' => 20, 'nam' => 'Prezzo'),
 			   array('lun' => 20, 'nam' => 'Sconto'),
 			   array('lun' => 20, 'nam' => 'Prezzo finito'),
 			   array('lun' => 20, 'nam' => 'IVA comp.'),
-			   array('lun' => 50, 'nam' => 'Categoria'),
+			   array('lun' => 40, 'nam' => 'Categoria'),
 		   )
 	   );
 	   $gForm = new magazzForm();
@@ -233,71 +221,60 @@ switch ($_GET['ts']) {
 	   $pdf->setFooterMargin(10);
 	   $pdf->setTopMargin(40);
 	   $pdf->AddPage('L');
-	   $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
-	//   $ctrlcatmer = 0;
-
-	   /* Inizializzo le variabili e setto la dimensione del font a 6 */
-	   $color = 0;
-	   $color1 = array(255, 255, 255);
-	   $color2 = array(240, 240, 240);
+	   $pdf->SetFillColor(235,235,235);
 	   $pdf->SetFont('helvetica', '', 10);
-	   /** ENRICO FEDELE */
+     $rf=false;
 	   while ($row = gaz_dbi_fetch_array($result)) {
-		  switch ($_GET['li']) {
-			 case '0':
-        $lastbuys= $libFunc->getLastBuys($row['codice'],false);
-        $klb=key($lastbuys);
-        // per gli acquisti mi baso sul prezzo dell'ultimo acquisto, se non c'è prendo dall'anagrafica
-				$price = $klb?$lastbuys[$klb]['prezzo']:$row['preacq'];
-				$row['unimis'] = $klb?$lastbuys[$klb]['unimis']:$row['uniacq'];
-				$row['sconto'] = $klb?$lastbuys[$klb]['scorig']:0;
-				break;
-			 case '1':
-				$price = $row['preve1'];
-				break;
-			 case '2':
-				$price = $row['preve2'];
-				break;
-			 case '3':
-				$price = $row['preve3'];
-				break;
-			 case '4':
-				$price = $row['preve4'];
-				break;
-			 case 'web':
-				$price = $row['web_price'] * $row['web_multiplier'];
-				$row['unimis'] = $row['web_mu'];
-				break;
-			 default:
-				$price = $row['preve1'];
-		  }
-		  /* Alterno il colore delle righe per maggiore leggibilità */
-		  $color == $color1 ? $color = $color2 : $color = $color1;
-		  $pdf->SetFillColor($color[0], $color[1], $color[2]);
-
-		  /* Celle con riempimento */
-		  $pdf->Cell(30, 4, $row['codart'], 1, 0, 'L', true, '', 1);
-		  $pdf->Cell(100, 4, $row['desart'], 1, 0, 'L', true, '', 1);
-		  $pdf->Cell(10, 4, $row['unimis'], 1, 0, 'L', true);
-		  $pdf->Cell(20, 4, number_format($price, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', true);
-		  $sconto=$row['sconto'];
-		  $pdf->Cell(20, 4, number_format($sconto, 2, ',', '.'), 1, 0, 'R', true);
-	//      $pdf->Cell(20, 4, $row['sconto'], 1, 0, 'C', true);
-		  $prezzoScontato=$price*(1-$sconto/100);
-		  $pdf->Cell(20, 4, number_format($prezzoScontato, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', true);
-		  $aliquotaIva=$row['aliquo'];
-		  $importo=$prezzoScontato*(1+$aliquotaIva/100);
-		  $pdf->Cell(20, 4, number_format($importo, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', true);
-		  $pdf->Cell(50, 4, $row['descat'], 1, 1, 'C', true, '', 1);
-	   }
-	break;
+        switch ($_GET['li']) {
+          case '0':
+          $lastbuys= $libFunc->getLastBuys($row['codice'],false);
+          $klb=key($lastbuys);
+          // per gli acquisti mi baso sul prezzo dell'ultimo acquisto, se non c'è prendo dall'anagrafica
+          $price = $klb?$lastbuys[$klb]['prezzo']:$row['preacq'];
+          $row['unimis'] = $klb?$lastbuys[$klb]['unimis']:$row['uniacq'];
+          $row['sconto'] = $klb?$lastbuys[$klb]['scorig']:0;
+          break;
+          case '1':
+          $price = $row['preve1'];
+          break;
+          case '2':
+          $price = $row['preve2'];
+          break;
+          case '3':
+          $price = $row['preve3'];
+          break;
+          case '4':
+          $price = $row['preve4'];
+          break;
+          case 'web':
+          $price = $row['web_price'] * $row['web_multiplier'];
+          $row['unimis'] = $row['web_mu'];
+          break;
+          default:
+          $price = $row['preve1'];
+        }
+        $pdf->Cell(20, 4, $row['codart'], 1, 0, 'L', $rf, '', 1);
+        $pdf->Cell(120, 4, $row['desart'], 1, 0, 'L', $rf, '', 1);
+        $pdf->Cell(10, 4, $row['unimis'], 1, 0, 'L', $rf);
+        $pdf->Cell(20, 4, number_format($price, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', $rf);
+        $sconto=$row['sconto'];
+        $pdf->Cell(20, 4, number_format($sconto, 2, ',', '.'), 1, 0, 'R', $rf);
+        $prezzoScontato=$price*(1-$sconto/100);
+        $pdf->Cell(20, 4, number_format($prezzoScontato, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', $rf);
+        $aliquotaIva=$row['aliquo'];
+        $importo=$prezzoScontato*(1+$aliquotaIva/100);
+        $pdf->Cell(20, 4, number_format($importo, $admin_aziend['decimal_price'], ',', '.'), 1, 0, 'R', $rf);
+        $pdf->Cell(40, 4, $row['descat'], 1, 1, 'C', $rf, '', 1);
+        $rf = !$rf;
+      }
+  break;
     case '2': // Stampa verticale (con confezioni)
 		$title=array('luogo_data'=>$luogo_data,
 					   'title'=>$descrlis,
 					   'hile'=>array(array('lun' => 30,'nam'=>'Codice'),
 									 array('lun' => 85,'nam'=>'Descrizione'),
 									 array('lun' => 15,'nam'=>'U.M.'),
-									 array('lun' => 25,'nam'=>'Prezzo'),
+									 array('lun' => 35,'nam'=>'Prezzo IVA esclusa'),
 									 array('lun' => 25,'nam'=>'Pz.Confezione')
 									 )
 					);
@@ -306,12 +283,12 @@ switch ($_GET['ts']) {
 		$pdf = new Report_template();
 		$pdf->setVars($admin_aziend,$title);
 		$pdf->setAuthor($admin_aziend['ragso1'].' '.$_SESSION['user_name']);
-		$pdf->setTitle($title['title']);
+		//$pdf->setTitle($title);
 		$pdf->SetTopMargin(39);
 		$pdf->setFooterMargin(10);
 		$pdf->setLeftMargin(10);
 		$pdf->AddPage();
-		$pdf->SetFillColor(hexdec(substr($admin_aziend['colore'],0,2)),hexdec(substr($admin_aziend['colore'],2,2)),hexdec(substr($admin_aziend['colore'],4,2)));
+		$pdf->SetFillColor(235,235,235);
 		$ctrlcatmer=0;
 		while ($row = gaz_dbi_fetch_array($result)) {
 			   $pdf->SetFont('helvetica','',10);
@@ -339,34 +316,37 @@ switch ($_GET['ts']) {
         $price = $row['preve1'];
 			  }
 			  if ($row["catmer"] <> $ctrlcatmer) {
-				gaz_set_time_limit (30);
-				$pdf->Cell(180,3,'',0,1);
-			    $pdf->SetFont('helvetica','B',11);
-				$pdf->Cell(180,5,$row['descat'],0,1);
-			    $pdf->SetFont('helvetica','',10);
-				if ($primapag) {
-					$primapag=0;
-				} else {
-				    $pdf->SetFont('helvetica','',9);
-					$pdf->Cell(30,4,'Codice',1,0,'C',1);
-					$pdf->Cell(85,4,'Descrizione',1,0,'C',1);
-					$pdf->Cell(15,4,'U.M.',1,0,'C',1);
-					$pdf->Cell(25,4,'Prezzo',1,0,'C',1);
-					$pdf->Cell(25,4,'Pz.Confezione',1,1,'C',1);
-					$pdf->SetFont('helvetica','',10);
-				}
+          $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
+          $pdf->Cell(180,3,'',0,1);
+            $pdf->SetFont('helvetica','B',11);
+          $pdf->Cell(180,5,$row['descat'],0,1);
+            $pdf->SetFont('helvetica','',10);
+          if ($primapag) {
+            $primapag=0;
+          } else {
+              $pdf->SetFont('helvetica','',9);
+            $pdf->Cell(30,4,'Codice',1,0,'C',1);
+            $pdf->Cell(85,4,'Descrizione',1,0,'C',1);
+            $pdf->Cell(15,4,'U.M.',1,0,'C',1);
+            $pdf->Cell(35,4,'Prezzo IVA escl',1,0,'C',1);
+            $pdf->Cell(25,4,'Pz.Confezione',1,1,'C',1);
+            $pdf->SetFont('helvetica','',10);
+          }
+          $pdf->SetFillColor(235,235,235);
+          $rf = false;
 			  }
-			    $pdf->SetFont('helvetica','',10);
-			  $pdf->Cell(30,5,$row['codart'],1,0,'L',0,'',1);
-			  $pdf->Cell(85,5,$row['desart'],1,0,'L',0,'',1);
-			  $pdf->Cell(15,5,$row['unimis'],1,0,'C',0,'',1);
-			  $pdf->Cell(25,5,number_format($price,$admin_aziend['decimal_price'],',','.'),1,0,'R',0,'',1);
+		    $pdf->SetFont('helvetica','',10);
+			  $pdf->Cell(30,5,$row['codart'],1,0,'L',$rf,'',1);
+			  $pdf->Cell(85,5,$row['desart'],1,0,'L',$rf,'',1);
+			  $pdf->Cell(15,5,$row['unimis'],1,0,'C',$rf,'',1);
+			  $pdf->Cell(35,5,number_format($price,$admin_aziend['decimal_price'],',','.'),1,0,'R',$rf,'',1);
 			  if ($row['pack_units']>0) {
-				  $pdf->Cell(25,5,$row['pack_units'],1,1,'C',0,'',1);
+				  $pdf->Cell(25,5,$row['pack_units'],1,1,'C',$rf,'',1);
 			  } else {
-				  $pdf->Cell(25,5,'1',1,1,'C',0,'',1);
+				  $pdf->Cell(25,5,'1',1,1,'C',$rf,'',1);
 			  }
 			  $ctrlcatmer=$row["catmer"];
+        $rf = !$rf;
 		}
 	break;
   case '3': // Stampa verticale (con confezioni e iva compresa)
@@ -375,7 +355,7 @@ switch ($_GET['ts']) {
 					   'hile'=>array(array('lun' => 30,'nam'=>'Codice'),
 									 array('lun' => 85,'nam'=>'Descrizione'),
 									 array('lun' => 15,'nam'=>'U.M.'),
-									 array('lun' => 25,'nam'=>'Prezzo'),
+									 array('lun' => 35,'nam'=>'Prezzo IVA compresa'),
 									 array('lun' => 25,'nam'=>'Pz.Confezione')
 									 )
 					);
@@ -384,16 +364,16 @@ switch ($_GET['ts']) {
 		$pdf = new Report_template();
 		$pdf->setVars($admin_aziend,$title);
 		$pdf->setAuthor($admin_aziend['ragso1'].' '.$_SESSION['user_name']);
-		$pdf->setTitle($title['title']);
+		//$pdf->setTitle($title['title']);
 		$pdf->SetTopMargin(39);
 		$pdf->setFooterMargin(10);
 		$pdf->setLeftMargin(10);
 		$pdf->AddPage();
-		$pdf->SetFillColor(hexdec(substr($admin_aziend['colore'],0,2)),hexdec(substr($admin_aziend['colore'],2,2)),hexdec(substr($admin_aziend['colore'],4,2)));
+		$pdf->SetFillColor(235,235,235);
 		$ctrlcatmer=0;
 		while ($row = gaz_dbi_fetch_array($result)) {
-			   $pdf->SetFont('helvetica','',10);
-			   switch($_GET['li']) {
+			  $pdf->SetFont('helvetica','',10);
+			  switch($_GET['li']) {
 				case '0':
 				$price = $row['preacq'];
 				break;
@@ -417,36 +397,39 @@ switch ($_GET['ts']) {
         $price = $row['preve1'];
 			  }
 			  if ($row["catmer"] <> $ctrlcatmer) {
-				gaz_set_time_limit (30);
-				$pdf->Cell(180,3,'',0,1);
-			    $pdf->SetFont('helvetica','B',11);
-				$pdf->Cell(180,5,$row['descat'],0,1);
-			    $pdf->SetFont('helvetica','',10);
-				if ($primapag) {
-					$primapag=0;
-				} else {
-				    $pdf->SetFont('helvetica','',9);
-					$pdf->Cell(30,4,'Codice',1,0,'C',1);
-					$pdf->Cell(85,4,'Descrizione',1,0,'C',1);
-					$pdf->Cell(15,4,'U.M.',1,0,'C',1);
-					$pdf->Cell(25,4,'Prezzo',1,0,'C',1);
-					$pdf->Cell(25,4,'Pz.Confezione',1,1,'C',1);
-					$pdf->SetFont('helvetica','',10);
-				}
+          $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
+          $pdf->Cell(180,3,'',0,1);
+          $pdf->SetFont('helvetica','B',11);
+          $pdf->Cell(180,5,$row['descat'],0,1);
+          $pdf->SetFont('helvetica','',10);
+          if ($primapag) {
+            $primapag=0;
+          } else {
+            $pdf->SetFont('helvetica','',9);
+            $pdf->Cell(30,4,'Codice',1,0,'C',1);
+            $pdf->Cell(85,4,'Descrizione',1,0,'C',1);
+            $pdf->Cell(15,4,'U.M.',1,0,'C',1);
+            $pdf->Cell(35,4,'Prezzo IVA compresa',1,0,'C',1,'',1);
+            $pdf->Cell(25,4,'Pz.Confezione',1,1,'C',1);
+            $pdf->SetFont('helvetica','',10);
+          }
+          $pdf->SetFillColor(235,235,235);
+          $rf = false;
 			  }
-			    $pdf->SetFont('helvetica','',10);
-			  $pdf->Cell(30,5,$row['codart'],1,0,'L',0,'',1);
-			  $pdf->Cell(85,5,$row['desart'],1,0,'L',0,'',1);
-			  $pdf->Cell(15,5,$row['unimis'],1,0,'C',0,'',1);
+		    $pdf->SetFont('helvetica','',10);
+			  $pdf->Cell(30,5,$row['codart'],1,0,'L',$rf,'',1);
+			  $pdf->Cell(85,5,$row['desart'],1,0,'L',$rf,'',1);
+			  $pdf->Cell(15,5,$row['unimis'],1,0,'C',$rf,'',1);
         $price=$price*(1-$row['sconto']/100);
         $price=$price*(1+$row['aliquo']/100);
-			  $pdf->Cell(25,5,number_format($price,$admin_aziend['decimal_price'],',','.'),1,0,'R',0,'',1);
+			  $pdf->Cell(35,5,number_format($price,$admin_aziend['decimal_price'],',','.'),1,0,'R',$rf,'',1);
 			  if ($row['pack_units']>0) {
-				  $pdf->Cell(25,5,$row['pack_units'],1,1,'C',0,'',1);
+				  $pdf->Cell(25,5,$row['pack_units'],1,1,'C',$rf,'',1);
 			  } else {
-				  $pdf->Cell(25,5,'1',1,1,'C',0,'',1);
+				  $pdf->Cell(25,5,'1',1,1,'C',$rf,'',1);
 			  }
 			  $ctrlcatmer=$row["catmer"];
+        $rf = !$rf;
 		}
 	break;
 }

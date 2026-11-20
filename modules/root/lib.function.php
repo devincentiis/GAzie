@@ -160,4 +160,55 @@ class CheckDbAlign {
 
 }
 
+function getMenuData($lang_id, $module_name = false) {
+  global $gTables;
+  $lang = gaz_dbi_get_row($gTables['languages'],'lang_id',$lang_id);
+  $data = [];
+  $rsm1 = gaz_dbi_dyn_query("*", $gTables['module'],'id >= 2','weight ASC');
+  while ($m1 = gaz_dbi_fetch_assoc($rsm1)) {
+    if ($module_name && $module_name != $m1['name']) continue;
+    // prendo i files degli script php ad eccezione di quelli delle funzioni, dei menu e delle lingue
+    $data[$m1['name']]['scripts'] = [];
+    $files = glob('../'.$m1['name'].'/*.php');
+    $patterns ='/\/docume|\/search|\/lang|\/lib|\/delete|\/ajax|\/rec_|\/get_|\/menu|\/send|\/sync|\/dash|\/invsta/';
+    foreach ($files as $rf) {
+      $bnrf = basename($rf);
+      if ( $bnrf == 'menu.'.strtolower($lang['title_native']).'.php') { // quando incontro quello relativo al menu della lingua sotto modifica mi carico i suoi valori che poi andrò a valorizzare sulla chiave file_menu
+        require($rf);
+        $data[$m1['name']]['file_menu'] = $transl[$m1['name']];
+      }
+      if (preg_match($patterns,$rf)  || !str_contains($bnrf, '_') ) continue;
+      $data[$m1['name']]['scripts'][] = $bnrf;
+    }
+    $data[$m1['name']]['m1'] = $m1;
+    $rsm2 = gaz_dbi_dyn_query("*", $gTables['menu_module'],'id_module = '.$m1['id'],'weight ASC');
+    while ($m2 = gaz_dbi_fetch_assoc($rsm2)) {
+      $m2id = $m2['id'];
+      unset($m2['id']);
+      $m2['file_label'] = $transl[$m1['name']]['m2'][$m2['translate_key']][1];
+      $m2['file_title'] = $transl[$m1['name']]['m2'][$m2['translate_key']][0];
+      $m2['module_name'] = $m1['name'];
+      $m2['url_script_basename'] = parse_url($m2['link'],PHP_URL_PATH);
+      $m2['id_menu_module'] = $m2id;
+      $m2['id_menu_script'] = 0; // per distinguere un menù di secondo livello da uno di terzo che sarà > 0
+      $data[$m1['name']]['db_menu'][] = $m2;
+      $rsm3 = gaz_dbi_dyn_query("*", $gTables['menu_script'],'id_menu = '.$m2id,'weight ASC');
+      while ($m3 = gaz_dbi_fetch_assoc($rsm3)) {
+        $m3['file_label'] = $transl[$m1['name']]['m3'][$m3['translate_key']][1];
+        $m3['file_title'] = $transl[$m1['name']]['m3'][$m3['translate_key']][0];
+        $m3['module_name'] = $m1['name'];
+        $m3['url_script_basename'] = parse_url($m3['link'],PHP_URL_PATH);
+        $m3['id_module'] = $m1['id'];
+        $m3['id_menu_module'] = $m2id;
+        $m3['id_menu_script'] = $m3['id'];
+        unset($m3['id']);
+        unset($m3['id_menu']);
+        $data[$m1['name']]['db_menu'][] = $m3;
+      }
+    }
+  }
+  return $data;
+}
+
+
 ?>

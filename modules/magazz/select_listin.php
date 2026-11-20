@@ -26,6 +26,8 @@ require("../../library/include/datlib.inc.php");
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 $admin_aziend = checkAdmin();
+$gForm = new magazzForm();
+
 $msg = '';
 
 function getExtremeValue($table_name, $min_max = 'MIN') {
@@ -132,8 +134,8 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
    }
    if (isset($_POST['export'])) {
     $what = $gTables['catmer'] . ".codice AS codcat , " . $gTables['catmer'] . ".descri AS descat , " .
-            $gTables['artico'] . ".codice AS codart," . $gTables['artico'] . ".descri AS desart," . $gTables['artico'] . ".* , " .
-            $gTables['aliiva'] . ".codice AS codiva, " . $gTables['aliiva'] . ".aliquo ";
+            $gTables['artico'] . ".codice AS codart," . $gTables['artico'] . ".descri AS desart, " .$gTables['artico'] . ".unimis," . $gTables['artico'] . ".preve1 , " .$gTables['artico'] . ".preve2 , " .$gTables['artico'] . ".preve3 , " .$gTables['artico'] . ".preve4 , " .$gTables['artico'] . ".web_mu, " .$gTables['artico'] . ".web_price, " .$gTables['artico'] . ".uniacq, " .$gTables['artico'] . ".preacq , " .$gTables['artico'] . ".barcode , " .
+            $gTables['aliiva'] . ".codice AS codiva, " . $gTables['aliiva'] . ".descri AS desiva, " . $gTables['aliiva'] . ".aliquo ";
     $table = $gTables['artico'] . " LEFT JOIN " . $gTables['catmer'] . " ON (" . $gTables['artico'] . ".catmer = " . $gTables['catmer'] . ".codice)
              LEFT JOIN " . $gTables['aliiva'] . " ON (" . $gTables['artico'] . ".aliiva = " . $gTables['aliiva'] . ".codice)";
     $where = "catmer BETWEEN '" . $form['cm_ini'] .
@@ -160,17 +162,39 @@ if (!isset($_POST['hidden_req'])) { //al primo accesso allo script
     }
     $result = gaz_dbi_dyn_query($what, $table, $where, $order);
     $acc=[];
+    $acc[0] = ['CM', 'Descrizione categoria', 'Codice articolo', 'Descrizione articolo', 'UM vendita', 'Prezzo 1', 'Prezzo 2', 'Prezzo 3', 'Prezzo 4','UM web', 'Prezzo web', 'UM acquisto', 'Prezzo acq.','Barcode', 'Cod.IVA','Descr.IVA','% IVA'];
 		while ($row = gaz_dbi_fetch_assoc($result)) {
-      if (count($acc)==0){ $acc[0] = array_keys($row); }
+      $row['barcode'] = $row['barcode'].' ';
       $acc[$row['codart']]=$row;
     }
     $spreadsheet = new Spreadsheet();
     $spreadsheet->setActiveSheetIndex(0);
-    $sheet = $spreadsheet->getActiveSheet()->fromArray($acc);
+    $spreadsheet->getActiveSheet()->fromArray($acc);
+    $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(30);
+    $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+    $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(50);
+    $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(15);
+    $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(15);
+    $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+    $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(10);
+    $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+    $spreadsheet->getActiveSheet()->getStyle('A')->getAlignment()->setHorizontal('center');
+    $spreadsheet->getActiveSheet()->getStyle('E')->getAlignment()->setHorizontal('center');
+    $spreadsheet->getActiveSheet()->getStyle('J')->getAlignment()->setHorizontal('center');
+    $spreadsheet->getActiveSheet()->getStyle('L')->getAlignment()->setHorizontal('center');
+    $spreadsheet->getActiveSheet()->getStyle('N:Q')->getAlignment()->setHorizontal('center');
+    $highestColumn = $spreadsheet->getActiveSheet()->getHighestColumn();
+    $spreadsheet->getActiveSheet()->getStyle('A1:' . $highestColumn . '1' )->getFont()->setBold(true);
     //mime type
     header('Content-Type: application/vnd.ms-excel');
     //tell browser what's the file name
-    header('Content-Disposition: attachment;filename="Listino_'.$form['listino'].'.xls"');
+    header('Content-Disposition: attachment;filename="Listino_'.$form['listino'].'_'.date('YmdHi').'.xls"');
     header('Cache-Control: max-age=0'); // no cache
     $writer = new Xls($spreadsheet);
     //force user to download the Excel file without writing it to server's HD
@@ -216,7 +240,17 @@ if (isset($_POST['print']) && $msg == '') {
 
 require("../../library/include/header.php");
 $script_transl = HeadMain(0, array('calendarpopup/CalendarPopup'));
-echo "<script type=\"text/javascript\">
+if (isset($admin_aziend['lang'])){
+  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist'", "id_ref ASC");
+  if ($price_list_names->num_rows == 6){
+    $script_transl['listino_value']=array();
+    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
+      $script_transl['listino_value'][]=$list_name["description"];
+    }
+  }
+}
+?>
+<script>
 var cal = new CalendarPopup();
 var calName = '';
 function setMultipleValues(y,m,d) {
@@ -233,21 +267,33 @@ function setDate(name) {
   cal.setReturnFunction('setMultipleValues');
   cal.showCalendar('anchor', mdy);
 }
+function printPdf(urlPrintDoc){
+	$(function(){
+		$('#framePdf').attr('src',urlPrintDoc);
+		$('#framePdf').css({'height': '100%'});
+		$('.framePdf').css({'display': 'block','width': '90%', 'height': '80%', 'z-index':'2000'});
+    $("html, body").delay(100).animate({scrollTop: $('#framePdf').offset().top},200, function() {
+        $("#framePdf").focus();
+    });
+		$('#closePdf').on( "click", function() {
+			$('.framePdf').css({'display': 'none'});
+		});
+	});
+};
 </script>
-";
-if (isset($admin_aziend['lang'])){
-  $price_list_names = gaz_dbi_dyn_query('*', $gTables['company_data'], "ref = '" . $admin_aziend['lang'] . "_artico_pricelist'", "id_ref ASC");
-  if ($price_list_names->num_rows == 6){
-    $script_transl['listino_value']=array();
-    while ($list_name = gaz_dbi_fetch_array($price_list_names)){
-      $script_transl['listino_value'][]=$list_name["description"];
-    }
-  }
-}
+<?php
 echo "<form method=\"POST\" name=\"select\">\n";
 echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
 echo "<input type=\"hidden\" value=\"" . $form['ritorno'] . "\" name=\"ritorno\" />\n";
-$gForm = new magazzForm();
+?>
+  <div class="framePdf panel panel-success" style="display: none; position: absolute; left: 5%; top: 100px">
+    <div class="col-lg-12">
+      <div class="col-xs-11"><h4><?php echo $script_transl['print']; ?></h4></div>
+      <div class="col-xs-1"><h4><button type="button" id="closePdf"><i class="glyphicon glyphicon-remove"></i></button></h4></div>
+    </div>
+    <iframe id="framePdf"  style="height: 100%; width: 100%" src=""></iframe>
+  </div>
+<?php
 echo "<div align=\"center\" class=\"FacetFormHeaderFont\">" . $script_transl['title'];
 echo "</div>\n";
 echo "<table class=\"Tsmall\" align=\"center\">\n";
@@ -295,27 +341,24 @@ echo "<tr>\n";
 
 /*scelta ordine di stampa*/
 echo "\t<td class=\"FacetFieldCaptionTD\">" . $script_transl['ordineStampa'] . " </td><td class=\"FacetDataTD\" colspan=\"2\">\n1)&nbsp;";
-$gForm->variousSelect("ordine1", $script_transl['alternativeOrdineStampa'], $form['ordine1']);
+$gForm->variousSelect("ordine1", $script_transl['alternativeOrdineStampa'], $form['ordine1'],'',false,'refresh');
 echo "<br>2)&nbsp;";
-$gForm->variousSelect("ordine2", $script_transl['alternativeOrdineStampa'], $form['ordine2']);
+$gForm->variousSelect("ordine2", $script_transl['alternativeOrdineStampa'], $form['ordine2'],'',false,'refresh');
 echo "<br>3)&nbsp;";
-$gForm->variousSelect("ordine3", $script_transl['alternativeOrdineStampa'], $form['ordine3']);
+$gForm->variousSelect("ordine3", $script_transl['alternativeOrdineStampa'], $form['ordine3'],'',false,'refresh');
 echo "</td>\n";
 echo "</tr>\n";
-
-/*scelta se stampa compatta*/
 echo "<tr>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">" . $script_transl['tipoStampa'] . " </td><td class=\"FacetDataTD\" colspan=\"2\">\n";
-$gForm->variousSelect("tipoStampa", $script_transl['alternativeTipoStampa'], $form['tipoStampa']);
+$gForm->variousSelect("tipoStampa", $script_transl['alternativeTipoStampa'], $form['tipoStampa'],'',false,'refresh');
 echo "</td>\n";
 echo "</tr>\n";
-
-/** fine modifica FP */
+// bottoni operazioni esporta / stampa
+$form['art_fin'] = $form['art_fin'] == 0 ? $form['art_ini'] : $form['art_fin'] ;
+$ref = 'li='.$form['listino'].'&ai='.$form['art_ini'].'&af='.$form['art_fin'].'&ci='.$form['cm_ini'].'&cf='.$form['cm_fin'].'&ds='.date("dmY", $utsexe).'fo='.$form['id_anagra'].'&fn='.$form['search']['id_anagra'].'&o1='.$form['ordine1'].'&o2='.$form['ordine2'].'&o3='.$form['ordine3'].'&ts='.$form['tipoStampa'];
 echo "\t<tr class=\"FacetFieldCaptionTD\">\n";
 echo '<td align="right"><input class="btn btn-info" type="submit" name="export" value="Esporta XLS">';
-echo '<td align="center"><input class="btn btn-warning" type="submit" accesskey="i" name="print" value="';
-echo $script_transl['print'];
-echo '" tabindex="100" >';
+echo '<td align="center"><a class="btn btn-warning" title="Stampa con PDF" style="cursor:pointer;" onclick="printPdf(\'stampa_listin.php?'. $ref.'\')" \> <i class="fa fa-file-pdf-o"></i> '.$script_transl['print'].' <i class="glyphicon glyphicon-print" ></i></a>';
 echo "\t </td>\n";
 echo "\t </tr>\n";
 echo "</table>\n";

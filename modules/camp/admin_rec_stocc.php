@@ -75,7 +75,8 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
 			} else { // e' un'inserimento
 				gaz_dbi_table_insert('camp_recip_stocc',$form);
 			}
-			exit(header("Location: ".$_POST['ritorno']));
+			header("Location: " . $_POST['ritorno']);
+      exit();
 		}
 	}
 } elseif ((!isset($_POST['Update'])) and (isset($_GET['Update']))) { //se e' il primo accesso per UPDATE
