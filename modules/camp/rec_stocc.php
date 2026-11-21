@@ -296,14 +296,20 @@ $recordnav -> output();
 				<td align="center"><?php echo gaz_format_quantity($a_row['capacita'], 1, 3);?></td>
 				<td>
 					<?php
-					if ($content>0){
-						$lot=	$gSil -> getLotRecip($a_row['cod_silos']);
-						echo "Kg.",gaz_format_quantity($content,true)," l.",gaz_format_quantity($content/0.915,true)," Ultimo lotto: ",$lot[1];
-						if ($content > $a_row['capacita']){
+					if ($content > 0){
+						$lot = $gSil->getLotRecip($a_row['cod_silos']);
+						echo "Kg.", gaz_format_quantity($content, true), " l.", gaz_format_quantity($content/0.915, true), " Ultimo lotto: ", $lot[1];
+						if ($content > $a_row['capacita']) {
 							echo " ERRORE!";
 						}
+					} elseif ($content < 0) {
+						echo '<span class="text-danger"><b>⚠ ERRORE: </b>Kg. ' . gaz_format_quantity($content, true) . '</span>';
+					} else {
+						echo '--- vuoto ---';
 					}
+
 					echo ' <a class="btn btn-xs btn-default dialog_content" title="Movimenti nel contenitore" onclick="getMovContainer(\''.$a_row['cod_silos'].'\')" > <i class="glyphicon glyphicon-list"></i></a>';
+
 					?>
 					<div class="bar">
 						<img src="../../modules/camp/media/white_bar.jpg" alt="Barra silos" title="Contenuto silos" style="padding-left:<?php echo ((($content/$a_row['capacita'])*100)* 280 )/100;?>px;">

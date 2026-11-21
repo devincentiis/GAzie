@@ -114,14 +114,33 @@ ul li ul:empty {
 
 </style>
 <form method="POST" name="myform">
-<input type="hidden" name="hidden_req" value="<?= $form['hidden_req'] ?>" />
-    <h4>Come funziona la modifica del menù</h4>
-    <ul>
-      <li><b>Aggiunta voce:</b> ----------------</li>
-      <li><b>Modifica voce:</b> -------------.</li>
-      <li><b>Elimina voce:</b> -------------.</li>
-      <li><b>Ripristina default:</b> ---------------.</li>
-    </ul>
+
+<input type="hidden" name="hidden_req" id="hidden_req" value="<?= $form['hidden_req'] ?>" />
+  <h4><?= $script_transl['title'] ?></h4>
+  <ul>
+    <li><b><?= $script_transl['add_item'] ?></b> ----------------</li>
+    <li><b><?= $script_transl['upd_item'] ?></b> -------------.</li>
+    <li><b><?= $script_transl['del_item'] ?></b> -------------.</li>
+    <li><b><?= $script_transl['rst_item'] ?></b> ---------------.</li>
+  </ul>
+
+<div id="dialog_editmenu" title="Modifica Voce Menu" style="display:none;">
+  <p class="bg-info"><small>id_menu_module: <span id="dialog_id_menu_module"></span> - id_menu_script: <span id="dialog_id_menu_script"></span></small></p>
+  <input type="hidden" id="edit_id_script" name="id_menu_script">
+  <input type="hidden" id="edit_id_module" name="id_menu_module">
+  <div class="form-group">
+    <label for="edit_label">Label</label>
+    <input type="text" id="edit_label" name="label" class="form-control" placeholder="">
+  </div>
+  <div class="form-group">
+    <label for="edit_link">Link</label>
+    <input type="text" id="edit_link" name="link" class="form-control" placeholder="">
+  </div>
+  <div class="form-group">
+    <label for="edit_descri">Descrizione</label>
+    <input type="text" id="edit_descri" name="descri" class="form-control" placeholder="">
+  </div>
+</div>
 <div class="container-fluid">
     <div class="text-center"><b>
     <?php
@@ -153,7 +172,7 @@ ul li ul:empty {
           $id_script = $v1['db_menu'][$i]['id_menu_script'];
           //var_dump($v1['db_menu'][$i]);
           $name_script = substr($v1['db_menu'][$i]['url_script_basename'],0,-4);
-          $elem_li = '<li title="'.$v1['db_menu'][$i]['file_title'].' url: '.$v1['db_menu'][$i]['link'].'" id_menu_script='.$id_script.'  id_menu_module='.$v1['db_menu'][$i]['id_menu_module'].'><span class="item" script-connector="'.$k1.$name_script.'">'.$v1['db_menu'][$i]['file_label'].' </span> <a class="btn btn-xs btn-edit" href="" > <i class="glyphicon glyphicon-edit"></i></a>';
+          $elem_li = '<li title="'.$v1['db_menu'][$i]['file_title'].' url: '.$v1['db_menu'][$i]['link'].'" id_menu_script='.$id_script.'  id_menu_module='.$v1['db_menu'][$i]['id_menu_module'].'><span class="item" script-connector="'.$k1.$name_script.'">'.$v1['db_menu'][$i]['file_label'].' </span> <button type="button" class="btn btn-xs btn-edit"> <i class="glyphicon glyphicon-edit"></i></button>';
           if ( $id_script == 0 && $prev_id_script == 9999 ){
             // primo menu livello 2
             echo "<!-- INIZIO SPECCHIETTO ORDINABILE-->\n".'<ul id="sortbox-'.$k1.'" class="lista-modulo">'.$elem_li."<ul>\n";
@@ -303,6 +322,77 @@ $(function () {
       }
     });
   }
+
+  $("#dialog_editmenu").dialog({
+    autoOpen: false,
+    modal: true,
+    width: 400,
+    open: function(event, ui) {
+      var $btn = $(this).data("triggerBtn");
+      var $li = $btn.closest("li");
+
+      $li.children("span.item").addClass("evidenziato");
+
+      var idScript = $li.attr("id_menu_script");
+      var idModule = $li.attr("id_menu_module");
+
+      var label = $li.children("span.item").text().trim();
+      var titleAttr = $li.attr("title") || "";
+      var partiTitle = titleAttr.split(" url: ");
+      var descri = partiTitle[0] ? partiTitle[0].trim() : "";
+      var link = partiTitle[1] ? partiTitle[1].trim() : "";
+      $("span#dialog_id_menu_script").html(idScript);
+      $("span#dialog_id_menu_module").html(idModule);
+      $("#edit_id_script").val(idScript);
+      $("#edit_id_module").val(idModule);
+      $("#edit_label").val(label).attr("placeholder", label);
+      $("#edit_link").val(link).attr("placeholder", link);
+      $("#edit_descri").val(descri).attr("placeholder", descri);
+    },
+    close: function(event, ui) {
+      var $btn = $(this).data("triggerBtn");
+      if ($btn) {
+        $btn.closest("li").children("span.item").removeClass("evidenziato");
+      }
+    },
+    buttons: [
+      {
+        text: "Annulla/chiudi",
+        class: "btn btn-default",
+        click: function() {
+          $(this).dialog("close");
+        }
+      },
+      {
+        text: "Conferma",
+        class: "btn btn-warning",
+        click: function() {
+          var $dialog = $(this);
+          var data = {
+            lang_id: $('#lang_id').val(),
+            id_menu_script: $("#edit_id_script").val(),
+            id_menu_module: $("#edit_id_module").val(),
+            label: $("#edit_label").val(),
+            link: $("#edit_link").val(),
+            descri: $("#edit_descri").val()
+          };
+          console.log("Dati pronti per il salvataggio:", data);
+          /*
+          $.post("menu_ajax.php", data, function(risposta) {
+            $dialog.dialog("close");
+            window.location.reload();
+          });
+          */
+        }
+      }
+    ]
+  });
+
+  // Apertura dialog al click
+  $(document).on("click", ".btn-edit", function(e) {
+    e.preventDefault();
+    $("#dialog_editmenu").data("triggerBtn", $(this)).dialog("open");
+  });
 
 });
 </script>

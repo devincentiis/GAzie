@@ -27,15 +27,21 @@ try {
     foreach ($form_data['elem'] as $el) {
       gaz_dbi_put_row($gTables['menu_module'],'id',$el['id_menu_module'],'weight',$order);
       $order += 5;
-      //error_log(json_encode($el));
     }
   } else if ($form_data['mode'] === 'm3') { // qui non so cosa è stato spostato quindi devo riprendere tutto il menù e controllare se e cosa è cambiato paragonandolo al contenuto del db
     $menu_module_data = getMenuData(intval($form_data['lang']))[$form_data['modname']]['db_menu'];
     $moved = [];
     $i=0;
+    $prev_m2_empty = 0;
+    $ctrl_id_menu_script = -1;
     foreach ($menu_module_data as $k => $v) {
+      $prev_id_menu_module = 0;
+      if ($v['id_menu_script'] == 0 && $v['id_menu_script'] == $ctrl_id_menu_script) { //  se ho due m2 consecutivi vuol dire che il precedente era vuoto e me lo appunto in $moved, servirà sotto in salita per attribuirglielo
+        $prev_id_menu_module = $form_data['elem'][($k-1)]['id_menu_module'];
+      }
+      $ctrl_id_menu_script = $v['id_menu_script'];
       if ($form_data['elem'][$k]['id_menu_script'] != $v['id_menu_script'] ) { // riprendo solo la porzione della lista che è stata modificata
-        $moved[$i] = ['db'=>['weight'=>$v['weight'],'id_menu_script'=>$v['id_menu_script'],'id_menu_module'=>$v['id_menu_module']],'fr'=>$form_data['elem'][$k]];
+        $moved[$i] = ['db'=>['weight'=>$v['weight'],'id_menu_script'=>$v['id_menu_script'],'id_menu_module'=>$v['id_menu_module'],'prev_id_menu_module'=>$prev_id_menu_module ],'fr'=>$form_data['elem'][$k]];
         $i++;
       }
     }
@@ -43,24 +49,29 @@ try {
     $ultim=$moved[($i-1)];
     $m2_mod=[];
     $updw = 0;
-    if ( $primo['db']['id_menu_module'] != $primo['fr']['id_menu_module'] || $ultim['db']['id_menu_module'] != $ultim['fr']['id_menu_module'] ) {
-      //error_log( 'spostamento tra m2 id '.$primo['db']['id_menu_module'].' e '.$ultim['db']['id_menu_module']."\n");
+    if ( $primo['db']['id_menu_module'] != $primo['db']['prev_id_menu_module'] && $primo['db']['prev_id_menu_module'] > 0 ) {
+      $m2_mod=[$primo['db']['prev_id_menu_module'],$ultim['db']['id_menu_module']];
+    } else if ( $primo['db']['id_menu_module'] != $primo['fr']['id_menu_module'] || $ultim['db']['id_menu_module'] != $ultim['fr']['id_menu_module']) {
       $m2_mod=[$primo['db']['id_menu_module'],$ultim['db']['id_menu_module']];
     } else {
       $m2_mod=[$primo['db']['id_menu_module']];
     }
-    if ( $primo['db']['id_menu_script'] == $ultim['fr']['id_menu_script'] ) { // discesa, ovvero il primo elemento sul db me lo ritrovo sull'ultimo del form
+    if ( $primo['db']['id_menu_script'] == $ultim['fr']['id_menu_script'] && $primo['db']['id_menu_script'] > 0 ) { // discesa, ovvero il primo elemento sul db me lo ritrovo sull'ultimo del form
       $new_weight = $ultim['db']['weight']+1;
-      error_log( 'new_weight:'.$new_weight." discesa\n");
+      // error_log( 'new_weight:'.$new_weight." discesa\n");
       $updw = -1;
-    } else if ( $ultim['db']['id_menu_script'] == $primo['fr']['id_menu_script'] ) { // salita, ovvero il primo elemento sul form è quello che stava
+    } else if ( $ultim['db']['id_menu_script'] == $primo['fr']['id_menu_script'] && $ultim['db']['id_menu_script'] > 0 ) { // salita, ovvero il primo elemento sul form è quello che stava
       $new_weight = $primo['db']['weight']-1;
-      error_log ('new_weight:'.$new_weight." salita\n");
+      // error_log ('new_weight:'.$new_weight." salita\n");
       $updw = 1;
     } else {
-      // errore non può non essere stato spostato nulla
+      // error_log( "Errore: non può non essere stato spostato nulla! \n");
     }
 
+    // foreach($moved as $dbv){
+    //  error_log (json_encode($dbv)."\n");
+    // }
+    error_log (json_encode($m2_mod)."\n");
     // da questo momento in poi ho i dati per poter effettuare le modifiche alla/e tabella/e
     // gli intermedi tra il primo e l'ultimo dovranno fare solo degli shift tramite la colonna weight di menu_script, senza cambiare mai il riferimento a menu_module
     // il primo o l'ultimo dovrà subire una modifica a secondo che sia stato fatto un spostamento all'interno dello stesso id_menu_module oppure in un altro
@@ -83,7 +94,11 @@ try {
         $order += 5;
       }
     } else if (count($m2_mod) == 2) { // spostamento tra due m2 diversi
-      if ( $updw == 1 ) { // salita
+      if ( $updw == 1 ) { // SALITA devo controllare se sto spostando su un m2 vuoto, in questo caso dovrò cambiargli id_menu_module con quello contenuto dentro $primo['db']['prev_id_menu_module'] che è valorizzato > 0 e sostituire anche il valore dentro $m2_mod
+        if ( $primo['db']['prev_id_menu_module'] > 0 ) {
+          $primo['db']['id_menu_module'] = $primo['db']['prev_id_menu_module']; // cambio con quello reale
+          $primo['db']['weight'] = 6; // diventerà 5, il primo
+        }
         gaz_dbi_put_row($gTables['menu_script'],'id',$primo['fr']['id_menu_script'],'weight',($primo['db']['weight']-1));
         gaz_dbi_put_row($gTables['menu_script'],'id',$primo['fr']['id_menu_script'],'id_menu',($primo['db']['id_menu_module']));
       } else if ( $updw == -1 ){ // DISCESA prendo l'ultimo elemento del form e gli do il weight dell'ultimo elemento del db +1

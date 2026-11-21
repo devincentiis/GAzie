@@ -112,7 +112,18 @@ $strScript = array("admin.php" =>
         'label_new_psw' => "Nueva contrase&ntilde;a",
         'new_psw' => "Introduzca nueva contraseña",
         'student'=>'Si usted es un estudiante puede iniciar sesión desde aquí'
-        ));
+    ),
+    "set_config_data.php" =>
+    array("title" => "Main GAzie config"
+    ),
+    "menu_manage.php" =>
+    array("title" => "Menu customization",
+      'add_item'=>"Add item",
+      'upd_item'=>"Update item",
+      'del_item'=>"delete item",
+      'rst_item'=>"Restore default"
+    )
+  );
 $errors = array(
     'access_module' => 'Non hai il diritto di accedere al modulo',
     'access_script' => 'Non hai il diritto di accedere alla funzione richiesta'

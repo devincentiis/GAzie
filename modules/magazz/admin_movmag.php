@@ -195,7 +195,17 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
 	$form['artico'] = $_POST['artico'];
 	$form['lot_or_serial']=$_POST['lot_or_serial'];
 	$form['SIAN']=$_POST['SIAN'];
-  $form['tesdoc']=$_POST['tesdoc'];
+	$form['tesdoc']=$_POST['tesdoc'];
+	if (!empty($_POST['tesdoc'])) {// se c'è documento di riferimento, sovrascrivo la data impostata nel caso fosse diversa
+		$id_tes = intval($_POST['tesdoc']);
+		$testata = gaz_dbi_get_row($gTables['tesdoc'], 'id_tes', $id_tes);
+		if ($testata && !empty($testata['datemi'])) {
+			// datemi è nel formato AAAA-MM-GG
+			$form['anndoc'] = substr($testata['datemi'], 0, 4);
+			$form['mesdoc'] = substr($testata['datemi'], 5, 2);
+			$form['giodoc'] = substr($testata['datemi'], 8, 2);
+		}
+	}
 	$form['cod_operazione'] = $_POST['cod_operazione'];
 	$form['recip_stocc'] = $_POST['recip_stocc'];
 	$form['recip_stocc_destin'] = $_POST['recip_stocc_destin'];
@@ -417,6 +427,20 @@ if (!isset($_POST['Update']) && isset($_GET['Update'])) { //se e' il primo acces
         $content = $sil -> getCont($form['recip_stocc'],$form['artico'],$prev_idmov);
         if ($content < $form['quanti']){ // se non c'è sufficiente olio nel silos selezionato
           $msg .="32+";
+        }
+      }
+      if ($form['operat']==1 && !empty($form['recip_stocc_destin'])){
+        $content = $sil -> getCont($form['recip_stocc_destin'],$form['artico'],$prev_idmov);
+        $capacita = gaz_dbi_get_row($gTables['camp_recip_stocc'], "cod_silos", $form['recip_stocc_destin'])['capacita'];
+        if (($content + $form['quanti'])>$capacita){ // se non c'è sufficiente olio nel silos selezionato per destinazione
+          $msg .="38+";
+        }
+      }
+      if ($form['operat']==1 && !empty($form['recip_stocc'])){
+        $content = $sil -> getCont($form['recip_stocc'],$form['artico'],$prev_idmov);
+        $capacita = gaz_dbi_get_row($gTables['camp_recip_stocc'], "cod_silos", $form['recip_stocc'])['capacita'];
+        if (($content + $form['quanti'])>$capacita){ // se non c'è sufficiente olio nel silos selezionato per destinazione
+          $msg .="39+";
         }
       }
       if($form['cod_operazione']==3 && (intval($form['tesdoc'])==0 || intval($form['clfoco'])==0)){
@@ -992,7 +1016,18 @@ if ($form['SIAN']>0 && $form['operat']<>0){
              <div class="row">
 							<label for="tesdoc" class="col-sm-6 control-label"><?php echo "Doc. giustificativo"; ?></label>
               <?php
-              $gForm->selectFromDB('tesdoc', 'tesdoc' ,'id_tes', $form['tesdoc'], 'datemi', 1, ' - doc. n. ','numdoc','TRUE','col-sm-6' , null, '', "clfoco='".$form['clfoco']."'", FALSE, " del ", "datemi", "DESC" );
+				$where = "clfoco='" . $form['clfoco'] . "'";
+				if (!empty($form['mesdoc']) && !empty($form['anndoc'])) {
+					// primo giorno del mese precedente a quello di riferimento
+					$dataDa = date('Y-m-d', mktime(0, 0, 0, (int)$form['mesdoc'] - 1, 1, (int)$form['anndoc']));
+					$where .= " AND datemi >= '" . $dataDa . "'";
+				}
+				// solo documenti con causale di magazzino con operat = 1
+				$where .= " AND caumag IN (SELECT codice FROM `" . $gTables['caumag'] . "` WHERE operat = 1)";
+
+				$gForm->selectFromDB('tesdoc', 'tesdoc', 'id_tes', $form['tesdoc'], 'datemi', 1, ' - doc. n. ', 'numdoc', 'TRUE', 'col-sm-6', null, '',
+					$where,
+					FALSE, " del ", "datemi", "DESC");
               ?>
               </div>
               <?php

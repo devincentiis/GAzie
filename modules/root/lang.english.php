@@ -108,12 +108,23 @@ $strScript = array("admin.php" =>
         'label_new_psw' => "New Password",
         'new_psw' => "Enter New Password",
         'student'=>'If you are a student you can log from here'
-        ));
-$errors = array(
+    ),
+    "set_config_data.php" =>
+    array("title" => "Main GAzie config"
+    ),
+    "menu_manage.php" =>
+    array("title" => "Menu customization",
+      'add_item'=>"Add item",
+      'upd_item'=>"Update item",
+      'del_item'=>"delete item",
+      'rst_item'=>"Restore default"
+    )
+  );
+  $errors = array(
     'access_module' => 'Non hai il diritto di accedere al modulo',
     'access_script' => 'Non hai il diritto di accedere alla funzione richiesta'
-);
-if (!defined("MESSAGE_WELCOME")) {
+  );
+  if (!defined("MESSAGE_WELCOME")) {
 // GAzie
     define("MESSAGE_WELCOME", "Benvenuto su: <b>GAzie a scuola</b>");
     define("MESSAGE_WELCOME_ADMIN", "Benvenuto su: <b>GAzie</b>");
