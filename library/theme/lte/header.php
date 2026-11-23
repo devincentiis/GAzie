@@ -101,7 +101,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
     <link rel="stylesheet" href="../../<?php echo(STATIC_VERSION);?>library/theme/lte/adminlte/dist/css/AdminLTE.css">
 
     <link href="../../<?php echo(STATIC_VERSION);?>js/jquery.ui/jquery-ui.css" rel="stylesheet">
-		<script src="../../js/jquery/jquery-3.7.1.min.js"></script>
+		<script src="../../js/jquery/jquery-3.8.0.min.js"></script>
     <?php
     if (!empty($admin_aziend['style']) && file_exists("../../library/theme/lte/scheletons/" . $admin_aziend['style'])) {
         $style = $admin_aziend['style'];

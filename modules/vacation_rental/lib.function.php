@@ -60,7 +60,7 @@ function user_has_app($user_id)
 
     // Se abbiamo già verificato che le tabelle NON esistono, esci subito (0 microsecondi)
     if ($tables_exist === false) {
-        return 0;
+        return null;
     }
 
     // Se è la prima volta che eseguiamo la funzione, controlliamo se la tabella principale esiste
@@ -68,7 +68,7 @@ function user_has_app($user_id)
         $check = mysqli_query($link, "SHOW TABLES LIKE 'gaz_android_messages'");
         if (!$check || mysqli_num_rows($check) === 0) {
             $tables_exist = false; // La tabella non esiste, ce lo ricordiamo per i prossimi cicli
-            return 0;
+            return null;
         }
         $tables_exist = true; // Le tabelle esistono, possiamo procedere liberamente
     }
@@ -2170,6 +2170,109 @@ function banIp($ip, $durationMinutes = 60) {
         file_put_contents($file, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
     chmod($file, 0666); // Mantiene permessi corretti
+}
+
+function checkIPattempts($ip, $maxAttempts = 4, $windowSeconds = 60, $banMinutes = 1) {// controllo e blocco tentativi per IP
+
+    // Verifico che l'indirizzo IP sia valido
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        return false;
+    }
+
+    // Se l'IP è già bannato, interrompo
+    if (isIpBanned($ip)) {
+        return true;
+    }
+
+    $maxAttempts = max(1, (int)$maxAttempts);
+    $windowSeconds = max(1, (int)$windowSeconds);
+    $banMinutes = max(1, (int)$banMinutes);
+
+    // Secondo ban e successivi: 30 giorni
+    $repeatBanMinutes = 30 * 24 * 60;
+
+    // File contenente lo storico degli IP
+    $file = __DIR__ . '/ip_attempts.json';
+
+    // Identificativo dell'IP
+    $ipKey = hash('sha256', $ip);
+
+    $now = time();
+
+    // Apro il file con blocco esclusivo
+    $fp = @fopen($file, 'c+');
+
+    if (!$fp) {
+        error_log('Impossibile aprire ip_attempts.json');
+        return false;
+    }
+
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        error_log('Impossibile bloccare ip_attempts.json');
+        return false;
+    }
+
+    // Leggo lo storico
+    $content = stream_get_contents($fp);
+    $history = [];
+
+    if (trim($content) !== '') {
+        $history = json_decode($content, true);
+        if (!is_array($history)) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+            error_log('Formato non valido in ip_attempts.json');
+            return false;
+        }
+    }
+
+    // Recupero i dati precedenti dell'IP
+    $ipData = $history[$ipKey] ?? [
+        'strikes' => 0,
+        'attempts' => []
+    ];
+
+    // Rimuovo i tentativi fuori dalla finestra temporale
+    $attempts = array_filter(
+        $ipData['attempts'],
+        function ($timestamp) use ($now, $windowSeconds) {
+            return (int)$timestamp >= ($now - $windowSeconds);
+        }
+    );
+
+    // Registro il tentativo corrente
+    $attempts[] = $now;
+    $ipData['attempts'] = array_values($attempts);
+    $blocked = false;
+
+    // Superata la soglia dei tentativi
+    if (count($ipData['attempts']) > $maxAttempts) {
+        // Incremento il numero di blocchi precedenti
+        $ipData['strikes'] = (int)$ipData['strikes'] + 1;
+        // Primo ban: durata standard
+        // Dal secondo ban: 30 giorni
+        $duration = ($ipData['strikes'] === 1)
+            ? $banMinutes
+            : $repeatBanMinutes;
+
+        // Azzero il contatore della finestra
+        $ipData['attempts'] = [];
+        // Blocco l'IP
+        banIp($ip, $duration);
+        $blocked = true;
+    }
+
+    // Salvo lo storico aggiornato
+    $history[$ipKey] = $ipData;
+
+    rewind($fp);
+    ftruncate($fp, 0);
+	fwrite($fp, json_encode($history, JSON_PRETTY_PRINT)); 
+	fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return $blocked;
 }
 
 

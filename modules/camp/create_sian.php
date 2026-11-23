@@ -7,7 +7,7 @@
 	  <https://gazie.sourceforge.net>
 	  --------------------------------------------------------------------------
 	  REGISTRO DI CAMPAGNA è un modulo creato per GAzie da Antonio Germani, Massignano AP
-	  Copyright (C) 2018-2023 - Antonio Germani, Massignano (AP)
+	  Copyright (C) 2018-present - Antonio Germani, Massignano (AP)
 	  https://www.lacasettabio.it
 	  https://www.programmisitiweb.lacasettabio.it
 	  --------------------------------------------------------------------------
@@ -209,6 +209,23 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 						}
 						$datdoc=""; // i tipi operazione L non vogliono la data del documento giustificativo
 						$row['confezione']=""; // il campo capacità confezione, pur essendo previsto fra i campi facoltativi, viene rifiutato nei tipi operazione L
+						if ($row['cod_operazione'] === 'O0') {// Codice operazione SIAN: classificazione							
+							$type_array[6] = str_pad("O0", 10);
+							// Categoria iniziale: olio in attesa di classificazione
+							$row['categoria'] = 3;
+							// Categoria finale: quella dell'articolo prodotto
+							$type_array[15] = sprintf("%02d", $row5['categoria']);
+							// Quantità di olio sfuso caricata
+							$type_array[22] = sprintf(
+								"%013d",
+								str_replace(".", "", number_format($row['quanti'], 3))
+							);
+							// Quantità totale di olio sfuso scaricata dai componenti
+							$type_array[23] = $row4['quanti'];
+							// O0 non prevede documento giustificativo
+							$row['numdoc'] = "";
+							$datdoc = "";
+						}
 						if ($row['cod_operazione']==1){// Confezionamento con etichettatura
 							$row['numdoc']="";
 							$type_array[6]=str_pad("L", 10); // codice operazione
@@ -467,6 +484,213 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 		}
 	}
 	fclose($myfile);
+	
+
+    // ==========================================================
+    // NORMALIZZAZIONE FILE SIAN
+    // Raggruppamento per data e progressivo univoco
+    // ==========================================================
+
+    $sianDirNorm = DATA_DIR . "files/" . $admin_aziend['codice'] . "/sian/";
+    $sianPathNorm = $sianDirNorm . $namefile;
+
+    // Leggo il file appena generato
+    $righeNuovoFile = @file(
+        $sianPathNorm,
+        FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+    );
+
+    if ($righeNuovoFile === false) {
+        die("Errore: impossibile rileggere il file SIAN generato.");
+    }
+
+    $cuaaNorm = strtoupper(trim($admin_aziend['codfis']));
+    $idStabNorm = sprintf("%010d", $id_sian['val']);
+
+    // Identifico i file storici di questa azienda
+    $patternStorico = '/^' . preg_quote($cuaaNorm, '/') .
+                      '_[0-9]{8}_[0-9]{5}_OPERREGI\.txt$/i';
+
+    // Progressivo massimo già utilizzato per ogni data
+    $maxStoricoPerData = array();
+
+    $elencoStorico = @scandir($sianDirNorm);
+
+    if ($elencoStorico === false) {
+        die("Errore: impossibile leggere la cartella dei file SIAN.");
+    }
+
+    // Leggo tutti i precedenti file, inclusi quelli di cancellazione
+    foreach ($elencoStorico as $fileStorico) {
+
+        // Escludo il file appena generato
+        if (
+            $fileStorico == "." ||
+            $fileStorico == ".." ||
+            $fileStorico == $namefile ||
+            !preg_match($patternStorico, $fileStorico)
+        ) {
+            continue;
+        }
+
+        $righeStoriche = @file(
+            $sianDirNorm . $fileStorico,
+            FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+        );
+
+        if ($righeStoriche === false) {
+            die("Errore nella lettura del file storico: " . $fileStorico);
+        }
+
+        foreach ($righeStoriche as $rigaStorica) {
+
+            $campiStorici = explode(";", rtrim($rigaStorica, "\r\n"));
+
+            // Ogni record deve avere 49 campi e il separatore finale
+            if (
+                count($campiStorici) != 50 ||
+                trim($campiStorici[49]) !== ''
+            ) {
+                die("Formato non valido nel file storico: " . $fileStorico);
+            }
+
+            // Considero soltanto la stessa azienda e lo stesso stabilimento
+            if (
+                strtoupper(trim($campiStorici[0])) !== $cuaaNorm ||
+                trim($campiStorici[1]) !== $idStabNorm
+            ) {
+                continue;
+            }
+
+            $dataStorica = trim($campiStorici[3]);
+            $numeroStorico = trim($campiStorici[2]);
+            $tipoStorico = trim($campiStorici[48]);
+
+            if (
+                preg_match('/^[0-9]{8}$/', $dataStorica) !== 1 ||
+                preg_match('/^[0-9]+$/', $numeroStorico) !== 1 ||
+                ($tipoStorico !== 'I' && $tipoStorico !== 'C')
+            ) {
+                die("Record non valido nel file storico: " . $fileStorico);
+            }
+
+            $numeroStorico = (int)$numeroStorico;
+
+            // Tengo il massimo progressivo della data
+            if (
+                !isset($maxStoricoPerData[$dataStorica]) ||
+                $numeroStorico > $maxStoricoPerData[$dataStorica]
+            ) {
+                $maxStoricoPerData[$dataStorica] = $numeroStorico;
+            }
+        }
+    }
+
+    // ==========================================================
+    // RAGGRUPPAMENTO DEI NUOVI MOVIMENTI PER DATA
+    // ==========================================================
+
+    $gruppi = array();
+
+    foreach ($righeNuovoFile as $rigaNuova) {
+
+        $campiNuovi = explode(";", rtrim($rigaNuova, "\r\n"));
+
+        if (
+            count($campiNuovi) != 50 ||
+            trim($campiNuovi[49]) !== ''
+        ) {
+            die("Formato non valido nel nuovo file SIAN.");
+        }
+
+        $dataNuova = trim($campiNuovi[3]);
+        $tipoNuovo = trim($campiNuovi[48]);
+
+        // Il normalizzatore deve lavorare soltanto su inserimenti
+        if (
+            preg_match('/^[0-9]{8}$/', $dataNuova) !== 1 ||
+            $tipoNuovo !== 'I'
+        ) {
+            die("Normalizzazione interrotta: trovato un record non valido o di cancellazione.");
+        }
+
+        // Chiave prefissata per evitare conversioni automatiche PHP
+        $chiave = 'D' . $dataNuova;
+
+        if (!isset($gruppi[$chiave])) {
+            $gruppi[$chiave] = array(
+                'data' => $dataNuova,
+                'righe' => array()
+            );
+        }
+
+        // Mantengo l'ordine originario dei movimenti della stessa data
+        $gruppi[$chiave]['righe'][] = $campiNuovi;
+    }
+	
+	// Ordino i gruppi per data crescente (dal più vecchio al più recente)
+	// La data DDMMYYYY viene trasformata in YYYYMMDD per il confronto
+
+	uasort($gruppi, function ($a, $b) {
+
+		$dataA = substr($a['data'], 4, 4) .
+				 substr($a['data'], 2, 2) .
+				 substr($a['data'], 0, 2);
+
+		$dataB = substr($b['data'], 4, 4) .
+				 substr($b['data'], 2, 2) .
+				 substr($b['data'], 0, 2);
+
+		return strcmp($dataA, $dataB);
+	});
+
+    // ==========================================================
+    // RINUMERAZIONE E RICOSTRUZIONE DEL FILE
+    // ==========================================================
+
+    $contenutoNormalizzato = "";
+
+    foreach ($gruppi as $gruppo) {
+
+        $data = $gruppo['data'];
+
+        // Parto dal massimo progressivo già utilizzato
+        // Se non esiste uno storico, parto da zero
+        $nprogNormalizzato = isset($maxStoricoPerData[$data])
+            ? $maxStoricoPerData[$data]
+            : 0;
+
+        foreach ($gruppo['righe'] as $campi) {
+
+            $nprogNormalizzato++;
+
+            // Campo 3: numero operazione SIAN
+            $campi[2] = sprintf("%010d", $nprogNormalizzato);
+
+            // Ricostruisco il record mantenendo tutti i campi originali
+            $contenutoNormalizzato .= implode(";", $campi) . "\r\n";
+        }
+    }
+
+    // Riscrivo il file definitivo
+    $byteScritti = @file_put_contents(
+        $sianPathNorm,
+        $contenutoNormalizzato,
+        LOCK_EX
+    );
+
+    if (
+        $byteScritti === false ||
+        $byteScritti !== strlen($contenutoNormalizzato)
+    ) {
+        die("Errore: impossibile salvare il file SIAN normalizzato.");
+    }
+
+    // ==========================================================
+    // FINE NORMALIZZAZIONE
+    // ==========================================================
+
+	
 	?>
 	<!-- E necessario evitare che se si ricarica la pagina si rigeneri un nuovo file  -->
 	<form name="myform" method="POST" enctype="multipart/form-data">

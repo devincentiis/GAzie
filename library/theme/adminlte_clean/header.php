@@ -66,7 +66,7 @@ $userName = trim($admin_aziend['user_firstname'] . ' ' . $admin_aziend['user_las
     </style>
     <link rel="stylesheet" href="../../library/theme/adminlte_clean/skins/<?php echo htmlspecialchars($skinFile); ?>">
     <link rel="stylesheet" href="../../js/jquery.ui/jquery-ui.css">
-    <script src="../../js/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../js/jquery/jquery-3.8.0.min.js"></script>
     <script src="../../js/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body class="hold-transition sidebar-mini<?php echo (isset($scriptname) && strpos($scriptname, 'report') !== false) ? ' gz-report' : ''; ?>">

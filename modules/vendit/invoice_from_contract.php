@@ -51,8 +51,11 @@ function lastDocNumber($year, $type = 'FAI', $vat_section = 1) {
     return $rtn;
 }
 
+// quanti mesi prima della fine del periodo già coperto si può emettere la fattura del periodo successivo
+$anticipo_mesi = 1;
+
 function getBillableContracts($date_ref = false, $vat_section = 1, $customer = 0) {
-    global $gTables;
+    global $gTables, $anticipo_mesi;
     if ($date_ref == false) {
         $date_ref = date('Y-m-d');
     }
@@ -64,7 +67,7 @@ function getBillableContracts($date_ref = false, $vat_section = 1, $customer = 0
     $billable=[];
     // modifica da Claudio Domiziani 29.09.2017
     $field = $gTables['contract'] . ".*,
-                DATE_FORMAT('" . $date_ref . "','%Y')*12 + DATE_FORMAT('" . $date_ref . "','%m') AS this_month,
+                DATE_FORMAT(DATE_ADD('" . $date_ref . "', INTERVAL " . $anticipo_mesi . " MONTH),'%Y')*12 + DATE_FORMAT(DATE_ADD('" . $date_ref . "', INTERVAL " . $anticipo_mesi . " MONTH),'%m') AS this_month,
                 YEAR(MAX(" . $gTables['tesdoc'] . ".data_ordine))*12 + MONTH(MAX(" . $gTables['tesdoc'] . ".data_ordine)) AS covered_month,
                 YEAR(" . $gTables['contract'] . ".start_date)*12 + MONTH(" . $gTables['contract'] . ".start_date) AS start_month,
                 (" . $gTables['contract'] . ".months_duration - PERIOD_DIFF(DATE_FORMAT('" . $date_ref . "','%Y%m'),
@@ -89,6 +92,12 @@ function getBillableContracts($date_ref = false, $vat_section = 1, $customer = 0
     // FINE MODIFICHE
     $result = gaz_dbi_dyn_query($field, $from, $where, $orderby);
     while ($row = gaz_dbi_fetch_array($result)) {
+        // il campo "Ultimo mese pagato" del contratto, se impostato, ha la precedenza sulle fatture già emesse
+        if (!empty($row['covered_ym'])) {
+            list($cy, $cm) = explode('-', $row['covered_ym']);
+            $row['covered_month'] = intval($cy) * 12 + intval($cm);
+            $row['do'] = $row['covered_ym'] . '-01';
+        }
         $billable[$row['id_contract']] = $row;
     }
     return $billable;
@@ -130,6 +139,9 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
         require("lang." . $admin_aziend['lang'] . ".php");
         foreach ($billable as $k => $val) {
             if (isset($_POST['check_' . $k])) { // se è stato selezionato il contratto da fatturare
+                // se non ci sono periodi da fatturare (già coperti fino al mese corrente) il contratto va saltato
+                $periodi_da_fatturare = ceil(($val['this_month'] - (empty($val['covered_month']) ? $val['start_month'] : $val['covered_month'])) / $val['periodicity']);
+                if ($periodi_da_fatturare <= 0) continue;
                 $last = lastDocNumber($form['this_date_Y'], $val['doc_type'], $form['vat_section']);
                 if ($first_protoc == 0) {
                     $first_protoc = $last['protoc'];
@@ -172,12 +184,14 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
                 if (empty($val['covered_month'])) { //first time
                   $y = floor($val['start_month'] / 12);
                   $m = $val['start_month'] - $y * 12 ;
-                  $fee = $cntr['current_fee'] * ceil(($val['this_month'] - $val['start_month']) / $val['periodicity']);
+                  $n_per = ceil(($val['this_month'] - $val['start_month']) / $val['periodicity']);
+                  $fee = $cntr['current_fee'] * $n_per;
                   $val['covered_month'] = $val['start_month'];
                 } else {
                   $y = floor($val['covered_month'] / 12);
                   $m = $val['covered_month'] - $y * 12 + 1;
-                  $fee = $cntr['current_fee'] * ceil(($val['this_month'] - $val['covered_month']) / $val['periodicity']);
+                  $n_per = ceil(($val['this_month'] - $val['covered_month']) / $val['periodicity']);
+                  $fee = $cntr['current_fee'] * $n_per;
                 }
                 $uts_first = mktime(12,0,0,$m,1,$y);
                 // se fatturo un arretrato allora non mi baso sulla periodicità
@@ -201,11 +215,15 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
                 );
                 tesdocInsert($head_data);
                 $tesdoc_id = gaz_dbi_last_id();
+                // aggiorno "Ultimo mese pagato" del contratto con l'ultimo mese coperto da questa fattura
+                gaz_dbi_put_row($gTables['contract'], 'id_contract', $k, 'covered_ym', date('Y-m', $uts_last));
                 //inserisco i primi 2 righi (sempre)
                 $uts_conclusion = mktime(12,0,0,substr($cntr['conclusion_date'],5,2),substr($cntr['conclusion_date'],8,2),substr($cntr['conclusion_date'],0,4));
                 $gazTimeFormatter->setPattern('dd MMMM yyyy');
                 $conclusion_date = $gazTimeFormatter->format(new DateTime('@'.$uts_conclusion));
-                $rows_data = ['id_tes' => $tesdoc_id, 'tiprig' => 2, 'descri' => $strScript['invoice_from_contract.php']['ref'].$conclusion_date];
+                // se nel contratto è compilata la descrizione in fattura la uso, altrimenti il testo standard
+                $descri_contratto = trim($cntr['invoice_descri']);
+                $rows_data = ['id_tes' => $tesdoc_id, 'tiprig' => 2, 'descri' => ($descri_contratto != '') ? $descri_contratto : $strScript['invoice_from_contract.php']['ref'].$conclusion_date];
                 // se ho chiesto l'inserimento del testo del contratto cambio la descrizione
                 if ($val['status']=='ASTEXT') {
                   $botxt = gaz_dbi_get_row($gTables['body_text'], 'id_body', $val['id_body_text']);
@@ -233,6 +251,8 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
                 // e se ci sono altri addebiti
                 $rs_rows = gaz_dbi_dyn_query("*", $gTables['contract_row'], "id_contract = " . $val['id_contract'], "id_row ASC");
                 while ($row = gaz_dbi_fetch_array($rs_rows)) {
+                  // le righe già fatturate una tantum non vanno più riportate
+                  if ($row['status'] == 'fatturata') continue;
                   $vat_per = gaz_dbi_get_row($gTables['aliiva'], 'codice', $row['vat_code']);
                   // il tipo rigo in base ai valori di unimis,quanti e price
                   $tiprig = 0;
@@ -245,7 +265,8 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
                     'tiprig' => $tiprig,
                     'descri' => $row['descri'].' ',
                     'unimis' => $row['unimis'],
-                    'quanti' => $row['quanti'],
+                    // la riga ricorrente viene moltiplicata per i periodi da fatturare, come il canone; la una tantum no
+                    'quanti' => ($row['status'] == 'unatantum') ? $row['quanti'] : $row['quanti'] * $n_per,
                     'prelis' => $row['price'],
                     'sconto' => $row['discount'],
                     'codvat' => $row['vat_code'],
@@ -258,6 +279,10 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
                     }
                   }
                   rigdocInsert($rows_data);
+                  // una tantum: dopo la fattura la riga è chiusa e non verrà più riportata
+                  if ($row['status'] == 'unatantum') {
+                    gaz_dbi_put_row($gTables['contract_row'], 'id_row', $row['id_row'], 'status', 'fatturata');
+                  }
                 }
             }
         }
@@ -268,7 +293,7 @@ if (!isset($_POST['vat_section'])) { // al primo accesso
             $doc_type = 4;
         }
         $gazTimeFormatter->setPattern('yyyyMMdd');
-        $locazione = "Location: select_docforprint.php?tipdoc=" . $doc_type . "&seziva=" . $form['vat_section'] .
+        $locazione = "Location: select_docforprint.php?from=contratti&tipdoc=" . $doc_type . "&seziva=" . $form['vat_section'] .
                 "&proini=" . $first_protoc . "&profin=" . $last_protoc .
                 "&numini=" . $first_numdoc . "&numfin=" . $last_numdoc .
                 "&datini=" . $gazTimeFormatter->format(new DateTime('@'.$uts_this_month)) . "&datfin=" . $gazTimeFormatter->format(new DateTime('@'.$uts_this_month));
@@ -290,7 +315,10 @@ foreach ($billable as $k => $val) {
   $form['rows'][$val['id_contract']]['start_date'] = $val['start_date'];
   $form['rows'][$val['id_contract']]['covered_month'] = $val['covered_month'];
   $form['rows'][$val['id_contract']]['ragsoc'] = $val['ragsoc'];
-  $form['rows'][$val['id_contract']]['current_fee'] = $val['current_fee'];
+  // a video: canone + righe ricorrenti del contratto (solo riferimento, la fattura usa canone e righe separatamente)
+  $rs_ric = gaz_dbi_dyn_query("SUM(quanti * price) AS tot_ric", $gTables['contract_row'], "id_contract = ".intval($val['id_contract'])." AND status <> 'unatantum' AND status <> 'fatturata'");
+  $ric = gaz_dbi_fetch_array($rs_ric);
+  $form['rows'][$val['id_contract']]['current_fee'] = $val['current_fee'] + floatval($ric['tot_ric']);
   $form['rows'][$val['id_contract']]['periodicity'] = $val['periodicity'];
   $form['rows'][$val['id_contract']]['do'] = $val['do'];
   $form['rows'][$val['id_contract']]['df'] = $val['df'];
@@ -306,7 +334,7 @@ foreach ($billable as $k => $val) {
       $form['rows'][$val['id_contract']]['check_' . $k] = 'checked';
   } else {
     $form['rows'][$val['id_contract']]['n_bill']='nessuno';
-    $form['rows'][$val['id_contract']]['check_' . $k] = '';
+    $form['rows'][$val['id_contract']]['check_' . $k] = 'disabled'; // nessun periodo da fatturare
   }
   //rilevazione errori
   $form['rows'][$val['id_contract']]['error'] = '';

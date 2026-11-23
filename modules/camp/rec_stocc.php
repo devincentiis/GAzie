@@ -172,56 +172,89 @@ function ContentSil(silos) {
 };
 
 function getMovContainer(cod_silos) {
-	$("#idsilos").append("Contenitore: "+cod_silos);
-  $("#dialog_movcontainer").attr("title","Movimenti del contenitore");
-	$.post("ajax_request.php",
-		{term: cod_silos, opt: 'movcontainer'},
-		function (data) {
-			var j=0;
-				$.each(data, function(i, value) {
-				j++;
+  $("#idsilos").text("Contenitore: " + cod_silos);
+  $("table.list_movcontainer").empty();
+
+  $.post(
+    "ajax_request.php",
+    { term: cod_silos, opt: "movcontainer" },
+    function (data) {
+      var j = 0;
+
+      $.each(data, function (i, value) {
+        j++;
 
         var pro = parseFloat(value.pro);
-        if (pro > 0.000001) {
-          clpro = 'bg-success';
+        var capacita = parseFloat(value.capacita);
+        var clpro = "bg-danger";
+
+        if (!isNaN(capacita) && capacita > 0 && pro > capacita + 0.000001) {
+          clpro = "bg-danger";
+          value.pro = "⚠ " + pro + " (capacità max: " + capacita + ")";
+        } else if (pro > 0.000001) {
+          clpro = "bg-success";
         } else if (pro < 0) {
-          clpro = 'bg-danger';
-          value.pro = '⚠ ' + pro; // mostra il valore negativo
-          // qui puoi aggiungere anche un allarme visivo
+          clpro = "bg-danger";
+          value.pro = "⚠ " + pro;
         } else {
-          clpro = 'bg-danger';
-          value.pro = '--- vuoto ---'; // zero reale
+          clpro = "bg-danger";
+          value.pro = "--- vuoto ---";
         }
 
-				$("table.list_movcontainer").append("<tr><td> <button onclick='location.href=\"../magazz/admin_movmag.php?Update&id_mov="+value.id+"\"' target='_blank' type='button'>"+value.id+" </button></td><td class='bg-warning'>&nbsp;"+ value.cod + " </td><td>&nbsp; "+value.datdoc+":"+value.des+value.id_lot+"&nbsp; </td><td class='bg-info'> "+value.val+ "</td><td> &nbsp;" +value.um+ "&nbsp; </td><td class='text-right "+ clpro +"'> "+value.pro+" </td></tr>");
-				});
-				if (j==0){
-					$(".list_movcontainer").append('<tr><td class="bg-danger">********* Contenitore non movimentato *********</td></tr>');
-				}
-		}, "json"
-	);
-	$( function() {
-    var dialog,
-    dialog = $("#dialog_movcontainer").dialog({
-      position: { my: "center-200 top", at: "center top+80"},
-      modal: true,
-      show: "blind",
-      hide: "explode",
-      width: "auto",
-      buttons: {
-        Chiudi: function() {
-          $(this).dialog('close');
+        var idOrd = parseInt(value.id_orderman, 10) || 0;
+        var pulsanti = "";
+
+        if (idOrd > 0) {
+          pulsanti =
+            '<button type="button" disabled>' + value.id + "</button> " +
+            '<button type="button" onclick="window.open(\'../orderman/admin_orderman.php?Update&codice=' + idOrd + '\', \'_blank\')">Produzione ' + idOrd + "</button>";
+        } else {
+          pulsanti =
+            '<button type="button" onclick="window.open(\'../magazz/admin_movmag.php?Update&id_mov=' + value.id + '\', \'_blank\')">' + value.id + "</button>";
         }
-      },
-      close: function(){
-          $("p#idsilos").empty();
-          $("table.list_movcontainer tr").remove();
-          $(this).dialog('destroy');
+
+        $("table.list_movcontainer").append(
+          "<tr>" +
+            "<td>" + pulsanti + "</td>" +
+            "<td class='bg-warning'>&nbsp;" + value.cod + "</td>" +
+            "<td>&nbsp;" + value.datdoc + ": " + value.des + value.id_lot + "&nbsp;</td>" +
+            "<td class='bg-info'>" + value.val + "</td>" +
+            "<td>&nbsp;" + value.um + "&nbsp;</td>" +
+            "<td class='text-right " + clpro + "'>" + value.pro + "</td>" +
+          "</tr>"
+        );
+      });
+
+      if (j === 0) {
+        $("table.list_movcontainer").append(
+          '<tr><td class="bg-danger">********* Contenitore non movimentato *********</td></tr>'
+        );
       }
-    });
-	});
 
-};
+      $("#dialog_movcontainer").dialog("open");
+    },
+    "json"
+  );
+
+  $("#dialog_movcontainer").dialog({
+	  autoOpen: false,
+	  modal: true,
+	  show: "blind",
+	  hide: "explode",
+	  width: Math.floor($(window).width() * 0.9),
+	  position: { my: "center", at: "center", of: window },
+	  buttons: {
+		Chiudi: function () {
+		  $(this).dialog("close");
+		}
+	  },
+	  close: function () {
+		$("#idsilos").empty();
+		$("table.list_movcontainer").empty();
+	  }
+	});
+}
+
 </script>
 <style> .ui-dialog { z-index: 1050; } </style>
 <div align="center" class="FacetFormHeaderFont">Recipienti di stoccaggio</div>
@@ -312,8 +345,9 @@ $recordnav -> output();
 
 					?>
 					<div class="bar">
-						<img src="../../modules/camp/media/white_bar.jpg" alt="Barra silos" title="Contenuto silos" style="padding-left:<?php echo ((($content/$a_row['capacita'])*100)* 280 )/100;?>px;">
+						<img src="../../modules/camp/media/white_bar.jpg" alt="Barra silos" title="Contenuto silos" style="padding-left:<?php echo ($content > 0 ? ((($content/$a_row['capacita'])*100)*280)/100 : 0); ?>px;">
 					</div>
+
 				</td>
 				<td>
 					<a class="btn btn-xs btn-default dialog_content" title="Contenuto in lotti e varietà" onclick="ContentSil('<?php echo $a_row['cod_silos'];?>')" >

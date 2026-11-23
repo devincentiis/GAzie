@@ -683,12 +683,14 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 $form['checked_in_date']=(isset($rental_events['checked_in_date']))?$rental_events['checked_in_date']:NULL;
                 $form['checked_out_date']=(isset($rental_events['checked_out_date']))?$rental_events['checked_out_date']:NULL;
                 $form['voucher_id']=(isset($rental_events['voucher_id']))?$rental_events['voucher_id']:NULL;
-                $form['status_webservice']=(isset($rental_events['status_webservice']))?$rental_events['status_webservice']:0;
+                $form['status_webservice']=(isset($rental_events['status_webservice']))?$rental_events['status_webservice']:0;				
                 $form['type']="ALLOGGIO";
                 $form['access_code'] = $access;
                 $form['title']= "Soggiorno ".$accomodation_type." ".$form['rows'][$i]['codart']." - ".$form['search']['clfoco'];
                 $form['house_code']=$form['rows'][$i]['codart'];
-                $columns = array('id', 'title', 'start', 'end', 'house_code', 'id_tesbro', 'id_rigbro', 'voucher_id', 'checked_in_date', 'checked_out_date', 'adult', 'child', 'type', 'access_code', 'status_webservice', 'ex_minors');
+				$form['Ical_sync_id'] = $rental_events['Ical_sync_id'] ?? NULL;
+				$form['ical_uid'] = $rental_events['ical_uid'] ?? NULL;
+                $columns = array('id', 'title', 'start', 'end', 'house_code', 'id_tesbro', 'id_rigbro', 'voucher_id', 'checked_in_date', 'checked_out_date', 'adult', 'child', 'type', 'access_code', 'status_webservice', 'ex_minors', 'Ical_sync_id', 'ical_uid');
                 tableInsert($table, $columns, $form);// inserisco il nuovo rental events
 
                 $artico = gaz_dbi_get_row($gTables['artico'], "codice", $form['rows'][$i]['codart']);

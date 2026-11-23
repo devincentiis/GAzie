@@ -1,5 +1,4 @@
 <?php
-
 /*
   --------------------------------------------------------------------------
   GAzie - Gestione Azienda
@@ -173,6 +172,7 @@ function getMenuData($lang_id, $module_name = false) {
     $patterns ='/\/docume|\/search|\/lang|\/lib|\/delete|\/ajax|\/rec_|\/get_|\/menu|\/send|\/sync|\/dash|\/invsta/';
     foreach ($files as $rf) {
       $bnrf = basename($rf);
+      if (preg_match('/\d/', $bnrf)) { continue; } // escludo gli script che sul nome hanno dei numeri, serve per consentire di rinominare le vecchie versioni aggiungendo ad esempio la data al nome ed evitare di usarlo ma non cancellarlo
       if ( $bnrf == 'menu.'.strtolower($lang['title_native']).'.php') { // quando incontro quello relativo al menu della lingua sotto modifica mi carico i suoi valori che poi andrò a valorizzare sulla chiave file_menu
         require($rf);
         $data[$m1['name']]['file_menu'] = $transl[$m1['name']];

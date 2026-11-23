@@ -100,6 +100,10 @@ h4.card-title {
 .item.evidenziato {
   background: #ffeb3b88; /* Giallo evidenziatore */
 }
+
+td.right-box.add-pointer {
+  cursor: pointer;
+}
 /* Seleziona le ul dentro i li (secondo livello) */
 ul li ul {
     min-height: 30px; /* Impedisce al contenitore di collassare a 0px */
@@ -128,6 +132,8 @@ ul li ul:empty {
   <p class="bg-info"><small>id_menu_module: <span id="dialog_id_menu_module"></span> - id_menu_script: <span id="dialog_id_menu_script"></span></small></p>
   <input type="hidden" id="edit_id_script" name="id_menu_script">
   <input type="hidden" id="edit_id_module" name="id_menu_module">
+  <input type="hidden" id="dialog_modname" name="dialog_modname">
+  <input type="hidden" id="dialog_status" name="dialog_status">
   <div class="form-group">
     <label for="edit_label">Label</label>
     <input type="text" id="edit_label" name="label" class="form-control" placeholder="">
@@ -160,7 +166,7 @@ ul li ul:empty {
         <div class="col-md-6">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title " <?= 'style="background-color: '.$bgcol.'; color: #000;"' ?>><img src="../<?= $k1.'/'.$k1 ?>.svg" height=40 > <?= $v1['file_menu']['name'] ?></h4>
+              <h4 class="card-title" <?= 'style="background-color: '.$bgcol.'; color: #000;"' ?>><img src="../<?= $k1.'/'.$k1 ?>.svg" height=40 > <?= $v1['file_menu']['name'] ?></h4>
             </div>
             <div class="card-body p-0">
         <?php
@@ -169,10 +175,15 @@ ul li ul:empty {
         //$max_r = max($nr_sc,$nr_db);
         $prev_id_script = 9999;
         for ($i = 0; $i <= $nr_db; $i++) {
+          if ($v1['db_menu'][$i]['id_menu_script'] >= 1 || ( $v1['db_menu'][$i]['id_menu_script'] == 0 && ( !isset($v1['db_menu'][($i+1)]['id_menu_script']) || $v1['db_menu'][($i+1)]['id_menu_script'] == 0 ) ) ) {
+            $eye = '<i class="glyphicon glyphicon-eye-'.($v1['db_menu'][$i]['status'] >= 1 ? 'open text-success' : 'close text-danger').'"></i>';
+          } else {
+            $eye = '';
+          }
           $id_script = $v1['db_menu'][$i]['id_menu_script'];
           //var_dump($v1['db_menu'][$i]);
           $name_script = substr($v1['db_menu'][$i]['url_script_basename'],0,-4);
-          $elem_li = '<li title="'.$v1['db_menu'][$i]['file_title'].' url: '.$v1['db_menu'][$i]['link'].'" id_menu_script='.$id_script.'  id_menu_module='.$v1['db_menu'][$i]['id_menu_module'].'><span class="item" script-connector="'.$k1.$name_script.'">'.$v1['db_menu'][$i]['file_label'].' </span> <button type="button" class="btn btn-xs btn-edit"> <i class="glyphicon glyphicon-edit"></i></button>';
+          $elem_li = '<li title="'.$v1['db_menu'][$i]['file_title'].' url: '.$v1['db_menu'][$i]['link'].'" id_menu_script='.$id_script.' vis-status='.$v1['db_menu'][$i]['status'].'  id_menu_module='.$v1['db_menu'][$i]['id_menu_module'].'><span class="item" script-connector="'.$k1.'-'.$name_script.'">'.$v1['db_menu'][$i]['file_label'].' </span> <button type="button" class="btn btn-xs btn-edit"><i class="glyphicon glyphicon-edit"></i></button> '.$eye;
           if ( $id_script == 0 && $prev_id_script == 9999 ){
             // primo menu livello 2
             echo "<!-- INIZIO SPECCHIETTO ORDINABILE-->\n".'<ul id="sortbox-'.$k1.'" class="lista-modulo">'.$elem_li."<ul>\n";
@@ -195,14 +206,14 @@ ul li ul:empty {
         <div class="col-md-6 sticky-box-adminlte">
           <div class="card card-primary">
             <div class="card-header">
-              <h4 class="card-title" <?= 'style="background-color: '.$bgcol.'; color: #000;"' ?>>Directory: modules/<?= $k1 ?></h4>
+              <h4 id="scriptlist-<?= $k1 ?>" class="script-modulo card-title" <?= 'style="background-color: '.$bgcol.'; color: #000;"' ?>>Directory: modules/<?= $k1 ?></h4>
             </div>
             <div class="card-body">
               <table class="table" style="background-color:  background-color: rgba(128, 128, 128, 0.35);">
         <?php
         for ($j = 0; $j <= $nr_sc; $j++) {
           if ($j % 3 == 0) { echo '<tr>'; }
-          echo '<td class="item right-box" script-connector="'.$k1.substr($v1['scripts'][$j],0,-4).'">'.$v1['scripts'][$j].'</td>';
+          echo '<td class="item right-box" script-connector="'.$k1.'-'.substr($v1['scripts'][$j],0,-4).'">'.$v1['scripts'][$j].'</td>';
           if (($j+1) % 3 == 0 || $j == $nr_sc) { echo '</tr>'; }
         }
         ?>
@@ -325,7 +336,7 @@ $(function () {
 
   $("#dialog_editmenu").dialog({
     autoOpen: false,
-    modal: true,
+    modal: false,
     width: 400,
     open: function(event, ui) {
       var $btn = $(this).data("triggerBtn");
@@ -335,7 +346,7 @@ $(function () {
 
       var idScript = $li.attr("id_menu_script");
       var idModule = $li.attr("id_menu_module");
-
+      var visstatus = $li.attr("vis-status");
       var label = $li.children("span.item").text().trim();
       var titleAttr = $li.attr("title") || "";
       var partiTitle = titleAttr.split(" url: ");
@@ -345,11 +356,53 @@ $(function () {
       $("span#dialog_id_menu_module").html(idModule);
       $("#edit_id_script").val(idScript);
       $("#edit_id_module").val(idModule);
-      $("#edit_label").val(label).attr("placeholder", label);
-      $("#edit_link").val(link).attr("placeholder", link);
-      $("#edit_descri").val(descri).attr("placeholder", descri);
+      $("#dialog_status").val(visstatus);
+
+      var $btnVis = $("#btn_toggle_vis");
+      if (visstatus == 1) {
+        $btnVis
+          .removeClass("btn-danger")
+          .addClass("btn-success")
+          .html('<div title="Nascondi"> Visibile <i class="glyphicon glyphicon-eye-open"></i></div>');
+      } else {
+        $btnVis
+          .removeClass("btn-success")
+          .addClass("btn-danger")
+          .html('<div title="Rendi visibile">Nascosto <i class="glyphicon glyphicon-eye-close"></i></div>');
+      }
+
+
+      $("#edit_label").attr("placeholder", label);
+      $("#edit_link").attr("placeholder", link);
+      $("#edit_descri").attr("placeholder", descri);
+      var $targetPos = $(this).data("targetPos");
+      if ($targetPos && $targetPos.length) {
+        $(this).dialog("option", "position", {
+          my: "right top",
+          at: "left top",
+          of: $targetPos,
+          collision: "fit none" // Impedisce che venga spinto troppo in alto fuori dall'allineamento
+        });
+
+        // Fa scorrere la pagina in modo fluido fino all'altezza del dialog (con 20px di margine in alto)
+        var $dialogWidget = $(this).dialog("widget");
+        var dialogTop = $dialogWidget.offset().top;
+        var dialogBottom = dialogTop + $dialogWidget.outerHeight();
+        var windowTop = $(window).scrollTop();
+        var windowBottom = windowTop + $(window).height();
+
+        // Esegue lo scroll solo se il dialog esce dal bordo inferiore (o superiore) della finestra
+        if (dialogBottom > windowBottom || dialogTop < windowTop) {
+          $("html, body").animate({
+            scrollTop: dialogTop - 20
+          }, 300);
+        }
+      }
+      var modname = $targetPos.attr('id').replace('scriptlist-','');
+      $('td.right-box[script-connector^="' + modname + '"]').addClass("add-pointer");
     },
     close: function(event, ui) {
+      $('td.right-box[script-connector]').removeClass("add-pointer");
       var $btn = $(this).data("triggerBtn");
       if ($btn) {
         $btn.closest("li").children("span.item").removeClass("evidenziato");
@@ -357,9 +410,35 @@ $(function () {
     },
     buttons: [
       {
+        id: "btn_toggle_vis",
+        text: "Visibilità",
+        class: "btn",
+        click: function() {
+          var $dialog = $(this);
+          $("#edit_label").val('');
+          $("#edit_link").val('');
+          $("#edit_descri").val('');
+          $("#dialog_modname").val('');
+          var data = JSON.stringify({
+            id_menu_script: $("#edit_id_script").val(),
+            id_menu_module: $("#edit_id_module").val(),
+            status_toggle: $("#dialog_status").val()
+          });
+          $.post("menu_ajax.php", data, function(risposta) {
+            $dialog.dialog("close");
+            window.location.reload();
+          });
+        }
+      },
+      {
         text: "Annulla/chiudi",
         class: "btn btn-default",
         click: function() {
+          $("#edit_label").val('');
+          $("#edit_link").val('');
+          $("#edit_descri").val('');
+          $("#dialog_modname").val('');
+          $("#dialog_status").val('');
           $(this).dialog("close");
         }
       },
@@ -388,10 +467,32 @@ $(function () {
     ]
   });
 
+  $('td.right-box[script-connector]').click(function() {
+    if ($("#dialog_editmenu").dialog("isOpen")) {
+      var dia_modname = $("#dialog_modname").val();
+      var scr_modname = $(this).attr('script-connector').split('-')[0].trim();
+      if ( dia_modname == scr_modname ) {
+        var nomeScript = $(this).text().trim();
+        $("#edit_link").val(nomeScript);
+      }
+    }
+  });
+
   // Apertura dialog al click
   $(document).on("click", ".btn-edit", function(e) {
+    if ($("#dialog_editmenu").dialog("isOpen")) {
+      $("#dialog_editmenu").dialog("close");
+      $("#edit_label").val('');
+      $("#edit_link").val('');
+      $("#edit_descri").val('');
+      $("#dialog_modname").val('');
+    }
+    var mod = $(this).closest('.lista-modulo').attr('id');
+    var id_position = mod.replace('sortbox','scriptlist');
+    var modname = mod.replace('sortbox-','');
+    $("#dialog_modname").val(modname);
     e.preventDefault();
-    $("#dialog_editmenu").data("triggerBtn", $(this)).dialog("open");
+    $("#dialog_editmenu").data("triggerBtn",$(this)).data("targetPos",$("#" + id_position)).dialog("open");;
   });
 
 });

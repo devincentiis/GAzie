@@ -31,7 +31,7 @@ $msg = "";
 function getDayNameFromDayNumber($day_number) {
   global $gazTimeFormatter;
   $gazTimeFormatter->setPattern('eeee');
-  return ucfirst(utf8_encode($gazTimeFormatter->format(new DateTime('@'.mktime(12,0,0,3,19+$day_number, 2017)))));
+  return ucfirst(($gazTimeFormatter->format(new DateTime('@'.mktime(12,0,0,3,19+$day_number, 2017)))));
 }
 
 $upd_mm = new magazzForm;

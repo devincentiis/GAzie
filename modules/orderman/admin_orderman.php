@@ -82,6 +82,29 @@ if ((isset($_POST['Update'])) or (isset($_GET['Update']))) {
 } else {
     $toDo = 'insert';
 }
+
+// Antonio Germani - Blocco modifica produzioni già esportate al SIAN
+$bloccaUpdateSian = false;
+$fileSianAssociato = '';
+$idOrdCheck = isset($_GET['codice'])
+    ? intval($_GET['codice'])
+    : (isset($_POST['id']) ? intval($_POST['id']) : 0);
+if ($toDo === 'update' && $idOrdCheck > 0) {
+    $query = "SELECT sian.status
+              FROM " . $gTables['movmag'] . " AS mag
+              INNER JOIN " . $gTables['camp_mov_sian'] . " AS sian
+                  ON sian.id_movmag = mag.id_mov
+              WHERE mag.id_orderman = " . $idOrdCheck . "
+                AND TRIM(COALESCE(sian.status, '')) <> ''
+              LIMIT 1";
+    $rsStatusSian = gaz_dbi_query($query);
+    $rowStatusSian = gaz_dbi_fetch_array($rsStatusSian);
+    if ($rowStatusSian) {
+        $bloccaUpdateSian = true;
+        $fileSianAssociato = $rowStatusSian['status'];
+    }
+}
+
 if (!isset($_POST['ritorno'])) {
     $_POST['ritorno'] = $_SERVER['HTTP_REFERER'];
 }
@@ -137,6 +160,18 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
   $form['old_recip_stocc'] = $_POST['old_recip_stocc'];
   $form['id_mov_sian_rif'] = $_POST['id_mov_sian_rif'];
 	$form['recip_stocc_destin'] = $_POST['recip_stocc_destin'];
+
+  if ($form['cod_operazione'] === 'O0') {// O0 - La quantità da classificare è l'intera giacenza del recipiente
+      $form['quantip'] = '';
+
+      if (strlen($form['recip_stocc']) > 0) {
+          $form['quantip'] = str_replace(
+              ',',
+              '',
+              (string)$campsilos->getCont($form['recip_stocc'])
+          );
+      }
+  }
 	if (strlen($form['recip_stocc'])>0){ // se c'è un recipiente di stoccaggio prendo l'ID del lotto
     if ($form['recip_stocc']==$form['old_recip_stocc']){// se non è cambiato il contenitore d'origine e stiamo in update
       $excluded_movmag=$form['id_mov_sian_rif'];// faccio escludere il movimento dal calcolo disponibilità
@@ -151,7 +186,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
 				$form['quantip']=$qtaLotId; $warnmsg.="42+";
 			}
 		}
-		if (intval($form['cod_operazione'] >0 AND intval($form['cod_operazione'])<4)) { // se sono operazioni che producono olio confezionato
+		if (in_array((string)$form['cod_operazione'], array('1', '2', '3'), true)) { // se sono operazioni che producono olio confezionato
 		   $var_orig = $campsilos->getContentSil($form['recip_stocc']);
 			unset($var_orig['varieta']['totale']);//tolgo il totale
 			$var=implode(", ",array_keys($var_orig['varieta']));// creo l'elenco varietà
@@ -245,7 +280,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
           $form['id_mov'][$m]=$_POST['id_mov' . $m];
           $form['old_quanti_comp'][$m]=$_POST['old_quanti_comp' . $m];
           $form['recip_stocc_comp'][$m] = (isset($_POST['recip_stocc_comp' . $m]))?$_POST['recip_stocc_comp' . $m]:"";
-          if (strlen($form['recip_stocc_comp'][$m])>0 AND intval($form['cod_operazione'] >0 AND intval($form['cod_operazione'])<4)) { // se sono operazioni che producono olio confezionato
+          if (strlen($form['recip_stocc_comp'][$m]) > 0 && in_array((string)$form['cod_operazione'], array('1', '2', '3'), true)) { // se sono operazioni che producono olio confezionato
             $var_orig = $campsilos->getContentSil($form['recip_stocc_comp'][$m]);
             unset($var_orig['varieta']['totale']);//tolgo il totale
             $var=implode(", ",array_keys($var_orig['varieta']));// creo l'elenco varietà
@@ -287,16 +322,177 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
     }
   }
 
-    // Se viene inviata la richiesta di conferma totale ... ******   CONTROLLO ERRORI   ******
+      // ==========================================================
+      // O0 - SIAN - PREPARAZIONE AUTOMATICA DELLE PARTITE DA SCARICARE
+      // ==========================================================
 
+      if ($form['cod_operazione'] === 'O0' && in_array($toDo, array('insert', 'update'), true) && strlen(trim((string)$form['recip_stocc'])) > 0) {
+
+          $form['artcomp'] = array();
+          $form['SIAN_comp'] = array();
+          $form['quality_comp'] = array();
+          $form['quanti_comp'] = array();
+          $form['prezzo_comp'] = array();
+          $form['q_lot_comp'] = array();
+          $form['id_lot_comp'] = array();
+          $form['lot_quanti'] = array();
+          $form['lot_idmov'] = array();
+          $form['id_mov'] = array();
+          $form['old_quanti_comp'] = array();
+          $form['recip_stocc_comp'] = array();
+          $indiceO0 = 0;
+          $recipienteO0 = $form['recip_stocc'];
+
+          // Escludo i movimenti della classificazione corrente in caso di UPDATE
+          $movimentiO0DaEscludere = array();
+          if ($toDo === 'update' && isset($_GET['codice'])) {
+              $resEsclusiO0 = gaz_dbi_dyn_query(
+                  "id_mov",
+                  $gTables['movmag'],
+                  "id_orderman = " . intval($_GET['codice'])
+              );
+              while ($movEsclusoO0 = gaz_dbi_fetch_array($resEsclusiO0)) {
+                  $movimentiO0DaEscludere[] = intval($movEsclusoO0['id_mov']);
+              }
+          }
+
+          // 1. Recupero i lotti presenti nel recipiente
+          $contenutoO0 = $campsilos->getContentSil($recipienteO0,"",0,$movimentiO0DaEscludere);
+          if (isset($contenutoO0['id_lotti']) && is_array($contenutoO0['id_lotti'])) {
+              foreach ($contenutoO0['id_lotti'] as $idLottoO0 => $quantitaO0) {
+                  if ($idLottoO0 === 'totale' || intval($idLottoO0) <= 0) {
+                      continue;
+                  }
+                  $quantitaO0 = (float)str_replace(',', '', (string)$quantitaO0);
+                  if ($quantitaO0 <= 0.000001) {
+                      continue;
+                  }
+                  $lottoO0 = gaz_dbi_get_row(
+                      $gTables['lotmag'],
+                      'id',
+                      intval($idLottoO0)
+                  );
+                  if (!$lottoO0) {
+                      $msg .= "O0lot+";
+                      continue;
+                  }
+                  $articoloO0 = gaz_dbi_get_row(
+                      $gTables['artico'],
+                      'codice',
+                      $lottoO0['codart']
+                  );
+                  if (!$articoloO0) {
+                      $msg .= "O0lot+";
+                      continue;
+                  }
+                  // Recupero il prezzo di magazzino
+                  $mvO0 = $magazz->getStockValue( false, $lottoO0['codart'], null, null, $admin_aziend['decimal_price']);
+                  $magvalO0 = is_array($mvO0) ? array_pop($mvO0) : null;
+                  $prezzoO0 = (is_array($magvalO0) && isset($magvalO0['v']))
+                      ? $magvalO0['v']
+                      : 0;
+                  if ($prezzoO0 == 0) {
+                      $prezzoO0 = $articoloO0['preacq'];
+                  }
+                  $form['artcomp'][$indiceO0] = $lottoO0['codart'];
+                  $form['SIAN_comp'][$indiceO0] = $articoloO0['SIAN'];
+                  $form['quality_comp'][$indiceO0] = $articoloO0['quality'];
+                  $form['quanti_comp'][$indiceO0] = $quantitaO0;
+                  $form['prezzo_comp'][$indiceO0] = $prezzoO0;
+                  $form['q_lot_comp'][$indiceO0] = 1;
+                  $form['id_lot_comp'][$indiceO0][0] = intval($idLottoO0);
+                  $form['lot_quanti'][$indiceO0][0] = $quantitaO0;
+                  $form['lot_idmov'][$indiceO0][0] = 0;
+                  $form['id_mov'][$indiceO0] = 0;
+                  $form['old_quanti_comp'][$indiceO0] = 0;
+                  $form['recip_stocc_comp'][$indiceO0] = $recipienteO0;
+                  $indiceO0++;
+              }
+          }
+
+          // 2. Recupero gli articoli presenti senza gestione lotti
+          $articoliO0 = $campsilos->getSilosArtico($recipienteO0,$movimentiO0DaEscludere);
+
+          foreach ($articoliO0 as $codartO0) {
+
+              $articoloO0 = gaz_dbi_get_row(
+                  $gTables['artico'],
+                  'codice',
+                  $codartO0
+              );
+
+              if (!$articoloO0 || intval($articoloO0['lot_or_serial']) > 0) {
+                  continue;
+              }
+
+              $quantitaO0 = (float)str_replace(
+                  ',',
+                  '',
+                  (string)$campsilos->getCont($recipienteO0,$codartO0,$movimentiO0DaEscludere)
+              );
+
+              if ($quantitaO0 <= 0.000001) {
+                  continue;
+              }
+
+              $mvO0 = $magazz->getStockValue(
+                  false,
+                  $codartO0,
+                  null,
+                  null,
+                  $admin_aziend['decimal_price']
+              );
+
+              $magvalO0 = is_array($mvO0) ? array_pop($mvO0) : null;
+
+              $prezzoO0 = (is_array($magvalO0) && isset($magvalO0['v']))
+                  ? $magvalO0['v']
+                  : 0;
+
+              if ($prezzoO0 == 0) {
+                  $prezzoO0 = $articoloO0['preacq'];
+              }
+
+              $form['artcomp'][$indiceO0] = $codartO0;
+              $form['SIAN_comp'][$indiceO0] = $articoloO0['SIAN'];
+              $form['quality_comp'][$indiceO0] = $articoloO0['quality'];
+              $form['quanti_comp'][$indiceO0] = $quantitaO0;
+              $form['prezzo_comp'][$indiceO0] = $prezzoO0;
+
+              $form['q_lot_comp'][$indiceO0] = 0;
+              $form['id_mov'][$indiceO0] = 0;
+              $form['old_quanti_comp'][$indiceO0] = 0;
+              $form['recip_stocc_comp'][$indiceO0] = $recipienteO0;
+
+              $indiceO0++;
+          }
+
+          $form['numcomp'] = $indiceO0;
+          // Verifico che tutte le quantità del recipiente siano state individuate
+          $totalePartiteO0 = 0;
+          foreach ($form['quanti_comp'] as $qtaO0) {
+              $totalePartiteO0 += (float)$qtaO0;
+          }
+          $totaleRecipienteO0 = (float)str_replace(',','',(string)$campsilos->getCont($recipienteO0,'',$movimentiO0DaEscludere));
+          if ( abs($totalePartiteO0 - $totaleRecipienteO0) > 0.001 ) {
+            $msg .= "O0qta+";
+          }
+          if ($indiceO0 == 0) {
+              $msg .= "O0empty+";
+          }
+      }
+
+    // Se viene inviata la richiesta di conferma totale ... ******   CONTROLLO ERRORI   ******
     $form['datemi'] = $form['anninp'] . "-" . $form['mesinp'] . "-" . $form['gioinp'];
     if (isset($_POST['ins'])) {
-
+      if ($bloccaUpdateSian) {
+          $msg .= "sianlock+";
+      }
       $itemart = gaz_dbi_get_row($gTables['artico'], "codice", $form['codart']);
       if ($form['codart'] <> "" && !isset($itemart)) { // controllo se codice articolo non esiste o se è nullo
           $msg.= "20+";
       }
-      if ($itemart && $itemart['good_or_service'] == 2 && isset($form['numcomp'])) { // se articolo composto,
+      if ((($itemart && $itemart['good_or_service'] == 2) || $form['cod_operazione'] === 'O0') && isset($form['numcomp'])){ // se articolo composto,
       //controllo se le quantità inserite per ogni singolo lotto, di ogni componente, corrispondono alla richiesta della produzione e alla reale disponbilità
         for ($nc = 0;$nc <= $form['numcomp'] - 1;++$nc) {
           if ($form['quanti_comp'][$nc] == "ERRORE"){
@@ -306,25 +502,42 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
           if (intval($form['q_lot_comp'][$nc])>0) {
             $tot=0;
             for ($l=0; $l<$form['q_lot_comp'][$nc]; ++$l) {
-              if ($lm -> getLotQty($form['id_lot_comp'][$nc][$l],$form['lot_idmov'][$nc][$l]) < $form['lot_quanti'][$nc][$l]){
-                $msg.= "21+";//Non c'è sufficiente disponibilità di un ID lotto selezionato
+
+              if ($form['cod_operazione'] === 'O0') {
+                  $disponibilitaLotto = $campsilos->sian_get_lot_qty(
+                      $form['id_lot_comp'][$nc][$l],
+                      $movimentiO0DaEscludere
+                  );
+              } else {
+                  $disponibilitaLotto = $lm->getLotQty(
+                      $form['id_lot_comp'][$nc][$l],
+                      $form['lot_idmov'][$nc][$l]
+                  );
+              }
+              if ($disponibilitaLotto < $form['lot_quanti'][$nc][$l]) {
+                  $msg .= "21+";//Non c'è sufficiente disponibilità di un ID lotto selezionato
               }
               $tot=$tot + $form['lot_quanti'][$nc][$l];
 
               $checklot = gaz_dbi_get_row($gTables['lotmag']." LEFT JOIN ".$gTables['movmag']." ON ".$gTables['movmag'].".id_mov = id_movmag", 'id', $form['id_lot_comp'][$nc][$l]," AND operat>0 ");
               if (strtotime($form['datreg']) < strtotime($checklot['datdoc']) ){// non può uscire un lotto prima della data della sua creazione
                 $msg .= "45+";// Il lotto non può uscire in tale data in quanto ancora inesistente
+              }
 
-              }
               //controllo se l'ID lotto è presente nel silos selezionato
-              if (strlen($form['recip_stocc_comp'][$nc])>0){
-                $var_idlot = $campsilos->getContentSil($form['recip_stocc_comp'][$nc]);
-                unset($var_idlot['id_lotti']['totale']);//tolgo il totale
-                $var=array_keys($var_idlot['id_lotti']);// creo array idlotti presenti nel silos
-                if (!in_array($form['id_lot_comp'][$nc][$l], $var)){ // se l'id del lotto non è nel silos
-                  $msg.= "47+";
-                }
+              $esclusiO0 = ($form['cod_operazione'] === 'O0' && isset($movimentiO0DaEscludere)) ? $movimentiO0DaEscludere : 0;
+              $var_idlot = $campsilos->getContentSil(
+                  $form['recip_stocc_comp'][$nc],
+                  "",
+                  0,
+                  $esclusiO0
+              );
+              unset($var_idlot['id_lotti']['totale']);
+              $var = array_keys($var_idlot['id_lotti']);
+              if (!in_array($form['id_lot_comp'][$nc][$l], $var)) {
+                  $msg .= "47+";
               }
+
             }
             if ($tot != $form['quanti_comp'][$nc] && strlen($form['recip_stocc_comp'][$nc])==0){// se c'è un silos la quantità totale viene stabilita da GAzie e, quindi, non si deve controllare
               //echo "Componente:",$form['artcomp'][$nc];
@@ -374,8 +587,49 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
                 $msg.= "22+";
             }
           if (intval($form['SIAN']) > 0 ){ // controlli SIAN
-            if (intval($form['cod_operazione'])<1) { // se manca il codice operazione SIAN
-              $msg.= "26+";
+
+            if ($form['cod_operazione'] !== 'O0' && intval($form['cod_operazione']) < 1) {// se manca il codice operazione SIAN
+                $msg.= "26+";
+            }
+            // O0 - La classificazione deve avvenire nello stesso recipiente
+            if ($form['cod_operazione'] === 'O0') {
+
+                $recipienteO0 = trim((string)$form['recip_stocc']);
+                $erroreRecipO0 = ($recipienteO0 === '');
+
+                for ($x = 0; $x < intval($form['numcomp']); $x++) {
+
+                    $recipienteComp = isset($form['recip_stocc_comp'][$x])
+                        ? trim((string)$form['recip_stocc_comp'][$x])
+                        : '';
+
+                    if (
+                        intval($form['SIAN_comp'][$x]) !== 1 ||
+                        $recipienteComp === '' ||
+                        $recipienteComp !== $recipienteO0
+                    ) {
+                        $erroreRecipO0 = true;
+                        break;
+                    }
+                }
+
+                if ($erroreRecipO0) {
+                    $msg .= "38+";
+                }
+            }
+            // O0: il prodotto finale deve essere olio sfuso già classificato
+            $resO0Prod = gaz_dbi_get_row(
+                $gTables['camp_artico'],
+                "codice",
+                $form['codart']
+            );
+
+            if (
+                !$resO0Prod ||
+                !in_array(intval($resO0Prod['categoria']), array(1, 2, 4), true) ||
+                floatval($resO0Prod['confezione']) != 0
+            ) {
+                $msg .= "O0dest+";
             }
             if (intval($form['cod_operazione'])==5){ // se M1 , movimentazione interna olio sfuso
               if (strlen ($form['recip_stocc_destin']) == 0 ) { // se M1 e manca il recipiente di destinazione
@@ -385,7 +639,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
                 $msg.= "28+";
               }
               $get_sil=gaz_dbi_get_row($gTables['camp_recip_stocc'],'cod_silos',$form['recip_stocc_destin']);
-			  $excluded_movmag_dest=($toDo == 'update')?$form['id_movmag']:0;
+              $excluded_movmag_dest=($toDo == 'update')?$form['id_movmag']:0;
               if ($campsilos -> getCont($form['recip_stocc_destin'],'', $excluded_movmag_dest)+floatval($form['quantip']) > $get_sil['capacita']){// se non c'è spazio sufficiente nel recipiente di destinazione
                 $msg.= "46+";
               }
@@ -396,16 +650,16 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
                 $msg.= "30+";
               }
             }
-            if ($toDo == 'insert' AND (intval($form['cod_operazione'])>0 AND intval($form['cod_operazione'])<3 AND $form['numcomp']==0)){ // se confezioniamo
-              $msg.= "39+"; // manca l'olio sfuso
+            if ($toDo == 'insert' && in_array((string)$form['cod_operazione'], array('1', '2'), true) && (!isset($form['numcomp']) || intval($form['numcomp']) == 0)){
+              $msg .= "39+";
             }
-            if (intval($form['cod_operazione']>0 AND intval($form['cod_operazione'])<4)) { // se sono operazioni che producono olio confezionato
+            if (in_array((string)$form['cod_operazione'], array('1','2','3'), true)) { // se sono operazioni che producono olio confezionato
               $rescampartico = gaz_dbi_get_row($gTables['camp_artico'], "codice", $form['codart']);
               if ($rescampartico['confezione']==0){ // se l'olio è sfuso segnalo l'errore
                 $msg.= "37+";
               }
             }
-            if (intval($form['cod_operazione']>0 AND intval($form['cod_operazione'])<3)) { // se sono operazioni che prelevano l'olio da recipiente
+            if (in_array((string)$form['cod_operazione'], array('1', '2'), true)) { // se sono operazioni che prelevano l'olio da recipiente
               for ($x = 0; $x < $form['numcomp']; $x++){ // controllo se ci sono i recipienti di stoccaggio per ogni componente
                 if ($form['SIAN_comp'][$x]==1 && strlen($form['recip_stocc_comp'][$x])==0){
                   $msg.= "38+";
@@ -414,24 +668,50 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
             }
           }
 
-          if ($toDo == 'insert' AND intval($form['SIAN']) > 0 AND (isset($form['numcomp']) AND $form['numcomp']>0)) { // se ci sono componenti faccio il controllo errori SIAN sui componenti
+          if (($toDo == 'insert' || $form['cod_operazione'] === 'O0') && intval($form['SIAN']) > 0 && isset($form['numcomp']) && intval($form['numcomp']) > 0) { // se ci sono componenti faccio il controllo errori SIAN sui componenti
+              // O0 - Recupero anticipato dei dati dell'articolo classificato
+              $resO0Prod = null;
+              if ($form['cod_operazione'] === 'O0') {
+                  $resO0Prod = gaz_dbi_get_row(
+                      $gTables['camp_artico'],
+                      'codice',
+                      $form['codart']
+                  );
+              }
               for ($m = 0;$m < $form['numcomp'];++$m) {
-              $rescamparticocomp = gaz_dbi_get_row($gTables['camp_artico'], "codice", $form['artcomp'][$m]);
-              if (isset($rescamparticocomp)){
-                if (intval($form['cod_operazione'])==3 AND $rescamparticocomp['confezione']==0 ) { // se L2 etichettatura e c'è olio sfuso
-                  $msg.= "29+";
+                $rescamparticocomp = gaz_dbi_get_row($gTables['camp_artico'], "codice", $form['artcomp'][$m]);
+                // O0: tutte le partite devono essere in attesa di classificazione
+                if ( $form['cod_operazione'] === 'O0' && ( !$rescamparticocomp || intval($rescamparticocomp['categoria']) !== 3)) {
+                    $msg .= "O0cat+";
                 }
-                if (intval($form['cod_operazione'])==3 AND $rescamparticocomp['etichetta']==1 ) { // se L2 etichettatura e c'è olio etichettato
-                  $msg.= "32+";
+                // O0: l'origine delle partite deve coincidere con quella del prodotto finale
+                if ($form['cod_operazione'] === 'O0' && is_array($rescamparticocomp) && isset($resO0Prod) && is_array($resO0Prod)) {
+                    $originePartitaMacro = trim((string)$rescamparticocomp['or_macro']);
+                    $origineProdottoMacro = trim((string)$resO0Prod['or_macro']);
+                    $originePartitaSpec = trim((string)$rescamparticocomp['or_spec']);
+                    $origineProdottoSpec = trim((string)$resO0Prod['or_spec']);
+                    if (
+                        $originePartitaMacro !== $origineProdottoMacro ||
+                        $originePartitaSpec !== $origineProdottoSpec
+                    ) {
+                        $msg .= "O0orig+";
+                    }
                 }
-                if (intval($form['cod_operazione'])==3 AND ($rescamparticocomp['categoria']!== $rescampartico['categoria'] OR $rescamparticocomp['or_macro']!== $rescampartico['or_macro'] OR $rescamparticocomp['estrazione']!== $rescampartico['estrazione'] OR $rescamparticocomp['biologico']!== $rescampartico['biologico'] OR $rescamparticocomp['confezione']!== $rescampartico['confezione'] )) { // se L2 etichettatura e c'è olio non etichettato
-                  $msg.= "31+";
-                }
-                if ($rescamparticocomp['id_campartico']>0 AND strlen($form['recip_stocc_comp'][$m])==0 AND (intval($form['cod_operazione'])>0 AND intval($form['cod_operazione'])<3)){
-                $msg.= "38+";
+                if (isset($rescamparticocomp)){
+                  if (intval($form['cod_operazione'])==3 AND $rescamparticocomp['confezione']==0 ) { // se L2 etichettatura e c'è olio sfuso
+                    $msg.= "29+";
+                  }
+                  if (intval($form['cod_operazione'])==3 AND $rescamparticocomp['etichetta']==1 ) { // se L2 etichettatura e c'è olio etichettato
+                    $msg.= "32+";
+                  }
+                  if (intval($form['cod_operazione'])==3 AND ($rescamparticocomp['categoria']!== $rescampartico['categoria'] OR $rescamparticocomp['or_macro']!== $rescampartico['or_macro'] OR $rescamparticocomp['estrazione']!== $rescampartico['estrazione'] OR $rescamparticocomp['biologico']!== $rescampartico['biologico'] OR $rescamparticocomp['confezione']!== $rescampartico['confezione'] )) { // se L2 etichettatura e c'è olio non etichettato
+                    $msg.= "31+";
+                  }
+                  if ($rescamparticocomp['id_campartico']>0 AND strlen($form['recip_stocc_comp'][$m])==0 AND (intval($form['cod_operazione'])>0 AND intval($form['cod_operazione'])<3)){
+                  $msg.= "38+";
+                  }
                 }
               }
-            }
           }
         }// fine se in produzione industriale
         if ($msg == "") { // nessun errore
@@ -602,7 +882,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
               $form['id_movmag']=$prod_id_movmag;// reimposto l'id_movmag del movimento di entrata
               $id_movmag=$form['id_movmag'];
             }
-            if ($itemart && $itemart['good_or_service'] == 2) { // se è un articolo composto
+            if (($itemart && $itemart['good_or_service'] == 2) || $form['cod_operazione'] === 'O0') {// se è un articolo composto
               $comp_total_val=0.00;
               for ($nc = 0;$nc <= $form['numcomp'] - 1;++$nc) { // *** faccio un ciclo con tutti i componenti da scaricare   ***
                 // accumulo il valore dei singoli componenti, mi servirà a fine ciclo per valorizzare il movimento 'PRO' precedentemente inserito
@@ -1174,6 +1454,10 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 
         while ($row = $rescompo->fetch_assoc()) { // creo gli input dei componenti visualizzandone anche disponibilità di magazzino
           $nmix=$nc;$mix="";$passrecstoc="";$ko="";
+          // O0: tutti i componenti provengono dal recipiente selezionato
+          if ($form['cod_operazione'] === 'O0') {
+              $form['recip_stocc_comp'][$nc] = $form['recip_stocc'];
+          }
           if ($form['quantip'] > 0) {
             ?><div class="container-fluid" style="border: 1px solid green;"><?php
 
@@ -1412,26 +1696,54 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
               <?php
             }
             // Antonio Germani - Inizio form SIAN
-            if ($row['SIAN']>0 AND $form['order_type'] == "IND"){ // se l'articolo prevede un movimento SIAN e siamo su prod.industriale
-              $rescampbase = gaz_dbi_get_row($gTables['camp_artico'], "codice", $row['codice_artico_base']);
-              if ($rescampbase['confezione']==0){ // se è sfuso apro la richiesta contenitore
+            // Antonio Germani - Gestione recipienti componenti
+            if ($form['cod_operazione'] === 'O0') {
+                // O0: utilizzo sempre il recipiente principale selezionato
+                echo '<input type="hidden" name="recip_stocc_comp'.$nmix.'" value="' .
+                    htmlspecialchars((string)$form['recip_stocc'], ENT_QUOTES, 'UTF-8') . '">';
 
-                ?>
-                <div class="row">
-                <label for="camp_recip_stocc_comp" class="col-sm-5"><?php echo "Recipiente stoccaggio del componente"; ?></label>
-                <?php
-                if (!isset($form['recip_stocc_comp'][$nmix])){
-                  $form['recip_stocc_comp'][$nmix]="";
+            } elseif ($row['SIAN'] > 0 AND $form['order_type'] == "IND") {
+                $rescampbase = gaz_dbi_get_row(
+                    $gTables['camp_artico'],
+                    "codice",
+                    $row['codice_artico_base']
+                );
+                if ($rescampbase['confezione'] == 0) {
+                    ?>
+                    <div class="row">
+                        <label for="camp_recip_stocc_comp" class="col-sm-5">
+                            <?php echo "Recipiente stoccaggio del componente"; ?>
+                        </label>
+                        <?php
+                        if (!isset($form['recip_stocc_comp'][$nmix])) {
+                            $form['recip_stocc_comp'][$nmix] = "";
+                        }
+
+                        $campsilos->selectSilos(
+                            'recip_stocc_comp'.$nmix,
+                            'cod_silos',
+                            $form['recip_stocc_comp'][$nmix],
+                            'cod_silos',
+                            1,
+                            'capacita',
+                            'TRUE',
+                            'col-sm-7',
+                            null,
+                            '',
+                            '',
+                            '',
+                            $row['codice_artico_base'],
+                            $excluded_movmag
+                        );
+                        ?>
+                    </div>
+                    <?php
+                } else {
+                    echo '<input type="hidden" name="recip_stocc_comp'.$nmix.'" value="">';
                 }
-                $campsilos->selectSilos('recip_stocc_comp'.$nmix ,'cod_silos', $form['recip_stocc_comp'][$nmix], 'cod_silos', 1,'capacita','TRUE','col-sm-7' , null, '','','',$row['codice_artico_base'],$excluded_movmag);
-                ?>
-                </div>
-                <?php
-              } else {
-                echo '<input type="hidden" name="recip_stocc_comp'.$nmix.'" value="">';
-              }
+
             } else {
-              echo '<input type="hidden" name="recip_stocc_comp'.$nmix.'" value="">';
+                echo '<input type="hidden" name="recip_stocc_comp'.$nmix.'" value="">';
             }
 
             if ($passrecstoc<>""){// se sono passato per il ciclo recipente di stoccaggio
@@ -1695,7 +2007,51 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 echo '<input type="hidden" name="old_recip_stocc" value="',$form["old_recip_stocc"],'">';
 echo '<input type="hidden" name="id_mov_sian_rif" value="',$form["id_mov_sian_rif"],'">';
 
-	?>
+  // O0 - Riepilogo delle partite che saranno scaricate
+  if ($form['cod_operazione'] === 'O0' && isset($form['artcomp']) && is_array($form['artcomp'])) {
+      $totaleRiepilogoO0 = 0;
+      echo '<tr>';
+      echo '<td class="FacetFieldCaptionTD">Partite da classificare</td>';
+      echo '<td class="FacetDataTD">';
+      echo '<table class="table table-bordered table-condensed">';
+      echo '<thead><tr>';
+      echo '<th>Codice articolo</th>';
+      echo '<th>Lotto</th>';
+      echo '<th class="text-right">Quantità (kg)</th>';
+      echo '</tr></thead><tbody>';
+      foreach ($form['artcomp'] as $iO0 => $codartO0) {
+          if (intval($form['q_lot_comp'][$iO0]) > 0) {
+              for ($lO0 = 0; $lO0 < intval($form['q_lot_comp'][$iO0]); $lO0++) {
+                  $idLottoO0 = intval($form['id_lot_comp'][$iO0][$lO0]);
+                  $lotInfoO0 = $lm->getLot($idLottoO0);
+                  $qtaRigaO0 = (float)$form['lot_quanti'][$iO0][$lO0];
+                  $totaleRiepilogoO0 += $qtaRigaO0;
+                  $lottoDescrO0 = ($lotInfoO0) ? $idLottoO0 . ' - ' . $lotInfoO0['identifier'] : $idLottoO0;
+                  echo '<tr>';
+                  echo '<td>' . htmlspecialchars($codartO0, ENT_QUOTES, 'UTF-8') . '</td>';
+                  echo '<td>' . htmlspecialchars((string)$lottoDescrO0, ENT_QUOTES, 'UTF-8') . '</td>';
+                  echo '<td class="text-right">' . gaz_format_quantity($qtaRigaO0) . '</td>';
+                  echo '</tr>';
+              }
+          } else {
+              $qtaRigaO0 = (float)$form['quanti_comp'][$iO0];
+              $totaleRiepilogoO0 += $qtaRigaO0;
+              echo '<tr>';
+              echo '<td>' . htmlspecialchars($codartO0, ENT_QUOTES, 'UTF-8') . '</td>';
+              echo '<td>Senza lotto</td>';
+              echo '<td class="text-right">' . gaz_format_quantity($qtaRigaO0) . '</td>';
+              echo '</tr>';
+          }
+      }
+      echo '</tbody><tfoot><tr>';
+      echo '<th colspan="2">TOTALE DA CLASSIFICARE</th>';
+      echo '<th class="text-right">' . gaz_format_quantity($totaleRiepilogoO0) . ' kg</th>';
+      echo '</tr></tfoot></table>';
+      echo '</td></tr>';
+  }
+  ?>
+
+
 	<!--- Antonio Germani - inserimento quantità  -->
 	<tr>
 		<td class="FacetFieldCaptionTD"><?php echo $script_transl['15']; ?> </td>
@@ -1703,7 +2059,13 @@ echo '<input type="hidden" name="id_mov_sian_rif" value="',$form["id_mov_sian_ri
 			<?php
 
 				?>
-				<input type="text" name="quantip" onchange="this.form.submit()" value="<?php echo $form['quantip']; ?>" />
+				<?php
+        if ($form['cod_operazione'] === 'O0') {
+            echo '<input type="text" name="quantip" value="' . htmlspecialchars((string)$form['quantip']) . '" readonly="readonly" />';
+        } else {
+            echo '<input type="text" name="quantip" onchange="this.form.submit()" value="' . htmlspecialchars((string)$form['quantip']) . '" />';
+        }
+        ?>
 				<?php
 				echo ($resartico)?$resartico['unimis']:'';
 				// Antonio Germani - Visualizzo quantità prodotte e rimanenti
@@ -1920,7 +2282,16 @@ if ($submit=="NO"){
   $title="C'è un componente KO oppure un problema nei movimenti del recipiente di stoccaggio: non puoi procedere";
 }
 if ($toDo == 'update') {
-    echo '<input type="submit" accesskey="m" title="'.$title.'" class="btn btn-warning" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['update']) . $addvalue . '" '.$disabled.'>';
+
+    if ($bloccaUpdateSian) {
+        echo '<button type="button" class="btn btn-danger" disabled="disabled">';
+        echo 'MODIFICA NON CONSENTITA: produzione già esportata nel SIAN';
+        echo '<br>File: ' .
+            htmlspecialchars($fileSianAssociato, ENT_QUOTES, 'UTF-8');
+        echo '</button>';
+    } else {
+        echo '<input type="submit" accesskey="m" title="'.$title.'" class="btn btn-warning" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['update']) . $addvalue . '" '.$disabled.'>';
+    }
 } else {
     echo '<input type="submit" accesskey="i" title="'.$title.'" class="btn btn-warning" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="' . ucfirst($script_transl['insert']) . $addvalue . '" '.$disabled.'>';
 }

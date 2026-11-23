@@ -282,6 +282,12 @@ if (isset($_POST['Return'])) {
 require("../../library/include/header.php");
 $script_transl = HeadMain();
 $gForm = new venditForm();
+// dall'evasione dei contratti il PDF si apre in una nuova scheda e la scheda di partenza torna all'evasione;
+// dagli altri moduli (emissi_fatdif, select_docforlist, ...) il comportamento resta quello di sempre
+$printAttr = '';
+if (isset($_GET['from']) && $_GET['from'] == 'contratti') {
+   $printAttr = ' formtarget="_blank" onclick="setTimeout(function(){window.location=\'invoice_from_contract.php?vat_section=' . intval($form['seziva']) . '\'},1500)"';
+}
 echo "<form method=\"POST\">";
 echo "<input type=\"hidden\" name=\"ritorno\" value=\"" . $form['ritorno'] . "\">\n";
 echo "<div align=\"center\" class=\"FacetFormHeaderFont\">Ristampa documenti gi&agrave; emessi " . $script_transl[1];
@@ -446,7 +452,7 @@ echo "</td></tr>\n";
 
 echo "<tr><td class=\"FacetFieldCaptionTD\">" . $script_transl['tipo_stampa'] . "</td><td>";
 $gForm->variousSelect('tipo_stampa', $script_transl['tipo_stampa_value'], $form['tipo_stampa'], "col-sm-8", false, '', false, 'style="max-width: 200px;"');
-echo '</td></tr><tr><td class="FacetFooterTD text-center" colspan=2><input type="submit" class="btn btn-warning" name="Print" value="' . ucfirst($script_transl['submit']) . "\"></td></tr>\n";
+echo '</td></tr><tr><td class="FacetFooterTD text-center" colspan=2><input type="submit" class="btn btn-warning" name="Print"' . $printAttr . ' value="' . ucfirst($script_transl['submit']) . "\"></td></tr>\n";
 ?>
 </table>
 </form>

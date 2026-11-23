@@ -59,7 +59,7 @@ function contractUpdate ($newValue,$codice=false,$tesdoc='')
                     'start_date', 'months_duration', 'initial_fee','periodic_reassessment',
                     'bank', 'periodicity', 'payment_method', 'tacit_renewal', 'current_fee',
                     'id_con', 'cod_revenue', 'vat_code', 'id_body_text', 'last_reassessment',
-                    'id_agente', 'provvigione', 'status', 'note', 'adminid');
+                    'id_agente', 'provvigione', 'status', 'note', 'covered_ym', 'invoice_descri', 'adminid');
   $newValue['adminid'] = $_SESSION["user_name"];
   if (is_array($codice)) {
     tableUpdate($table, $columns, $codice, $newValue);
@@ -71,6 +71,16 @@ function contractUpdate ($newValue,$codice=false,$tesdoc='')
   } else {
     return tableInsert($table, $columns, $newValue);
   }
+}
+
+// selettore del tipo di addebito di una riga del contratto: ricorrente (ogni periodo), una tantum, fatturata
+function contractRowStatusSelect ($name, $value) {
+    $opzioni = array('ricorrente' => 'ricorrente', 'unatantum' => 'una tantum', 'fatturata' => 'fatturata');
+    $html = '<select name="' . $name . '" title="ricorrente: si fattura a ogni periodo; una tantum: si fattura una sola volta">';
+    foreach ($opzioni as $codice => $testo) {
+        $html .= '<option value="' . $codice . '"' . (($value == $codice) ? ' selected' : '') . '>' . $testo . '</option>';
+    }
+    return $html . '</select>';
 }
 
 function contractRowUpdate ($newValue,$codice=false)

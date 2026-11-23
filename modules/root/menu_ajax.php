@@ -15,14 +15,22 @@ header('Content-Type: application/json');
 // Legge il payload JSON inviato da AJAX
 $input = file_get_contents('php://input');
 $form_data = json_decode($input, true);
-if (!$form_data || !isset($form_data['elem'])) {
+if (!$form_data || ( !isset($form_data['elem']) && !isset($form_data['status_toggle']) )) {
   http_response_code(400);
   echo json_encode(['status' => 'error', 'message' => 'Dati non validi']);
   exit;
 }
 
 try {
-  if ($form_data['mode'] === 'm2') { // ordinare il menù 2: cambio solo  weight di menu_module
+  if ( isset($form_data['status_toggle']) ) { // cambio lo status
+    $status = intval($form_data['status_toggle']);
+    $status ^= 1;
+    if ( $form_data['id_menu_script'] > 0 ) {
+      gaz_dbi_put_row($gTables['menu_script'],'id',$form_data['id_menu_script'],'status',$status);
+    } else {
+      gaz_dbi_put_row($gTables['menu_module'],'id',$form_data['id_menu_module'],'status',$status);
+    }
+  } else if ($form_data['mode'] === 'm2') { // ordinare il menù 2: cambio solo  weight di menu_module
     $order = 5;
     foreach ($form_data['elem'] as $el) {
       gaz_dbi_put_row($gTables['menu_module'],'id',$el['id_menu_module'],'weight',$order);

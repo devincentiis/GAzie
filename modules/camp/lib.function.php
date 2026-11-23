@@ -131,40 +131,167 @@ class silos {
 			return $content ;
 	}
 
-	function getMovContainer($codsil,$codart="", $excluded_movmag = 0){// restituisce i movimenti di olio e lotti di un contenitore olio
+	// restituisce i movimenti di olio e lotti di un contenitore olio
+	function getMovContainer($codsil,$codart="", $excluded_movmag = 0) {
 		global $gTables,$admin_aziend;
-		$content=[];
-		$q=0;
-		$where="recip_stocc = '".$codsil."'";
 
-		if (is_array($excluded_movmag)){
-		  $add_excl="";
-		  foreach($excluded_movmag as $each){
-			$add_excl.= " AND ".$gTables['movmag'].".id_mov <> ".intval($each);
-		  }
-		  $where=$where.$add_excl;
-		}elseif($excluded_movmag <> 0){
-			$where=$where." AND ".$gTables['movmag'].".id_mov <> ".$excluded_movmag;
-		}
+		$content = array();
+		$q = 0.0;
 
-		if (strlen($codart)>0){
-		  $where=$where." AND artico = '". $codart ."'";
-		}
-			$what=	$gTables['movmag'].".operat, ".$gTables['movmag'].".id_mov, ".$gTables['movmag'].".id_lotmag, ".$gTables['movmag'].".quanti, ".$gTables['movmag'].".id_orderman, ".$gTables['movmag'].".datdoc, ".$gTables['camp_mov_sian'].".*, ".$gTables['camp_artico'].".confezione, ".$gTables['artico'].".codice, ".$gTables['artico'].".descri, ".$gTables['artico'].".unimis";
-			$table=$gTables['camp_mov_sian']." LEFT JOIN ".$gTables['movmag']." ON ".$gTables['camp_mov_sian'].".id_movmag = ".$gTables['movmag'].".id_mov
-											LEFT JOIN ".$gTables['camp_artico']." ON ".$gTables['movmag'].".artico = ".$gTables['camp_artico'].".codice
-											LEFT JOIN ".$gTables['artico']." ON ".$gTables['movmag'].".artico = ".$gTables['artico'].".codice";
-			$ressilos=gaz_dbi_dyn_query ($what,$table,$where,$gTables['movmag'].'.datreg');
-			while ($r = gaz_dbi_fetch_array($ressilos)) {
-				if ($r['confezione']==0 && $r['id_mov']>=1 ){
-          $val=$r['quanti']*$r['operat'];
-					$q = number_format($q + $val,6);
-          $idlot=(intval($r['id_lotmag'])>0)?"-id lotto: ".$r['id_lotmag']:'';
-					$content[]=['val'=>$r['quanti']*$r['operat'],'id'=>$r['id_mov'],'cod'=>$r['codice'],'des'=>$r['descri'],'um'=>$r['unimis'],'pro'=>$q,'id_lot'=>$idlot,'datdoc'=>$r['datdoc']];
-				}
+		$codsil = trim((string)$codsil);
+		$codsilSQL = addslashes($codsil);
+
+		// Considero sia i movimenti in entrata che quelli in uscita
+		$where = "(TRIM(".$gTables['camp_mov_sian'].".recip_stocc) = '".$codsilSQL."'
+			OR TRIM(".$gTables['camp_mov_sian'].".recip_stocc_destin) = '".$codsilSQL."')";
+
+		if (is_array($excluded_movmag)) {
+			foreach ($excluded_movmag as $each) {
+				$where .= " AND ".$gTables['movmag'].".id_mov <> ".intval($each);
 			}
-			return $content ;
+		} elseif ($excluded_movmag != 0) {
+			$where .= " AND ".$gTables['movmag'].".id_mov <> ".intval($excluded_movmag);
+		}
+
+		if (strlen($codart)>0) {
+			$where .= " AND ".$gTables['movmag'].".artico = '".addslashes($codart)."'";
+		}
+
+		// Data effettiva dell'operazione SIAN
+		// Per i carichi C3 manuali utilizzo la data del documento
+		$dataSian = "CASE
+			WHEN ".$gTables['camp_mov_sian'].".cod_operazione = '3'
+			AND IFNULL(".$gTables['camp_mov_sian'].".tesdoc,0) > 0
+			THEN sian_tesdoc.datemi
+			ELSE ".$gTables['movmag'].".datdoc
+		END";
+
+		$what = $gTables['movmag'].".operat, ".
+				$gTables['movmag'].".id_mov, ".
+				$gTables['movmag'].".id_lotmag, ".
+				$gTables['movmag'].".quanti, ".
+				$gTables['movmag'].".id_orderman, ".
+				$gTables['movmag'].".datreg, ".
+				$gTables['camp_mov_sian'].".*, ".
+				$dataSian." AS data_sian, ".
+				$gTables['camp_artico'].".confezione, ".
+				$gTables['artico'].".codice, ".
+				$gTables['artico'].".descri, ".
+				$gTables['artico'].".unimis";
+
+		$table = $gTables['camp_mov_sian']."
+      LEFT JOIN ".$gTables['movmag']."
+          ON ".$gTables['camp_mov_sian'].".id_movmag = ".$gTables['movmag'].".id_mov
+
+      LEFT JOIN ".$gTables['camp_mov_sian']." AS sian_padre
+          ON sian_padre.id_mov_sian = ".$gTables['camp_mov_sian'].".id_mov_sian_rif
+
+      LEFT JOIN ".$gTables['tesdoc']." AS sian_tesdoc
+          ON sian_tesdoc.id_tes = ".$gTables['camp_mov_sian'].".tesdoc
+
+      LEFT JOIN ".$gTables['camp_artico']."
+          ON ".$gTables['movmag'].".artico = ".$gTables['camp_artico'].".codice
+
+      LEFT JOIN ".$gTables['artico']."
+          ON ".$gTables['movmag'].".artico = ".$gTables['artico'].".codice";
+
+		// Recupero una sola volta la capacità del recipiente
+		$recSilos = gaz_dbi_get_row(
+			$gTables['camp_recip_stocc'],
+			'cod_silos',
+			$codsil
+		);
+
+		$capacita = (isset($recSilos['capacita']))
+			? (float)$recSilos['capacita']
+			: 0;
+
+		// Ordine cronologico effettivo SIAN
+		// Nella stessa giornata mantengo l'ordine di registrazione
+		// Per O0 visualizzo prima gli scarichi figli e poi il carico principale
+    $ordine = "data_sian ASC, ".
+          $gTables['movmag'].".datreg ASC, ".
+          "CASE
+              WHEN sian_padre.cod_operazione = 'O0'
+              THEN sian_padre.id_movmag
+              ELSE ".$gTables['movmag'].".id_mov
+          END ASC, ".
+          "CASE
+              WHEN sian_padre.cod_operazione = 'O0' THEN 0
+              WHEN ".$gTables['camp_mov_sian'].".cod_operazione = 'O0' THEN 1
+              ELSE 0
+          END ASC, ".
+          $gTables['movmag'].".id_mov ASC, ".
+          $gTables['movmag'].".clfoco ASC, ".
+          $gTables['movmag'].".operat DESC, ".
+          $gTables['movmag'].".tipdoc ASC";
+
+		$ressilos = gaz_dbi_dyn_query(
+			$what,
+			$table,
+			$where,
+			$ordine
+		);
+
+		while ($r = gaz_dbi_fetch_array($ressilos)) {
+			// Escludo il movimento padre Orderman M1:
+			// la movimentazione effettiva è già rappresentata
+			// dai movimenti collegati id_mov_sian_rif.
+
+			if (
+				intval($r['id_orderman']) > 0 &&
+				intval($r['operat']) == 1 &&
+				intval($r['cod_operazione']) == 5
+			) {
+				continue;
+			}
+
+			if ($r['confezione'] == 0 && $r['id_mov'] >= 1) {
+
+				$partenza = trim((string)$r['recip_stocc']);
+				$destinazione = trim((string)$r['recip_stocc_destin']);
+
+				// Escludo i movimenti che non riguardano il contenitore visualizzato
+				if (
+					$partenza != (string)$codsil &&
+					$destinazione != (string)$codsil
+				) {
+					continue;
+				}
+
+				// Se il recipiente visualizzato è quello di destinazione,
+				// considero il movimento come un carico positivo
+				if ($destinazione == $codsil && $partenza != $codsil) {
+					$val = abs((float)$r['quanti']);
+				} else {
+					$val = (float)$r['quanti'] * (float)$r['operat'];
+				}
+
+				// Calcolo progressivo senza formattazioni intermedie
+				$q = round($q + $val, 6);
+
+				$idlot = (intval($r['id_lotmag']) > 0)
+					? "-id lotto: ".$r['id_lotmag']
+					: '';
+
+				$content[] = array(
+					'val' => round($val,6),
+					'id' => $r['id_mov'],
+					'cod' => $r['codice'],
+					'des' => $r['descri'],
+					'um' => $r['unimis'],
+					'pro' => $q,
+					'id_lot' => $idlot,
+					'datdoc' => $r['data_sian'],
+					'capacita' => $capacita,
+					'id_orderman' => $r['id_orderman']
+				);
+			}
+		}
+
+		return $content;
 	}
+
 
 	function getLotRecip($codsil,$codart="",$excluded_movmag = 0){// funzione per trovare l'ID dell'ultimo lotto inserito nel recipiente di stoccaggio
 		$id_lotma=false;
@@ -307,7 +434,10 @@ class silos {
 		$res = gaz_dbi_query($query);
 		$sum=0;$zeroday=array();
 		foreach ($res as $r){
-			$sum = number_format($sum,8) + ($r['quanti']*$r['operat']);
+			$sum = round($sum + ((float)$r['quanti'] * (float)$r['operat']), 8);
+      if (abs($sum) < 0.00000001) {
+          $sum = 0;
+      }
 			if ($sum == 0){
 				$zeroday['id_mov']=$r['id_mov'];
 				$zeroday['datdoc']=$r['datdoc'];
@@ -360,10 +490,10 @@ class silos {
 			//echo "<pre>",print_r($res);
 			if( !isset($count[$key][$res['id_lotmag']]) ){ // se la chiave lotto ancora non c'è nell'array
 				// Aggiungo la chiave con il rispettivo valore iniziale
-				$count[$key][$res['id_lotmag']] = number_format(($res['quanti']*$res['operat']),8);
+				$count[$key][$res['id_lotmag']] = round((float)$res['quanti'] * (float)$res['operat'], 8);
 			} else {
 				// Altrimenti, aggiorno il valore della chiave
-				$count[$key][$res['id_lotmag']] += number_format(($res['quanti']*$res['operat']),8);
+				$count[$key][$res['id_lotmag']] = round((float)$count[$key][$res['id_lotmag']] + ((float)$res['quanti'] * (float)$res['operat']),8);
 			}
 
 			if( !isset($count[$key2][$res['quality']]) ){ // se la chiave varietà ancora non c'è nell'array
@@ -371,15 +501,15 @@ class silos {
 				if (strlen($res['quality'])<3){// basta una sola partita senza varietà per bloccare la classificazione varietale del silos
 					$var_dichiarabili="NO";// varietà non dichiarabili in quanto è presente una partita anonima
 				}
-				$count[$key2][$res['quality']] = number_format(($res['quanti']*$res['operat']),8);
+				$count[$key2][$res['quality']] = round((float)$res['quanti'] * (float)$res['operat'], 8);
 			} else {
 				// Altrimenti, aggiorno il valore della chiave
-				$count[$key2][$res['quality']]+= number_format(($res['quanti']*$res['operat']),8);
+				$count[$key2][$res['quality']] = round((float)$count[$key2][$res['quality']] + ((float)$res['quanti'] * (float)$res['operat']), 8);
 			}
 		}
-		$count[$key]['totale']= number_format (array_sum($count[$key]),8); // il totale dei lotti
 
-		$count[$key2]['totale']= number_format (array_sum($count[$key2]),8); // il totale delle varietà
+    $count[$key]['totale'] = round(array_sum($count[$key]), 8);// il totale dei lotti
+    $count[$key2]['totale'] = round(array_sum($count[$key2]), 8);// il totale delle varietà
 
 		// i valori zero o, peggio, negativi sono da escludere
 		$count[$key] = array_filter($count[$key],function($var){return($var >= 0.00000001);});
@@ -395,6 +525,33 @@ class silos {
 		//restituisce array['lotti](totale=>qta, idlotto=>qta, id lotto=>qta, etc) e array['varieta'](totale=>qta, varieta=>qta, varieta=>qta, etc) Le varietà sono elencate in ordine descrescente in base al valore della quantità.
 		return $count;
 	}
+  // Antonio Germani - Disponibilità lotto per classificazioni SIAN O0
+  function sian_get_lot_qty($id_lotmag, $excluded_movmag = array()) {
+      global $gTables;
+      $id_lotmag = intval($id_lotmag);
+      if ($id_lotmag <= 0) {
+          return 0;
+      }
+      $where = "id_lotmag = " . $id_lotmag;
+      if (!is_array($excluded_movmag)) {
+          $excluded_movmag = array($excluded_movmag);
+      }
+      foreach ($excluded_movmag as $id_mov) {
+          $id_mov = intval($id_mov);
+          if ($id_mov > 0) {
+              $where .= " AND id_mov <> " . $id_mov;
+          }
+      }
+      $query = "
+          SELECT COALESCE(SUM(quanti * operat), 0) AS disponibilita
+          FROM " . $gTables['movmag'] . "
+          WHERE " . $where;
+
+      $result = gaz_dbi_query($query);
+      $row = gaz_dbi_fetch_array($result);
+      return round((float)$row['disponibilita'], 5);
+  }
+
 }
 
 // converte da ore decimali a hh:mm:ss - Es. da 5.75 a 05:45:00

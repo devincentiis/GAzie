@@ -29,9 +29,13 @@ $msg = '';
 $anagrafica = new Anagrafica();
 
 if (!isset($_POST['ritorno'])) {
-    $form['ritorno'] = $_SERVER['HTTP_REFERER'];
+    $form['ritorno'] = $_SERVER['HTTP_REFERER'] ?? '';
 } else {
     $form['ritorno'] = $_POST['ritorno'];
+}
+// senza referer (pagina aperta direttamente) dopo il salvataggio si torna all'elenco dei contratti
+if (empty($form['ritorno'])) {
+    $form['ritorno'] = 'report_contract.php';
 }
 
 if ((isset($_GET['Update']) and  !isset($_GET['id_contract']))) {
@@ -84,14 +88,18 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
     $form['id_agente'] = intval($_POST['id_agente']);
     $form['provvigione'] = floatval(preg_replace("/\,/",'.',$_POST['provvigione']));
     $form['status'] = $_POST['status'];
+    $form['invoice_descri'] = substr($_POST['invoice_descri'], 0, 255);
+    $form['note'] = substr($_POST['note'] ?? '', 0, 64);
     // inizio rigo di input
     $form['in_descri'] = $_POST['in_descri'];
     $form['in_unimis'] = $_POST['in_unimis'];
     $form['in_quanti'] = gaz_format_quantity($_POST['in_quanti'],0,$admin_aziend['decimal_quantity']);
-    $form['in_price'] = $_POST['in_price'];
+    // il prezzo può arrivare con la virgola (24,51): lo porto a numero con il punto, altrimenti number_format() dà errore
+    $form['in_price'] = floatval(preg_replace("/\,/",'.',$_POST['in_price']));
     $form['in_discount'] = $_POST['in_discount'];
     $form['in_vat_code'] = $_POST['in_vat_code'];
     $form['in_cod_revenue'] = $_POST['in_cod_revenue'];
+    $form['in_status'] = isset($_POST['in_status']) ? $_POST['in_status'] : 'ricorrente';
     // fine rigo input
     $form['rows'] = array();
     $next_row = 0;
@@ -104,6 +112,7 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
             $form['rows'][$next_row]['quanti'] = gaz_format_quantity($value['quanti'],0,$admin_aziend['decimal_quantity']);
             $form['rows'][$next_row]['vat_code'] = intval($value['vat_code']);
             $form['rows'][$next_row]['cod_revenue'] = intval($value['cod_revenue']);
+            $form['rows'][$next_row]['status'] = isset($value['status']) ? substr($value['status'],0,10) : '';
             $next_row++;
        }
     }
@@ -156,6 +165,8 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
              $new_clfoco = $anagrafica->getPartnerData($match[1],1);
              $form['id_customer']=$anagrafica->anagra_to_clfoco($new_clfoco,$admin_aziend['mascli'],$form['payment_method']);
           }
+          // ultimo mese pagato: salvato sul contratto, anche se non ci sono ancora fatture collegate
+          $form['covered_ym'] =($form['covered_year'] > 0 && $form['covered_month'] > 0) ? sprintf('%04d-%02d', $form['covered_year'], $form['covered_month']) : '';
           if ($toDo == 'update') { // e' una modifica
              $old_rows = gaz_dbi_dyn_query("*", $gTables['contract_row'], "id_contract = ".$form['id_contract'],"id_contract");
              $i=0;
@@ -230,6 +241,7 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
     $form['rows'][$next_row]['quanti'] = $form['in_quanti'];
     $form['rows'][$next_row]['discount'] = $form['in_discount'];
     $form['rows'][$next_row]['vat_code'] =  $form['in_vat_code'];
+    $form['rows'][$next_row]['status'] = $form['in_status'];
     $form['rows'][$next_row]['cod_revenue'] = $form['in_cod_revenue'];
     // reinizializzo rigo di input tranne che tipo rigo, aliquota iva e conto ricavo
     $form['in_descri'] = "";
@@ -266,8 +278,17 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
     $form['start_date_M'] = substr($contract['start_date'],5,2);
     $form['start_date_D'] = substr($contract['start_date'],8,2);
     $form['months_duration'] = $contract['months_duration'];
-    $form['covered_month'] = $tesdoc ? substr($tesdoc['data_ordine'],5,2) : '';
-    $form['covered_year'] = $tesdoc ? substr($tesdoc['data_ordine'],0,4) : '';
+    // ultimo mese pagato: quello salvato sul contratto ha la precedenza, altrimenti quello della fattura collegata
+    if (!empty($contract['covered_ym'])) {
+      $form['covered_month'] = substr($contract['covered_ym'],5,2);
+      $form['covered_year'] = substr($contract['covered_ym'],0,4);
+    } elseif ($tesdoc) {
+      $form['covered_month'] = substr($tesdoc['data_ordine'],5,2);
+      $form['covered_year'] = substr($tesdoc['data_ordine'],0,4);
+    } else {
+      $form['covered_month'] = '';
+      $form['covered_year'] = '';
+    }
     $form['initial_fee'] = $contract['initial_fee'];
     $form['periodic_reassessment'] = $contract['periodic_reassessment'];
     $form['bank'] = $contract['bank'];
@@ -286,6 +307,8 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
     $form['provvigione'] = $contract['provvigione'];
     $form['id_agente'] = $contract['id_agente'];
     $form['status'] = $contract['status'];
+    $form['invoice_descri'] = $contract['invoice_descri'];
+    $form['note'] = $contract['note'];
 
     // inizio rigo di input
     $form['in_descri'] = "";
@@ -308,6 +331,7 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
            $form['rows'][$next_row]['quanti'] = gaz_format_quantity($row['quanti'],0,$admin_aziend['decimal_quantity']);
            $form['rows'][$next_row]['vat_code'] = $row['vat_code'];
            $form['rows'][$next_row]['cod_revenue'] = $row['cod_revenue'];
+           $form['rows'][$next_row]['status'] = $row['status'];
            $next_row++;
     }
 } elseif (!isset($_POST['Insert'])) { //se e' il primo accesso per INSERT
@@ -320,21 +344,14 @@ if ((isset($_POST['Insert'])) or (isset($_POST['Update']))) {   //se non e' il p
     }
     $cliente['indspe'] = '';
     $form['search']['id_customer']='';
-    if (!isset($_GET['vat_section'])) {
-        $rs_last = gaz_dbi_dyn_query("vat_section,doc_type", $gTables['contract'], 1,"id_contract DESC",0,1);
-        $last = gaz_dbi_fetch_array($rs_last);
-                if ($last){
-                   $form['vat_section'] = $last['vat_section'];
-                } else {
-                   $form['vat_section'] = 1;
-                }
-    } else {
-        $form['vat_section'] = intval($_GET['vat_section']);
-    }
+    // sezionale di default 1; l'utente lo può cambiare nel form
+    $form['vat_section'] = isset($_GET['vat_section']) ? intval($_GET['vat_section']) : 1;
     // trovo l'ultimo numero di contratto
     $rs_last = gaz_dbi_dyn_query("*", $gTables['contract'], "YEAR(conclusion_date)=".date("Y"),"doc_number DESC",0,1);
     $last = gaz_dbi_fetch_array($rs_last);
     $form['doc_number'] = ($last)?($last['doc_number']+1):1;
+    $form['invoice_descri'] = '';
+    $form['note'] = '';
     $form['conclusion_date_Y'] = date("Y");
     $form['conclusion_date_M'] = date("m");
     $form['conclusion_date_D'] = date("d");
@@ -432,7 +449,17 @@ echo "<tr>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['doc_number']."</td>\n";
 echo "\t<td class=\"FacetDataTD\"><input type=\"text\" name=\"doc_number\" value=\"".$form['doc_number']."\" align=\"right\" maxlength=\"9\" /></td>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['current_fee']."</td>\n";
-echo "\t<td class=\"FacetDataTD\"><input type=\"text\" name=\"current_fee\" value=\"".$form['current_fee']."\" align=\"right\" maxlength=\"9\" tabindex=\"2\" /></td>\n";
+// il canone vero (quello fatturato) resta nel campo inviato; a video il totale di canone e righe ricorrenti, solo come riferimento
+$tot_ricorrenti = 0;
+foreach ($form['rows'] as $rr) {
+    if (isset($rr['status']) && ($rr['status'] == 'unatantum' || $rr['status'] == 'fatturata')) continue;
+    $tot_ricorrenti += floatval(str_replace(',', '.', $rr['quanti'])) * floatval(str_replace(',', '.', $rr['price']));
+}
+echo "\t<td class=\"FacetDataTD\"><input type=\"text\" name=\"current_fee\" value=\"".$form['current_fee']."\" align=\"right\" maxlength=\"9\" tabindex=\"2\" />";
+if ($tot_ricorrenti > 0) {
+    echo " <small>+ ricorrenti ".number_format($tot_ricorrenti,2,',','.')." = ".number_format($form['current_fee'] + $tot_ricorrenti,2,',','.')."</small>";
+}
+echo "</td>\n";
 echo "\t<td class=\"FacetFieldCaptionTD\">".$script_transl['start_date']."</td>\n";
 echo "\t<td class=\"FacetDataTD\">\n";
 $gForm->CalendarPopup('start_date',$form['start_date_D'],$form['start_date_M'],$form['start_date_Y']);
@@ -489,9 +516,8 @@ echo "\t<input type=\"text\" name=\"provvigione\" value=\"".$form['provvigione']
 echo "</td>\n";
 echo "</tr>\n";
 echo "<tr>\n";
-echo "\t<td class=\"FacetFieldCaptionTD\"></td><td  class=\"FacetDataTD\">";
-echo "\t </td>\n";
-echo "<td class=\"FacetFieldCaptionTD\"></td><td  class=\"FacetDataTD\">\n";
+echo "\t<td class=\"FacetFieldCaptionTD\">Note</td><td colspan=\"3\" class=\"FacetDataTD\">\n";
+echo "\t<input type=\"text\" name=\"note\" value=\"".htmlspecialchars($form['note'])."\" maxlength=\"64\" style=\"width:100%;max-width:400px\" />\n";
 echo "</td>\n";
 echo "<td class=\"FacetFieldCaptionTD\">Ultimo mese pagato</td><td  class=\"FacetDataTD\">\n";
 $gazTimeFormatter->setPattern('MMMM');
@@ -516,7 +542,10 @@ echo "\t </select>\n";
 echo "</td>\n";
 echo "</tr>\n";
 echo "<tr>\n";
-echo '<td colspan=3 align="right"><b>'.$script_transl['body_text'].'</b></td><td colspan=3>';
+echo "<td class=\"FacetFieldCaptionTD\">Descrizione in fattura</td><td colspan=\"3\" class=\"FacetDataTD\">\n";
+echo "\t<input type=\"text\" name=\"invoice_descri\" value=\"".htmlspecialchars($form['invoice_descri'])."\" maxlength=\"255\" style=\"width:100%;max-width:400px\" placeholder=\"vuoto = testo standard\" />\n";
+echo "</td>\n";
+echo '<td align="right"><b>'.$script_transl['body_text'].'</b></td><td>';
 echo $script_transl['status'].': ';
 $gForm->variousSelect('status',$script_transl['status_value'],$form['status'],'',false);
 echo '</td></tr>';
@@ -524,16 +553,18 @@ echo "\t<tr><td colspan=\"6\">\n";
 echo "<textarea id=\"body_text\" name=\"body_text\" class=\"mceClass\" style=\"width:100%;height:400px;\" >".$form['body_text']."</textarea>\n";
 echo "</td></tr>\n";
 echo "</table></div>\n";
-echo "<div class=\"table-responsive\"><table class=\"Tlarge table table-striped\">\n";
+echo "<div class=\"table-responsive\"><table class=\"Tlarge table table-striped table-bordered\">\n";
 if ($next_row>0) {
-  echo "<tr class=\"bg-info text-center\"><td colspan=\"8\"><b>".$script_transl['insrow']."</b></td></tr>\n";
+  echo "<tr class=\"bg-info text-center\"><td colspan=\"9\"><b>".$script_transl['insrow']."</b></td></tr>\n";
   foreach ($form['rows'] as $k=>$val) {
     $nr=$k+1;
     $aliiva = gaz_dbi_get_row($gTables['aliiva'],'codice',$val['vat_code']);
     echo "<input type=\"hidden\" value=\"".$val['vat_code']."\" name=\"rows[$k][vat_code]\">\n";
     echo "<input type=\"hidden\" value=\"".$val['cod_revenue']."\" name=\"rows[$k][cod_revenue]\">\n";
     echo "<tr class=\"FacetFieldCaptionTD\">\n";
-    echo '<td>'.$nr."</td><td colspan=2><input type=\"text\" name=\"rows[$k][descri]\" value=\"".$val['descri']."\" maxlength=\"100\" /><br/>
+    echo '<td>'.$nr."</td>\n";
+    echo "<td>".contractRowStatusSelect("rows[$k][status]", $val['status'] ?? '')."</td>\n";
+    echo "<td colspan=2><input type=\"text\" name=\"rows[$k][descri]\" value=\"".$val['descri']."\" maxlength=\"100\" /><br/>
           ".$script_transl['cod_revenue'].": ".$val['cod_revenue']." - ".$aliiva['descri']."</td>\n";
     echo "<td><input type=\"text\" name=\"rows[$k][unimis]\" value=\"".$val['unimis']."\" maxlength=\"3\" /></td>\n";
     echo "<td><input type=\"text\" style=\"text-align:right\" name=\"rows[$k][quanti]\" value=\"".$val['quanti']."\" maxlength=\"11\" /></td>\n";
@@ -546,22 +577,29 @@ if ($next_row>0) {
 		echo "\t </tr>\n";
   }
 }
-echo "</table></div><br/>\n";
+echo "</table></div>\n";
 echo "<div class=\"table-responsive\"><table class=\"Tlarge table input-area\">\n";
 echo "<tr>\n";
-echo "\t<td colspan=\"8\" align=\"center\"><b>".$script_transl['rows_title']."</b></td>\n";
+echo "\t<td colspan=\"9\" align=\"center\"><b>".$script_transl['rows_title']."</b></td>\n";
 echo "</tr>\n";
 echo "<tr>\n";
 echo "<input type=\"hidden\" value=\"".$form['hidden_req']."\" name=\"hidden_req\" />\n";
 echo "\t<tr align=\"center\">\n";
-echo "\t<td colspan=\"3\">".$script_transl['descri']."</td>\n";
+echo "\t<td></td>\n";
+echo "\t<td>Tipo addebito</td>\n";
+echo "\t<td colspan=\"2\">".$script_transl['descri']."</td>\n";
 echo "\t<td>".$script_transl['unimis']."</td>\n";
 echo "\t<td>".$script_transl['quanti']."</td>\n";
 echo "\t<td>".$script_transl['price']."</td>\n";
 echo "\t<td>".$script_transl['discount']."</td>\n";
+echo "\t<td></td>\n";
 echo "</tr>\n";
 echo "<tr align=\"center\">\n";
-echo "<td colspan=\"3\">\n";
+echo "<td></td>\n";
+echo "<td>\n";
+echo contractRowStatusSelect("in_status", $form['in_status'] ?? 'ricorrente');
+echo "\t </td>\n";
+echo "<td colspan=\"2\">\n";
 echo "<input type=\"text\" value=\"".$form['in_descri']."\" maxlength=\"100\" name=\"in_descri\">\n";
 echo "\t </td>\n";
 echo "<td>\n";
@@ -581,7 +619,7 @@ echo '&nbsp;<button type="submit" class="btn btn-success" name="in_submit"><i cl
 echo "\t </td>\n";
 echo "\t </tr>\n";
 echo "\t<tr>\n";
-echo "<td colspan=\"7\">\n";
+echo "<td colspan=\"9\">\n";
 echo $script_transl['vat_code'].' :';
 $gForm->selectFromDB('aliiva','in_vat_code','codice',$form['in_vat_code'],'codice',0,' - ','descri');
 echo $script_transl['cod_revenue'].' :';
@@ -591,7 +629,7 @@ $select_cod_revenue -> output(substr($form['in_cod_revenue'],0,1));
 echo "\t </td>\n";
 echo "\t </tr>\n";
 echo "\t<tr class=\"FacetFooterTD\">\n";
-echo '<td colspan=8 align="center"> <input type="submit" class="btn btn-warning" accesskey="i" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="';
+echo '<td colspan=9 align="center"> <input type="submit" class="btn btn-warning" accesskey="i" name="ins" id="preventDuplicate" onClick="chkSubmit();" value="';
 echo $script_transl['submit'];
 echo '" tabindex="100" >';
 echo "\t </td>\n";
