@@ -30,6 +30,8 @@ $scroll_input_row = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscro
 $after_newdoc_back_to_doclist=gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
 $msgtoast = "";
 $msg = "";
+require_once("../../library/include/prezzo_consigliato.inc.php");
+$prezzo_consigliato = prezzo_consigliato_attivo(); // prezzo scrivibile, costo d'acquisto e prezzo consigliato nel riquadro
 $show_artico_composit = gaz_dbi_get_row($gTables['company_config'], 'var', 'show_artico_composit');
 $tipo_composti = gaz_dbi_get_row($gTables['company_config'], 'var', 'tipo_composti');
 
@@ -184,6 +186,9 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
     $form['in_ritenuta'] = $_POST['in_ritenuta'];
     $form['in_unimis'] = $_POST['in_unimis'];
     $form['in_prelis'] = $_POST['in_prelis'];
+    if ($prezzo_consigliato) { // prezzo scritto a mano: virgola o campo vuoto
+      $form['in_prelis'] = prezzo_consigliato_numero($form['in_prelis']);
+    }
     $form['in_sconto'] = $_POST['in_sconto'];
     $form['in_quanti'] = gaz_format_quantity($_POST['in_quanti'], 0, $admin_aziend['decimal_quantity']);
     $form['in_codvat'] = $_POST['in_codvat'];
@@ -603,6 +608,9 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                       }
                     }
                 }
+                if ($prezzo_consigliato && $form['tipdoc'] != 'VPR') { // costi d'acquisto corretti a mano (non dai preventivi): vanno nella scheda articolo
+                    prezzo_consigliato_salva_costi($form['rows']);
+                }
                 if ($after_newdoc_back_to_doclist==1 && $pdf_to_modal==0) {
 	                $_SESSION['print_queue'] = array();
 	                $_SESSION['print_queue']['tpDoc'] =  $form['tipdoc'];
@@ -922,6 +930,9 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
               } else {
                   $form['rows'][$old_key]['prelis'] = number_format($artico['preve1'], $admin_aziend['decimal_price'], '.', '');
               }
+              if ($prezzo_consigliato && ($pc_prezzo = prezzo_consigliato_scritto($form['in_codart'], $form['in_prelis'])) !== false) { // prezzo scritto nel riquadro: vince sul listino
+                  $form['rows'][$old_key]['prelis'] = number_format($pc_prezzo, $admin_aziend['decimal_price'], '.', '');
+              }
               $mv = $upd_mm->getStockValue(false, $form['in_codart'], $form['annemi'] . '-' . $form['mesemi'] . '-' . $form['gioemi'], $admin_aziend['stock_eval_method']);
               $magval = array_pop($mv);
               $magval=(is_numeric($magval))?['q_g'=>0,'v_g'=>0]:$magval;
@@ -1085,6 +1096,9 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
                 } else {
                     $form['rows'][$next_row]['prelis'] = number_format((isset($artico['preve1']))?$artico['preve1']:0, $admin_aziend['decimal_price'], '.', '');
                 }
+            }
+            if ($prezzo_consigliato && ($pc_prezzo = prezzo_consigliato_scritto($form['in_codart'], $form['in_prelis'])) !== false) { // prezzo scritto nel riquadro: vince su listino e prezzo netto
+                $form['rows'][$next_row]['prelis'] = number_format($pc_prezzo, $admin_aziend['decimal_price'], '.', '');
             }
             $form['rows'][$next_row]['codvat'] = $admin_aziend['preeminent_vat'];
             $iva_azi = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['preeminent_vat']);
@@ -2040,7 +2054,7 @@ function printInputNewRowForm ($form,$trsl,$gForm) {
 	  <input type="hidden" value="' . $form['in_tipiva'] . '" name="in_tipiva" />
 	  <input type="hidden" value="' . $form['in_ritenuta'] . '" name="in_ritenuta" />
     <input type="hidden" value="' . $form['in_unimis'] . '" name="in_unimis" />
-	  <input type="hidden" value="' . $form['in_prelis'] . '" name="in_prelis" />
+	  ' . (prezzo_consigliato_attivo() ? '' : '<input type="hidden" value="' . $form['in_prelis'] . '" name="in_prelis" />') . '
 	  <input type="hidden" value="' . $form['in_id_mag'] . '" name="in_id_mag" />
     <input type="hidden" value="' . $form['in_id_rig'] . '" name="in_id_rig" />
     <input type="hidden" value="' . $form['in_nrow'] . '" name="in_nrow" />
@@ -2077,6 +2091,11 @@ if (substr($form['in_status'], 0, 6) != "UPDROW") { //se non è un rigo da modif
 ?>
 			</td>
 		</tr>
+<?php
+if (prezzo_consigliato_attivo()) { // Prezzo, Acquisto, Prezzo consigliato
+  prezzo_consigliato_campi($form, true);
+}
+?>
 		<tr>
 			<td>
 <?php

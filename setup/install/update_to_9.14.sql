@@ -55,6 +55,7 @@ DEALLOCATE PREPARE stmtbXXX;
 ALTER TABLE `gaz_XXXcontract` ADD COLUMN `covered_ym` VARCHAR(7) NOT NULL DEFAULT '' COMMENT 'Ultimo mese pagato (AAAA-MM), salvato sul contratto anche senza fatture/ricevute collegate' AFTER `note`;
 ALTER TABLE `gaz_XXXcontract` ADD COLUMN `invoice_descri` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Descrizione del primo rigo in fattura (vuoto = testo standard)' AFTER `covered_ym`;
 ALTER TABLE `gaz_XXXassist` ADD COLUMN `id_tesdoc` INT NOT NULL DEFAULT 0 COMMENT 'Documento di vendita generato dall\'intervento' AFTER `note`;
+INSERT INTO `gaz_XXXcompany_config` (`lang_id`, `description`, `var`, `val`) SELECT * FROM (SELECT 1 AS `lang_id`, 'Prezzo scrivibile, costo di acquisto e prezzo consigliato nei documenti di vendita (0=No, 1=Si)' AS `description`, 'prezzo_consigliato' AS `var`, '0' AS `val`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_XXXcompany_config` WHERE `var` = 'prezzo_consigliato');
 ALTER TABLE `gaz_XXXaliiva`	CHANGE COLUMN `taxstamp` `taxstamp` INT NULL DEFAULT (0) AFTER `aliquo`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'C', 0.0,'N1', 'Art. 29 DL.10/2026 (esclusi)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'S', 0.0,'N2.1', 'Art. 15 DL.10/2026(FC x territorialita)' FROM `gaz_XXXaliiva`;
