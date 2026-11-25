@@ -47,6 +47,7 @@ SET @adminid_queryXXX = IF(@adminid_existsXXX = 0, "ALTER TABLE `gaz_XXXrigbro` 
 PREPARE stmtaXXX FROM @adminid_queryXXX;
 EXECUTE stmtaXXX;
 DEALLOCATE PREPARE stmtaXXX;
+INSERT INTO `gaz_XXXcompany_config` (`lang_id`, `description`, `var`, `val`) SELECT * FROM (SELECT 1 AS `lang_id`, 'Avviso fido: striscia esposizione/fido del cliente in DDT, fatture, ordini (0=No, 1=Si)' AS `description`, 'avviso_fido' AS `var`, '0' AS `val`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_XXXcompany_config` WHERE `var` = 'avviso_fido');
 SET @last_modified_existsXXX = ( SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'gaz_XXXrigbro' AND COLUMN_NAME = 'last_modified');
 SET @last_modified_queryXXX = IF(@last_modified_existsXXX = 0,  "ALTER TABLE `gaz_XXXrigbro` ADD COLUMN `last_modified` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `adminid`","SELECT 1");
 PREPARE stmtbXXX FROM @last_modified_queryXXX;

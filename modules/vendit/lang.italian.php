@@ -136,6 +136,16 @@ $strScript = array("admin_client.php" =>
         'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 5 => ' di Vendita Online'),
         'ref_ecommerce_id_customer' => 'Riferimento al codice dell\'e-commerce'
     ),
+    "avviso_fido" => array( // striscia fido nei documenti di vendita (library/include/avviso_fido.inc.php)
+        'ok' => 'Fido OK',
+        'quasi' => 'Fido quasi esaurito',
+        'superato' => 'FIDO SUPERATO',
+        'esposizione' => 'Esposizione',
+        'scaduto' => 'di cui scaduto',
+        'documento' => 'documento in corso',
+        'su_fido' => 'su fido',
+        'affidabilita' => 'Affidabilità',
+    ),
     "report_docven.php" =>
     array('title' => 'Lista dei documenti di vendita',
         'mail_alert0' => 'Invio documento con email',
