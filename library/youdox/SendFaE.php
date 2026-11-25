@@ -5,6 +5,7 @@
   Copyright (C) 2004-present - Antonio De Vincentiis Montesilvano (PE)
   (https://www.devincentiis.it)
   <https://gazie.sourceforge.net>
+  Questo file: Copyright (C) 2026 Domenico Seccia - Assistenzacassa (https://assistenzacassa.it)
   --------------------------------------------------------------------------
   Questo programma e` free software;   e` lecito redistribuirlo  e/o
   modificarlo secondo i  termini della Licenza Pubblica Generica GNU
