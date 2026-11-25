@@ -51,7 +51,8 @@ $transl['config'] = array('name' => "Archivo Base",
         8 => array("Insertar nuevos puertos", "Nuevos puertos"),
         9 => array("Insertar nuevo usuario", "Nuevo usuario"),
         10 => array("Lista de empresas instaladas", "Empresa instalada"),
-        11 => array("Crear nueva empresa", "Crear nueva empresa")
+        11 => array("Crear nueva empresa", "Crear nueva empresa"),
+        12 => array("Firma digital de documentos (SystemaSign)", "Firma digital SystemaSign")
     )
 );
 ?>

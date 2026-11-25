@@ -41,6 +41,7 @@ UPDATE `gaz_languages` SET `description`='Idioma' WHERE `lang_id`=3;
 DELETE m2 FROM `gaz_menu_module` m2 LEFT JOIN `gaz_module` m1 ON m2.`id_module` = m1.id WHERE m1.id IS NULL;
 DELETE m3 FROM `gaz_menu_script` m3 LEFT JOIN `gaz_menu_module` m2 ON m3.`id_menu` = m2.id WHERE m2.id IS NULL;
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, (SELECT id_menu FROM `gaz_menu_script` WHERE `link`='genera_movmag.php'), 'editable_inventory.php', '', '', 17, '','', 10, 1 FROM `gaz_menu_script`;
+INSERT INTO `gaz_menu_script` (`id`, `id_menu`, `link`, `icon`, `class`, `translate_key`, `accesskey`, `weight`) SELECT * FROM (SELECT MAX(id)+1 AS id, (SELECT `id` FROM `gaz_menu_module` WHERE `link`='admin_aziend.php' LIMIT 1) AS id_menu, '../vendit/systemasign.php?impostazioni' AS link, '' AS icon, '' AS class, 12 AS translate_key, '' AS accesskey, 9 AS weight FROM `gaz_menu_script`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_menu_script` WHERE `link`='../vendit/systemasign.php?impostazioni');
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
 SET @adminid_existsXXX = ( SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'gaz_XXXrigbro' AND COLUMN_NAME = 'adminid');
 SET @adminid_queryXXX = IF(@adminid_existsXXX = 0, "ALTER TABLE `gaz_XXXrigbro` ADD COLUMN `adminid` VARCHAR(20) NOT NULL AFTER `status`","SELECT 1");
