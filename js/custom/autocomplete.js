@@ -2,8 +2,10 @@ $(function() {
 	// utilizzata dalla funzione selectDocPartner, quando incontra un solo risultato nella select lo conferma in automatico
 	$( "#onlyone_submit" ).trigger( "click" );
 
+	// ricerca separata (ricerca_partner_separata): data-mastro="c" solo clienti, "f" solo fornitori
+	var mastroClfoco = $( "#search_clfoco" ).data( "mastro" );
 	$( "#search_clfoco" ).autocomplete({
-		source: "../../modules/root/search.php",
+		source: "../../modules/root/search.php" + (mastroClfoco ? "?mastro=" + mastroClfoco : ""),
 		minLength: 2,
         html: true, // optional (jquery.ui.autocomplete.html.js required)
 

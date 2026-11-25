@@ -2168,8 +2168,9 @@ echo '<input type="hidden" value="' . $strArrayDest . '" name="rs_destinazioni">
             } else {
                 echo $script_transl['ins_this'].$title;
             }
+            require_once("../../library/include/ricerca_partner.inc.php"); // ricerca separata clienti/fornitori
             $select_fornitore = new selectPartner('clfoco');
-            $select_fornitore->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['search_partner'], $admin_aziend['masfor']);
+            $select_fornitore->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['search_partner'], $admin_aziend['masfor'], -1, 1, false, ricerca_partner_mastro('f'));
             ?>
             </b>
         </div>

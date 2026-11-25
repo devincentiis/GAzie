@@ -2120,8 +2120,9 @@ echo '	<input type="hidden" name="' . ucfirst($toDo) . '" value="" />
 		<input type="hidden" value="' . $form['datfat'] . '" name="datfat" />
 		<input type="hidden" value="' . (isset($_POST['last_focus']) ? $_POST['last_focus'] : "") . '" name="last_focus" />
 		<div align="center" class="row FacetFormHeaderFont">' . $title . '  a :';
+require_once("../../library/include/ricerca_partner.inc.php"); // ricerca separata clienti/fornitori
 $select_cliente = new selectPartner('clfoco');
-$select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli']);
+$select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli'], -1, 1, false, ricerca_partner_mastro('c'));
 $template_sets=[];
 $relativePath = '../../config';
 if ($handle = opendir($relativePath)) {

@@ -808,12 +808,18 @@ class selectPartner extends SelectBox {
         /** ENRICO FEDELE */
     }
 
-  function selectDocPartner($name, $val, $strSearch = '', $val_hiddenReq = '', $mesg='', $m = 0, $anonimo = -1, $tab = 1, $soloMastroSelezionato = false) {
+  function selectDocPartner($name, $val, $strSearch = '', $val_hiddenReq = '', $mesg='', $m = 0, $anonimo = -1, $tab = 1, $soloMastroSelezionato = false, $ricercaSeparata = '') {
     /* se passo $m=-1 ottengo tutti i partner nel piano dei conti indistintamente
       passare false su $tab se non si vuole la tabulazione
       $soloMastroSelezionato = true se si vogliono visualizzare solo i clienti (o i fornitori) in base a $m
+      $ricercaSeparata = 'c' (clienti) o 'f' (fornitori): solo le anagrafiche con un conto nel mastro $m,
+        anche se il risultato e' uno solo, e tendina di autocompletamento limitata allo stesso mastro
+        (vedi ricerca_partner_mastro() in ricerca_partner.inc.php); '' come prima
      */
     global $gTables;
+    if ($ricercaSeparata !== 'c' && $ricercaSeparata !== 'f') {
+      $ricercaSeparata = '';
+    }
     $tab1 = '';
     $tab2 = '';
     $tab3 = '';
@@ -859,6 +865,11 @@ class selectPartner extends SelectBox {
           $partner = $this->queryAnagra(array("a.codfis" => " LIKE '%" . addslashes($strSearch) . "%'"));
         } else {                                     //ricerca per ragione sociale
           $partner = $this->queryAnagra(array("a.ragso1" => " LIKE '" . addslashes($strSearch) . "%'"));
+        }
+        if ($ricercaSeparata !== '' && $m > 100) { // ricerca separata: tolgo le anagrafiche senza conto nel mastro $m
+          $partner = array_values(array_filter($partner, function ($r) {
+            return $r['codpart'] > 0;
+          }));
         }
         if (count($partner) > 1 || $_POST['hidden_req']=='change' ) {
           echo "\t<select name=\"$name\" $tab1 class=\"FacetSelect\" onchange=\"if(typeof(this.form.hidden_req)!=='undefined'){this.form.hidden_req.value='$name';} this.form.submit();\">\n";
@@ -931,7 +942,7 @@ class selectPartner extends SelectBox {
         echo "\t<input type=\"hidden\" name=\"$name\" value=\"$val\">\n";
       }
       if( !strstr($val,'id') && $val<=100000000){
-        echo '<input type="text" '.$tab2.' id="search_'.$name.'" name="search['.$name.']" value="' . $strSearch .'" placeholder="'.(isset($msg)?$msg.' 🔍' : '').'" >';
+        echo '<input type="text" '.$tab2.' id="search_'.$name.'" name="search['.$name.']" value="' . $strSearch .'" placeholder="'.(isset($msg)?$msg.' 🔍' : '').'"'.($ricercaSeparata !== '' ? ' data-mastro="'.$ricercaSeparata.'"' : '').' >';
       }
       if( !strstr($val,'id') && $val<=100000000){
         echo '<button type="submit" name="search_str" ' . $tab3 . '> 🔍 </button>';

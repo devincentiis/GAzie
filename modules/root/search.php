@@ -224,7 +224,12 @@ if (isset($_GET['term'])) { //	Evitiamo errori se lo script viene chiamato diret
         }           //	non inizia per za il risultato è nullo, così invece se cerco za%, viene fuori anche un prodotto il
       }            //  cui nome (o descrizione) inizia per za ma il cui codice può anche essere TPQ
       $like = implode(" OR ", $like);    //	creo la porzione di query per il like, con OR perchè cerco in campi differenti
-      $result = gaz_dbi_dyn_query("id, CONCAT(ragso1,' ',ragso2) AS label, ragso1 AS value, 'S' AS movimentabile ", $gTables['anagra'].' LEFT JOIN '.$gTables['clfoco']. " ON id = id_anagra", "(".$like.") AND  status NOT LIKE 'HIDDEN'", 'ragso1',0,500);
+      $from = $gTables['anagra'].' LEFT JOIN '.$gTables['clfoco']. " ON id = id_anagra";
+      if (isset($_GET['mastro']) && ($_GET['mastro'] === 'c' || $_GET['mastro'] === 'f')) { // ricerca separata: c solo clienti, f solo fornitori
+        $mas = intval($_GET['mastro'] === 'c' ? $admin_aziend['mascli'] : $admin_aziend['masfor']);
+        $from = $gTables['anagra'].' JOIN '.$gTables['clfoco']. " ON id = id_anagra AND codice BETWEEN ".$mas."000001 AND ".$mas."999999";
+      }
+      $result = gaz_dbi_dyn_query("id, CONCAT(ragso1,' ',ragso2) AS label, ragso1 AS value, 'S' AS movimentabile ", $from, "(".$like.") AND  status NOT LIKE 'HIDDEN'", 'ragso1',0,500);
   }
   while ($row = gaz_dbi_fetch_assoc($result)) {
       $return_arr[] = $row;
