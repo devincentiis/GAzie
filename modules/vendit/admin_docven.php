@@ -26,6 +26,8 @@ require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
 
 $admin_aziend = checkAdmin();
+require_once("../../library/include/inserimento_rapido.inc.php");
+$inserimento_rapido = inserimento_rapido_attivo(); // inserimento da tastiera e tasti rapidi
 $backDocList = gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
 $scorrimento = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
 $msgtoast = "";
@@ -4018,7 +4020,7 @@ if ($next_row > 0) {
 
 }
 echo '</table></div>';
-echo '<div class="text-center col-xs-12 FacetFooterTD"><input name="ins" class="btn '.$class_btn_confirm.'" id="preventDuplicate" onClick="chkSubmit();" type="submit" value="' . ucfirst($script_transl[$toDo]). @$addvalue . '"></div>';
+echo '<div class="text-center col-xs-12 FacetFooterTD"><input name="ins" class="btn '.$class_btn_confirm.'" id="preventDuplicate" onClick="chkSubmit();" type="submit" value="' . ucfirst($script_transl[$toDo]). @$addvalue . ($inserimento_rapido ? ' (F10)' : '') . '"></div>';
 ?>
 </form>
 </div>
@@ -4120,5 +4122,8 @@ $( document ).ready(function() {
 
 </script>
 <?php
+if ($inserimento_rapido) { // cursore sul cliente se manca, altrimenti sull'articolo (se non ci sono errori)
+  inserimento_rapido_script_documento(($form['clfoco'] < 100000000) ? 'cliente' : ((count($msg['err']) <= 0) ? 'articolo' : ''), true);
+}
 require("../../library/include/footer.php");
 ?>

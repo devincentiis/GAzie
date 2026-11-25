@@ -25,6 +25,8 @@
 require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
 $admin_aziend = checkAdmin();
+require_once("../../library/include/inserimento_rapido.inc.php");
+$inserimento_rapido = inserimento_rapido_attivo(); // inserimento da tastiera e tasti rapidi
 $pdf_to_modal = gaz_dbi_get_row($gTables['company_config'], 'var', 'pdf_reports_send_to_modal')['val'];
 $scroll_input_row = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
 $after_newdoc_back_to_doclist=gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
@@ -2882,7 +2884,7 @@ if ($next_row > 0) {
             <input name="shortdescri" maxlength=20 size=20 type="text" placeholder="Breve descrizione preventivo" value="'.$form['shortdescri'].'"/>
 					</td>
 					<td colspan="2" class="text-center FacetFooterTD">
-						<input name="ins" class="btn '.$class_btn_confirm.'" id="preventDuplicate" onClick="chkSubmit();" type="submit" value="' . ucfirst($script_transl[$toDo]) . '">
+						<input name="ins" class="btn '.$class_btn_confirm.'" id="preventDuplicate" onClick="chkSubmit();" type="submit" value="' . ucfirst($script_transl[$toDo]) . ($inserimento_rapido ? ' (F10)' : '') . '">
 					</td>
 				';
 } else {
@@ -2958,6 +2960,9 @@ if (isset($_POST['ins']) && empty($msg) && $pdf_to_modal!==0) {// stampa pdf in 
     printPdf('invsta_broven.php');
   </script>
   <?php
+}
+if ($inserimento_rapido) { // cursore sul cliente se manca, altrimenti sull'articolo (se non ci sono errori)
+  inserimento_rapido_script_documento(($form['clfoco'] < 100000000) ? 'cliente' : (empty($msg) ? 'articolo' : ''));
 }
 require("../../library/include/footer.php");
 ?>

@@ -85,6 +85,7 @@ function gzMenuItems($array) {
 
 function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $cssArray = '') {
     global $module, $admin_aziend, $radix, $scriptname, $gTables, $mod_uri, $debug_active;
+    require_once("../../library/include/inserimento_rapido.inc.php");
     if (is_array($jsArray)) {
         foreach ($jsArray as $v) {
             echo '			<script type="text/javascript" src="../../js/' . $v . '.js"></script>';
@@ -129,6 +130,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
                   require("../../modules/" . $row['name'] . "/lang.".$admin_aziend['lang'].".php");
                   $othertransl=$strScript;
                 }
+                inserimento_rapido_menu($transl, $row); // tasto rapido (F5...) accanto alla voce, se attivo
                 if ($ctrl_m2 != $row['m2_id']) {
                   $next_m3_name=false;
                   if (isset($othertransl[$nfr2.'.php'])) { // se è stato indicato il nome specifico per la voce di terzo livello generato dal secondo livello
@@ -409,6 +411,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
 		 }
 		 </script>
          <!--<div class="container" role="main">-->';
+         inserimento_rapido_script_tasti(); // F5, F6, F7 solo se attivo
          // override di variabili dei moduli: bs3clean/overrides.php definisce $gzOverrides (vedi il file)
         global $sortable_headers;
         $gzOverrides = array();
