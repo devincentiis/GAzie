@@ -26,6 +26,8 @@ require("../../library/include/datlib.inc.php");
 require("../../modules/magazz/lib.function.php");
 
 $admin_aziend = checkAdmin();
+require_once("../../library/include/ortofrutta.inc.php");
+$gestione_ortofrutta = ortofrutta_attiva(); // provenienza, calibro e categoria sui righi
 $backDocList = gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
 $scorrimento = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
 $msgtoast = "";
@@ -309,6 +311,11 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
       $form['rows'][$next_row]['unimis'] = substr($v['unimis'], 0, 3);
       $form['rows'][$next_row]['prelis'] = number_format(floatval(preg_replace("/\,/", '.', $v['prelis'])), $admin_aziend['decimal_price'], '.', '');
       $form['rows'][$next_row]['sconto'] = round((float)preg_replace("/\,/", ".", $v['sconto']),2);
+      if ($gestione_ortofrutta) { // i righi diversi dal normale non hanno questi campi
+        $form['rows'][$next_row]['provenienza'] = strtoupper(substr($v['provenienza'] ?? '', 0, 3));
+        $form['rows'][$next_row]['calibro'] = substr($v['calibro'] ?? '', 0, 20);
+        $form['rows'][$next_row]['categoria'] = substr($v['categoria'] ?? '', 0, 10);
+      }
       $form['rows'][$next_row]['quanti'] = gaz_format_quantity($v['quanti'], 0, $admin_aziend['decimal_quantity']);
       $codvat = intval($v['codvat']);
       $form['rows'][$next_row]['codvat'] = $codvat;
@@ -1042,6 +1049,13 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
           //se è un'articolo di magazzino controllo se la sua anagrafica aveva l'unità di misura, altrimenti uso questa
           if ($v['tiprig'] == 0 && !empty($v['codart'])) {
             $ctrlart = gaz_dbi_get_row($gTables['artico'], "codice", $v['codart']);
+            if ($gestione_ortofrutta && $ctrlart) { // provenienza, calibro e categoria scelti nel rigo diventano quelli dell'articolo
+              foreach (['provenienza', 'calibro', 'categoria'] as $campo_of) {
+                if (!empty($v[$campo_of]) && $v[$campo_of] != $ctrlart[$campo_of]) {
+                  gaz_dbi_put_row($gTables['artico'], 'codice', $v['codart'], $campo_of, $v[$campo_of]);
+                }
+              }
+            }
             if ($ctrlart && empty(trim($ctrlart['unimis']))) {
               gaz_dbi_put_row($gTables['artico'], 'codice', $v['codart'], 'unimis', $v['unimis']);
               if ($ctrlart['preve1'] < 0.00001 ) { // se anche il prezzo era a zero popolo il listino 1 con quello inserito nella prima vendita
@@ -1408,6 +1422,11 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
 				}
         $form['rows'][$old_key]['unimis'] = $artico['unimis'];
         $form['rows'][$old_key]['descri'] = $artico['descri'];
+        if ($gestione_ortofrutta) {
+          $form['rows'][$old_key]['provenienza'] = $artico['provenienza'] ?? '';
+          $form['rows'][$old_key]['calibro'] = $artico['calibro'] ?? '';
+          $form['rows'][$old_key]['categoria'] = $artico['categoria'] ?? '';
+        }
         if ($form['listin'] == 2) {
             $form['rows'][$old_key]['prelis'] = number_format($artico['preve2'], $admin_aziend['decimal_price'], '.', '');
         } elseif ($form['listin'] == 3) {
@@ -1567,6 +1586,11 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
  				$form['rows'][$next_row]['SIAN'] = $artico['SIAN'];
         $form['rows'][$next_row]['descri'] = $artico['descri'];
         $form['rows'][$next_row]['unimis'] = $artico['unimis'];
+        if ($gestione_ortofrutta) {
+          $form['rows'][$next_row]['provenienza'] = $artico['provenienza'] ?? '';
+          $form['rows'][$next_row]['calibro'] = $artico['calibro'] ?? '';
+          $form['rows'][$next_row]['categoria'] = $artico['categoria'] ?? '';
+        }
         $form['rows'][$next_row]['prelis'] = number_format($form['in_prelis'], $admin_aziend['decimal_price'], '.', '');
         $form['rows'][$next_row]['codric'] = $form['in_codric'];
         $form['rows'][$next_row]['quanti'] = $form['in_quanti'];
@@ -2251,6 +2275,11 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
     $form['rows'][$next_row]['unimis'] = $rigo['unimis'];
     $form['rows'][$next_row]['prelis'] = number_format($rigo['prelis'], $admin_aziend['decimal_price'], '.', '');
     $form['rows'][$next_row]['sconto'] = round($rigo['sconto'],2);
+    if ($gestione_ortofrutta) {
+      $form['rows'][$next_row]['provenienza'] = $rigo['provenienza'] ?? '';
+      $form['rows'][$next_row]['calibro'] = $rigo['calibro'] ?? '';
+      $form['rows'][$next_row]['categoria'] = $rigo['categoria'] ?? '';
+    }
     $form['rows'][$next_row]['quanti'] = gaz_format_quantity($rigo['quanti'], 0, $admin_aziend['decimal_quantity']);
     $form['rows'][$next_row]['codvat'] = $rigo['codvat'];
     $form['rows'][$next_row]['codric'] = $rigo['codric'];
@@ -2957,6 +2986,11 @@ foreach ($form['rows'] as $k => $v) {
         echo '<td><input class="gazie-tooltip" data-type="product-thumb" data-id="' . $v["codart"] . '" data-title="' . $v['annota'] . '" type="text" name="rows[' . $k . '][descri]" value="' . $descrizione . '" maxlength=100 size=100 />';
         if ($form['partner_lang'] > 1 ) { // bottone per dialog traduzione se previsto dalla lingua del cliente
           echo '<a class="btn btn-xs dialog_translate_descri" ref="translate_descri_'.$k.'" href="#" title="'.$v['translate_descri'].'" > '.base64_decode($partner_lang['emoji']).'</a>';
+        }
+        if ($gestione_ortofrutta) {
+          echo '<div><small>Prov.</small> ' . ortofrutta_select('rows[' . $k . '][provenienza]', 'provenienza', $v['provenienza'] ?? '')
+            . ' <small>Cal.</small> ' . ortofrutta_select('rows[' . $k . '][calibro]', 'calibro', $v['calibro'] ?? '')
+            . ' <small>Cat.</small> ' . ortofrutta_select('rows[' . $k . '][categoria]', 'categoria', $v['categoria'] ?? '') . '</div>';
         }
         if (gaz_dbi_get_single_value($gTables['shelves'],'id_shelf','id_shelf > 0 LIMIT 1')){
         echo 'Ubicazione:';

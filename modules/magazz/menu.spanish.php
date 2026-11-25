@@ -56,7 +56,10 @@ $transl['magazz'] = array('name' => "Bodega",
                                          14 =>array("Insertar nuevo grupo","Insertar nuevo grupo"),
                                          15 =>array("Insert new warehouse","Insert new warehouse"),
                                          16 =>array("Cambio codice articolo","Cambio codice articolo"),
-                                         17 =>array("Inventario editable","Inventario editable")
+                                         17 =>array("Inventario editable","Inventario editable"),
+                                         18 =>array("Procedencias de frutas y verduras (paises)","Procedencias fruta/verdura"),
+                                         19 =>array("Categorias de calidad de frutas y verduras","Categorias fruta/verdura"),
+                                         20 =>array("Calibres de frutas y verduras","Calibres fruta/verdura")
                                       )
                           );
 ?>
