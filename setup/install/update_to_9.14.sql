@@ -52,6 +52,7 @@ SET @last_modified_queryXXX = IF(@last_modified_existsXXX = 0,  "ALTER TABLE `ga
 PREPARE stmtbXXX FROM @last_modified_queryXXX;
 EXECUTE stmtbXXX;
 DEALLOCATE PREPARE stmtbXXX;
+INSERT INTO `gaz_XXXcompany_config` (`lang_id`, `description`, `var`, `val`) SELECT * FROM (SELECT 1 AS `lang_id`, 'Conto ricavi/costi azienda sui righi senza conto in contabilizzazione (0=No, 1=Si)' AS `description`, 'conto_ricavi_riserva' AS `var`, '0' AS `val`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_XXXcompany_config` WHERE `var` = 'conto_ricavi_riserva');
 ALTER TABLE `gaz_XXXcontract` ADD COLUMN `covered_ym` VARCHAR(7) NOT NULL DEFAULT '' COMMENT 'Ultimo mese pagato (AAAA-MM), salvato sul contratto anche senza fatture/ricevute collegate' AFTER `note`;
 ALTER TABLE `gaz_XXXcontract` ADD COLUMN `invoice_descri` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Descrizione del primo rigo in fattura (vuoto = testo standard)' AFTER `covered_ym`;
 ALTER TABLE `gaz_XXXassist` ADD COLUMN `id_tesdoc` INT NOT NULL DEFAULT 0 COMMENT 'Documento di vendita generato dall\'intervento' AFTER `note`;

@@ -25,6 +25,7 @@
 require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 require("../../library/include/calsca.inc.php");
+require("../../library/include/conto_riserva.inc.php");
 $msg=['err'=>[],'war'=>[]];
 
 function getExtremeDocs($type = '_', $vat_section = 1, $date = false) {
@@ -185,6 +186,8 @@ function getDocumentsAccounts($type = '___', $vat_section = 1, $date = false, $p
                     ON rs.codvat=vat.codice';
         $rs_rig = gaz_dbi_dyn_query('rs.*,vat.tipiva AS tipiva', $from, "rs.id_tes = " . $tes['id_tes'], "id_tes DESC");
         while ($r = gaz_dbi_fetch_array($rs_rig)) {
+            // rigo senza conto ricavi valido: conto dell'azienda (se attivo conto_ricavi_riserva)
+            $r['codric'] = conto_riserva_rigo($r['codric'], $r['tiprig'], ($tes['tipdoc'] == 'FNC') ? $admin_aziend['sales_return'] : $admin_aziend['impven']);
             if ($r['tiprig'] <= 1  || $r['tiprig'] == 4 || $r['tiprig'] == 90) { // se del tipo normale, forfait, cassa previdenziale, vendita cespite
                 //calcolo importo rigo
                 $importo = CalcolaImportoRigo($r['quanti'], $r['prelis'], array($r['sconto'], $tes['sconto']));
