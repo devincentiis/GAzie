@@ -192,15 +192,29 @@ class Template extends Fpdi {
 			if (!empty($this->efattura)){
 				$this->SetFont('helvetica','B',9);
 				$this->SetTextColor(255,0,0);
+				if ($this->layout_pos_logo_on_doc == 'LEFT') { // con il logo a sinistra la scritta va a destra del logo
+					$this->SetX(80);
+				}
 				$this->Cell(110,0,'Copia di cortesia del documento elettronico inviato al Sistema di Interscambio',0,1,'L',0,'',1);
 				$this->SetTextColor(0,0,0);
 			}
             $this->SetFont('helvetica', '', 10);
-            $this->Cell(110, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);
-            if ($this->tesdoc['tipdoc'] == 'NOP' || $this->withoutPageGroup) {
-                $this->Cell(30, 5);
+            if ($this->layout_pos_logo_on_doc == 'LEFT') {
+                // con il logo a sinistra tipo documento e numero di pagina stanno sulla stessa riga, a destra del logo
+                $this->SetX(80);
+                $this->Cell(95, 5, $this->tipdoc, 1, 0, 'L', 1, '', 1);
+                if ($this->tesdoc['tipdoc'] == 'NOP' || $this->withoutPageGroup) {
+                    $this->Cell(30, 5, '', 0, 1);
+                } else {
+                    $this->Cell(30, 5, 'Pag. ' . $this->getGroupPageNo() . ' di ' . $this->getPageGroupAlias(), 0, 1, 'L');
+                }
             } else {
-                $this->Cell(30, 5, 'Pag. ' . $this->getGroupPageNo() . ' di ' . $this->getPageGroupAlias(), 0, 0, 'L');
+                $this->Cell(110, 5, $this->tipdoc, 1, 1, 'L', 1, '', 1);
+                if ($this->tesdoc['tipdoc'] == 'NOP' || $this->withoutPageGroup) {
+                    $this->Cell(30, 5);
+                } else {
+                    $this->Cell(30, 5, 'Pag. ' . $this->getGroupPageNo() . ' di ' . $this->getPageGroupAlias(), 0, 0, 'L');
+                }
             }
             $this->Ln(6);
             $interlinea = $this->GetY();
@@ -216,10 +230,15 @@ class Template extends Fpdi {
                 }
             }
 			if ($this->codice_partner > 0){
-				$this->SetXY(35, $interlinea - 5);
+				$logo_a_sinistra = ($this->layout_pos_logo_on_doc == 'LEFT'); // con il logo a sinistra il riquadro va a destra del logo
+				$this->SetXY($logo_a_sinistra ? 80 : 35, $interlinea - 5);
 				$this->Cell(13, 4, $this->descri_partner, 'LT', 0, 'R', 1, '', 1);
 				$this->Cell(72, 4, ': ' . $this->cliente5, 'TR', 1, 0, '', 1);
-				$this->Cell(25);
+				if ($logo_a_sinistra) {
+					$this->SetX(80);
+				} else {
+					$this->Cell(25);
+				}
 				$this->Cell(20, 4, ' cod.: ' . $this->codice_partner, 'LB', 0, 'L');
 				$to='';
 				if (trim($this->cod_univoco)!=''){
