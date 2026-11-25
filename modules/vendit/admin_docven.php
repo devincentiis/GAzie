@@ -2661,8 +2661,9 @@ if ($form['tipdoc'] == 'FAI') {
 }
 echo " a:";
 
+require_once("../../library/include/ricerca_partner.inc.php"); // ricerca separata clienti/fornitori
 $select_cliente = new selectPartner('clfoco');
-$select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli']);
+$select_cliente->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['mascli'], -1, 1, false, ricerca_partner_mastro('c'));
 //tabula solo se non e' stato settato il cliente
 $tabula = " tabindex=\"3\" ";
 if ($form['clfoco'] > 0)

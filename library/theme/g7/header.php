@@ -190,7 +190,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
              */
             if (is_array($jsArray)) {
                 foreach ($jsArray as $v) {
-                    echo "          <!-- js caricato dallo script in esecuzione -->\n" . '        <script type="text/javascript" src="../../js/' . $v . '.js"></script>' . "\n";
+                    echo "          <!-- js caricato dallo script in esecuzione -->\n" . '        <script type="text/javascript" src="../../js/' . $v . '.js?v=' . @filemtime(__DIR__ . '/../../../js/' . $v . '.js') . '"></script>' . "\n";
                 }
             }
             if (is_array($cssArray)) {

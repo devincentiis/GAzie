@@ -87,7 +87,7 @@ function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $c
     global $module, $admin_aziend, $radix, $scriptname, $gTables, $mod_uri, $debug_active;
     if (is_array($jsArray)) {
         foreach ($jsArray as $v) {
-            echo '			<script type="text/javascript" src="../../js/' . $v . '.js"></script>';
+            echo '			<script type="text/javascript" src="../../js/' . $v . '.js?v=' . @filemtime(__DIR__ . '/../../../js/' . $v . '.js') . '"></script>';
         }
     }
     if (is_array($cssArray)) {

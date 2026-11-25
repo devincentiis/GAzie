@@ -1050,8 +1050,9 @@ echo '<input type="hidden" value="' . (isset($_POST['last_focus']) ? $_POST['las
 echo "<input type=\"hidden\" value=\"\" id=\"dialog_row_focus\" />\n";
 echo "<input type=\"hidden\" value=\"" . $form['hidden_req'] . "\" name=\"hidden_req\" />\n";
 echo "<div align=\"center\" class=\"FacetFormHeaderFont\">$title ";
+require_once("../../library/include/ricerca_partner.inc.php"); // ricerca separata clienti/fornitori
 $select_fornitore = new selectPartner("clfoco");
-$select_fornitore->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['masfor']);
+$select_fornitore->selectDocPartner('clfoco', $form['clfoco'], $form['search']['clfoco'], 'clfoco', $script_transl['mesg'], $admin_aziend['masfor'], -1, 1, false, ricerca_partner_mastro('f'));
 echo "</div>\n";
 echo "<div class=\"table-responsive\"><table class=\"Tlarge table table-striped table-bordered table-condensed\">\n";
 echo "<tr><td class=\"FacetFieldCaptionTD\">$script_transl[4]</td><td class=\"FacetDataTD\">\n";
