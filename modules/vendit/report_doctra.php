@@ -26,6 +26,8 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $pdf_to_modal = gaz_dbi_get_row($gTables['company_config'], 'var', 'pdf_reports_send_to_modal')['val'];
 $partner_select = !gaz_dbi_get_row($gTables['company_config'], 'var', 'partner_select_mode')['val'];
+require_once("../../library/include/systemasign.inc.php"); // SystemaSign: firma digitale di DDT e fatture accompagnatorie
+$ss_stati = ss_stati_ddt();
 $table_join = $gTables['tesdoc']." AS dtesdoc".
                      " INNER JOIN {$gTables['clfoco']}" .
                      " ON dtesdoc.clfoco = {$gTables['clfoco']}.codice " .
@@ -369,6 +371,7 @@ if (isset($_SESSION['print_request']) && intval($_SESSION['print_request'])>0){
                             $targetPrintDoc = ($pdf_to_modal==0)?'href="stampa_docven.php?id_tes=' . $r["id_tes"] .'&template=DDT" target="_blank" ':"onclick=\"printPdf('stampa_docven.php?id_tes=" . $r["id_tes"] . "&template=DDT')\"";
                             echo "<td>";
                             echo '<a class="btn btn-xs btn-default" style="cursor:pointer;" '.$targetPrintDoc.' ><i class="glyphicon glyphicon-print" title="Stampa documento"></i></a>';
+                            echo ss_pulsante($r['id_tes'], $ss_stati); // SystemaSign
                             echo "<a class=\"btn btn-xs btn-default\" style=\"cursor:pointer;\" onclick=\"printPdf('".$urlPrintEtichette."')\" data-toggle=\"modal\" data-target=\"#print_doc\" ><i class=\"glyphicon glyphicon-tag\" title=\"Stampa etichetta\"></i></a>";
                             echo ' <a class="btn btn-xs btn-default" title="XML Peppol" href="./peppol.php?id_tes='.$r['id_tes'].'&viewxml" target="_blank"> XML </a>';
                             echo "</td>\n";

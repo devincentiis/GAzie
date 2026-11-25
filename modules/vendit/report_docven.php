@@ -26,6 +26,8 @@ require("../../library/include/datlib.inc.php");
 $admin_aziend = checkAdmin();
 $pdf_to_modal = gaz_dbi_get_row($gTables['company_config'], 'var', 'pdf_reports_send_to_modal')['val'];
 $partner_select = !gaz_dbi_get_row($gTables['company_config'], 'var', 'partner_select_mode')['val'];
+require_once("../../library/include/systemasign.inc.php"); // SystemaSign: firma digitale di DDT e fatture accompagnatorie
+$ss_stati = ss_stati_ddt();
 $tesdoc_e_partners = $gTables['tesdoc'] . " LEFT JOIN " . $gTables['clfoco'] . " ON " . $gTables['tesdoc'] . ".clfoco = " . $gTables['clfoco'] . ".codice LEFT JOIN " . $gTables['anagra'] . ' ON ' . $gTables['clfoco'] . '.id_anagra = ' . $gTables['anagra'] . '.id LEFT JOIN ' . $gTables['fae_flux'] . " ON " . $gTables['tesdoc'] . ".id_tes = " . $gTables['fae_flux'] . '.id_tes_ref';
 
 // funzione di utilità generale, adatta a mysqli.inc.php
@@ -794,6 +796,9 @@ function printPdf(urlPrintDoc){
                 // Colonna Stampa / Duplica
                 $targetPrintDoc = ($pdf_to_modal==0)?'href="'.$modulo.'" target="_blank" ':"onclick=\"printPdf('".$modulo."')\"";
                 echo '<td class="text-center"><a class="btn btn-xs btn-default" style="cursor:pointer;" '.$targetPrintDoc.'"><i class="glyphicon glyphicon-print" title="Stampa documento PDF"></i></a>';
+                if ($r['tipdoc'] == 'FAI' && gaz_dbi_get_single_value($gTables['tesdoc'], 'template', 'id_tes = ' . intval($r['id_tes'])) == 'FatturaImmediata') {
+                  echo ss_pulsante($r['id_tes'], $ss_stati); // SystemaSign: fattura accompagnatoria
+                }
                 if ( $r['tipdoc']== 'FAA' || $r['tipdoc']== 'FAI' ) {
                   echo '<a class="btn btn-xs btn-success" href="admin_docven.php?Duplicate&id_tes=' . $r["id_tes"] . '" style="float: right;" title="Duplica"><i class="glyphicon glyphicon-duplicate"></i> </a>';
                 }
