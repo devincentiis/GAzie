@@ -1065,6 +1065,10 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
           } else {
             $_SESSION['template'] = '';
           }
+          if (substr($form['tipdoc'], 0, 1) == 'F') { // invio automatico allo SdI, se attivato in Configurazione Avanzata (send_fae_automatico)
+            require_once('../../library/include/fae_invio_automatico.inc.php');
+            fae_invio_automatico($gTables, $admin_aziend, $ultimo_id);
+          }
           if (intval($backDocList)==0){ // tornare a nuovo inserimento
             header("Location: admin_docven.php?Insert&tipdoc=". $form['tipdoc']);
             exit;
