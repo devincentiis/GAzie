@@ -1216,6 +1216,18 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
     $form['hidden_req'] = '';
   }
 
+  // controlli sul rigo normale, se attivati (controlli_righi)
+  require_once("../../library/include/controlli_righi.inc.php");
+  if (isset($_POST['in_submit']) && controlli_righi_attivo()) {
+    $controlli_righi_campo = controlli_righi_zero($form);
+    if ($controlli_righi_campo) { // quantita' o prezzo a zero: il rigo non entra
+      $msg['err'][] = 'zero_qta_prezzo';
+      unset($_POST['in_submit']);
+    } elseif (controlli_righi_doppio($form)) {
+      $msg['war'][] = 'dup_codart';
+    }
+  }
+
   // Se viene inviata la richiesta di conferma rigo
 	if (isset($_POST['in_submit_desc'])) { //rigo Descrittivo rapido
     $form['rows'][$next_row]['codart'] = '';
@@ -2596,6 +2608,9 @@ if (count($msg['war']) > 0) { // ho un alert-danger
 	echo '<div class="text-center"><div><b>';
     $gForm->gazHeadMessage($msg['war'], $script_transl['war'], 'war');
 	echo "</b></div></div>\n";
+}
+if (!empty($controlli_righi_campo)) { // campo del rigo da correggere
+  echo controlli_righi_script($controlli_righi_campo);
 }
 ?>
 <form method="POST" name="docven" enctype="multipart/form-data">

@@ -384,7 +384,9 @@ $strScript = array("admin_client.php" =>
         'weight' => 'weight',
         'zero_rows' => 'The document no contains rows or products. For add  them to the body enter the "%" value for a complete list or to make a partial search',
         'discount_alert' => 'discount taken from article\'s informations',
-        'last_row' => 'Last row'
+        'last_row' => 'Last row',
+        'zero_qta_prezzo' => "Row NOT added: quantity and price must be other than zero!",
+        'dup_codart' => "Item already present in another row of the document: possible double entry!"
     ),
     "report_contract.php" =>
     array('title' => 'Report of concluded contracts',
