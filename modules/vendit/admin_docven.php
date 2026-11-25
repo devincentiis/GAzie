@@ -29,6 +29,8 @@ $admin_aziend = checkAdmin();
 $backDocList = gaz_dbi_get_row($gTables['company_config'], 'var', 'after_newdoc_back_to_doclist')['val'];
 $scorrimento = gaz_dbi_get_row($gTables['company_config'], 'var', 'autoscroll_to_last_row')['val'];
 $msgtoast = "";
+require_once("../../library/include/prezzo_consigliato.inc.php");
+$prezzo_consigliato = prezzo_consigliato_attivo(); // prezzo scrivibile, costo d'acquisto e prezzo consigliato nel riquadro
 $msg = ['err'=>[],'war'=>[]];
 $calc = new Compute;
 $magazz = new magazzForm;
@@ -230,6 +232,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
   $form['in_ritenuta'] = $_POST['in_ritenuta'];
   $form['in_unimis'] = $_POST['in_unimis'];
   $form['in_prelis'] = $_POST['in_prelis'];
+  if ($prezzo_consigliato) { // prezzo scritto a mano: virgola o campo vuoto
+    $form['in_prelis'] = prezzo_consigliato_numero($form['in_prelis']);
+  }
   $form['in_sconto'] = $_POST['in_sconto'];
   $form['in_quanti'] = gaz_format_quantity($_POST['in_quanti'], 0, $admin_aziend['decimal_quantity']);
   $form['in_codvat'] = $_POST['in_codvat'];
@@ -1050,6 +1055,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
             }
           }
         }
+        if ($prezzo_consigliato) { // costi d'acquisto corretti a mano nel documento: vanno nella scheda articolo
+          prezzo_consigliato_salva_costi($form['rows']);
+        }
         if ($form['id_doc_ritorno'] > 0) { // è un RDV pertanto non lo stampo e inserisco il riferimento sulla testata relativa
           gaz_dbi_put_row($gTables['tesdoc'], 'id_tes', $form['id_doc_ritorno'], 'id_doc_ritorno', $ultimo_id);
           header("Location: report_doctra.php");
@@ -1419,6 +1427,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         } else {
             $form['rows'][$old_key]['prelis'] = number_format($artico['preve1'], $admin_aziend['decimal_price'], '.', '');
         }
+        if ($prezzo_consigliato && ($pc_prezzo = prezzo_consigliato_scritto($form['in_codart'], $form['in_prelis'])) !== false) { // prezzo scritto nel riquadro: vince sul listino
+          $form['rows'][$old_key]['prelis'] = number_format($pc_prezzo, $admin_aziend['decimal_price'], '.', '');
+        }
         $mv = $magazz->getStockValue(false, $form['in_codart'], $datemi, $admin_aziend['stock_eval_method']);
         $magval = array_pop($mv);
         $magval=(is_numeric($magval))?['q_g'=>0,'v_g'=>0]:$magval;
@@ -1611,6 +1622,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
           } else {
               $form['rows'][$next_row]['prelis'] = number_format($artico['preve1'], $admin_aziend['decimal_price'], '.', '');
           }
+        }
+        if ($prezzo_consigliato && ($pc_prezzo = prezzo_consigliato_scritto($form['in_codart'], $form['in_prelis'])) !== false) { // prezzo scritto nel riquadro: vince su listino e prezzo netto
+          $form['rows'][$next_row]['prelis'] = number_format($pc_prezzo, $admin_aziend['decimal_price'], '.', '');
         }
         $form['rows'][$next_row]['codvat'] = $admin_aziend['preeminent_vat'];
         $iva_azi = gaz_dbi_get_row($gTables['aliiva'], "codice", $admin_aziend['preeminent_vat']);
@@ -3645,7 +3659,7 @@ echo '	<input type="hidden" value="' . $form['in_descri'] . '" name="in_descri" 
 		<input type="hidden" value="' . $form['in_tipiva'] . '" name="in_tipiva" />
 		<input type="hidden" value="' . $form['in_ritenuta'] . '" name="in_ritenuta" />
     <input type="hidden" value="' . $form['in_unimis'] . '" name="in_unimis" />
-		<input type="hidden" value="' . $form['in_prelis'] . '" name="in_prelis" />
+		' . ($prezzo_consigliato ? '' : '<input type="hidden" value="' . $form['in_prelis'] . '" name="in_prelis" />') . '
 		<input type="hidden" value="' . $form['in_id_mag'] . '" name="in_id_mag" />
 		<input type="hidden" value="' . $form['in_extdoc'] . '" name="in_extdoc" />
 		<input type="hidden" value="' . $form['in_annota'] . '" name="in_annota" />
@@ -3729,6 +3743,11 @@ if ($toDo == "insert"){
                 ?>
             </div>
         </div>
+<?php
+if ($prezzo_consigliato) { // Prezzo, Acquisto, Prezzo consigliato
+  prezzo_consigliato_campi($form);
+}
+?>
         <div class="row">
             <div class="form-group col-xs-12 col-sm-6 col-md-3">
                 <label for="in_sconto" ><?php echo ' %'.$script_transl[24].':'; ?></label>
