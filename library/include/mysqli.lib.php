@@ -865,14 +865,14 @@ function rigcmrUpdate($codice, $newValue) {
 
 function rigdocInsert($newValue) {
    $table = 'rigdoc';
-   $columns = array('id_tes', 'tiprig', 'nrow', 'nrow_linked', 'codart', 'codice_fornitore', 'descri', 'id_body_text', 'unimis', 'quanti', 'prelis', 'sconto', 'codvat', 'pervat', 'codric', 'provvigione', 'peso_specifico', 'ritenuta', 'id_order', 'id_mag', 'id_orderman', 'status');
+   $columns = array('id_tes', 'tiprig', 'nrow', 'nrow_linked', 'codart', 'codice_fornitore', 'descri', 'id_body_text', 'unimis', 'quanti', 'prelis', 'sconto', 'codvat', 'pervat', 'codric', 'provvigione', 'peso_specifico', 'ritenuta', 'id_order', 'id_mag', 'id_orderman', 'status', 'provenienza', 'calibro', 'categoria');
    $last_id = tableInsert($table, $columns, $newValue);
    return $last_id;
 }
 
 function rigdocUpdate($codice, $newValue) {
    $table = 'rigdoc';
-   $columns = array('id_tes', 'tiprig', 'nrow', 'nrow_linked', 'codart', 'codice_fornitore', 'descri', 'id_body_text', 'unimis', 'quanti', 'prelis', 'sconto', 'codvat', 'pervat', 'codric', 'provvigione', 'peso_specifico', 'ritenuta', 'id_order', 'id_mag', 'id_orderman', 'status');
+   $columns = array('id_tes', 'tiprig', 'nrow', 'nrow_linked', 'codart', 'codice_fornitore', 'descri', 'id_body_text', 'unimis', 'quanti', 'prelis', 'sconto', 'codvat', 'pervat', 'codric', 'provvigione', 'peso_specifico', 'ritenuta', 'id_order', 'id_mag', 'id_orderman', 'status', 'provenienza', 'calibro', 'categoria');
    tableUpdate($table, $columns, $codice, $newValue);
 }
 

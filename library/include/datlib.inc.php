@@ -94,7 +94,7 @@ if (@file_exists('./lib.data.php')) {
 //tabelle aziendali
 $tn = ['agenti','agenti_forn','aliiva','artico','artico_group','artico_position','assets','assist','banapp','body_text',
 'campi','camp_artico','camp_mov_sian','camp_recip_stocc','cash_register','cash_register_reparto','cash_register_tender',
-'catmer','caucon','caucon_rows','caumag','clfoco','company_config','company_data','comunicazioni_dati_fatture','customer_group',
+'catmer','caucon','caucon_rows','caumag','clfoco','company_config','company_data','comunicazioni_dati_fatture','customer_group','provenienze','categorie_ortofrutta','calibri_ortofrutta',
 'contract', 'contract_row','distinta_base','effett','expdoc','extcon','fae_flux','files','imball','instal','letter',
 'liquidazioni_iva', 'lotmag', 'movmag','orderman','pagame','pagame_distribution','paymov','portos','provvigioni','ragstat',
 'registro_trattamento_dati','rigbro','rigdoc','rigmoc','rigmoi','sconti_articoli','sconti_raggruppamenti','shelves','spediz',

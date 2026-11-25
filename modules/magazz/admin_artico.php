@@ -57,6 +57,8 @@ global $gTables;
 // m1 fine Modificato a mano
 
 $admin_aziend = checkAdmin();
+require_once("../../library/include/ortofrutta.inc.php");
+$gestione_ortofrutta = ortofrutta_attiva(); // provenienza, calibro e categoria
 
 $suggest_new_codart = gaz_dbi_get_row($gTables['company_config'], 'var', 'suggest_new_codart');
 
@@ -1007,6 +1009,22 @@ if ($modal_ok_insert === true) {
                         </div>
                     </div>
                 </div><!-- chiude row  -->
+<?php if ($gestione_ortofrutta) { // gestione ortofrutta: valori proposti nei righi dei documenti di vendita ?>
+                <div id="ortofrutta" class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">Provenienza / Calibro / Categoria</label>
+                            <div class="col-sm-8">
+                            <?php
+                            echo ortofrutta_select('provenienza', 'provenienza', $form['provenienza'] ?? '') . ' ';
+                            echo ortofrutta_select('calibro', 'calibro', $form['calibro'] ?? '') . ' ';
+                            echo ortofrutta_select('categoria', 'categoria', $form['categoria'] ?? '');
+                            ?>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- chiude row  -->
+<?php } ?>
                 <div id="sconto" class="row IERincludeExcludeRow">
                     <div class="col-md-12">
                         <div class="form-group">

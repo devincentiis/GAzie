@@ -472,6 +472,13 @@ class DocContabVars {
               }
             }
           }
+          // gestione ortofrutta: origine, categoria e calibro in coda alla descrizione del rigo
+          if ($this->tableName == 'rigdoc' && $rigo['tiprig'] == 0 && (!empty($rigo['provenienza']) || !empty($rigo['calibro']) || !empty($rigo['categoria']))) {
+            require_once(__DIR__ . '/ortofrutta.inc.php');
+            if (ortofrutta_attiva()) {
+              $rigo['descri'] .= ' - ' . ortofrutta_testo_rigo($rigo);
+            }
+          }
           $rigo['durability_mu'] = '';
           $rigo['durability'] = '';
           if (isset($art['durability_mu']) && ($art['durability_mu']==">" || $art['durability_mu']=="<")){ // se impostato accodo la durabilità alla descrizione serve per gli agroalimentari
