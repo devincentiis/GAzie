@@ -996,8 +996,11 @@ class selectPartner extends SelectBox {
       echo '<textarea rows=1 cols=30 name="destin" placeholder="'.$ph.'">'.$vals['destin'].'</textarea><br>';
       if (preg_replace('/[^0-9]/','',$codclfoco) > 100000000) { // la destinazione solo se ho il cliente/fornitore
         $clfoco = gaz_dbi_get_row($this->gTables['clfoco'],"codice",$codclfoco);
+        if (!$clfoco) { // anagrafica non ancora cliente/fornitore ("id_NNN"): senza conto la query sotto andava in errore
+          $clfoco = array('id_anagra' => preg_match('/^id_([0-9]+)$/', $codclfoco, $match) ? intval($match[1]) : 0);
+        }
         $anagra = gaz_dbi_get_row($this->gTables['anagra'],"id",$clfoco['id_anagra']);
-        $rs_destina = gaz_dbi_dyn_query('*', $this->gTables['destina'],'id_anagra = '.$clfoco['id_anagra']);
+        $rs_destina = gaz_dbi_dyn_query('*', $this->gTables['destina'],'id_anagra = '.intval($clfoco['id_anagra']));
         $first=1;
         while ($r = gaz_dbi_fetch_array($rs_destina)) {
           if($first==1){
