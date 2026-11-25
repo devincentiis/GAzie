@@ -97,7 +97,7 @@ $tn = ['agenti','agenti_forn','aliiva','artico','artico_group','artico_position'
 'catmer','caucon','caucon_rows','caumag','clfoco','company_config','company_data','comunicazioni_dati_fatture','customer_group',
 'contract', 'contract_row','distinta_base','effett','expdoc','extcon','fae_flux','files','imball','instal','letter',
 'liquidazioni_iva', 'lotmag', 'movmag','orderman','pagame','pagame_distribution','paymov','portos','provvigioni','ragstat',
-'registro_trattamento_dati','rigbro','rigdoc','rigmoc','rigmoi','sconti_articoli','sconti_raggruppamenti','shelves','spediz',
+'registro_trattamento_dati','rigbro','rigdoc','rigmoc','rigmoi','sconti_articoli','sconti_raggruppamenti','customer_group_prezzi','shelves','spediz',
 'staff','staff_skills','staff_worked_hours','staff_work_movements','tesbro','tesdoc','tesmov','vettor','warehouse'];
 foreach ($tn as $v) {
   $gTables[$v] = $table_prefix . "_" . $id . $v;

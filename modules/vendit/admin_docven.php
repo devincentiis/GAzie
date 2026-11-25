@@ -993,6 +993,8 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
         $form['datemi'] = $datemi;
         $form['data_ordine'] = $form['annord'] . "-" . $form['mesord'] . "-" . $form['gioord'];
         $ultimo_id = tesdocInsert($form);
+        // listino di gruppo: nei DDT e fatture immediate nuovi il prezzo del rigo diventa il nuovo prezzo netto
+        $listino_aggiorna = ($form['tipdoc'] == 'DDT' || $form['tipdoc'] == 'FAI') && listino_aggiorna_da_documenti_attivo();
         //inserisco i righi
         foreach ($form['rows'] as $i => $v) {
           $form['rows'][$i]['peso_specifico']=$v['pesosp'];
@@ -1047,6 +1049,9 @@ if ((isset($_POST['Insert'])) || ( isset($_POST['Update']))) {   //se non e' il 
               if ($ctrlart['preve1'] < 0.00001 ) { // se anche il prezzo era a zero popolo il listino 1 con quello inserito nella prima vendita
                 gaz_dbi_put_row($gTables['artico'], 'codice', $v['codart'], 'preve1', $v['prelis']);
               }
+            }
+            if ($listino_aggiorna && $ctrlart) {
+              listino_aggiorna_da_rigo($form['clfoco'], $v['codart'], $v['prelis'], $v['sconto'], $admin_aziend['decimal_price']);
             }
           }
         }

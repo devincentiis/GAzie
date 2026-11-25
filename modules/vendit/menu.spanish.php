@@ -104,7 +104,8 @@ $transl['vendit'] = array('name' => "Ventas",
         60 => array("Stampa libera lista effetti", "Stampa lista effetti"),
         61 => array("Nuovo gruppo clienti", "Nuovo gruppo clienti"),
         62 => array("Lista gruppi clienti", "Lista gruppi clienti"),
-        63 => array("Estado del pedido", "Estado del pedido")
+        63 => array("Estado del pedido", "Estado del pedido"),
+        64 => array("Lista de precios de grupo (precios netos por grupo de clientes)", "Lista de precios de grupo")
     )
 );
 ?>
