@@ -794,6 +794,18 @@ if ((isset($_POST['Insert'])) or ( isset($_POST['Update']))) {   //se non e' il 
         $form['hidden_req'] = '';
     }
 
+    // controlli sul rigo normale, se attivati (controlli_righi)
+    require_once("../../library/include/controlli_righi.inc.php");
+    if (isset($_POST['in_submit']) && controlli_righi_attivo()) {
+        $controlli_righi_campo = controlli_righi_zero($form);
+        if ($controlli_righi_campo) { // quantita' o prezzo a zero: il rigo non entra
+            $msg .= "zero_qta_prezzo+";
+            unset($_POST['in_submit']);
+        } elseif (controlli_righi_doppio($form)) {
+            $msg .= "dup_codart+";
+        }
+    }
+
     // Se viene inviata la richiesta di conferma rigo
     /** ENRICO FEDELE */
     /* Con button non funziona _x */
@@ -2165,7 +2177,7 @@ if (!empty($msg)) {
     $message = "";
     $rsmsg = array_slice(explode('+', chop($msg)), 0, -1);
     foreach ($rsmsg as $v) {
-        $message .= ( $v == 62 ) ? '' : $script_transl['error'] . "! -> ";
+        $message .= ( $v == 62 || $v == 'dup_codart' ) ? '' : $script_transl['error'] . "! -> "; // dup_codart e' solo un avviso
         $rsval = explode('-', chop($v));
         foreach ($rsval as $valmsg) {
             $message .= $script_transl[$valmsg] . " ";
@@ -2173,6 +2185,9 @@ if (!empty($msg)) {
         $message .= "<br />";
     }
     echo '			<td colspan="2" class="FacetDataTDred">' . $message . '</td>';
+    if (!empty($controlli_righi_campo)) { // campo del rigo da correggere
+        echo controlli_righi_script($controlli_righi_campo);
+    }
 } else {
     echo '			<td class="FacetFieldCaptionTD">' . $script_transl[5] . '</td>
    					<td class="FacetDataTD">' . $form['indspe'] . '<br /></td>';

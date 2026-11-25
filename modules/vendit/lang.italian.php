@@ -339,7 +339,8 @@ $strScript = array("admin_client.php" =>
 			'lotinsuf' => 'Per questo ID lotto non c\'è la quantità richiesta',
 			'siandate' => 'La data di registrazione è precedente all\'ultimo movimento inviato al SIAN. Se si conferma, questo movimento non sarà inviato al SIAN.',
 			'emptylot' => 'Non è stato inserito il lotto',
-			'rigointento' => 'Aggiunto in automatico il rigo Tipo 26 - Intento'
+			'rigointento' => 'Aggiunto in automatico il rigo Tipo 26 - Intento',
+			'dup_codart' => 'Articolo gi&agrave; presente in un altro rigo del documento: possibile doppia immissione!'
 		),
 		'cod_operaz_value' => array(11=>'',0=>'S0-Vendita olio a consumatore finale',1=>'S1-Vendita olio a ditta italiana',2=>'S2-Vendita olio a ditta comunitaria',3=>'S3-Vendita olio a ditta extracomunitaria',4=>'S4-Scarico olio trasferimento stabilimento stessa impresa',5=>'S5-Scarico olio trasferimento a terzista',6=>'S6-Cessione omaggio olio confezionato',7=>'S7-Scarico olio destinato ad altri usi',8=>'S8-Scarico olio autoconsumo',9=>'S9-Trasferimento olio a punti vendita aziendali',10=>'S10-Scarico olio reso al fornitore'),
     'cod_operaz_value_carico' => array(11=>'',7=>'C7->TO DO< Reso di olio sfuso da clienti',8=>'C8-Reso di olio confezionato da clienti'),
@@ -380,7 +381,8 @@ $strScript = array("admin_client.php" =>
 			'filesize' => 'File troppo grande',
 			'filenoload' => 'Il file non è stato caricato',
 			'business_date_cessation' => 'Data successiva alla cessazione',
-			'dataintento' => 'La dichiarazione di intento è scaduta'
+			'dataintento' => 'La dichiarazione di intento è scaduta',
+			'zero_qta_prezzo' => 'Rigo NON inserito: quantit&agrave; e prezzo devono essere diversi da zero!'
 		),
         'consentivisua' => '<center>ATTENZIONE MANCANO I DATI FISCALI</center>'
     ),
@@ -510,6 +512,8 @@ $strScript = array("admin_client.php" =>
         'discount_alert' => 'sconto da anagrafe articoli',
         'last_row' => 'Ultimo rigo inserito',
         'listino_value' => array(1 => ' di Vendita 1', 2 => ' di Vendita 2', 3 => ' di Vendita 3', 4 => ' di Vendita 4', 5 => ' di Vendita Online'),
+        'zero_qta_prezzo' => "Rigo NON inserito: quantit&agrave; e prezzo devono essere diversi da zero!",
+        'dup_codart' => "Articolo gi&agrave; presente in un altro rigo del documento: possibile doppia immissione!",
 
     ),
     "admin_cmr.php" =>
