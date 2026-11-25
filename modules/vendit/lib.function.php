@@ -23,6 +23,7 @@
   Fifth Floor Boston, MA 02110-1335 USA Stati Uniti.
   --------------------------------------------------------------------------
  */
+require_once(__DIR__ . '/../../library/include/listino_gruppo.inc.php');
 
 class venditForm extends GAzieForm {
 
@@ -531,6 +532,7 @@ class venditCalc extends Compute {
     * controlla nell'ordine:
     * 1) prezzo netto cliente/articolo
     * 2) sconto cliente/articolo
+    * 2b) prezzo netto del gruppo clienti/articolo (solo con listino_gruppo = 1)
     * 3) sconto cliente/raggruppamento (anche per tutti i super-raggruppamenti
     * 4) sconto cliente
     * 5) sconto articolo
@@ -555,6 +557,14 @@ class venditCalc extends Compute {
       if ($scontoTrovato > 0) { // sconto cliente/articolo
          $msgtoast = $codart . ": sconto articolo riservato al cliente";
          return $scontoTrovato;
+      }
+//cerco prezzo netto del gruppo del cliente (solo con listino_gruppo attivo)
+      if (listino_gruppo_attivo()) {
+         $prezzo_gruppo = listino_gruppo_prezzo(listino_gruppo_del_cliente($codcli), $codart);
+         if ($prezzo_gruppo > 0) {
+            $msgtoast = $codart . ": prezzo netto del gruppo clienti";
+            return -$prezzo_gruppo;
+         }
       }
 //cerco sconto cliente/raggruppamento
       $artico = gaz_dbi_get_row($gTables['artico'], "codice", $codart);

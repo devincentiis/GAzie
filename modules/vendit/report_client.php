@@ -23,6 +23,7 @@
   --------------------------------------------------------------------------
  */
 require("../../library/include/datlib.inc.php");
+require_once("../../library/include/listino_gruppo.inc.php");
 $admin_aziend = checkAdmin();
 $gForm = new venditForm;
 $titolo = 'Clienti';
@@ -51,6 +52,19 @@ $sortable_headers = array(
   "Visualizza <br /> e/o stampa" => "",
   "Cancella" => ""
 );
+// listino di gruppo attivo: colonna e filtro Gruppo dopo la ragione sociale
+$con_gruppo = listino_gruppo_attivo();
+if ($con_gruppo) {
+  $search_fields['gruppo'] = "id_customer_group = %d";
+  $tmp_headers = array();
+  foreach ($sortable_headers as $k => $v) {
+    $tmp_headers[$k] = $v;
+    if ($v == 'ragso1') {
+      $tmp_headers['Gruppo'] = 'id_customer_group';
+    }
+  }
+  $sortable_headers = $tmp_headers;
+}
 
 require("../../library/include/header.php");
 if (isset($_GET['privacy'])) {
@@ -151,6 +165,22 @@ function clipandgo(pi,url) {
             <td class="FacetFieldCaptionTD">
                 <?php gaz_flt_disp_int("nome", "Nome cliente"); ?>
             </td>
+<?php
+if ($con_gruppo) {
+  $gruppi = array();
+  $rs = gaz_dbi_query("SELECT id, descri FROM " . $gTables['customer_group'] . " ORDER BY descri");
+  while ($g = gaz_dbi_fetch_array($rs)) {
+    $gruppi[$g['id']] = $g['descri'];
+  }
+  $gruppo_scelto = isset($_GET['gruppo']) ? intval($_GET['gruppo']) : 0;
+  echo '            <td class="FacetFieldCaptionTD"><select class="form-control input-sm" name="gruppo" onchange="this.form.submit()">';
+  echo '<option value="">Tutti</option>';
+  foreach ($gruppi as $id_g => $descri_g) {
+    echo '<option value="' . intval($id_g) . '"' . ($id_g == $gruppo_scelto ? ' selected' : '') . '>' . htmlspecialchars($descri_g) . '</option>';
+  }
+  echo "</select></td>\n";
+}
+?>
             <td class="FacetFieldCaptionTD">
                 <?php gaz_flt_disp_select("sexper", "sexper", $gTables["anagra"], " sexper <> ''", "sexper asc"); ?>
             </td>
@@ -203,6 +233,9 @@ while ($r = gaz_dbi_fetch_array($result)) {
   echo "<td align=\"center\"><a class=\"btn btn-xs btn-edit\" href=\"admin_client.php?codice=" . substr($r["codice"], 3) . "&Update\"><i class=\"glyphicon glyphicon-edit\"></i>&nbsp;" .intval(substr($r["codice"],3)) . "</a> &nbsp</td>";
   // Colonna ragione sociale
   echo '<td><span class="gazie-tooltip col-xs-12" data-type="anagra-thumb" data-id="'. $r['codice'] .'" data-title="'. $r["ragso1"].' '.$r["ragso2"].'">' . $r["ragso1"] . " </span></td>";
+  if ($con_gruppo) { // colonna gruppo
+    echo '<td>' . (isset($gruppi[$r['id_customer_group']]) ? htmlspecialchars($gruppi[$r['id_customer_group']]) : '') . '</td>';
+  }
   // colonna sesso
   echo "<td align=\"center\">" . $r["sexper"] . "</td>";
   // colonna indirizzo
