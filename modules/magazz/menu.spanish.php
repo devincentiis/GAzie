@@ -56,7 +56,8 @@ $transl['magazz'] = array('name' => "Bodega",
                                          14 =>array("Insertar nuevo grupo","Insertar nuevo grupo"),
                                          15 =>array("Insert new warehouse","Insert new warehouse"),
                                          16 =>array("Cambio codice articolo","Cambio codice articolo"),
-                                         17 =>array("Inventario editable","Inventario editable")
+                                         17 =>array("Inventario editable","Inventario editable"),
+                                         23 =>array("Lista de compras: que comprar para los pedidos de clientes y costes del dia","Lista de compras")
                                       )
                           );
 ?>

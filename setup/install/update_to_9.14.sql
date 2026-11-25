@@ -40,6 +40,7 @@ UPDATE `gaz_languages` SET `description`='Language' WHERE `lang_id`=2;
 UPDATE `gaz_languages` SET `description`='Idioma' WHERE `lang_id`=3;
 DELETE m2 FROM `gaz_menu_module` m2 LEFT JOIN `gaz_module` m1 ON m2.`id_module` = m1.id WHERE m1.id IS NULL;
 DELETE m3 FROM `gaz_menu_script` m3 LEFT JOIN `gaz_menu_module` m2 ON m3.`id_menu` = m2.id WHERE m2.id IS NULL;
+INSERT INTO `gaz_menu_script` (`id`, `id_menu`, `link`, `icon`, `class`, `translate_key`, `accesskey`, `trans_code`, `weight`, `status`) SELECT * FROM (SELECT MAX(`id`)+1 AS `id`, (SELECT mm.`id` FROM `gaz_menu_module` mm JOIN `gaz_module` md ON mm.`id_module` = md.`id` WHERE md.`name` = 'magazz' AND mm.`link` = 'report_artico.php' LIMIT 1) AS `id_menu`, 'lista_spesa.php' AS `link`, '' AS `icon`, '' AS `class`, 23 AS `translate_key`, '' AS `accesskey`, NULL AS `trans_code`, 25 AS `weight`, 1 AS `status` FROM `gaz_menu_script`) AS nuova WHERE nuova.`id_menu` IS NOT NULL AND NOT EXISTS (SELECT 1 FROM `gaz_menu_script` WHERE `link` = 'lista_spesa.php');
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, (SELECT id_menu FROM `gaz_menu_script` WHERE `link`='genera_movmag.php'), 'editable_inventory.php', '', '', 17, '','', 10, 1 FROM `gaz_menu_script`;
 -- START_WHILE ( questo e' un tag che serve per istruire install.php ad INIZIARE ad eseguire le query seguenti su tutte le aziende dell'installazione)
 SET @adminid_existsXXX = ( SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'gaz_XXXrigbro' AND COLUMN_NAME = 'adminid');
@@ -76,6 +77,7 @@ INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'N', 0.0,'N3.4', 'Art. 50 DL.10/2026(Cess. Vaticano)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'N', 0.0,'N3.5', 'Art. 45 C.1 L.d 10/2026(Cess.dichiar.intento)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'N', 0.0,'N3.6', 'Altre oper. non imponibili s/plafond' FROM `gaz_XXXaliiva`;
+INSERT INTO `gaz_XXXcompany_config` (`lang_id`, `description`, `var`, `val`) SELECT * FROM (SELECT 1 AS `lang_id`, 'Lista della spesa: quanto comprare dagli ordini clienti, costo del giorno, listino (0=No, 1=Si)' AS `description`, 'lista_spesa' AS `var`, '0' AS `val`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_XXXcompany_config` WHERE `var` = 'lista_spesa');
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'E', 0.0, 'N4',  'Art. 37 DL.10/2026(Operazioni esenti)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'M', 0.0, 'N5',  'Art.141 DL.10/2026(Reg.agenzie viaggio)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'M', 0.0, 'N5',  'Regime del margine beni usati TU' FROM `gaz_XXXaliiva`;
