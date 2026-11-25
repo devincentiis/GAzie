@@ -184,6 +184,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
 
         function HeadMain($idScript = '', $jsArray = '', $alternative_transl = false, $cssArray = '') {
             global $module, $admin_aziend, $radix, $scriptname, $debug_active;
+            require_once("../../library/include/inserimento_rapido.inc.php");
             /* - In $idScript si deve passare l'id dell'array submenu (m2) in menu.language.php (per mettere nel tag <TITLE> )
               oltre che il nome del modulo anche quello dello script tradotto
               - In $jsArray di devono passare i nomi dei file javascript che si vogliono caricare e presenti nella directory 'js'
@@ -225,6 +226,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
                         if ($ctrl_m1 != $row['m1_id']) {
                             require("../../modules/" . $row['name'] . "/menu." . $admin_aziend['lang'] . ".php");
                         }
+                        inserimento_rapido_menu($transl, $row); // tasto rapido (F5...) accanto alla voce, se attivo
                         if ($row['name'] == $module) {
                             $row['weight'] = 0;
                             if ($row['m3_link'] == $scriptname) {
@@ -352,7 +354,9 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
 			}
 		 }
 </script>
-<div class="container-fluid gaz-body">';
+';
+            inserimento_rapido_script_tasti(); // F5, F6, F7 solo se attivo
+            echo '<div class="container-fluid gaz-body">';
 		printDash($gTables,$module,$admin_aziend,$transl,$acc_excluded);
             return ($strCommon + $translated_script);
         }

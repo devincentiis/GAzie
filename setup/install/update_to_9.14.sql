@@ -97,4 +97,5 @@ INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'R', 0.0,'N6.8', 'Vendite Art.64 c.6 fat (Oper.sett.energ.)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'R',22.0,'N6.9', 'Acquisti Art.64 a/disp (Altri rev.charge)' FROM `gaz_XXXaliiva`;
 INSERT INTO `gaz_XXXaliiva` (`codice`, `tipiva`, `aliquo`, `fae_natura`, `descri`) SELECT MAX(codice)+1 , 'R', 0.0,'N6.9', 'Vendite Art.64 a/disp (Altri rev.charge)' FROM `gaz_XXXaliiva`;
+INSERT INTO `gaz_XXXcompany_config` (`lang_id`, `description`, `var`, `val`) SELECT * FROM (SELECT 1 AS `lang_id`, 'Inserimento rapido da tastiera e tasti F5 DDT, F6 fattura, F7 ordine, F10 conferma (0=No, 1=Si)' AS `description`, 'inserimento_rapido' AS `var`, '0' AS `val`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_XXXcompany_config` WHERE `var` = 'inserimento_rapido');
 -- STOP_WHILE ( questo e' un tag che serve per istruire install.php a SMETTERE di eseguire le query su tutte le aziende dell'installazione )
