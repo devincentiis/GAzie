@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS `gaz_menu_custom_data` (`id` int unsigned NOT NULL AU
 UPDATE `gaz_languages` SET `description`='Lingua' WHERE `lang_id`=1;
 UPDATE `gaz_languages` SET `description`='Language' WHERE `lang_id`=2;
 UPDATE `gaz_languages` SET `description`='Idioma' WHERE `lang_id`=3;
+INSERT INTO `gaz_menu_script` (`id`, `id_menu`, `link`, `icon`, `class`, `translate_key`, `accesskey`, `trans_code`, `weight`, `status`) SELECT * FROM (SELECT MAX(`id`)+1 AS `id`, (SELECT mm.`id` FROM `gaz_menu_module` mm JOIN `gaz_module` md ON mm.`id_module` = md.`id` WHERE md.`name` = 'magazz' AND mm.`link` = 'report_artico.php' LIMIT 1) AS `id_menu`, 'inventario_facile.php' AS `link`, '' AS `icon`, '' AS `class`, 21 AS `translate_key`, '' AS `accesskey`, NULL AS `trans_code`, 23 AS `weight`, 1 AS `status` FROM `gaz_menu_script`) AS nuova WHERE nuova.`id_menu` IS NOT NULL AND NOT EXISTS (SELECT 1 FROM `gaz_menu_script` WHERE `link` = 'inventario_facile.php');
+INSERT INTO `gaz_menu_script` (`id`, `id_menu`, `link`, `icon`, `class`, `translate_key`, `accesskey`, `trans_code`, `weight`, `status`) SELECT * FROM (SELECT MAX(`id`)+1 AS `id`, (SELECT mm.`id` FROM `gaz_menu_module` mm JOIN `gaz_module` md ON mm.`id_module` = md.`id` WHERE md.`name` = 'magazz' AND mm.`link` = 'report_artico.php' LIMIT 1) AS `id_menu`, 'situazione_facile.php' AS `link`, '' AS `icon`, '' AS `class`, 22 AS `translate_key`, '' AS `accesskey`, NULL AS `trans_code`, 24 AS `weight`, 1 AS `status` FROM `gaz_menu_script`) AS nuova WHERE nuova.`id_menu` IS NOT NULL AND NOT EXISTS (SELECT 1 FROM `gaz_menu_script` WHERE `link` = 'situazione_facile.php');
 DELETE m2 FROM `gaz_menu_module` m2 LEFT JOIN `gaz_module` m1 ON m2.`id_module` = m1.id WHERE m1.id IS NULL;
 DELETE m3 FROM `gaz_menu_script` m3 LEFT JOIN `gaz_menu_module` m2 ON m3.`id_menu` = m2.id WHERE m2.id IS NULL;
 INSERT INTO `gaz_menu_script` SELECT MAX(id)+1, (SELECT id_menu FROM `gaz_menu_script` WHERE `link`='genera_movmag.php'), 'editable_inventory.php', '', '', 17, '','', 10, 1 FROM `gaz_menu_script`;
@@ -52,6 +54,7 @@ SET @last_modified_queryXXX = IF(@last_modified_existsXXX = 0,  "ALTER TABLE `ga
 PREPARE stmtbXXX FROM @last_modified_queryXXX;
 EXECUTE stmtbXXX;
 DEALLOCATE PREPARE stmtbXXX;
+INSERT INTO `gaz_XXXcompany_config` (`lang_id`, `description`, `var`, `val`) SELECT * FROM (SELECT 1 AS `lang_id`, 'Magazzino facile: inventario e situazione semplificati, rettifica giacenza (0=No, 1=Si)' AS `description`, 'magazzino_facile' AS `var`, '0' AS `val`) AS nuova WHERE NOT EXISTS (SELECT 1 FROM `gaz_XXXcompany_config` WHERE `var` = 'magazzino_facile');
 ALTER TABLE `gaz_XXXcontract` ADD COLUMN `covered_ym` VARCHAR(7) NOT NULL DEFAULT '' COMMENT 'Ultimo mese pagato (AAAA-MM), salvato sul contratto anche senza fatture/ricevute collegate' AFTER `note`;
 ALTER TABLE `gaz_XXXcontract` ADD COLUMN `invoice_descri` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Descrizione del primo rigo in fattura (vuoto = testo standard)' AFTER `covered_ym`;
 ALTER TABLE `gaz_XXXassist` ADD COLUMN `id_tesdoc` INT NOT NULL DEFAULT 0 COMMENT 'Documento di vendita generato dall\'intervento' AFTER `note`;
