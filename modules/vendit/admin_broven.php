@@ -2003,6 +2003,12 @@ if ( empty($msg) && !isset($_POST['ins']) && $scroll_input_row == '1' ) { // se 
 
 });
 </script>
+<?php
+require_once("../../library/include/avviso_fido.inc.php");
+if (avviso_fido_attivo()) { // striscia esposizione/fido del cliente scelto
+  echo avviso_fido_striscia($form['clfoco'], $form['rows'], $form['sconto']);
+}
+?>
 
 <form method="POST" name="broven" id="broven" enctype="multipart/form-data">
 

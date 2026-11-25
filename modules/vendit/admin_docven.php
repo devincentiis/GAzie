@@ -2597,6 +2597,10 @@ if (count($msg['war']) > 0) { // ho un alert-danger
     $gForm->gazHeadMessage($msg['war'], $script_transl['war'], 'war');
 	echo "</b></div></div>\n";
 }
+require_once("../../library/include/avviso_fido.inc.php");
+if (avviso_fido_attivo()) { // striscia esposizione/fido del cliente scelto
+  echo avviso_fido_striscia($form['clfoco'], $form['rows'], $form['sconto'], $form['tipdoc'], ($toDo == 'update') ? intval($form['id_tes']) : 0);
+}
 ?>
 <form method="POST" name="docven" enctype="multipart/form-data">
 
