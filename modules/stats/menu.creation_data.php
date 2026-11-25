@@ -26,7 +26,8 @@ $menu_data=
 ['m1'=>['link'=>"docume_stats.php"],
  'm2'=>[1=>['link'=>"stats_vendit.php",'weight'=>5],
 				2=>['link'=>"stats_acquis.php",'weight'=>10],
-				3=>['link'=>"stats_magazz.php",'weight'=>15]
+				3=>['link'=>"stats_magazz.php",'weight'=>15],
+				4=>['link'=>"dashboard_direzionale.php",'weight'=>20]
        ],
  'm3'=>['m2'=>[1=>[['translate_key'=>1,'link'=>"select_analisi_acquisti_clienti.php",'weight'=>5],
                    ['translate_key'=>2,'link'=>"select_analisi_agenti.php",'weight'=>10],
@@ -39,6 +40,8 @@ $menu_data=
 									 ['translate_key'=>6,'link'=>"esportazione_articoli_venduti_per_fornitore.php",'weight'=>10]
 									],
 							 3=>[['translate_key'=>7,'link'=>"stats_magazz",'weight'=>5]
+									],
+							 4=>[['translate_key'=>10,'link'=>"dashboard_direzionale.php",'weight'=>5]
 									]
 
               ]

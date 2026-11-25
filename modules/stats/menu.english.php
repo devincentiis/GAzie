@@ -27,7 +27,8 @@ $transl['stats'] = array('name' => "Statistiche",
     'title' => "Statistiche",
     'm2' => array(	1 => array("Statistiche delle vendite", "Statistiche vendite"),
 					2 => array("Statistiche degli acquisti", "Statistiche acquisti"),
-					3 => array("Statistiche di magazzino", "Statistiche magazzino")
+					3 => array("Statistiche di magazzino", "Statistiche magazzino"),
+					4 => array("Management dashboard", "Management dashboard")
     ),
     'm3' => array(	1 => array("Analisi acquisti dei clienti", "Analisi acquisti clienti"),
 					2 => array("Analisi vendite agenti", "Analisi agenti"),
@@ -37,7 +38,8 @@ $transl['stats'] = array('name' => "Statistiche",
 					6 => array("Esportazione articoli venduti per fornitore", "Esportazione articoli venduti"),
 					7 => array("Vendite da movimenti di magazzino", "Vendite da movimenti (non funz.)"),
 					8 => array("Vendite da righi documenti", "Vendite articoli (da documenti)"),
-					9 => array("Vendite per tipo pagamento", "Vendite per tipo pagamento")
+					9 => array("Vendite per tipo pagamento", "Vendite per tipo pagamento"),
+					10 => array("Management dashboard: sales, receipts, credits and comparisons", "Management dashboard")
     )
 );
 ?>
