@@ -205,12 +205,34 @@ function ss_dati_ddt($testata) {
     $cliente = gaz_dbi_get_row($gTables['clfoco'] . ' LEFT JOIN ' . $gTables['anagra'] . ' ON ' . $gTables['clfoco'] . '.id_anagra = ' . $gTables['anagra'] . '.id',
         $gTables['clfoco'] . '.codice', $testata['clfoco']);
     $nome = $cliente ? trim($cliente['ragso1'] . ' ' . $cliente['ragso2']) : '';
-    $destinazione = trim((string)$testata['destin']);
-    if ($destinazione === '' && intval($testata['id_des']) > 0) {
+    // destinazione diversa: stesso ordine della stampa del DDT (library/include/document.php):
+    // 1) sede del cliente scelta fra le sue destinazioni, 2) altra anagrafica, 3) testo libero.
+    // indirizzo/coordinate = dove va l'autista (tasto mappa): la destinazione diversa, altrimenti la sede del cliente
+    $destinazione = '';
+    $indirizzo = '';
+    $coordinate = '';
+    $d = null;
+    if (isset($testata['id_des_same_company']) && intval($testata['id_des_same_company']) > 0) {
+        $d = gaz_dbi_get_row($gTables['destina'], 'codice', intval($testata['id_des_same_company']));
+        if ($d) {
+            $destinazione = ss_unisci(array(trim($d['unita_locale1'] . ' ' . $d['unita_locale2']), ss_indirizzo($d)));
+        }
+    }
+    if (!$d && intval($testata['id_des']) > 0) {
         $d = gaz_dbi_get_row($gTables['anagra'], 'id', intval($testata['id_des']));
         if ($d) {
-            $destinazione = trim($d['ragso1'] . ' ' . $d['ragso2'] . ', ' . $d['indspe'] . ' ' . $d['citspe']);
+            $destinazione = ss_unisci(array(trim($d['ragso1'] . ' ' . $d['ragso2']), ss_indirizzo($d)));
         }
+    }
+    if ($d) {
+        $indirizzo = ss_indirizzo($d);
+        $coordinate = ss_coordinate($d);
+    } elseif (trim((string)$testata['destin']) !== '') {
+        $destinazione = ss_unisci(preg_split('/[\r\n]+/', (string)$testata['destin']));
+        $indirizzo = $destinazione;
+    } elseif ($cliente) {
+        $indirizzo = ss_indirizzo($cliente);
+        $coordinate = ss_coordinate($cliente);
     }
     $righe = array();
     $rs = gaz_dbi_query("SELECT tiprig, codart, descri, unimis, quanti FROM " . $gTables['rigdoc'] . " WHERE id_tes=" . intval($testata['id_tes']) .
@@ -242,10 +264,40 @@ function ss_dati_ddt($testata) {
         'cliente' => $nome,
         'cod_cliente' => strlen($codice) > 3 ? (string)intval(substr($codice, 3)) : $codice,
         'destinazione' => $destinazione,
+        'indirizzo' => $indirizzo,
+        'coordinate' => $coordinate,
         'righe' => $righe,
         'email' => $email,
         'cellulare' => $cliente ? ss_cellulare($cliente['cell'], $cliente['telefo']) : '',
     );
+}
+
+/* pezzi non vuoti separati da virgola */
+function ss_unisci($pezzi) {
+    $buoni = array();
+    foreach ($pezzi as $p) {
+        $p = trim(preg_replace('/\s+/', ' ', (string)$p), " ,");
+        if ($p !== '') {
+            $buoni[] = $p;
+        }
+    }
+    return implode(', ', $buoni);
+}
+
+/* "Via Roma 1, 20100 Milano MI" da una riga di anagrafica o di destinazioni (indspe, capspe, citspe, prospe, country) */
+function ss_indirizzo($r) {
+    $paese = isset($r['country']) ? strtoupper(trim($r['country'])) : '';
+    return ss_unisci(array($r['indspe'], trim($r['capspe'] . ' ' . $r['citspe'] . ' ' . $r['prospe']), ($paese !== '' && $paese !== 'IT') ? $paese : ''));
+}
+
+/* "45.46420,9.18998" se l'anagrafica ha le coordinate (0,0 = non impostate) */
+function ss_coordinate($r) {
+    $lat = isset($r['latitude']) ? floatval($r['latitude']) : 0;
+    $lon = isset($r['longitude']) ? floatval($r['longitude']) : 0;
+    if (abs($lat) < 0.0001 && abs($lon) < 0.0001) {
+        return '';
+    }
+    return sprintf('%.5F,%.5F', $lat, $lon);
 }
 
 /* numero per WhatsApp: il cellulare, altrimenti il telefono se e' un cellulare italiano (3xx); col prefisso 39 */

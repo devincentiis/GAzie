@@ -302,6 +302,13 @@ $script_transl = HeadMain();
     </div>
     <div class="panel-body">
       <p style="font-size:16px"><b><?php echo ss_h($dati['cliente']); ?></b><?php if ($dati['destinazione']) { ?><br><span class="text-muted"><?php echo ss_h($dati['destinazione']); ?></span><?php } ?></p>
+      <?php if ($dati['indirizzo'] !== '' || $dati['coordinate'] !== '') { // tasto mappa dell'autista: qui l'ufficio vede dove portera'
+          $ss_mappa = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($dati['coordinate'] !== '' ? $dati['coordinate'] : $dati['indirizzo']); ?>
+      <p><i class="glyphicon glyphicon-map-marker"></i> Mappa dell'autista: <a href="<?php echo ss_h($ss_mappa); ?>" target="_blank" rel="noopener"><?php echo ss_h($dati['indirizzo'] !== '' ? $dati['indirizzo'] : $dati['coordinate']); ?></a>
+        <?php echo $dati['destinazione'] === '' ? '<span class="text-muted">(sede del cliente)</span>' : '<span class="text-muted">(destinazione diversa)</span>'; ?></p>
+      <?php } else { ?>
+      <p class="text-muted"><i class="glyphicon glyphicon-map-marker"></i> Nessun indirizzo in anagrafica: l'autista non avra' il tasto della mappa.</p>
+      <?php } ?>
       <table class="table table-condensed ss-righe">
         <?php foreach ($dati['righe'] as $r) { ?>
           <tr><td><?php echo ss_h($r['descrizione']); ?></td><td class="text-right" style="white-space:nowrap"><?php echo $r['quantita'] !== null ? ss_h(rtrim(rtrim(number_format($r['quantita'], 3, ',', ''), '0'), ',') . ' ' . $r['um']) : ''; ?></td></tr>
