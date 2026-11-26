@@ -225,6 +225,9 @@ if (sizeof($result) > 0 AND !isset($_POST['ritorno'])) { // se ci sono movimenti
 							// O0 non prevede documento giustificativo
 							$row['numdoc'] = "";
 							$datdoc = "";
+							if (strlen($row['varieta'])>3){
+								$type_array[28]=str_pad(substr(("Varietà ".$row['varieta']), 0, 300 ), 300); // Note (varietà)
+							}
 						}
 						if ($row['cod_operazione']==1){// Confezionamento con etichettatura
 							$row['numdoc']="";

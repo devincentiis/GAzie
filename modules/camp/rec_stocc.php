@@ -318,6 +318,17 @@ $recordnav -> output();
 		<?php
 		while ($a_row = gaz_dbi_fetch_array($result)) {
 			$content= $gSil -> getCont($a_row['cod_silos']);
+			
+			$articoliPresenti = $gSil->getSilosArticoPresenti($a_row['cod_silos']);
+			$olioNonClassificato = false;
+			foreach ($articoliPresenti as $codart => $saldo) {
+				$artCamp = gaz_dbi_get_row($gTables['camp_artico'], 'codice', $codart);
+				if (isset($artCamp['categoria']) && intval($artCamp['categoria']) == 3) {
+					$olioNonClassificato = true;
+					break;
+				}
+			}
+			
 			unset ($lot);
 			?>
 			<tr class="FacetDataTD">
@@ -353,7 +364,13 @@ $recordnav -> output();
 					<a class="btn btn-xs btn-default dialog_content" title="Contenuto in lotti e varietà" onclick="ContentSil('<?php echo $a_row['cod_silos'];?>')" >
 					<i class="glyphicon glyphicon-oil"></i>
 					</a>
+					<?php
+					if ($olioNonClassificato) {
+						echo ' <a href="../orderman/admin_orderman.php?Insert" class="label label-warning" style="font-size:90%; padding:5px 8px;">⚠ OLIO NON CLASSIFICATO</a>';	
+					}
+					?>
 				</td>
+				
 				<td align="center">
 					<?php
 					if (intval($a_row['affitto'])==0){

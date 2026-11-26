@@ -322,7 +322,8 @@ class silos {
 		return array($id_lotma,$identifier) ;
 	}
 
-  function getSilosArtico($codsil, $excluded_movmag=0){// restituisce i codici articoli presenti nel silos
+  function getSilosArtico($codsil, $excluded_movmag=0){// // Restituisce i codici degli articoli movimentati nel recipiente dopo l'ultimo svuotamento.
+	// Non verifica che abbiano ancora un saldo positivo.
     global $gTables;
     $latestEmpty= $this -> getLatestEmptySil($codsil, $excluded_movmag);
     //echo "<pre>latest:",print_r($latestEmpty);
@@ -342,6 +343,29 @@ class silos {
     }
     return array_unique($result);
   }
+   
+	
+	function getSilosArticoPresenti($codsil, $excluded_movmag = 0) {// Restituisce gli articoli effettivamente presenti nel recipiente,
+		// associando a ciascun codice la quantità residua positiva. $excluded_movmag può anche essere un array.
+		if (is_array($excluded_movmag)) {
+			$excluded_movmag = array_map('intval', $excluded_movmag);
+		} else {
+			$excluded_movmag = intval($excluded_movmag);
+		}
+		$articoli = $this->getSilosArtico($codsil, $excluded_movmag);
+		$result = array();
+		foreach ($articoli as $codart) {
+			$saldo = (float)str_replace(
+				',',
+				'',
+				(string)$this->getCont($codsil, $codart, $excluded_movmag)
+			);
+			if ($saldo > 0.000001) {
+				$result[$codart] = $saldo;
+			}
+		}
+		return $result;
+	}
 
 	function selectSilos($name, $key, $val, $order = false, $empty = false, $key2 = '', $val_hiddenReq = '', $class = 'FacetSelect', $addOption = null, $style = '', $where = false, $echo=false, $codart="", $excluded_movmag=0) {
         global $gTables;

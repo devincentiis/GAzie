@@ -262,13 +262,13 @@ if (isset($_POST['conferma'])) {
 					$r = gaz_dbi_fetch_array($rs_last);
 					$m2_id = $r['max_id'];
 					foreach ($menu_data['m2'] as $k_m2 => $v_2) {
-						gaz_dbi_table_insert('menu_module', array('id' => $m2_id, 'id_module' => $mod_id, 'link' => $v_2['link'], 'translate_key' => $k_m2, 'weight' => $v_2['weight']));
+						gaz_dbi_table_insert('menu_module', array('id' => $m2_id, 'id_module' => $mod_id, 'link' => $v_2['link'], 'translate_key' => $k_m2, 'weight' => $v_2['weight'],'status'=>1));
 						if (isset($menu_data['m3']['m2'][$k_m2])) {
 							foreach ($menu_data['m3']['m2'][$k_m2] as $v_3) {
 								// trovo l'ultimo id del sub menu
 								$rs_last = gaz_dbi_dyn_query("MAX(id)+1 AS max_id", $gTables['menu_script'], 1);
 								$r = gaz_dbi_fetch_array($rs_last);
-								gaz_dbi_table_insert('menu_script', array('id' => $r['max_id'], 'id_menu' => $m2_id, 'link' => $v_3['link'], 'translate_key' => $v_3['translate_key'], 'weight' => $v_3['weight']));
+								gaz_dbi_table_insert('menu_script', array('id' => $r['max_id'], 'id_menu' => $m2_id, 'link' => $v_3['link'], 'translate_key' => $v_3['translate_key'], 'weight' => $v_3['weight'],'status'=>1));
 							}
 						}
 						$m2_id ++;

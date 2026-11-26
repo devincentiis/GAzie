@@ -604,11 +604,11 @@ class lotmag {
    }
 
    function getAvailableLots($codart, $excluded_movmag = 0, $date="", $negative=0, $all=false) {
-// restituisce tutti i lotti non completamente venduti ordinandoli in base alla configurazione aziendale (FIFO o LIFO)
-// e propone una ripartizione, se viene passato un movimento di magazzino questo verrà escluso perché si suppone sia lo stesso
-// che si sta modificando
-// Antonio Germani - si escludono dal conteggio tutti gli inventari: caumag 98 e 99. Gli inventari non hanno lotti, quindi bisogna analizzare sempre tutto il database.
-// Antonio Germani - $excluded_movmag può essere un singolo ID oppure multipli ID in un array:  array("ID1", "ID2", "etc");
+    // restituisce tutti i lotti non completamente venduti ordinandoli in base alla configurazione aziendale (FIFO o LIFO)
+    // e propone una ripartizione, se viene passato un movimento di magazzino questo verrà escluso perché si suppone sia lo stesso
+    // che si sta modificando
+    // Antonio Germani - si escludono dal conteggio tutti gli inventari: caumag 98 e 99. Gli inventari non hanno lotti, quindi bisogna analizzare sempre tutto il database.
+    // Antonio Germani - $excluded_movmag può essere un singolo ID oppure multipli ID in un array:  array("ID1", "ID2", "etc");
     global $gTables, $admin_aziend;
     $ob = ' ASC'; // FIFO-PWM-STANDARD (First In First Out)
     if ($admin_aziend['stock_eval_method'] == 2) {
@@ -628,7 +628,7 @@ class lotmag {
     }
 	  $add_where="";
 	  if (intval($date)>0){
-		$add_where=$gTables['movmag'] . ".datreg < '". $date ."' AND ";
+      $add_where=$gTables['movmag'] . ".datreg <= '". $date ."' AND ";
 	  }
     // Antonio Germani - la data di creazione del primo lotto per il dato articolo
     $first_lot_date=gaz_dbi_get_row($gTables['movmag'], "artico", $codart, " AND id_lotmag > '1' AND caumag <> '99' AND operat = '1'", "MIN(datdoc)");

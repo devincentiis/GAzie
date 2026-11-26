@@ -34,7 +34,7 @@ if ( isset($_POST['codart']) && isset($_POST['datref']) ) {
 	$admin_aziend = checkAdmin();
   require_once("../vendit/lib.function.php");
   $lm = new lotmag;
-  $lm->getAvailableLots(substr($_POST['codart'],0,15),0,substr($_POST['datref'],0,10),0);
+  $lm->getAvailableLots(substr($_POST['codart'],0,32),0,substr($_POST['datref'],0,10),0);
   $lotrests = $lm->available;
   echo json_encode($lotrests);
 }

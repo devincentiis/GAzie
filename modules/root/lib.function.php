@@ -181,6 +181,7 @@ function getMenuData($lang_id, $module_name = false) {
       $data[$m1['name']]['scripts'][] = $bnrf;
     }
     $data[$m1['name']]['m1'] = $m1;
+    $data[$m1['name']]['custom_menu'] = [];
     $rsm2 = gaz_dbi_dyn_query("*", $gTables['menu_module'],'id_module = '.$m1['id'],'weight ASC');
     while ($m2 = gaz_dbi_fetch_assoc($rsm2)) {
       $m2id = $m2['id'];
@@ -192,8 +193,12 @@ function getMenuData($lang_id, $module_name = false) {
       $m2['id_menu_module'] = $m2id;
       $m2['id_menu_script'] = 0; // per distinguere un menù di secondo livello da uno di terzo che sarà > 0
       $data[$m1['name']]['db_menu'][] = $m2;
+      $mcd = gaz_dbi_get_row($gTables['menu_custom_data'], 'id_menu_module', $m2id, "AND id_menu_script = 0 AND lang_id = ".$lang_id );
+      $data[$m1['name']]['custom_menu'][] = $mcd;
       $rsm3 = gaz_dbi_dyn_query("*", $gTables['menu_script'],'id_menu = '.$m2id,'weight ASC');
       while ($m3 = gaz_dbi_fetch_assoc($rsm3)) {
+        $mcd = gaz_dbi_get_row($gTables['menu_custom_data'], 'id_menu_module', $m2id, "AND id_menu_script = ".$m3['id']." AND lang_id = ".$lang_id );
+        $data[$m1['name']]['custom_menu'][] = $mcd;
         $m3['file_label'] = $transl[$m1['name']]['m3'][$m3['translate_key']][1];
         $m3['file_title'] = $transl[$m1['name']]['m3'][$m3['translate_key']][0];
         $m3['module_name'] = $m1['name'];

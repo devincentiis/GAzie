@@ -883,11 +883,10 @@ class magazzForm extends GAzieForm {
         $hrefdoc = json_decode(gaz_dbi_get_row($gTables['config'], 'variable', 'report_movmag_ref_doc')['cvalue']);
         $rshref=get_object_vars($hrefdoc);
         // trovo i fornitori
-        $rs=gaz_dbi_query("SELECT mm1.id_mov, mm1.id_orderman, mm1.clfoco, mm1.desdoc, unimis,mm1.quanti,mm1.scorig,mm1.prezzo, ".$gTables['rigdoc'] .".id_rig AS docref, ".$gTables['rigdoc'] .".codice_fornitore, CONCAT(".$gTables['anagra'] .".ragso1,".$gTables['anagra'] .".ragso2) AS supplier , ".$gTables['tesdoc'] .".tipdoc FROM " . $gTables['movmag'] . " mm1 LEFT JOIN ".$gTables['clfoco'] ." ON mm1.clfoco = ".$gTables['clfoco'] .".codice LEFT JOIN ".$gTables['anagra'] ." ON ".$gTables['clfoco'] .".id_anagra = ".$gTables['anagra'] .".id LEFT JOIN ".$gTables['rigdoc'] ." ON mm1.id_rif = ".$gTables['rigdoc'] .".id_rig LEFT JOIN ".$gTables['tesdoc'] ." ON ".$gTables['rigdoc'] .".id_tes = ".$gTables['tesdoc'] .".id_tes
-        WHERE mm1.artico = '".$codart."' AND mm1.clfoco LIKE '". $admin_aziend['masfor'] ."%'
+        $rs=gaz_dbi_query("SELECT mm1.id_mov, mm1.artico, mm1.id_orderman, mm1.clfoco, mm1.desdoc, unimis,mm1.quanti,mm1.scorig,mm1.prezzo, ".$gTables['rigdoc'] .".id_rig AS docref, ".$gTables['rigdoc'] .".codice_fornitore, CONCAT(".$gTables['anagra'] .".ragso1,".$gTables['anagra'] .".ragso2) AS supplier , ".$gTables['tesdoc'] .".tipdoc FROM " . $gTables['movmag'] . " mm1 LEFT JOIN ".$gTables['clfoco'] ." ON mm1.clfoco = ".$gTables['clfoco'] .".codice LEFT JOIN ".$gTables['anagra'] ." ON ".$gTables['clfoco'] .".id_anagra = ".$gTables['anagra'] .".id LEFT JOIN ".$gTables['rigdoc'] ." ON mm1.id_rif = ".$gTables['rigdoc'] .".id_rig LEFT JOIN ".$gTables['tesdoc'] ." ON ".$gTables['rigdoc'] .".id_tes = ".$gTables['tesdoc'] .".id_tes
+        WHERE mm1.artico = '".$codart."' AND mm1.clfoco LIKE '". $admin_aziend['masfor'] ."%' AND ".$gTables['rigdoc'] .".id_rig  >= 1
         ORDER BY mm1.datdoc DESC");
         while ($r = gaz_dbi_fetch_array($rs)) {
-          // faccio dipendere l'url del link al tipdoc richiamando il file del modulo che ha generato il movimento di magazzino per avere le informazioni sul documento genitore
           require_once("../".$rshref[$r['tipdoc']]."/prepare_ref_doc_movmag.php");
           $funcn=preg_replace('/[0-9]+/', '', $rshref[$r['tipdoc']]);
           $funcn=$funcn.'_prepare_ref_doc';

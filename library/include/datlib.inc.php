@@ -58,8 +58,8 @@ if (isset($_SESSION['table_prefix'])) {
 $tn = ['admin','admin_config','admin_module','anagra','anagra_chiper','aziend','bank','breadcrumb',
     'camp_avversita','camp_colture','camp_fitofarmaci','camp_uso_fitofarmaci','classroom',
     'config','country','currencies','currency_history','destina','forme_giuridiche','languages',
-    'menu_module','menu_script','menu_usage','module','municipalities','provinces','regions',
-    'staff_absence_type','staff_work_type','students'];
+    'menu_module','menu_script','menu_usage','menu_custom_data','module','municipalities','provinces',
+    'regions','staff_absence_type','staff_work_type','students'];
 foreach ($tn as $v) {
     $gTables[$v] = $table_prefix . "_" . $v;
 }

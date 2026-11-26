@@ -1839,12 +1839,12 @@ class shopsynchronizegazSynchro {
                     $rawres['link'] = '';
                     $rawres['style'] = 'danger';
     			}
-    			$countDocument=0;$numdoc=""; $year="";
+    			$countDocument=0;$numdoc=0; $year="";
 
     			foreach($xml->Documents->children() as $order) { // ciclo gli ordini
 
 					if(!gaz_dbi_get_row($gTables['tesbro'], "ref_ecommerce_id_order", $order->Numbering, " AND datemi  = '".$order->DateOrder."'")){// se l'ordine non esiste lo carico in GAzie
-						if ($numdoc=="" and $year==""){// se sono al primo ciclo degli ordini
+						if ($numdoc==0 and $year==""){// se sono al primo ciclo degli ordini
 							// ricavo il progressivo numero d'ordine di GAzie in base al tipo di documento
 							$orderdb = "numdoc desc";
 							$sql_documento = "YEAR(datemi) = " . substr($order->DateOrder,0,4) . " and tipdoc = 'VOW'";

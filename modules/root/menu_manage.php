@@ -43,7 +43,7 @@ if (isset($_POST['hidden_req'])) {
   $form['hidden_req'] = substr($_POST['hidden_req'],0,20);
 } else {
   $usr_lang = gaz_dbi_get_row($gTables['languages'],'title_native',ucfirst($admin_aziend['lang']));
-  $form['lang_id'] = $usr_lang['lang_id'];
+  $form['lang_id'] = isset($_GET['lang_id']) ? intval($_GET['lang_id']) : $usr_lang['lang_id'];
   $form['hidden_req'] = '';
 }
 
@@ -63,6 +63,14 @@ if (isset($_GET['modifica']) && isset($mine[(int) $_GET['modifica']])) {
 
 require("../../library/include/header.php");
 $script_transl = HeadMain();
+if ($form['hidden_req'] == 'refresh_language') {
+  echo
+  "<script >
+    const url = new URL(window.location.href);
+    url.searchParams.set('lang_id', '".$form['lang_id']."');
+    window.location.href = url.toString();
+  </script>";
+}
 ?>
 <style>
 /* Sblocca lo sticky dentro il contenitore principale di AdminLTE 3 */
@@ -130,6 +138,10 @@ ul li ul:empty {
 
 <div id="dialog_editmenu" title="Modifica Voce Menu" style="display:none;">
   <p class="bg-info"><small>id_menu_module: <span id="dialog_id_menu_module"></span> - id_menu_script: <span id="dialog_id_menu_script"></span></small></p>
+  <input type="hidden" id="cmd_id" name="cmd_id">
+  <input type="hidden" id="cmd_link" name="cmd_link">
+  <input type="hidden" id="cmd_label" name="cmd_label">
+  <input type="hidden" id="cmd_descri" name="cmd_descri">
   <input type="hidden" id="edit_id_script" name="id_menu_script">
   <input type="hidden" id="edit_id_module" name="id_menu_module">
   <input type="hidden" id="dialog_modname" name="dialog_modname">
@@ -175,15 +187,18 @@ ul li ul:empty {
         //$max_r = max($nr_sc,$nr_db);
         $prev_id_script = 9999;
         for ($i = 0; $i <= $nr_db; $i++) {
+          $custom_menu_data = $v1['custom_menu'][$i]; // dati personalizzati, provenienti dalla tabella del db
+          $cmd_data = $custom_menu_data ? ' cmd_id='.$custom_menu_data['id'].' cmd_label="'.$custom_menu_data['label'].'" cmd_link="'.$custom_menu_data['link'].'" cmd_descri="'.$custom_menu_data['descri'].'"' : ' cmd_id=0 cmd_label="" cmd_link="" cmd_descri=""';
           if ($v1['db_menu'][$i]['id_menu_script'] >= 1 || ( $v1['db_menu'][$i]['id_menu_script'] == 0 && ( !isset($v1['db_menu'][($i+1)]['id_menu_script']) || $v1['db_menu'][($i+1)]['id_menu_script'] == 0 ) ) ) {
             $eye = '<i class="glyphicon glyphicon-eye-'.($v1['db_menu'][$i]['status'] >= 1 ? 'open text-success' : 'close text-danger').'"></i>';
           } else {
             $eye = '';
+            $v1['db_menu'][$i]['status'] = 9; // indico a dialog che non deve mettere il bottone per cambiare lo status
           }
           $id_script = $v1['db_menu'][$i]['id_menu_script'];
           //var_dump($v1['db_menu'][$i]);
           $name_script = substr($v1['db_menu'][$i]['url_script_basename'],0,-4);
-          $elem_li = '<li title="'.$v1['db_menu'][$i]['file_title'].' url: '.$v1['db_menu'][$i]['link'].'" id_menu_script='.$id_script.' vis-status='.$v1['db_menu'][$i]['status'].'  id_menu_module='.$v1['db_menu'][$i]['id_menu_module'].'><span class="item" script-connector="'.$k1.'-'.$name_script.'">'.$v1['db_menu'][$i]['file_label'].' </span> <button type="button" class="btn btn-xs btn-edit"><i class="glyphicon glyphicon-edit"></i></button> '.$eye;
+          $elem_li = '<li title="'.$v1['db_menu'][$i]['file_title'].' url: '.$v1['db_menu'][$i]['link'].'" id_menu_script='.$id_script.' vis-status='.$v1['db_menu'][$i]['status'].' id_menu_module='.$v1['db_menu'][$i]['id_menu_module'].$cmd_data.'><span class="item" script-connector="'.$k1.'-'.$name_script.'">'.$v1['db_menu'][$i]['file_label'].' </span> <button type="button" class="btn btn-xs btn-edit"><i class="glyphicon glyphicon-edit"></i></button> '.$eye;
           if ( $id_script == 0 && $prev_id_script == 9999 ){
             // primo menu livello 2
             echo "<!-- INIZIO SPECCHIETTO ORDINABILE-->\n".'<ul id="sortbox-'.$k1.'" class="lista-modulo">'.$elem_li."<ul>\n";
@@ -344,6 +359,10 @@ $(function () {
 
       $li.children("span.item").addClass("evidenziato");
 
+      var idCmd = $li.attr("cmd_id");
+      var labelCmd = $li.attr("cmd_label");
+      var linkCmd = $li.attr("cmd_link");
+      var descriCmd = $li.attr("cmd_descri");
       var idScript = $li.attr("id_menu_script");
       var idModule = $li.attr("id_menu_module");
       var visstatus = $li.attr("vis-status");
@@ -362,16 +381,27 @@ $(function () {
       if (visstatus == 1) {
         $btnVis
           .removeClass("btn-danger")
+          .removeClass("btn-default")
           .addClass("btn-success")
           .html('<div title="Nascondi"> Visibile <i class="glyphicon glyphicon-eye-open"></i></div>');
+      } else if (visstatus == 9) { // è un m2 non vuoto
+        $btnVis
+          .removeClass("btn-danger")
+          .removeClass("btn-success")
+          .addClass("btn-default")
+          .html('<div title="Non vuoto: non modificabile"><i class="glyphicon glyphicon-eye-open"></i></div>');
       } else {
         $btnVis
           .removeClass("btn-success")
+          .removeClass("btn-default")
           .addClass("btn-danger")
           .html('<div title="Rendi visibile">Nascosto <i class="glyphicon glyphicon-eye-close"></i></div>');
       }
 
 
+      $("#edit_label").val(labelCmd);
+      $("#edit_link").val(linkCmd);
+      $("#edit_descri").val(descriCmd);
       $("#edit_label").attr("placeholder", label);
       $("#edit_link").attr("placeholder", link);
       $("#edit_descri").attr("placeholder", descri);
@@ -419,15 +449,18 @@ $(function () {
           $("#edit_link").val('');
           $("#edit_descri").val('');
           $("#dialog_modname").val('');
+          var sts = $("#dialog_status").val();
           var data = JSON.stringify({
             id_menu_script: $("#edit_id_script").val(),
             id_menu_module: $("#edit_id_module").val(),
-            status_toggle: $("#dialog_status").val()
+            status_toggle: sts
           });
-          $.post("menu_ajax.php", data, function(risposta) {
-            $dialog.dialog("close");
-            window.location.reload();
-          });
+          if (sts < 9) { // non faccio il toggle in caso di m2 non vuoto
+            $.post("menu_ajax.php", data, function(risposta) {
+              $dialog.dialog("close");
+              window.location.reload();
+            });
+          }
         }
       },
       {

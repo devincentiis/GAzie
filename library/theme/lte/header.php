@@ -117,7 +117,7 @@ if (file_exists(DATA_DIR.'files/'.$admin_aziend['codice'].'/favicon.ico')) { // 
         $isblack = strpos($admin_aziend['skin'],'black') === false ? false : true;
         $iswhite = strpos($admin_aziend['skin'],'white') === false ? false : true;
         if ($isblack){ // se è black inverto lo sfondo (negativo)
-          $im = @imagecreatefrompng( DATA_DIR . 'files/' . $admin_aziend['codice'] . '/sfondo.png');
+          $im = @imagecreatefromstring( base64_decode($sfondo));
           imagefilter($im, IMG_FILTER_NEGATE);
           ob_start ();
           imagepng($im);

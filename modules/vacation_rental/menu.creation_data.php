@@ -106,5 +106,5 @@ $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_discounts` ADD `device_di
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_discounts` ADD `booking_from` DATE NULL DEFAULT NULL COMMENT 'Limita lo sconto ad un determinato periodo di prenotazione' AFTER `valid_to`, ADD `booking_to` DATE NULL DEFAULT NULL COMMENT 'Limita lo sconto ad un determinato periodo di prenotazione' AFTER `booking_from`;";
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXclfoco` ADD INDEX(`id_anagra`);";
 $update_db[]="ALTER TABLE `".$table_prefix."_XXXrental_payments` ADD COLUMN `payment_method` VARCHAR(25) DEFAULT NULL AFTER `type`;";
-$update_db[] = "ALTER TABLE `".$table_prefix."_XXXrental_events` ADD COLUMN `ical_uid` VARCHAR(255) NULL AFTER `Ical_sync_id`, ADD INDEX `idx_ical_uid` (`Ical_sync_id`, `ical_uid`);";
+$update_db[] = "ALTER TABLE `".$table_prefix."_XXXrental_events` ADD COLUMN `ical_uid` VARCHAR(191) NULL AFTER `Ical_sync_id`, ADD INDEX `idx_ical_uid` (`Ical_sync_id`, `ical_uid`);";
 ?>

@@ -28,36 +28,41 @@ require("../../library/include/datlib.inc.php");
 require("../../modules/vendit/lib.function.php");
 $admin_aziend=checkAdmin();
 
-if (!ini_get('safe_mode')){ //se me lo posso permettere...
-    ini_set('memory_limit','128M');
-}
+$gazTimeFormatter->setPattern('dd MMMM yyyy');
+$luogo_data=$admin_aziend['citspe'].", lì ";
+$luogo_data .= ucwords($gazTimeFormatter->format(new DateTime()));
 
 require("../../config/templates/report_template.php");
-require("lang.".$admin_aziend['lang'].".php");
-$passo=1000;
-$limit=0;
 $lm = new lotmag;
 $gForm = new magazzForm;
 $codice = filter_input(INPUT_GET, 'codice');
 
 $des = gaz_dbi_get_row($gTables['artico'], 'codice', $codice);
-$title = "       Movimenti lotti disponibili per articolo ".$codice." - ".$des['descri'];
+$title = array('luogo_data' => $luogo_data,
+ 'title' => "Movimenti lotti disponibili per articolo ".$codice." - ".$des['descri'],
+ 'hile' => array(
+   array('lun' => 50, 'nam' => 'Lotto'),
+   array('lun' => 25, 'nam' => 'Scadenza'),
+   array('lun' => 85, 'nam' => 'Descrizione movimento'),
+   array('lun' => 25, 'nam' => 'Data'),
+   array('lun' => 15, 'nam' => 'U.M.'),
+   array('lun' => 20, 'nam' => 'Entrata'),
+   array('lun' => 20, 'nam' => 'Uscita'),
+   array('lun' => 30, 'nam' => 'Totale')
+ )
+);
 
 $lm->getAvailableLots($codice,0,'',1,true);
 
-$pdf = new Report_template();
-$filename = $title.'_'.date("Ymd").'.pdf';
+$pdf = new Report_template('L','mm','A4',true,'UTF-8',false,true);
+$filename = "Movimenti lotti disponibili per articolo_".$codice.'_'.date("Ymd").'.pdf';
 $pdf->setVars($admin_aziend,$title);
-$pdf->SetTopMargin(36);
+$pdf->setAuthor($admin_aziend['ragso1'] . ' ' . $_SESSION["user_name"]);
+$pdf->SetTopMargin(45);
+$pdf->setFooterMargin(10);
+$pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
+$pdf->AddPage('L',"A4");
 
-$pdf->SetFont('helvetica','',10);
-
-$light = array(
-    'B' => array('width' => 0, 'color' => array(200,200,200), 'solid' => '1,15', 'cap' => 'butt'),
-);
-$heavy = array (
-    'TRBL' => array('width' => 0, 'color' => array(0,0,0), 'solid' => 1, 'cap' => 'butt'),
-);
 $i=0;
 $orderby = "datdoc,id_mov";
 if (count($lm->available) > 0) {
@@ -80,47 +85,38 @@ if (count($lm->available) > 0) {
 		" LEFT JOIN " . $gTables['artico'] . " ON ". $gTables['movmag'] . ".artico = " . $gTables['artico'] . ".codice ".
 		" LEFT JOIN ".$gTables['clfoco']." ON ".$gTables['movmag'].".clfoco = ".$gTables['clfoco'].".codice"
 		, $where, $orderby);
-
-		foreach ($rs as $movlot){ // stampo tutti i movimenti del singolo lotto
-			if ( $i % 24 == 0 ) {
-				// cambio pagina e stampo intestazione colonne
-				$pdf->AddPage('L',"A4");
-				$pdf->Cell(50,5,"Lotto",$heavy,0,'C');
-				$pdf->Cell(25,5,"Scadenza",$heavy,0,'C');
-				$pdf->Cell(85,5,"Descrizione movimento",$heavy,0,'L');
-				$pdf->Cell(25,5,"Data",$heavy,0,'C');
-				$pdf->Cell(15,5,"U.m.",$heavy,0,'C');
-
-				$pdf->Cell(20,5,"Entrata",$heavy,0,'R');
-				$pdf->Cell(20,5,"Uscita",$heavy,0,'R');
-
-				$pdf->Cell(30,5,"Totale",$heavy,1,'R');
-			}
+    $rf=false;
+	  $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFillColor(hexdec(substr($admin_aziend['colore'], 0, 2)), hexdec(substr($admin_aziend['colore'], 2, 2)), hexdec(substr($admin_aziend['colore'], 4, 2)));
+		$pdf->Cell(270,4,'',0,1);
+		$pdf->Cell(270,5,'LOTTO:'.$v_lm['identifier']." - id:".$v_lm['id'],'LBR',1,'C',1);
+    $pdf->SetFillColor(235,235,235);
+    foreach ($rs as $movlot){ // stampo tutti i movimenti del singolo lotto
 			$totale=$totale+($movlot['operat']*$movlot['quanti']);
 			$pdf->SetTextColor(0);
 			if ($totale<0){
 				$pdf->SetTextColor(255,0,0);
 			}
-			$pdf->Cell(50,5,$movlot['identifier']." - id:".$movlot['id'],$light,0,'L');
+			$pdf->Cell(50,5,$movlot['identifier']." - id:".$movlot['id'],1,0,'L',$rf);
 			if ($movlot['expiry']>0){
-				$pdf->Cell(25,5,gaz_format_date($movlot['expiry']),$light,0,'C');
+				$pdf->Cell(25,5,gaz_format_date($movlot['expiry']),1,0,'C',$rf);
 			} else {
-				$pdf->Cell(25,5,'',$light);
+				$pdf->Cell(25,5,'',1,0,'C',$rf);
 			}
-			$pdf->Cell(85,5,substr($movlot['tipdoc']." - ".$movlot['desdoc']." ".$movlot['ragsoc'],0,50),$light,0,'L');
-			$pdf->Cell(25,5,gaz_format_date($movlot['datdoc']),$light,0,'C');
-			$pdf->Cell(15,5,$movlot['unimis'],$light,0,'C');
+			$pdf->Cell(85,5,substr($movlot['tipdoc']." - ".$movlot['desdoc']." ".$movlot['ragsoc'],0,50),1,0,'L',$rf);
+			$pdf->Cell(25,5,gaz_format_date($movlot['datdoc']),1,0,'C',$rf);
+			$pdf->Cell(15,5,$movlot['unimis'],1,0,'C');
 			if ($movlot['operat']>0) {
-				$pdf->Cell(20,5,gaz_format_number($movlot['quanti']),$light,0,'R', 0, '', 1);
-				$pdf->Cell(20,5,'',$light);
+				$pdf->Cell(20,5,gaz_format_number($movlot['quanti']),1,0,'R',$rf, '', 1);
+				$pdf->Cell(20,5,'',1);
 			} else {
-				$pdf->Cell(20,5,'',$light);
-				$pdf->Cell(20,5,gaz_format_number($movlot['quanti']),$light,0,'R', 0, '', 1);
+				$pdf->Cell(20,5,'',1);
+				$pdf->Cell(20,5,gaz_format_number($movlot['quanti']),1,0,'R',$rf, '', 1);
 			}
-			$pdf->Cell(30,5,gaz_format_number($totale),$light,1,'R');
+			$pdf->Cell(30,5,gaz_format_number($totale),1,1,'R',$rf);
 			$i++;
+      $rf = !$rf;
 		}
-		$pdf->Cell(270,5,'','',1);
 	}
 }
 $pdf->SetFont('helvetica','B',9);

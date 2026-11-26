@@ -326,7 +326,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
       // O0 - SIAN - PREPARAZIONE AUTOMATICA DELLE PARTITE DA SCARICARE
       // ==========================================================
 
-      if ($form['cod_operazione'] === 'O0' && in_array($toDo, array('insert', 'update'), true) && strlen(trim((string)$form['recip_stocc'])) > 0) {
+	if ($form['cod_operazione'] === 'O0' && in_array($toDo, array('insert', 'update'), true) && strlen(trim((string)$form['recip_stocc'])) > 0) {
 
           $form['artcomp'] = array();
           $form['SIAN_comp'] = array();
@@ -355,7 +355,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
                   $movimentiO0DaEscludere[] = intval($movEsclusoO0['id_mov']);
               }
           }
-
+		  
           // 1. Recupero i lotti presenti nel recipiente
           $contenutoO0 = $campsilos->getContentSil($recipienteO0,"",0,$movimentiO0DaEscludere);
           if (isset($contenutoO0['id_lotti']) && is_array($contenutoO0['id_lotti'])) {
@@ -480,7 +480,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
           if ($indiceO0 == 0) {
               $msg .= "O0empty+";
           }
-      }
+	}
 
     // Se viene inviata la richiesta di conferma totale ... ******   CONTROLLO ERRORI   ******
     $form['datemi'] = $form['anninp'] . "-" . $form['mesinp'] . "-" . $form['gioinp'];
@@ -624,11 +624,7 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
                 $form['codart']
             );
 
-            if (
-                !$resO0Prod ||
-                !in_array(intval($resO0Prod['categoria']), array(1, 2, 4), true) ||
-                floatval($resO0Prod['confezione']) != 0
-            ) {
+            if ( $form['cod_operazione'] === 'O0' && (!$resO0Prod || !in_array(intval($resO0Prod['categoria']), array(1, 2, 4), true) || floatval($resO0Prod['confezione']) != 0 )){
                 $msg .= "O0dest+";
             }
             if (intval($form['cod_operazione'])==5){ // se M1 , movimentazione interna olio sfuso
@@ -1118,6 +1114,18 @@ if ((isset($_POST['Insert'])) || (isset($_POST['Update']))){ // se NON è il pri
 			LEFT JOIN ".$gTables['artico']." on (".$gTables['distinta_base'].".codice_artico_base = ".$gTables['artico'].".codice)";
       $rescompo = gaz_dbi_dyn_query ($gTables['distinta_base'].".*, ".$gTables['artico'].".*", $table, $where );
 	}
+	 // Escludo i movimenti della classificazione corrente in caso di UPDATE
+	$movimentiO0DaEscludere = array();
+	if ($toDo === 'update' && isset($_GET['codice'])) {
+	  $resEsclusiO0 = gaz_dbi_dyn_query(
+		  "id_mov",
+		  $gTables['movmag'],
+		  "id_orderman = " . intval($_GET['codice'])
+	  );
+	  while ($movEsclusoO0 = gaz_dbi_fetch_array($resEsclusiO0)) {
+		  $movimentiO0DaEscludere[] = intval($movEsclusoO0['id_mov']);
+	  }
+	}	
 
 	if (isset($result7)) {// se ci sono stati componenti carico i righi dei componenti
       $m = 0;$form['artcomp']=array();
@@ -1445,10 +1453,11 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 					  }
 					  $exc++;
 					}
+					
 					if(($key = array_search('0', $excluded_movmag)) !== false){
 						 unset($excluded_movmag[$key]);// tolgo eventuali id zero
 					}
-        }else{ // se non è update non escludo nulla
+				}else{ // se non è update non escludo nulla
 					$excluded_movmag=0;
 				}
 
@@ -1981,6 +1990,34 @@ if ($form['order_type'] <> "AGR") { // Se non è produzione agricola
 					?>
 				</div>
 				<?php
+				if ($form['cod_operazione'] === 'O0') {
+					echo '<div class="col-sm-6">';
+					echo '<div style="background:#f8f9fa; border:1px solid #e5e5e5; border-radius:4px; padding:8px 12px; margin:5px 0 12px;">';
+					echo 'Nota: Nell\'operazione O0 la categoria iniziale viene presa dall\'olio che è presente nel recipiente di stoccaggio. La categoria a fine operazione sarà quella dell\'olio selezionato per la produzione.';
+					echo '</div></div>';
+				}
+				$articoliPresenti = $campsilos->getSilosArticoPresenti(
+					$form['recip_stocc'],
+					$movimentiO0DaEscludere ?? ""
+				);
+
+				if (!empty($articoliPresenti)) {
+					echo '<div class="row"><div class="col-sm-6"></div><div class="col-sm-6">';
+					echo '<div style="background:#f8f9fa; border:1px solid #e5e5e5; border-radius:4px; padding:8px 12px; margin:5px 0 12px;">';
+					echo '<strong class="text-muted">Oli presenti nel recipiente</strong>';
+					echo '<ul class="list-unstyled" style="margin:5px 0 0;">';
+
+					foreach ($articoliPresenti as $codart => $quantita) {
+						echo '<li style="padding:3px 0;">'
+						   . htmlspecialchars($codart, ENT_QUOTES, 'UTF-8')
+						   . ' <strong class="pull-right">'
+						   . number_format($quantita, 3, ',', '.') . ' Kg</strong>'
+						   . '</li>';
+					}
+
+					echo '</ul></div></div></div>';
+				}
+				
 				if ($form['cod_operazione']==5){ ?>
 					<div class="row">
 					<label for="camp_recip_stocc" class="col-sm-6"><?php echo "Recipiente stoccaggio destinazione"; ?></label>
@@ -2129,7 +2166,7 @@ echo '<input type="hidden" name="id_mov_sian_rif" value="',$form["id_mov_sian_ri
 <tr>
 	<td class="FacetFieldCaptionTD"><?php echo $script_transl['2']; ?> </td>
 	<td colspan="2" class="FacetDataTD">
-	<input type="text" name="description" value="<?php echo htmlspecialchars($form['description']); ?>" maxlength="80" />
+	<input type="text" id="description" name="description" value="<?php echo htmlspecialchars($form['description']); ?>" maxlength="80" />
 	</td>
 </tr>
 <?php
@@ -2297,6 +2334,32 @@ if ($toDo == 'update') {
 }
 echo "</td></tr></table>\n";
 ?>
+<script>
+(function () {
+    var operazione = document.querySelector('select[name="cod_operazione"]');
+    var descrizione = document.getElementById('description');
+
+    if (!operazione || !descrizione) return;
+
+    var descrizioneAutomatica = '';
+
+    operazione.addEventListener('change', function () {
+
+        var opzione = this.options[this.selectedIndex];
+        var nuovaDescrizione = opzione ? opzione.text.trim() : '';
+
+        if (!nuovaDescrizione || this.value === '0') return;
+
+        var descrizioneCorrente = descrizione.value.trim();
+
+        // Aggiorno solo se vuota o se contiene la precedente descrizione automatica
+        if (descrizioneCorrente === '' || descrizioneCorrente === descrizioneAutomatica) {
+            descrizione.value = nuovaDescrizione;
+            descrizioneAutomatica = nuovaDescrizione;
+        }
+    });
+})();
+</script>
 </form>
 <?php
 require ("../../library/include/footer.php");
